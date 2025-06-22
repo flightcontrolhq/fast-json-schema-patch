@@ -214,56 +214,49 @@ fakerDoc2.posts.push({
 const fakerPlan = buildPlan(userSchema as any, { primaryKeyMap: { "/posts": "postId" } });
 const fakerPatcher = new SchemaPatcher({ plan: fakerPlan });
 
-bench
-  .add("SchemaPatcher (pre-built plan) - Small Config", () => {
-    patcherWithPlan.createPatch(smallDoc1, smallDoc2);
-  })
-  .add("fast-json-patch - Small Config", () => {
-    fastJsonPatch.compare(smallDoc1, smallDoc2);
-  })
-  .add("rfc6902 - Small Config", () => {
-    rfc6902.createPatch(smallDoc1, smallDoc2);
-  })
-  .add("jsondiffpatch - Small Config", () => {
-    diffpatcher.diff(smallDoc1, smallDoc2);
-  })
-  .add("SchemaPatcher (pre-built plan) - Large Config", () => {
-    patcherWithPlan.createPatch(largeDoc1, largeDoc2);
-  })
-  .add("fast-json-patch - Large Config", () => {
-    fastJsonPatch.compare(largeDoc1, largeDoc2);
-  })
-  .add("rfc6902 - Large Config", () => {
-    rfc6902.createPatch(largeDoc1, largeDoc2);
-  })
-  .add("jsondiffpatch - Large Config", () => {
-    diffpatcher.diff(largeDoc1, largeDoc2);
-  })
-  .add("SchemaPatcher (pre-built plan) - Real-world Config", () => {
-    patcherWithPlan.createPatch(realWorldDoc1, realWorldDoc2);
-  })
-  .add("fast-json-patch - Real-world Config", () => {
-    fastJsonPatch.compare(realWorldDoc1, realWorldDoc2);
-  })
-  .add("rfc6902 - Real-world Config", () => {
-    rfc6902.createPatch(realWorldDoc1, realWorldDoc2);
-  })
-  .add("jsondiffpatch - Real-world Config", () => {
-    diffpatcher.diff(realWorldDoc1, realWorldDoc2);
-  })
-  .add("SchemaPatcher (pre-built plan) - Faker Config", () => {
-    fakerPatcher.createPatch(fakerDoc1, fakerDoc2);
-  })
-  .add("fast-json-patch - Faker Config", () => {
-    fastJsonPatch.compare(fakerDoc1, fakerDoc2);
-  })
-  .add("rfc6902 - Faker Config", () => {
-    rfc6902.createPatch(fakerDoc1, fakerDoc2);
-  })
-  .add("jsondiffpatch - Faker Config", () => {
-    diffpatcher.diff(fakerDoc1, fakerDoc2);
-  });
+const smallConfigBench = new Bench().add("SchemaPatcher (pre-built plan) - Small Config", () => {
+  patcherWithPlan.createPatch(smallDoc1, smallDoc2);
+}).add("fast-json-patch - Small Config", () => {
+  fastJsonPatch.compare(smallDoc1, smallDoc2);
+}).add("rfc6902 - Small Config", () => {
+  rfc6902.createPatch(smallDoc1, smallDoc2);
+}).add("jsondiffpatch - Small Config", () => {
+  diffpatcher.diff(smallDoc1, smallDoc2);
+});
+const largeConfigBench = new Bench().add("SchemaPatcher (pre-built plan) - Large Config", () => {
+  patcherWithPlan.createPatch(largeDoc1, largeDoc2);
+}).add("fast-json-patch - Large Config", () => {
+  fastJsonPatch.compare(largeDoc1, largeDoc2);
+}).add("rfc6902 - Large Config", () => {
+  rfc6902.createPatch(largeDoc1, largeDoc2);
+}).add("jsondiffpatch - Large Config", () => {
+  diffpatcher.diff(largeDoc1, largeDoc2);
+});
+const fakerConfigBench = new Bench().add("SchemaPatcher (pre-built plan) - Faker Config", () => {
+  fakerPatcher.createPatch(fakerDoc1, fakerDoc2);
+}).add("fast-json-patch - Faker Config", () => {
+  fastJsonPatch.compare(fakerDoc1, fakerDoc2);
+}).add("rfc6902 - Faker Config", () => {
+  rfc6902.createPatch(fakerDoc1, fakerDoc2);
+}).add("jsondiffpatch - Faker Config", () => {
+  diffpatcher.diff(fakerDoc1, fakerDoc2);
+});
+const realWorldConfigBench = new Bench().add("SchemaPatcher (pre-built plan) - Real-world Config", () => {
+  patcherWithPlan.createPatch(realWorldDoc1, realWorldDoc2);
+}).add("fast-json-patch - Real-world Config", () => {
+  fastJsonPatch.compare(realWorldDoc1, realWorldDoc2);
+}).add("rfc6902 - Real-world Config", () => {
+  rfc6902.createPatch(realWorldDoc1, realWorldDoc2);
+}).add("jsondiffpatch - Real-world Config", () => {
+  diffpatcher.diff(realWorldDoc1, realWorldDoc2);
+});
 
-await bench.run();
+await smallConfigBench.run();
+await largeConfigBench.run();
+await fakerConfigBench.run();
+await realWorldConfigBench.run();
 
-console.table(bench.table()); 
+console.table(smallConfigBench.table()); 
+console.table(largeConfigBench.table());
+console.table(fakerConfigBench.table());
+console.table(realWorldConfigBench.table());

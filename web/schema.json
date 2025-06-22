@@ -1,0 +1,241 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "envVariables": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fromParameterStore": {
+                "type": "string"
+              }
+            },
+            "required": ["fromParameterStore"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fromSecretsManager": {
+                "type": "string"
+              }
+            },
+            "required": ["fromSecretsManager"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "fromService": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "dbConnectionString",
+                          "username",
+                          "password",
+                          "dbName",
+                          "port",
+                          "host",
+                          "origin",
+                          "loadBalancerHost",
+                          "loadBalancerOrigin",
+                          "authToken",
+                          "connectionString",
+                          "readerconnectionString",
+                          "readerHost",
+                          "readerPort",
+                          "bucketName"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^loadBalancerPort"
+                      }
+                    ]
+                  }
+                },
+                "required": ["id", "value"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["fromService"],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "default": {}
+    },
+    "environments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 191
+          },
+          "region": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "pr": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "trigger": {
+                    "type": "string",
+                    "enum": ["push", "manual"],
+                    "default": "push"
+                  },
+                  "filter": {
+                    "type": "object",
+                    "properties": {
+                      "labels": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "toBranches": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "null"
+                            }
+                          }
+                        ]
+                      },
+                      "toBranch": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "fromBranches": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "null"
+                            }
+                          }
+                        ]
+                      },
+                      "watchPaths": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["pr"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "pr": {
+                    "type": "boolean",
+                    "const": false,
+                    "default": false
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "trigger": {
+                    "$ref": "#/properties/environments/items/properties/source/anyOf/0/properties/trigger"
+                  }
+                },
+                "required": ["branch"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "services": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 191
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 191
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "web"
+                    }
+                  },
+                  "required": ["id", "name", "type"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
+        },
+        "required": ["name", "region", "source", "services"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["environments"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
