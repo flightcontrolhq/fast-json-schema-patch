@@ -80,20 +80,43 @@ largeDoc2.environments[0].services.push({ // add one
 // Real-world config
 const realWorldDoc1 = require("../test/test.json");
 const realWorldDoc2 = JSON.parse(JSON.stringify(realWorldDoc1));
-// 1. Add a new port to the first service in the first environment
-realWorldDoc2.environments[0].services[0].ports.push({
-  id: "new-port",
-  port: 9999,
-  protocol: "tcp",
-  healthCheck: { type: "tcp" },
+
+// More complex, real-world changes to simulate user behavior
+
+// 1. In env1, service1, move a port from the end to the beginning
+const portToMove = realWorldDoc2.environments[0].services[0].ports.pop();
+if (portToMove) {
+  realWorldDoc2.environments[0].services[0].ports.unshift(portToMove);
+}
+
+// 2. In env1, service1, change a deeply nested health check path
+const httpPort = realWorldDoc2.environments[0].services[0].ports.find(
+  (p: any) => p.id === "http-8004"
+);
+if (httpPort) {
+  httpPort.healthCheck.path = "/new-health";
+}
+
+// 3. In env1, add a new service that depends on an existing one
+realWorldDoc2.environments[0].services.push({
+  id: "new-worker-service",
+  name: "New Worker Service",
+  type: "worker",
+  cpu: 1,
+  memory: 2,
+  dependsOn: ["nlb-server"],
 });
-// 2. Remove the second service from the first environment
-realWorldDoc2.environments[0].services.splice(1, 1);
-// 3. Replace a value in the second environment
-realWorldDoc2.environments[1].services[0].cpu = 5;
+
+// 4. In env2, service1, modify cpu/memory and remove a port
+realWorldDoc2.environments[1].services[0].cpu = 4;
+realWorldDoc2.environments[1].services[0].memory = 8;
+realWorldDoc2.environments[1].services[0].ports.splice(1, 1); // remove udp-8002
+
+// 5. Re-order services in the first environment
+const serviceToMove = realWorldDoc2.environments[0].services.splice(1, 1)[0];
+realWorldDoc2.environments[0].services.push(serviceToMove);
 
 const plan = buildPlan(schema);
-console.dir(plan, { depth: null });
 const patcherWithPlan = new SchemaPatcher({ plan });
 
 bench
