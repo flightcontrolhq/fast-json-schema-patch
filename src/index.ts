@@ -13,6 +13,10 @@ interface ArrayPlan {
 
 type Plan = Map<string, ArrayPlan>;
 
+export interface BuildPlanOptions {
+  primaryKeyMap?: Record<string, string>;
+}
+
 function _resolveRef(ref: string, schema: Schema): any {
   if (!ref.startsWith("#/")) {
     // We only support local references for now.
@@ -38,36 +42,60 @@ function _traverseSchema(
   subSchema: any,
   docPath: string,
   plan: Plan,
-  schema: Schema
+  schema: Schema,
+  visited: Set<any> = new Set(),
+  options?: BuildPlanOptions
 ) {
-  if (!subSchema || typeof subSchema !== "object") {
+  if (!subSchema || typeof subSchema !== "object" || visited.has(subSchema)) {
     return;
   }
+  visited.add(subSchema);
 
   if (subSchema.$ref) {
     const resolved = _resolveRef(subSchema.$ref, schema);
     if (resolved) {
       // Note: We don't change the docPath when resolving a ref
-      _traverseSchema(resolved, docPath, plan, schema);
+      _traverseSchema(resolved, docPath, plan, schema, visited, options);
     }
+    // The visited check at the start of the function handles cycles.
+    // We should remove the subSchema from visited before returning,
+    // so it can be visited again via a different path.
+    visited.delete(subSchema);
     return;
   }
 
   for (const keyword of ["anyOf", "oneOf", "allOf"]) {
     if (Array.isArray(subSchema[keyword])) {
       for (const s of subSchema[keyword]) {
-        _traverseSchema(s, docPath, plan, schema);
+        _traverseSchema(s, docPath, plan, schema, visited, options);
       }
     }
   }
 
-  if (subSchema.type === "object" && subSchema.properties) {
-    for (const key in subSchema.properties) {
+  if (subSchema.type === "object") {
+    if (subSchema.properties) {
+      for (const key in subSchema.properties) {
+        _traverseSchema(
+          subSchema.properties[key],
+          `${docPath}/${key}`,
+          plan,
+          schema,
+          visited,
+          options
+        );
+      }
+    }
+    if (
+      typeof subSchema.additionalProperties === "object" &&
+      subSchema.additionalProperties
+    ) {
       _traverseSchema(
-        subSchema.properties[key],
-        `${docPath}/${key}`,
+        subSchema.additionalProperties,
+        `${docPath}/*`,
         plan,
-        schema
+        schema,
+        visited,
+        options
       );
     }
   }
@@ -75,74 +103,76 @@ function _traverseSchema(
   if (subSchema.type === "array" && subSchema.items) {
     const arrayPlan: ArrayPlan = { primaryKey: null };
 
-    let itemsSchema = subSchema.items;
-    if (itemsSchema.$ref) {
-      itemsSchema = _resolveRef(itemsSchema.$ref, schema);
-    }
-
-    const findPrimaryKey = (s: any): string | null => {
-      if (!s || typeof s !== "object") return null;
-
-      if (s.$ref) {
-        s = _resolveRef(s.$ref, schema);
-      }
-      if (!s || s.type !== "object" || !s.properties) {
-        return null;
-      }
-
-      const props = s.properties;
-      const required = new Set(s.required || []);
-
-      const potentialKeys = ["id", "name", "port"];
-      for (const key of potentialKeys) {
-        if (props[key] && props[key].type === "string" && required.has(key)) {
-          return key;
-        }
-      }
-
-      return null;
-    };
-
-    if (itemsSchema.anyOf) {
-      for (const s of itemsSchema.anyOf) {
-        const pk = findPrimaryKey(s);
-        if (pk) {
-          arrayPlan.primaryKey = pk;
-          break;
-        }
-      }
+    const customKey = options?.primaryKeyMap?.[docPath];
+    if (customKey) {
+      arrayPlan.primaryKey = customKey;
     } else {
-      arrayPlan.primaryKey = findPrimaryKey(itemsSchema);
+      let itemsSchema = subSchema.items;
+      if (itemsSchema.$ref) {
+        itemsSchema = _resolveRef(itemsSchema.$ref, schema);
+      }
+
+      const findPrimaryKey = (s: any): string | null => {
+        if (!s || typeof s !== "object") return null;
+
+        if (s.$ref) {
+          s = _resolveRef(s.$ref, schema);
+        }
+        if (!s || s.type !== "object" || !s.properties) {
+          return null;
+        }
+
+        const props = s.properties;
+        const required = new Set(s.required || []);
+
+        const potentialKeys = ["id", "name", "port"];
+        for (const key of potentialKeys) {
+          if (
+            props[key] &&
+            (props[key].type === "string" || props[key].type === "number") &&
+            required.has(key)
+          ) {
+            return key;
+          }
+        }
+
+        return null;
+      };
+
+      const schemas = itemsSchema.anyOf || itemsSchema.oneOf;
+      if (schemas) {
+        for (const s of schemas) {
+          const pk = findPrimaryKey(s);
+          if (pk) {
+            arrayPlan.primaryKey = pk;
+            break;
+          }
+        }
+      } else {
+        arrayPlan.primaryKey = findPrimaryKey(itemsSchema);
+      }
     }
 
-    if (arrayPlan.primaryKey) {
-      plan.set(docPath, arrayPlan);
-    }
+    plan.set(docPath, arrayPlan);
 
     // We continue traversal into array items. The path does not change here
     // as the diffing logic will add array indices.
-    _traverseSchema(subSchema.items, docPath, plan, schema);
+    _traverseSchema(subSchema.items, docPath, plan, schema, visited, options);
   }
+  visited.delete(subSchema);
 }
 
-export function buildPlan(schema: Schema): Plan {
+export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
   const plan: Plan = new Map();
-  _traverseSchema(schema, "", plan, schema);
+  _traverseSchema(schema, "", plan, schema, new Set(), options);
   return plan;
 }
 
 export class SchemaPatcher {
   private readonly plan: Plan;
 
-  constructor({ plan, schema }: { plan?: Plan; schema?: Schema }) {
-    if (plan) {
-      this.plan = plan;
-    } else {
-      if (!schema) {
-        throw new Error("Either plan or schema must be provided");
-      }
-      this.plan = buildPlan(schema);
-    }
+  constructor({ plan }: { plan: Plan }) {
+    this.plan = plan;
   }
 
   public createPatch(doc1: any, doc2: any): Operation[] {
@@ -215,7 +245,14 @@ export class SchemaPatcher {
     patches: Operation[]
   ) {
     const normalizedPath = path.replace(/\/\d+/g, "");
-    const plan = this.plan.get(normalizedPath);
+    let plan = this.plan.get(normalizedPath);
+    if (!plan) {
+      const parts = normalizedPath.split("/");
+      parts.pop();
+      const parentPath = `${parts.join("/")}/*`;
+      plan = this.plan.get(parentPath);
+    }
+
     if (!plan || !plan.primaryKey) {
       // Fallback for arrays without a primary key in the plan
       const len1 = arr1.length;

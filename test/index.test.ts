@@ -45,7 +45,10 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const plan = buildPlan(schema);
+  console.dir(plan, { depth: null });
+
+  const patcher = new SchemaPatcher({ plan });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -99,7 +102,7 @@ test("SchemaPatcher handles empty arrays correctly", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const patcher = new SchemaPatcher({ plan: buildPlan(schema) });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -147,7 +150,7 @@ test("SchemaPatcher handles array with all items removed", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const patcher = new SchemaPatcher({ plan: buildPlan(schema) });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -173,7 +176,7 @@ test("SchemaPatcher handles no changes", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const patcher = new SchemaPatcher({ plan: buildPlan(schema) });
   const patches = patcher.createPatch(doc1, doc1);
   expect(patches).toEqual([]);
 });
@@ -222,7 +225,7 @@ test("SchemaPatcher handles array without primary key (fallback)", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const patcher = new SchemaPatcher({ plan: buildPlan(schema) });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -281,7 +284,7 @@ test("SchemaPatcher handles deeply nested changes", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ schema });
+  const patcher = new SchemaPatcher({ plan: buildPlan(schema) });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [

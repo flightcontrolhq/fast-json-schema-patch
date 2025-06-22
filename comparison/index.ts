@@ -1,10 +1,9 @@
-import { Bench } from "tinybench";
 import { SchemaPatcher, buildPlan } from "../src/index";
 import schema from "../test/schema.json";
 import * as fastJsonPatch from "fast-json-patch";
 import rfc6902 from "rfc6902";
-
-const bench = new Bench({ time: 100 });
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
 // Small Config - from existing test
 const smallDoc1 = {
@@ -77,30 +76,41 @@ largeDoc2.environments[0].services.push({ // add one
   memory: 1,
 });
 
-const plan = buildPlan(schema);
-console.dir(plan, { depth: null });
-const patcherWithPlan = new SchemaPatcher({ plan });
+async function compare() {
+  const plan = buildPlan(schema);
+  const patcher = new SchemaPatcher({ plan });
 
-bench
-  .add("SchemaPatcher (pre-built plan) - Small Config", () => {
-    patcherWithPlan.createPatch(smallDoc1, smallDoc2);
-  })
-  .add("fast-json-patch - Small Config", () => {
-    fastJsonPatch.compare(smallDoc1, smallDoc2);
-  })
-  .add("rfc6902 - Small Config", () => {
-    rfc6902.createPatch(smallDoc1, smallDoc2);
-  })
-  .add("SchemaPatcher (pre-built plan) - Large Config", () => {
-    patcherWithPlan.createPatch(largeDoc1, largeDoc2);
-  })
-  .add("fast-json-patch - Large Config", () => {
-    fastJsonPatch.compare(largeDoc1, largeDoc2);
-  })
-  .add("rfc6902 - Large Config", () => {
-    rfc6902.createPatch(largeDoc1, largeDoc2);
-  });
+  const scenarios = {
+    small: { doc1: smallDoc1, doc2: smallDoc2 },
+    large: { doc1: largeDoc1, doc2: largeDoc2 },
+  };
 
-await bench.run();
+  for (const [name, { doc1, doc2 }] of Object.entries(scenarios)) {
+    console.log(`Comparing ${name} config...`);
 
-console.table(bench.table()); 
+    const schemaPatch = patcher.createPatch(doc1, doc2);
+    const fastPatch = fastJsonPatch.compare(doc1, doc2);
+    const rfcPatch = rfc6902.createPatch(doc1, doc2);
+
+    await writeFile(
+      join(__dirname, `${name}-schema-patch.json`),
+      JSON.stringify(schemaPatch, null, 2)
+    );
+    await writeFile(
+      join(__dirname, `${name}-fast-json-patch.json`),
+      JSON.stringify(fastPatch, null, 2)
+    );
+    await writeFile(
+      join(__dirname, `${name}-rfc6902-patch.json`),
+      JSON.stringify(rfcPatch, null, 2)
+    );
+
+    console.log(`- SchemaPatcher patch length: ${schemaPatch.length}`);
+    console.log(`- fast-json-patch patch length: ${fastPatch.length}`);
+    console.log(`- rfc6902 patch length: ${rfcPatch.length}`);
+    console.log(`- Wrote patches to comparison/${name}-*.json`);
+    console.log("");
+  }
+}
+
+compare().catch(console.error); 
