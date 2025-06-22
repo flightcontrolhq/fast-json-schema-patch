@@ -1,0 +1,330 @@
+[
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/memory",
+    "value": 8
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/cpu",
+    "value": 4
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/4"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/3/tls",
+    "value": true
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/3/healthCheck/path",
+    "value": "/echo"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/3/protocol",
+    "value": "http2"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/3/port",
+    "value": 8005
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/3/id",
+    "value": "http2-8005"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/2/healthCheck/type",
+    "value": "http"
+  },
+  {
+    "op": "add",
+    "path": "/environments/1/services/0/ports/2/healthCheck/path",
+    "value": "/health"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/2/protocol",
+    "value": "http"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/2/port",
+    "value": 8004
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/2/id",
+    "value": "http-8004"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/1/healthCheck/tcpPort"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/1/healthCheck/type",
+    "value": "tcp"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/1/protocol",
+    "value": "grpc"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/1/port",
+    "value": 8003
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/ports/1/id",
+    "value": "grpc-8003"
+  },
+  {
+    "op": "add",
+    "path": "/environments/1/services/0/ports/1/tls",
+    "value": false
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/versionHistoryCount"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/containerInsights"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/buildType"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/envVariables"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/jobs"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/containerImage"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/memory",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/cpu",
+    "value": 1
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/1/target"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/type",
+    "value": "worker"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/name",
+    "value": "New Worker Service"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/id",
+    "value": "new-worker-service"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/1/dependsOn",
+    "value": [
+      "nlb-server"
+    ]
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/tls",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/healthCheck/path",
+    "value": "/new-health"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/protocol",
+    "value": "http"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/port",
+    "value": 8004
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/id",
+    "value": "http-8004"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/3/healthCheck/path"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/3/healthCheck/type",
+    "value": "tcp"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/3/protocol",
+    "value": "grpc"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/3/port",
+    "value": 8003
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/3/id",
+    "value": "grpc-8003"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/2/tls"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/2/healthCheck/type",
+    "value": "udp"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/2/healthCheck/tcpPort",
+    "value": 8001
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/2/protocol",
+    "value": "udp"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/2/port",
+    "value": 8007
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/2/id",
+    "value": "udp-8002"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/1/healthCheck/tcpPort"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/1/healthCheck/type",
+    "value": "tcp"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/1/protocol",
+    "value": "tcp"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/1/port",
+    "value": 8001
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/1/id",
+    "value": "tcp-8001"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/1/tls",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/0/tls",
+    "value": true
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/0/healthCheck/type",
+    "value": "http"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/0/healthCheck/path",
+    "value": "/echo"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/0/protocol",
+    "value": "http2"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/0/port",
+    "value": 8005
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/0/id",
+    "value": "http2-8005"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/2",
+    "value": {
+      "id": "nlb-client-scheduler",
+      "name": "NLB Client Scheduler",
+      "type": "scheduler",
+      "target": {
+        "type": "fargate"
+      },
+      "cpu": 0.25,
+      "memory": 0.5,
+      "containerImage": {
+        "fromService": "nlb-server"
+      },
+      "jobs": {
+        "nlb-client-test": {
+          "startCommand": [
+            "/bin/sh",
+            "-c",
+            ". ./certs.env && ./client"
+          ],
+          "schedule": "manual"
+        }
+      },
+      "envVariables": {
+        "LOAD_BALANCER_HOST": {
+          "fromService": {
+            "id": "nlb-server",
+            "value": "loadBalancerHost"
+          }
+        }
+      },
+      "buildType": "fromService",
+      "containerInsights": false,
+      "versionHistoryCount": 10
+    }
+  }
+]

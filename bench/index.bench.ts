@@ -77,6 +77,21 @@ largeDoc2.environments[0].services.push({ // add one
   memory: 1,
 });
 
+// Real-world config
+const realWorldDoc1 = require("../test/test.json");
+const realWorldDoc2 = JSON.parse(JSON.stringify(realWorldDoc1));
+// 1. Add a new port to the first service in the first environment
+realWorldDoc2.environments[0].services[0].ports.push({
+  id: "new-port",
+  port: 9999,
+  protocol: "tcp",
+  healthCheck: { type: "tcp" },
+});
+// 2. Remove the second service from the first environment
+realWorldDoc2.environments[0].services.splice(1, 1);
+// 3. Replace a value in the second environment
+realWorldDoc2.environments[1].services[0].cpu = 5;
+
 const plan = buildPlan(schema);
 console.dir(plan, { depth: null });
 const patcherWithPlan = new SchemaPatcher({ plan });
@@ -99,6 +114,15 @@ bench
   })
   .add("rfc6902 - Large Config", () => {
     rfc6902.createPatch(largeDoc1, largeDoc2);
+  })
+  .add("SchemaPatcher (pre-built plan) - Real-world Config", () => {
+    patcherWithPlan.createPatch(realWorldDoc1, realWorldDoc2);
+  })
+  .add("fast-json-patch - Real-world Config", () => {
+    fastJsonPatch.compare(realWorldDoc1, realWorldDoc2);
+  })
+  .add("rfc6902 - Real-world Config", () => {
+    rfc6902.createPatch(realWorldDoc1, realWorldDoc2);
   });
 
 await bench.run();

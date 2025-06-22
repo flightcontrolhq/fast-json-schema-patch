@@ -1,0 +1,55 @@
+[
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/0",
+    "value": {
+      "id": "http2-8005",
+      "port": 8005,
+      "protocol": "http2",
+      "healthCheck": {
+        "type": "http",
+        "path": "/echo",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": true
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/ports/4/healthCheck/path",
+    "value": "/new-health"
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/5"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/1",
+    "value": {
+      "id": "new-worker-service",
+      "name": "New Worker Service",
+      "type": "worker",
+      "cpu": 1,
+      "memory": 2,
+      "dependsOn": [
+        "nlb-server"
+      ]
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/1"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/cpu",
+    "value": 4
+  },
+  {
+    "op": "replace",
+    "path": "/environments/1/services/0/memory",
+    "value": 8
+  }
+]

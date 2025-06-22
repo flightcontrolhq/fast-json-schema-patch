@@ -46,7 +46,6 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
   };
 
   const plan = buildPlan(schema);
-  console.dir(plan, { depth: null });
 
   const patcher = new SchemaPatcher({ plan });
   const patches = patcher.createPatch(doc1, doc2);
@@ -343,6 +342,51 @@ test("SchemaPatcher works with a pre-built plan", () => {
   const expectedPatches: Operation[] = [
     { op: "replace", path: "/environments/0/services/0/cpu", value: 2 },
   ];
+
+  expect(patches).toEqual(expectedPatches);
+});
+
+test("SchemaPatcher handles real-world schema and data", () => {
+  // Use the actual schema and a test data file
+  const doc1 = JSON.parse(JSON.stringify(require("./test.json")));
+  const doc2 = JSON.parse(JSON.stringify(require("./test.json")));
+
+  // 1. Add a new port to the first service in the first environment
+  doc2.environments[0].services[0].ports.push({
+    id: "new-port",
+    port: 9999,
+    protocol: "tcp",
+    healthCheck: { type: "tcp" },
+  });
+
+  // 2. Remove the second service from the first environment
+  doc2.environments[0].services.splice(1, 1);
+
+  // 3. Replace a value in the second environment
+  doc2.environments[1].services[0].cpu = 5;
+
+  const plan = buildPlan(schema);
+  const patcher = new SchemaPatcher({ plan });
+  const patches = patcher.createPatch(doc1, doc2);
+
+  const expectedPatches: Operation[] = [
+    {
+      op: "add",
+      path: "/environments/0/services/0/ports/-",
+      value: {
+        id: "new-port",
+        port: 9999,
+        protocol: "tcp",
+        healthCheck: { type: "tcp" },
+      },
+    },
+    { op: "remove", path: "/environments/0/services/1" },
+    { op: "replace", path: "/environments/1/services/0/cpu", value: 5 },
+  ];
+
+  const sortFn = (a: any, b: any) => a.path.localeCompare(b.path);
+  patches.sort(sortFn);
+  expectedPatches.sort(sortFn);
 
   expect(patches).toEqual(expectedPatches);
 });
