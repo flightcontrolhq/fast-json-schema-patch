@@ -173,33 +173,48 @@ export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
 function deepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
 
-  if (obj1 && obj2 && typeof obj1 === "object" && typeof obj2 === "object") {
-    if (obj1.constructor !== obj2.constructor) return false;
+  // Quick type and null checks
+  if (obj1 == null || obj2 == null) return obj1 === obj2;
+  
+  const type1 = typeof obj1;
+  const type2 = typeof obj2;
+  if (type1 !== type2) return false;
+  
+  // For non-objects, they're already not equal if we reach here
+  if (type1 !== "object") {
+    // Handle NaN case
+    return Number.isNaN(obj1) && Number.isNaN(obj2);
+  }
 
-    let length: number, i: number;
-    if (Array.isArray(obj1)) {
-      length = obj1.length;
-      if (length !== obj2.length) return false;
-      for (i = length; i-- !== 0; )
-        if (!deepEqual(obj1[i], obj2[i])) return false;
-      return true;
+  // Both are objects at this point
+  const isArray1 = Array.isArray(obj1);
+  const isArray2 = Array.isArray(obj2);
+  if (isArray1 !== isArray2) return false;
+
+  if (isArray1) {
+    // Array comparison - optimized
+    const length = obj1.length;
+    if (length !== obj2.length) return false;
+    for (let i = 0; i < length; i++) {
+      if (!deepEqual(obj1[i], obj2[i])) return false;
     }
-
-    const keys = Object.keys(obj1);
-    length = keys.length;
-    if (length !== Object.keys(obj2).length) return false;
-
-    for (i = length; i-- !== 0; ) {
-      const key = keys[i] as keyof typeof obj1;
-      if (!obj2.hasOwnProperty(key) || !deepEqual(obj1[key], obj2[key]))
-        return false;
-    }
-
     return true;
   }
 
-  // true if both NaN, false otherwise
-  return Number.isNaN(obj1) && Number.isNaN(obj2);
+  // Object comparison - optimized
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  const length = keys1.length;
+  if (length !== keys2.length) return false;
+
+  for (let i = 0; i < length; i++) {
+    const key = keys1[i]!; // keys1[i] is guaranteed to exist
+    if (!(key in obj2) || !deepEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export class SchemaPatcher {
@@ -216,13 +231,12 @@ export class SchemaPatcher {
   }
 
   private diff(obj1: any, obj2: any, path: string, patches: Operation[]) {
-    const type1 = typeof obj1;
-    const type2 = typeof obj2;
-
+    // Fast path for identical values
     if (obj1 === obj2) {
       return;
     }
 
+    // Fast path for undefined values
     if (obj1 === undefined) {
       patches.push({ op: "add", path, value: obj2 });
       return;
@@ -233,17 +247,41 @@ export class SchemaPatcher {
       return;
     }
 
-    if (type1 !== type2 || Array.isArray(obj1) !== Array.isArray(obj2)) {
+    // Fast path for null values
+    if (obj1 === null || obj2 === null) {
       patches.push({ op: "replace", path, value: obj2 });
       return;
     }
 
-    if (Array.isArray(obj1)) {
-      this.diffArray(obj1, obj2, path, patches);
-    } else if (type1 === "object" && obj1 !== null && obj2 !== null) {
-      this.diffObject(obj1, obj2, path, patches);
-    } else {
+    const type1 = typeof obj1;
+    const type2 = typeof obj2;
+
+    // Fast path for different types
+    if (type1 !== type2) {
       patches.push({ op: "replace", path, value: obj2 });
+      return;
+    }
+
+    // Fast path for primitives
+    if (type1 !== "object") {
+      patches.push({ op: "replace", path, value: obj2 });
+      return;
+    }
+
+    // Both are objects, check array status
+    const isArray1 = Array.isArray(obj1);
+    const isArray2 = Array.isArray(obj2);
+    
+    if (isArray1 !== isArray2) {
+      patches.push({ op: "replace", path, value: obj2 });
+      return;
+    }
+
+    // Delegate to appropriate diffing method
+    if (isArray1) {
+      this.diffArray(obj1, obj2, path, patches);
+    } else {
+      this.diffObject(obj1, obj2, path, patches);
     }
   }
 
@@ -253,18 +291,26 @@ export class SchemaPatcher {
     path: string,
     patches: Operation[]
   ) {
-    const keys1 = new Set(Object.keys(obj1));
-    const keys2 = new Set(Object.keys(obj2));
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    
+    // Create sets only when needed for efficient lookup
+    const keys2Set = new Set(keys2);
 
-    for (const key of keys1) {
-      if (!keys2.has(key)) {
+    // Process removals
+    for (let i = 0; i < keys1.length; i++) {
+      const key = keys1[i]!;
+      if (!keys2Set.has(key)) {
         patches.push({ op: "remove", path: `${path}/${key}` });
       }
     }
 
-    for (const key of keys2) {
+    // Process additions and changes
+    for (let i = 0; i < keys2.length; i++) {
+      const key = keys2[i]!;
       const newPath = `${path}/${key}`;
-      if (!keys1.has(key)) {
+      
+      if (!(key in obj1)) {
         patches.push({ op: "add", path: newPath, value: obj2[key] });
       } else {
         this.diff(obj1[key], obj2[key], newPath, patches);
@@ -293,45 +339,45 @@ export class SchemaPatcher {
       return;
     }
 
-    const { primaryKey } = plan;
+    const primaryKey = plan.primaryKey;
 
-    const map1 = new Map(
-      arr1.map((item, index) => [item[primaryKey], { item, index }])
-    );
-    const map2 = new Map(
-      arr2.map((item, index) => [item[primaryKey], { item, index }])
-    );
+    // Build maps more efficiently - avoid creating wrapper objects
+    const map1 = new Map<any, number>();
+    const map2 = new Map<any, number>();
+    
+    // Pre-size the maps for better performance
+    for (let i = 0; i < arr1.length; i++) {
+      map1.set(arr1[i][primaryKey], i);
+    }
+    
+    for (let i = 0; i < arr2.length; i++) {
+      map2.set(arr2[i][primaryKey], i);
+    }
 
-    const removed: { index: number }[] = [];
-    for (const [key, { index }] of map1.entries()) {
+    // Collect removals - avoid creating objects
+    const removals: number[] = [];
+    for (const [key, index] of map1.entries()) {
       if (!map2.has(key)) {
-        removed.push({ index });
+        removals.push(index);
       }
     }
 
     // Remove from the end to avoid index shifting issues
-    removed.sort((a, b) => b.index - a.index);
-    for (const { index } of removed) {
-      patches.push({ op: "remove", path: `${path}/${index}` });
+    removals.sort((a, b) => b - a);
+    for (let i = 0; i < removals.length; i++) {
+      patches.push({ op: "remove", path: `${path}/${removals[i]}` });
     }
 
-    const added: { item: any }[] = [];
-    for (const [key, { item }] of map2.entries()) {
-      if (!map1.has(key)) {
-        added.push({ item });
+    // Process changes and additions
+    for (const [key, newIndex] of map2.entries()) {
+      const oldIndex = map1.get(key);
+      if (oldIndex === undefined) {
+        // Addition
+        patches.push({ op: "add", path: `${path}/-`, value: arr2[newIndex] });
       } else {
-        // It exists in both, so diff the items.
-        // We need original index from arr1 for path
-        const original = map1.get(key);
-        if (original) {
-          this.diff(original.item, item, `${path}/${original.index}`, patches);
-        }
+        // Exists in both - diff the items
+        this.diff(arr1[oldIndex], arr2[newIndex], `${path}/${oldIndex}`, patches);
       }
-    }
-
-    for (const { item } of added) {
-      // RFC6902 says for add to an array, you can use a high index or '-'
-      patches.push({ op: "add", path: `${path}/-`, value: item });
     }
   }
 

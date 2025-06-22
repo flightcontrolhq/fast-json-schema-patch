@@ -1,5 +1,5 @@
-import { expect, test } from "bun:test";
 import { SchemaPatcher, type Operation, buildPlan } from "../src/index";
+import { test, expect } from "bun:test";
 import schema from "./schema.json";
 
 test("SchemaPatcher generates correct patches for array with primary key", () => {
