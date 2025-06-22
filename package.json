@@ -1,0 +1,18 @@
+{
+  "name": "schema-json-patch",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.4",
+    "@types/bun": "latest",
+    "fast-json-patch": "^3.1.1",
+    "rfc6902": "^5.1.2",
+    "tinybench": "^4.0.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "bench": "bun run bench/index.bench.ts"
+  }
+}

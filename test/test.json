@@ -1,0 +1,258 @@
+{
+    "$schema": "https://app.flightcontrol.dev/schema.json",
+    "environments": [
+      {
+        "id": "production",
+        "name": "NLB",
+        "region": "eu-west-1",
+        "source": {
+          "branch": "main",
+          "pr": false,
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "nlb-server",
+            "name": "NLB Server",
+            "type": "network-server",
+            "target": {
+              "type": "fargate"
+            },
+            "ports": [
+              {
+                "id": "tcp-8001",
+                "port": 8001,
+                "protocol": "tcp",
+                "healthCheck": {
+                  "type": "tcp",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "udp-8002",
+                "port": 8007,
+                "protocol": "udp",
+                "healthCheck": {
+                  "type": "udp",
+                  "tcpPort": 8001,
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                }
+              },
+              {
+                "id": "grpc-8003",
+                "port": 8003,
+                "protocol": "grpc",
+                "healthCheck": {
+                  "type": "tcp",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "http-8004",
+                "port": 8004,
+                "protocol": "http",
+                "healthCheck": {
+                  "type": "http",
+                  "path": "/health",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "http2-8005",
+                "port": 8005,
+                "protocol": "http2",
+                "healthCheck": {
+                  "type": "http",
+                  "path": "/echo",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": true
+              }
+            ],
+            "cpu": 1,
+            "gpu": 0,
+            "memory": 2,
+            "healthCheckPath": "/",
+            "healthCheckTimeoutSecs": 4,
+            "healthCheckIntervalSecs": 5,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "versionHistoryCount": 10,
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "injectEnvVariablesInDockerfile": true,
+            "buildType": "docker",
+            "containerInsights": false,
+            "basePath": ".",
+            "privileged": false,
+            "autoscaling": {
+              "cpuThreshold": 70,
+              "memoryThreshold": 70,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
+            "enableCloudfrontSwr": false,
+            "includeEnvVariablesInBuild": true,
+            "ci": {
+              "type": "codebuild"
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true
+            },
+            "cloudfrontAutoCacheInvalidation": true,
+            "originShieldEnabled": true
+          },
+          {
+            "id": "nlb-client-scheduler",
+            "name": "NLB Client Scheduler",
+            "type": "scheduler",
+            "target": {
+              "type": "fargate"
+            },
+            "cpu": 0.25,
+            "memory": 0.5,
+            "containerImage": {
+              "fromService": "nlb-server"
+            },
+            "jobs": {
+              "nlb-client-test": {
+                "startCommand": ["/bin/sh", "-c", ". ./certs.env && ./client"],
+                "schedule": "manual"
+              }
+            },
+            "envVariables": {
+              "LOAD_BALANCER_HOST": {
+                "fromService": {
+                  "id": "nlb-server",
+                  "value": "loadBalancerHost"
+                }
+              }
+            },
+            "buildType": "fromService",
+            "containerInsights": false,
+            "versionHistoryCount": 10
+          }
+        ]
+      },
+      {
+        "id": "preview",
+        "name": "Preview",
+        "region": "us-west-1",
+        "source": {
+          "pr": true,
+          "filter": {
+            "toBranches": ["main"]
+          }
+        },
+        "services": [
+          {
+            "id": "nlb-server",
+            "name": "NLB Server",
+            "type": "network-server",
+            "target": {
+              "type": "fargate"
+            },
+            "ports": [
+              {
+                "id": "tcp-8001",
+                "port": 8001,
+                "protocol": "tcp",
+                "healthCheck": {
+                  "type": "tcp",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "udp-8002",
+                "port": 8002,
+                "protocol": "udp",
+                "healthCheck": {
+                  "type": "udp",
+                  "tcpPort": 8001,
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                }
+              },
+              {
+                "id": "grpc-8003",
+                "port": 8003,
+                "protocol": "grpc",
+                "healthCheck": {
+                  "type": "tcp",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "http-8004",
+                "port": 8004,
+                "protocol": "http",
+                "healthCheck": {
+                  "type": "http",
+                  "path": "/health",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": false
+              },
+              {
+                "id": "http2-8005",
+                "port": 8005,
+                "protocol": "http2",
+                "healthCheck": {
+                  "type": "http",
+                  "path": "/echo",
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                },
+                "tls": true
+              }
+            ],
+            "cpu": 1,
+            "gpu": 0,
+            "memory": 2,
+            "healthCheckPath": "/",
+            "healthCheckTimeoutSecs": 4,
+            "healthCheckIntervalSecs": 5,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "versionHistoryCount": 10,
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "injectEnvVariablesInDockerfile": true,
+            "buildType": "docker",
+            "containerInsights": false,
+            "basePath": ".",
+            "privileged": false,
+            "autoscaling": {
+              "cpuThreshold": 70,
+              "memoryThreshold": 70,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
+            "enableCloudfrontSwr": false,
+            "includeEnvVariablesInBuild": true,
+            "ci": {
+              "type": "codebuild"
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true
+            },
+            "cloudfrontAutoCacheInvalidation": true,
+            "originShieldEnabled": true
+          }
+        ]
+      }
+    ]
+  }
