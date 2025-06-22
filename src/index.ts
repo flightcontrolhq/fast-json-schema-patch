@@ -13,124 +13,135 @@ interface ArrayPlan {
 
 type Plan = Map<string, ArrayPlan>;
 
-export class SchemaPatcher {
-  private readonly schema: Schema;
-  private readonly plan: Plan;
-
-  constructor(schema: Schema) {
-    this.schema = schema;
-    this.plan = this.createPlan();
+function _resolveRef(ref: string, schema: Schema): any {
+  if (!ref.startsWith("#/")) {
+    // We only support local references for now.
+    console.warn(`Unsupported reference: ${ref}`);
+    return null;
   }
-
-  private resolveRef(ref: string): any {
-    if (!ref.startsWith("#/")) {
-      // We only support local references for now.
-      console.warn(`Unsupported reference: ${ref}`);
+  const path = ref.substring(2).split("/");
+  let current: any = schema;
+  for (const part of path) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !current.hasOwnProperty(part)
+    ) {
       return null;
     }
-    const path = ref.substring(2).split("/");
-    let current: any = this.schema;
-    for (const part of path) {
-      if (
-        typeof current !== "object" ||
-        current === null ||
-        !current.hasOwnProperty(part)
-      ) {
-        return null;
-      }
-      current = current[part];
-    }
-    return current;
+    current = current[part];
+  }
+  return current;
+}
+
+function _traverseSchema(
+  subSchema: any,
+  docPath: string,
+  plan: Plan,
+  schema: Schema
+) {
+  if (!subSchema || typeof subSchema !== "object") {
+    return;
   }
 
-  private createPlan(): Plan {
-    const plan: Plan = new Map();
-    this.traverseSchema(this.schema, "", plan);
-    return plan;
+  if (subSchema.$ref) {
+    const resolved = _resolveRef(subSchema.$ref, schema);
+    if (resolved) {
+      // Note: We don't change the docPath when resolving a ref
+      _traverseSchema(resolved, docPath, plan, schema);
+    }
+    return;
   }
 
-  private traverseSchema(subSchema: any, docPath: string, plan: Plan) {
-    if (!subSchema || typeof subSchema !== "object") {
-      return;
-    }
-
-    if (subSchema.$ref) {
-      const resolved = this.resolveRef(subSchema.$ref);
-      if (resolved) {
-        // Note: We don't change the docPath when resolving a ref
-        this.traverseSchema(resolved, docPath, plan);
-      }
-      return;
-    }
-
-    for (const keyword of ["anyOf", "oneOf", "allOf"]) {
-      if (Array.isArray(subSchema[keyword])) {
-        for (const s of subSchema[keyword]) {
-          this.traverseSchema(s, docPath, plan);
-        }
+  for (const keyword of ["anyOf", "oneOf", "allOf"]) {
+    if (Array.isArray(subSchema[keyword])) {
+      for (const s of subSchema[keyword]) {
+        _traverseSchema(s, docPath, plan, schema);
       }
     }
+  }
 
-    if (subSchema.type === "object" && subSchema.properties) {
-      for (const key in subSchema.properties) {
-        this.traverseSchema(
-          subSchema.properties[key],
-          `${docPath}/${key}`,
-          plan,
-        );
-      }
+  if (subSchema.type === "object" && subSchema.properties) {
+    for (const key in subSchema.properties) {
+      _traverseSchema(
+        subSchema.properties[key],
+        `${docPath}/${key}`,
+        plan,
+        schema
+      );
+    }
+  }
+
+  if (subSchema.type === "array" && subSchema.items) {
+    const arrayPlan: ArrayPlan = { primaryKey: null };
+
+    let itemsSchema = subSchema.items;
+    if (itemsSchema.$ref) {
+      itemsSchema = _resolveRef(itemsSchema.$ref, schema);
     }
 
-    if (subSchema.type === "array" && subSchema.items) {
-      const arrayPlan: ArrayPlan = { primaryKey: null };
+    const findPrimaryKey = (s: any): string | null => {
+      if (!s || typeof s !== "object") return null;
 
-      let itemsSchema = subSchema.items;
-      if (itemsSchema.$ref) {
-        itemsSchema = this.resolveRef(itemsSchema.$ref);
+      if (s.$ref) {
+        s = _resolveRef(s.$ref, schema);
       }
-
-      const findPrimaryKey = (schema: any): string | null => {
-        if (!schema || typeof schema !== "object") return null;
-
-        if (schema.$ref) {
-          schema = this.resolveRef(schema.$ref);
-        }
-        if (!schema || schema.type !== "object" || !schema.properties) {
-          return null;
-        }
-
-        const props = schema.properties;
-        const required = new Set(schema.required || []);
-
-        const potentialKeys = ["id", "name"];
-        for (const key of potentialKeys) {
-          if (props[key] && props[key].type === "string" && required.has(key)) {
-            return key;
-          }
-        }
-
+      if (!s || s.type !== "object" || !s.properties) {
         return null;
-      };
+      }
 
-      if (itemsSchema.anyOf) {
-        for (const s of itemsSchema.anyOf) {
-          const pk = findPrimaryKey(s);
-          if (pk) {
-            arrayPlan.primaryKey = pk;
-            break;
-          }
+      const props = s.properties;
+      const required = new Set(s.required || []);
+
+      const potentialKeys = ["id", "name", "port"];
+      for (const key of potentialKeys) {
+        if (props[key] && props[key].type === "string" && required.has(key)) {
+          return key;
         }
-      } else {
-        arrayPlan.primaryKey = findPrimaryKey(itemsSchema);
       }
 
-      if (arrayPlan.primaryKey) {
-        plan.set(docPath, arrayPlan);
-      }
+      return null;
+    };
 
-      // We continue traversal into array items. The path does not change here
-      // as the diffing logic will add array indices.
-      this.traverseSchema(subSchema.items, docPath, plan);
+    if (itemsSchema.anyOf) {
+      for (const s of itemsSchema.anyOf) {
+        const pk = findPrimaryKey(s);
+        if (pk) {
+          arrayPlan.primaryKey = pk;
+          break;
+        }
+      }
+    } else {
+      arrayPlan.primaryKey = findPrimaryKey(itemsSchema);
+    }
+
+    if (arrayPlan.primaryKey) {
+      plan.set(docPath, arrayPlan);
+    }
+
+    // We continue traversal into array items. The path does not change here
+    // as the diffing logic will add array indices.
+    _traverseSchema(subSchema.items, docPath, plan, schema);
+  }
+}
+
+export function buildPlan(schema: Schema): Plan {
+  const plan: Plan = new Map();
+  _traverseSchema(schema, "", plan, schema);
+  return plan;
+}
+
+export class SchemaPatcher {
+  private readonly plan: Plan;
+
+  constructor({ plan, schema }: { plan?: Plan; schema?: Schema }) {
+    if (plan) {
+      this.plan = plan;
+    } else {
+      if (!schema) {
+        throw new Error("Either plan or schema must be provided");
+      }
+      this.plan = buildPlan(schema);
     }
   }
 
@@ -176,7 +187,7 @@ export class SchemaPatcher {
     obj1: Record<string, any>,
     obj2: Record<string, any>,
     path: string,
-    patches: Operation[],
+    patches: Operation[]
   ) {
     const keys1 = new Set(Object.keys(obj1));
     const keys2 = new Set(Object.keys(obj2));
@@ -201,7 +212,7 @@ export class SchemaPatcher {
     arr1: any[],
     arr2: any[],
     path: string,
-    patches: Operation[],
+    patches: Operation[]
   ) {
     const normalizedPath = path.replace(/\/\d+/g, "");
     const plan = this.plan.get(normalizedPath);
@@ -230,10 +241,10 @@ export class SchemaPatcher {
     const { primaryKey } = plan;
 
     const map1 = new Map(
-      arr1.map((item, index) => [item[primaryKey], { item, index }]),
+      arr1.map((item, index) => [item[primaryKey], { item, index }])
     );
     const map2 = new Map(
-      arr2.map((item, index) => [item[primaryKey], { item, index }]),
+      arr2.map((item, index) => [item[primaryKey], { item, index }])
     );
 
     const removed: { index: number }[] = [];

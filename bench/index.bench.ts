@@ -1,5 +1,5 @@
 import { Bench } from "tinybench";
-import { SchemaPatcher } from "../src/index";
+import { SchemaPatcher, buildPlan } from "../src/index";
 import schema from "../test/schema.json";
 import * as fastJsonPatch from "fast-json-patch";
 
@@ -76,17 +76,26 @@ largeDoc2.environments[0].services.push({ // add one
   memory: 1,
 });
 
-const patcher = new SchemaPatcher(schema);
+const plan = buildPlan(schema);
+const patcherWithPlan = new SchemaPatcher({ plan });
 
 bench
-  .add("SchemaPatcher - Small Config", () => {
+  .add("SchemaPatcher (with plan build) - Small Config", () => {
+    const patcher = new SchemaPatcher({ schema });
     patcher.createPatch(smallDoc1, smallDoc2);
+  })
+  .add("SchemaPatcher (pre-built plan) - Small Config", () => {
+    patcherWithPlan.createPatch(smallDoc1, smallDoc2);
   })
   .add("fast-json-patch - Small Config", () => {
     fastJsonPatch.compare(smallDoc1, smallDoc2);
   })
-  .add("SchemaPatcher - Large Config", () => {
+  .add("SchemaPatcher (with plan build) - Large Config", () => {
+    const patcher = new SchemaPatcher({ schema });
     patcher.createPatch(largeDoc1, largeDoc2);
+  })
+  .add("SchemaPatcher (pre-built plan) - Large Config", () => {
+    patcherWithPlan.createPatch(largeDoc1, largeDoc2);
   })
   .add("fast-json-patch - Large Config", () => {
     fastJsonPatch.compare(largeDoc1, largeDoc2);

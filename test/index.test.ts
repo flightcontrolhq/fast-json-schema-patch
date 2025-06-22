@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { SchemaPatcher, type Operation } from "../src/index";
+import { SchemaPatcher, type Operation, buildPlan } from "../src/index";
 import schema from "./schema.json";
 
 test("SchemaPatcher generates correct patches for array with primary key", () => {
@@ -12,7 +12,13 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
         source: { branch: "main" },
         services: [
           { id: "service1", name: "api", type: "web", cpu: 1, memory: 2 },
-          { id: "service2", name: "worker", type: "worker", cpu: 0.5, memory: 1 },
+          {
+            id: "service2",
+            name: "worker",
+            type: "worker",
+            cpu: 0.5,
+            memory: 1,
+          },
         ],
       },
     ],
@@ -27,13 +33,19 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
         source: { branch: "main" },
         services: [
           { id: "service1", name: "api", type: "web", cpu: 2, memory: 2 },
-          { id: "service3", name: "new-worker", type: "worker", cpu: 1, memory: 2 },
+          {
+            id: "service3",
+            name: "new-worker",
+            type: "worker",
+            cpu: 1,
+            memory: 2,
+          },
         ],
       },
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -42,7 +54,13 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
     {
       op: "add",
       path: "/environments/0/services/-",
-      value: { id: "service3", name: "new-worker", type: "worker", cpu: 1, memory: 2 },
+      value: {
+        id: "service3",
+        name: "new-worker",
+        type: "worker",
+        cpu: 1,
+        memory: 2,
+      },
     },
   ];
 
@@ -81,7 +99,7 @@ test("SchemaPatcher handles empty arrays correctly", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -105,7 +123,13 @@ test("SchemaPatcher handles array with all items removed", () => {
         source: { branch: "main" },
         services: [
           { id: "service1", name: "api", type: "web", cpu: 1, memory: 2 },
-          { id: "service2", name: "worker", type: "worker", cpu: 0.5, memory: 1 },
+          {
+            id: "service2",
+            name: "worker",
+            type: "worker",
+            cpu: 0.5,
+            memory: 1,
+          },
         ],
       },
     ],
@@ -123,7 +147,7 @@ test("SchemaPatcher handles array with all items removed", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -149,7 +173,7 @@ test("SchemaPatcher handles no changes", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc1);
   expect(patches).toEqual([]);
 });
@@ -198,11 +222,15 @@ test("SchemaPatcher handles array without primary key (fallback)", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
-    { op: "replace", path: "/environments/0/services/0/dependsOn/1", value: "c" },
+    {
+      op: "replace",
+      path: "/environments/0/services/0/dependsOn/1",
+      value: "c",
+    },
     { op: "add", path: "/environments/0/services/0/dependsOn/2", value: "d" },
   ];
 
@@ -253,7 +281,7 @@ test("SchemaPatcher handles deeply nested changes", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher(schema);
+  const patcher = new SchemaPatcher({ schema });
   const patches = patcher.createPatch(doc1, doc2);
 
   const expectedPatches: Operation[] = [
@@ -268,10 +296,50 @@ test("SchemaPatcher handles deeply nested changes", () => {
       value: 85,
     },
   ];
-  
+
   const sortFn = (a: any, b: any) => a.path.localeCompare(b.path);
   patches.sort(sortFn);
   expectedPatches.sort(sortFn);
+
+  expect(patches).toEqual(expectedPatches);
+});
+
+test("SchemaPatcher works with a pre-built plan", () => {
+  const doc1 = {
+    environments: [
+      {
+        id: "env1",
+        name: "production",
+        region: "us-east-1",
+        source: { branch: "main" },
+        services: [
+          { id: "service1", name: "api", type: "web", cpu: 1, memory: 2 },
+        ],
+      },
+    ],
+  };
+
+  const doc2 = {
+    environments: [
+      {
+        id: "env1",
+        name: "production",
+        region: "us-east-1",
+        source: { branch: "main" },
+        services: [
+          { id: "service1", name: "api", type: "web", cpu: 2, memory: 2 },
+        ],
+      },
+    ],
+  };
+
+  const plan = buildPlan(schema);
+  const patcher = new SchemaPatcher({ plan });
+  const patches = patcher.createPatch(doc1, doc2);
+
+  const expectedPatches: Operation[] = [
+    { op: "replace", path: "/environments/0/services/0/cpu", value: 2 },
+  ];
 
   expect(patches).toEqual(expectedPatches);
 });
