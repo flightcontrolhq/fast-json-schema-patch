@@ -14,18 +14,7 @@
   },
   "scripts": {
     "bench": "bun run bench/index.bench.ts",
-    "test": "bun test",
-    "dev": "bun web/index.tsx"
+    "test": "bun test"
   },
-  "dependencies": {
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@types/react-syntax-highlighter": "^15.5.13",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-syntax-highlighter": "^15.6.1",
-    "tailwindcss": "3"
-  }
+  "private": true
 }

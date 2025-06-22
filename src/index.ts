@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: because I know what I'm doing */
+/** biome-ignore-all lint/suspicious/noPrototypeBuiltins: because I know what I'm doing */
 export interface Operation {
   op: "add" | "remove" | "replace" | "move" | "copy" | "test";
   path: string;
@@ -171,12 +173,7 @@ export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
 function deepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
 
-  if (
-    obj1 &&
-    obj2 &&
-    typeof obj1 === "object" &&
-    typeof obj2 === "object"
-  ) {
+  if (obj1 && obj2 && typeof obj1 === "object" && typeof obj2 === "object") {
     if (obj1.constructor !== obj2.constructor) return false;
 
     let length: number, i: number;
@@ -325,8 +322,10 @@ export class SchemaPatcher {
       } else {
         // It exists in both, so diff the items.
         // We need original index from arr1 for path
-        const original = map1.get(key)!;
-        this.diff(original.item, item, `${path}/${original.index}`, patches);
+        const original = map1.get(key);
+        if (original) {
+          this.diff(original.item, item, `${path}/${original.index}`, patches);
+        }
       }
     }
 
