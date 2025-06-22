@@ -260,8 +260,7 @@ function deepEqual(obj1: any, obj2: any): boolean {
   const length = keys1.length;
   if (length !== keys2.length) return false;
 
-  for (let i = 0; i < length; i++) {
-    const key = keys1[i]!; // keys1[i] is guaranteed to exist
+  for (const key of keys1) {
     if (!(key in obj2) || !deepEqual(obj1[key], obj2[key])) {
       return false;
     }
@@ -275,9 +274,8 @@ function fastHash(obj: any, fields: string[]): string {
   // This is a simple, non-cryptographic hash.
   // The goal is speed and reducing collisions for similar objects.
   let hash = "";
-  for (let i = 0; i < fields.length; i++) {
-    const key = fields[i]!;
-    hash += obj[key] + "|";
+  for (const key of fields) {
+    hash += `${obj[key]}|`;
   }
   return hash;
 }
