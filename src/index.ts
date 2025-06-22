@@ -11,6 +11,16 @@ type Schema = Record<string, any>;
 
 interface ArrayPlan {
   primaryKey: string | null;
+  // Pre-resolved item schema to avoid repeated $ref resolution
+  itemSchema?: any;
+  // Set of required fields for faster validation and comparison
+  requiredFields?: Set<string>;
+  // Fields to use for quick equality hashing before deep comparison
+  hashFields?: string[];
+  // Strategy hint for array comparison
+  strategy?: "primaryKey" | "lcs";
+  // Whether array items are primitives (for faster comparison)
+  isPrimitiveItems?: boolean;
 }
 
 type Plan = Map<string, ArrayPlan>;
@@ -103,18 +113,36 @@ function _traverseSchema(
   }
 
   if (subSchema.type === "array" && subSchema.items) {
-    const arrayPlan: ArrayPlan = { primaryKey: null };
+    const arrayPlan: ArrayPlan = { primaryKey: null, strategy: "lcs" };
+
+    let itemsSchema = subSchema.items;
+    if (itemsSchema.$ref) {
+      itemsSchema = _resolveRef(itemsSchema.$ref, schema);
+    }
+
+    // Store the resolved item schema to avoid repeated resolution
+    arrayPlan.itemSchema = itemsSchema;
+
+    // Check if items are primitives
+    const isPrimitive =
+      itemsSchema &&
+      (itemsSchema.type === "string" ||
+        itemsSchema.type === "number" ||
+        itemsSchema.type === "boolean");
+    arrayPlan.isPrimitiveItems = isPrimitive;
 
     const customKey = options?.primaryKeyMap?.[docPath];
     if (customKey) {
       arrayPlan.primaryKey = customKey;
-    } else {
-      let itemsSchema = subSchema.items;
-      if (itemsSchema.$ref) {
-        itemsSchema = _resolveRef(itemsSchema.$ref, schema);
-      }
-
-      const findPrimaryKey = (s: any): string | null => {
+      arrayPlan.strategy = "primaryKey";
+    } else if (!isPrimitive) {
+      // Find primary key and other metadata only for non-primitive object arrays
+      const findMetadata = (
+        s: any
+      ): Pick<
+        ArrayPlan,
+        "primaryKey" | "requiredFields" | "hashFields"
+      > | null => {
         if (!s || typeof s !== "object") return null;
 
         if (s.$ref) {
@@ -125,16 +153,34 @@ function _traverseSchema(
         }
 
         const props = s.properties;
-        const required = new Set(s.required || []);
+        const required = new Set(s.required || []) as Set<string>;
+        const hashFields: string[] = [];
+
+        // Identify potential hash fields (required, primitive types)
+        for (const key of required) {
+          const prop = props[key];
+          if (
+            prop &&
+            (prop.type === "string" || prop.type === "number")
+          ) {
+            hashFields.push(key);
+          }
+        }
 
         const potentialKeys = ["id", "name", "port"];
         for (const key of potentialKeys) {
-          if (
-            props[key] &&
-            (props[key].type === "string" || props[key].type === "number") &&
-            required.has(key)
-          ) {
-            return key;
+          if (required.has(key)) {
+            const prop = props[key];
+            if (
+              prop &&
+              (prop.type === "string" || prop.type === "number")
+            ) {
+              return {
+                primaryKey: key,
+                requiredFields: required,
+                hashFields,
+              };
+            }
           }
         }
 
@@ -142,16 +188,23 @@ function _traverseSchema(
       };
 
       const schemas = itemsSchema.anyOf || itemsSchema.oneOf;
+      let metadata: ReturnType<typeof findMetadata> | null = null;
       if (schemas) {
         for (const s of schemas) {
-          const pk = findPrimaryKey(s);
-          if (pk) {
-            arrayPlan.primaryKey = pk;
+          metadata = findMetadata(s);
+          if (metadata?.primaryKey) {
             break;
           }
         }
       } else {
-        arrayPlan.primaryKey = findPrimaryKey(itemsSchema);
+        metadata = findMetadata(itemsSchema);
+      }
+
+      if (metadata?.primaryKey) {
+        arrayPlan.primaryKey = metadata.primaryKey;
+        arrayPlan.requiredFields = metadata.requiredFields;
+        arrayPlan.hashFields = metadata.hashFields;
+        arrayPlan.strategy = "primaryKey";
       }
     }
 
@@ -215,6 +268,18 @@ function deepEqual(obj1: any, obj2: any): boolean {
   }
 
   return true;
+}
+
+// A lightweight hash function for quick object comparison.
+function fastHash(obj: any, fields: string[]): string {
+  // This is a simple, non-cryptographic hash.
+  // The goal is speed and reducing collisions for similar objects.
+  let hash = "";
+  for (let i = 0; i < fields.length; i++) {
+    const key = fields[i]!;
+    hash += obj[key] + "|";
+  }
+  return hash;
 }
 
 export class SchemaPatcher {
@@ -299,7 +364,10 @@ export class SchemaPatcher {
 
     // Process removals
     for (let i = 0; i < keys1.length; i++) {
-      const key = keys1[i]!;
+      const key = keys1[i];
+      if (key === undefined) {
+        continue;
+      }
       if (!keys2Set.has(key)) {
         patches.push({ op: "remove", path: `${path}/${key}` });
       }
@@ -307,7 +375,10 @@ export class SchemaPatcher {
 
     // Process additions and changes
     for (let i = 0; i < keys2.length; i++) {
-      const key = keys2[i]!;
+      const key = keys2[i];
+      if (key === undefined) {
+        continue;
+      }
       const newPath = `${path}/${key}`;
       
       if (!(key in obj1)) {
@@ -333,52 +404,86 @@ export class SchemaPatcher {
       plan = this.plan.get(parentPath);
     }
 
-    if (!plan || !plan.primaryKey) {
-      // Fallback for arrays without a primary key in the plan
-      this.diffArrayLCS(arr1, arr2, path, patches);
+    // Use the strategy from the plan, or fallback to LCS
+    const strategy = plan?.strategy || "lcs";
+
+    if (strategy === "primaryKey" && plan?.primaryKey) {
+      const { primaryKey, hashFields } = plan;
+      const useHashing = hashFields && hashFields.length > 0;
+
+      const map1 = new Map<any, number>();
+      for (let i = 0; i < arr1.length; i++) {
+        map1.set(arr1[i][primaryKey], i);
+      }
+
+      const map2 = new Map<any, number>();
+      for (let i = 0; i < arr2.length; i++) {
+        map2.set(arr2[i][primaryKey], i);
+      }
+
+      const modificationPatches: Operation[] = [];
+      const additionPatches: Operation[] = [];
+      const removalIndices: number[] = [];
+
+      for (const [key, oldIndex] of map1.entries()) {
+        if (!map2.has(key)) {
+          removalIndices.push(oldIndex);
+        }
+      }
+
+      for (const [key, newIndex] of map2.entries()) {
+        const oldIndex = map1.get(key);
+        const newItem = arr2[newIndex];
+        if (!newItem) {
+          continue;
+        }
+
+        if (oldIndex === undefined) {
+          additionPatches.push({ op: "add", path: `${path}/-`, value: newItem });
+        } else {
+          const oldItem = arr1[oldIndex];
+          if (!oldItem) {
+            continue;
+          }
+          let areEqual = false;
+          // Use hash for a quick check if available
+          if (useHashing) {
+            if (
+              fastHash(oldItem, hashFields) === fastHash(newItem, hashFields)
+            ) {
+              // If hashes match, do a full deepEqual.
+              // This avoids deepEqual for the majority of objects that have changed.
+              if (deepEqual(oldItem, newItem)) {
+                areEqual = true;
+              }
+            }
+          } else {
+            // Fallback to deepEqual if no hashFields are defined
+            if (deepEqual(oldItem, newItem)) {
+              areEqual = true;
+            }
+          }
+
+          if (!areEqual) {
+            this.diff(oldItem, newItem, `${path}/${oldIndex}`, modificationPatches);
+          }
+        }
+      }
+
+      // Apply patches in a safe order: modifications, then removals, then additions.
+      patches.push(...modificationPatches);
+      
+      removalIndices.sort((a, b) => b - a);
+      for (const index of removalIndices) {
+        patches.push({ op: "remove", path: `${path}/${index}` });
+      }
+
+      patches.push(...additionPatches);
       return;
     }
 
-    const primaryKey = plan.primaryKey;
-
-    // Build maps more efficiently - avoid creating wrapper objects
-    const map1 = new Map<any, number>();
-    const map2 = new Map<any, number>();
-    
-    // Pre-size the maps for better performance
-    for (let i = 0; i < arr1.length; i++) {
-      map1.set(arr1[i][primaryKey], i);
-    }
-    
-    for (let i = 0; i < arr2.length; i++) {
-      map2.set(arr2[i][primaryKey], i);
-    }
-
-    // Collect removals - avoid creating objects
-    const removals: number[] = [];
-    for (const [key, index] of map1.entries()) {
-      if (!map2.has(key)) {
-        removals.push(index);
-      }
-    }
-
-    // Remove from the end to avoid index shifting issues
-    removals.sort((a, b) => b - a);
-    for (let i = 0; i < removals.length; i++) {
-      patches.push({ op: "remove", path: `${path}/${removals[i]}` });
-    }
-
-    // Process changes and additions
-    for (const [key, newIndex] of map2.entries()) {
-      const oldIndex = map1.get(key);
-      if (oldIndex === undefined) {
-        // Addition
-        patches.push({ op: "add", path: `${path}/-`, value: arr2[newIndex] });
-      } else {
-        // Exists in both - diff the items
-        this.diff(arr1[oldIndex], arr2[newIndex], `${path}/${oldIndex}`, patches);
-      }
-    }
+    // Fallback to LCS for complex cases without a primary key
+    this.diffArrayLCS(arr1, arr2, path, patches);
   }
 
   private diffArrayLCS(

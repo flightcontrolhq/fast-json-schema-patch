@@ -1,0 +1,36 @@
+{
+  "environments": {
+    "0": {
+      "services": {
+        "0": {
+          "cpu": [
+            1,
+            2
+          ]
+        },
+        "1": [
+          {
+            "id": "service3",
+            "name": "new-worker",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 2
+          }
+        ],
+        "_t": "a",
+        "_1": [
+          {
+            "id": "service2",
+            "name": "worker",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 1
+          },
+          0,
+          0
+        ]
+      }
+    },
+    "_t": "a"
+  }
+}

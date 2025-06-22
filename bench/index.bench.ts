@@ -3,6 +3,73 @@ import { SchemaPatcher, buildPlan } from "../src/index";
 import schema from "../test/schema.json";
 import * as fastJsonPatch from "fast-json-patch";
 import rfc6902 from "rfc6902";
+import { faker } from "@faker-js/faker";
+import * as jsondiffpatch from "jsondiffpatch";
+
+const userSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "string" },
+    username: { type: "string" },
+    email: { type: "string" },
+    avatar: { type: "string" },
+    password: { type: "string" },
+    birthdate: { type: "string", format: "date-time" },
+    registeredAt: { type: "string", format: "date-time" },
+    address: {
+      type: "object",
+      properties: {
+        street: { type: "string" },
+        city: { type: "string" },
+        zipCode: { type: "string" },
+      },
+      required: ["street", "city", "zipCode"],
+    },
+    posts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          postId: { type: "string" },
+          title: { type: "string" },
+          content: { type: "string" },
+          timestamp: { type: "string", format: "date-time" },
+          likes: { type: "number" },
+          tags: { type: "array", items: { type: "string" } },
+        },
+        required: ["postId", "title", "content", "timestamp", "likes"],
+      },
+    },
+  },
+  required: ["userId", "username", "email", "registeredAt"],
+};
+
+function createRandomUser() {
+  return {
+    userId: faker.string.uuid(),
+    username: faker.internet.username(),
+    email: faker.internet.email(),
+    avatar: faker.image.avatar(),
+    birthdate: faker.date.past().toISOString(),
+    registeredAt: faker.date.past().toISOString(),
+    address: {
+      street: faker.location.streetAddress(),
+      city: faker.location.city(),
+      zipCode: faker.location.zipCode(),
+    },
+    posts: Array.from({ length: faker.number.int({ min: 2, max: 10 }) }, () => ({
+      postId: faker.string.uuid(),
+      title: faker.lorem.sentence(),
+      content: faker.lorem.paragraphs(),
+      timestamp: faker.date.recent().toISOString(),
+      likes: faker.number.int({ min: 0, max: 1000 }),
+      tags: Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        () => faker.lorem.word()
+      ),
+    })),
+  };
+}
 
 const bench = new Bench({ time: 100 });
 
@@ -119,6 +186,34 @@ realWorldDoc2.environments[0].services.push(serviceToMove);
 const plan = buildPlan(schema);
 const patcherWithPlan = new SchemaPatcher({ plan });
 
+const diffpatcher = jsondiffpatch.create({
+  objectHash: (obj: any) => {
+    return obj.id || obj.postId || obj.name;
+  },
+});
+
+// Faker docs
+const fakerDoc1 = createRandomUser();
+const fakerDoc2 = JSON.parse(JSON.stringify(fakerDoc1));
+fakerDoc2.username = faker.internet.username();
+if (fakerDoc2.posts.length > 1) {
+  fakerDoc2.posts.splice(1, 1);
+}
+if (fakerDoc2.posts.length > 0) {
+    fakerDoc2.posts[0].title = "A totally new title";
+}
+fakerDoc2.posts.push({
+  postId: faker.string.uuid(),
+  title: "Newly Added Post",
+  content: faker.lorem.paragraphs(),
+  timestamp: faker.date.recent().toISOString(),
+  likes: 0,
+  tags: ["new", "post"],
+});
+
+const fakerPlan = buildPlan(userSchema as any, { primaryKeyMap: { "/posts": "postId" } });
+const fakerPatcher = new SchemaPatcher({ plan: fakerPlan });
+
 bench
   .add("SchemaPatcher (pre-built plan) - Small Config", () => {
     patcherWithPlan.createPatch(smallDoc1, smallDoc2);
@@ -129,6 +224,9 @@ bench
   .add("rfc6902 - Small Config", () => {
     rfc6902.createPatch(smallDoc1, smallDoc2);
   })
+  .add("jsondiffpatch - Small Config", () => {
+    diffpatcher.diff(smallDoc1, smallDoc2);
+  })
   .add("SchemaPatcher (pre-built plan) - Large Config", () => {
     patcherWithPlan.createPatch(largeDoc1, largeDoc2);
   })
@@ -138,6 +236,9 @@ bench
   .add("rfc6902 - Large Config", () => {
     rfc6902.createPatch(largeDoc1, largeDoc2);
   })
+  .add("jsondiffpatch - Large Config", () => {
+    diffpatcher.diff(largeDoc1, largeDoc2);
+  })
   .add("SchemaPatcher (pre-built plan) - Real-world Config", () => {
     patcherWithPlan.createPatch(realWorldDoc1, realWorldDoc2);
   })
@@ -146,6 +247,21 @@ bench
   })
   .add("rfc6902 - Real-world Config", () => {
     rfc6902.createPatch(realWorldDoc1, realWorldDoc2);
+  })
+  .add("jsondiffpatch - Real-world Config", () => {
+    diffpatcher.diff(realWorldDoc1, realWorldDoc2);
+  })
+  .add("SchemaPatcher (pre-built plan) - Faker Config", () => {
+    fakerPatcher.createPatch(fakerDoc1, fakerDoc2);
+  })
+  .add("fast-json-patch - Faker Config", () => {
+    fastJsonPatch.compare(fakerDoc1, fakerDoc2);
+  })
+  .add("rfc6902 - Faker Config", () => {
+    rfc6902.createPatch(fakerDoc1, fakerDoc2);
+  })
+  .add("jsondiffpatch - Faker Config", () => {
+    diffpatcher.diff(fakerDoc1, fakerDoc2);
   });
 
 await bench.run();

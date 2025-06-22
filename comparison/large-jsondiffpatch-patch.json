@@ -1,0 +1,39 @@
+{
+  "environments": {
+    "0": {
+      "services": {
+        "2": {
+          "cpu": [
+            1.7722018164075615,
+            100
+          ]
+        },
+        "9": [
+          {
+            "id": "service-new",
+            "name": "new-service",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 1
+          }
+        ],
+        "_t": "a",
+        "_5": [
+          {
+            "id": "service5",
+            "name": "service-name-5",
+            "type": "web",
+            "cpu": 0.6874929932500722,
+            "memory": 7.119191828991296,
+            "dependsOn": [
+              "service4"
+            ]
+          },
+          0,
+          0
+        ]
+      }
+    },
+    "_t": "a"
+  }
+}

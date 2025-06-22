@@ -46,7 +46,6 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
   };
 
   const plan = buildPlan(schema);
-
   const patcher = new SchemaPatcher({ plan });
   const patches = patcher.createPatch(doc1, doc2);
 

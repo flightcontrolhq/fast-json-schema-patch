@@ -1,0 +1,51 @@
+[
+  {
+    "op": "remove",
+    "path": "/posts/1/tags/2"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/tags/1",
+    "value": "post"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/tags/0",
+    "value": "new"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/likes",
+    "value": 0
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/timestamp",
+    "value": "2025-06-21T21:49:57.597Z"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/content",
+    "value": "Quia desipio decor bene antepono thermae abstergo abutor vulariter. Dicta minus attollo solio cinis utrum cimentarius carcer. Stabilis decipio adhaero voro auxilium allatus.\nConfugo officia tepesco derideo suppellex cui. Tamdiu aedificium solum vorago turpis abbas tertius. Expedita adeptio tertius creator totam contego.\nCasso venio viridis beatus. Temptatio eius pariatur. Tempora deripio volup certe."
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/title",
+    "value": "Newly Added Post"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/1/postId",
+    "value": "04b26db4-1e60-4b3d-a89b-cf15912fe8d1"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/0/title",
+    "value": "A totally new title"
+  },
+  {
+    "op": "replace",
+    "path": "/username",
+    "value": "Shad.Nicolas"
+  }
+]

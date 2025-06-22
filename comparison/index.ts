@@ -2,8 +2,75 @@ import { SchemaPatcher, buildPlan } from "../src/index";
 import schema from "../test/schema.json";
 import * as fastJsonPatch from "fast-json-patch";
 import rfc6902 from "rfc6902";
+import * as jsondiffpatch from "jsondiffpatch";
 import { writeFile } from "fs/promises";
 import { join } from "path";
+import { faker } from "@faker-js/faker";
+
+const userSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "string" },
+    username: { type: "string" },
+    email: { type: "string" },
+    avatar: { type: "string" },
+    password: { type: "string" },
+    birthdate: { type: "string", format: "date-time" },
+    registeredAt: { type: "string", format: "date-time" },
+    address: {
+      type: "object",
+      properties: {
+        street: { type: "string" },
+        city: { type: "string" },
+        zipCode: { type: "string" },
+      },
+      required: ["street", "city", "zipCode"],
+    },
+    posts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          postId: { type: "string" },
+          title: { type: "string" },
+          content: { type: "string" },
+          timestamp: { type: "string", format: "date-time" },
+          likes: { type: "number" },
+          tags: { type: "array", items: { type: "string" } },
+        },
+        required: ["postId", "title", "content", "timestamp", "likes"],
+      },
+    },
+  },
+  required: ["userId", "username", "email", "registeredAt"],
+};
+
+function createRandomUser() {
+  return {
+    userId: faker.string.uuid(),
+    username: faker.internet.username(),
+    email: faker.internet.email(),
+    avatar: faker.image.avatar(),
+    birthdate: faker.date.past().toISOString(),
+    registeredAt: faker.date.past().toISOString(),
+    address: {
+      street: faker.location.streetAddress(),
+      city: faker.location.city(),
+      zipCode: faker.location.zipCode(),
+    },
+    posts: Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, () => ({
+      postId: faker.string.uuid(),
+      title: faker.lorem.sentence(),
+      content: faker.lorem.paragraphs(),
+      timestamp: faker.date.recent().toISOString(),
+      likes: faker.number.int({ min: 0, max: 1000 }),
+      tags: Array.from(
+        { length: faker.number.int({ min: 1, max: 5 }) },
+        () => faker.lorem.word()
+      ),
+    })),
+  };
+}
 
 // Small Config - from existing test
 const smallDoc1 = {
@@ -122,22 +189,29 @@ realWorldDoc2.environments[1].services[0].ports.splice(1, 1); // remove udp-8002
 const serviceToMove = realWorldDoc2.environments[0].services.splice(1, 1)[0];
 realWorldDoc2.environments[0].services.push(serviceToMove);
 
-async function compare() {
-  const plan = buildPlan(schema);
-  const patcher = new SchemaPatcher({ plan });
+const diffpatcher = jsondiffpatch.create({
+  objectHash: (obj: any) => {
+    return obj.id || obj.postId || obj.name;
+  },
+});
 
+async function compare() {
   const scenarios = {
-    small: { doc1: smallDoc1, doc2: smallDoc2 },
-    large: { doc1: largeDoc1, doc2: largeDoc2 },
-    "real-world": { doc1: realWorldDoc1, doc2: realWorldDoc2 },
+    small: { doc1: smallDoc1, doc2: smallDoc2, schema },
+    large: { doc1: largeDoc1, doc2: largeDoc2, schema },
+    "real-world": { doc1: realWorldDoc1, doc2: realWorldDoc2, schema },
   };
 
-  for (const [name, { doc1, doc2 }] of Object.entries(scenarios)) {
+  for (const [name, { doc1, doc2, schema: scenarioSchema }] of Object.entries(scenarios)) {
     console.log(`Comparing ${name} config...`);
+    
+    const plan = buildPlan(scenarioSchema as any);
+    const patcher = new SchemaPatcher({ plan });
 
     const schemaPatch = patcher.createPatch(doc1, doc2);
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
     const rfcPatch = rfc6902.createPatch(doc1, doc2);
+    const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
 
     await writeFile(
       join(__dirname, `${name}-schema-patch.json`),
@@ -151,13 +225,87 @@ async function compare() {
       join(__dirname, `${name}-rfc6902-patch.json`),
       JSON.stringify(rfcPatch, null, 2)
     );
+    await writeFile(
+      join(__dirname, `${name}-jsondiffpatch-patch.json`),
+      JSON.stringify(jsonDiffPatch, null, 2)
+    );
 
     console.log(`- SchemaPatcher patch length: ${schemaPatch.length}`);
     console.log(`- fast-json-patch patch length: ${fastPatch.length}`);
     console.log(`- rfc6902 patch length: ${rfcPatch.length}`);
+    console.log(`- jsondiffpatch patch length: ${jsonDiffPatch ? Object.keys(jsonDiffPatch).length : 0}`);
     console.log(`- Wrote patches to comparison/${name}-*.json`);
     console.log("");
   }
+
+  // Faker scenario
+  console.log("Comparing faker-generated config...");
+  const plan = buildPlan(userSchema as any, { primaryKeyMap: { "/posts": "postId" } });
+  const patcher = new SchemaPatcher({ plan });
+  let totalSchemaPatches = 0;
+  let totalFastPatches = 0;
+  let totalRfcPatches = 0;
+  let totalJsonDiffPatches = 0;
+  const numFakerRuns = 10;
+
+  for (let i = 0; i < numFakerRuns; i++) {
+    const doc1 = createRandomUser();
+    const doc2 = JSON.parse(JSON.stringify(doc1));
+
+    // Make some changes
+    doc2.username = faker.internet.username();
+    if (doc2.posts.length > 1) {
+      doc2.posts.splice(1, 1);
+    }
+    doc2.posts[0].title = "A totally new title";
+    doc2.posts.push({
+      postId: faker.string.uuid(),
+      title: "Newly Added Post",
+      content: faker.lorem.paragraphs(),
+      timestamp: faker.date.recent().toISOString(),
+      likes: 0,
+      tags: ["new", "post"],
+    });
+
+    const schemaPatch = patcher.createPatch(doc1, doc2);
+    const fastPatch = fastJsonPatch.compare(doc1, doc2);
+    const rfcPatch = rfc6902.createPatch(doc1, doc2);
+    const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
+
+    totalSchemaPatches += schemaPatch.length;
+    totalFastPatches += fastPatch.length;
+    totalRfcPatches += rfcPatch.length;
+    if (jsonDiffPatch) {
+      totalJsonDiffPatches += Object.keys(jsonDiffPatch).length;
+    }
+
+    if (i === 0) {
+      // Save one example
+      await writeFile(
+        join(__dirname, "faker-schema-patch.json"),
+        JSON.stringify(schemaPatch, null, 2)
+      );
+      await writeFile(
+        join(__dirname, "faker-fast-json-patch.json"),
+        JSON.stringify(fastPatch, null, 2)
+      );
+      await writeFile(
+        join(__dirname, "faker-rfc6902-patch.json"),
+        JSON.stringify(rfcPatch, null, 2)
+      );
+      await writeFile(
+        join(__dirname, "faker-jsondiffpatch-patch.json"),
+        JSON.stringify(jsonDiffPatch, null, 2)
+      );
+    }
+  }
+  
+  console.log(`- SchemaPatcher average patch length: ${totalSchemaPatches / numFakerRuns}`);
+  console.log(`- fast-json-patch average patch length: ${totalFastPatches / numFakerRuns}`);
+  console.log(`- rfc6902 average patch length: ${totalRfcPatches / numFakerRuns}`);
+  console.log(`- jsondiffpatch average patch length: ${totalJsonDiffPatches / numFakerRuns}`);
+  console.log("- Wrote first faker patches to comparison/faker-*.json");
+  console.log("");
 }
 
 compare().catch(console.error);

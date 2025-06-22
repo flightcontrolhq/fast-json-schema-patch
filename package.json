@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "@biomejs/biome": "^2.0.4",
+    "@faker-js/faker": "^9.8.0",
     "@types/bun": "latest",
     "fast-json-patch": "^3.1.1",
     "rfc6902": "^5.1.2",
@@ -16,5 +17,8 @@
     "bench": "bun run bench/index.bench.ts",
     "test": "bun test"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+    "jsondiffpatch": "^0.7.3"
+  }
 }

@@ -1,0 +1,31 @@
+[
+  {
+    "op": "replace",
+    "path": "/username",
+    "value": "Shad.Nicolas"
+  },
+  {
+    "op": "replace",
+    "path": "/posts/0/title",
+    "value": "A totally new title"
+  },
+  {
+    "op": "remove",
+    "path": "/posts/1"
+  },
+  {
+    "op": "add",
+    "path": "/posts/-",
+    "value": {
+      "postId": "04b26db4-1e60-4b3d-a89b-cf15912fe8d1",
+      "title": "Newly Added Post",
+      "content": "Quia desipio decor bene antepono thermae abstergo abutor vulariter. Dicta minus attollo solio cinis utrum cimentarius carcer. Stabilis decipio adhaero voro auxilium allatus.\nConfugo officia tepesco derideo suppellex cui. Tamdiu aedificium solum vorago turpis abbas tertius. Expedita adeptio tertius creator totam contego.\nCasso venio viridis beatus. Temptatio eius pariatur. Tempora deripio volup certe.",
+      "timestamp": "2025-06-21T21:49:57.597Z",
+      "likes": 0,
+      "tags": [
+        "new",
+        "post"
+      ]
+    }
+  }
+]
