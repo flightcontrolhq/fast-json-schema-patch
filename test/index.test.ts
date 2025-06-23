@@ -389,3 +389,170 @@ test("SchemaPatcher handles real-world schema and data", () => {
 
   expect(patches).toEqual(expectedPatches);
 });
+
+test("SchemaPatcher handles multiple removals from array with primary key", () => {
+  const doc1 = {
+    $schema: "https://app.flightcontrol.dev/schema.json",
+    environments: [
+      {
+        id: "production",
+        name: "NLB",
+        region: "eu-west-1",
+        source: {
+          branch: "main",
+          pr: false,
+          trigger: "push",
+        },
+        services: [
+          {
+            id: "nlb-server",
+            name: "NLB Server",
+            type: "network-server",
+            target: {
+              type: "fargate",
+            },
+            ports: [
+              {
+                id: "tcp-8001",
+                port: 8001,
+                protocol: "tcp",
+                healthCheck: {
+                  type: "tcp",
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+                tls: false,
+              },
+              {
+                id: "udp-8002",
+                port: 8007,
+                protocol: "udp",
+                healthCheck: {
+                  type: "udp",
+                  tcpPort: 8001,
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+              },
+            ],
+            cpu: 1,
+            memory: 2,
+            buildType: "docker",
+          },
+          {
+            id: "nlb-server-2",
+            name: "NLB Server 2",
+            type: "network-server",
+            target: {
+              type: "fargate",
+            },
+            ports: [
+              {
+                id: "tcp-8001",
+                port: 8001,
+                protocol: "tcp",
+                healthCheck: {
+                  type: "tcp",
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+                tls: false,
+              },
+              {
+                id: "udp-8002",
+                port: 8007,
+                protocol: "udp",
+                healthCheck: {
+                  type: "udp",
+                  tcpPort: 8001,
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+              },
+            ],
+            cpu: 1,
+            memory: 2,
+            buildType: "docker",
+          },
+          {
+            id: "nlb-client-scheduler",
+            name: "NLB Client Scheduler",
+            type: "scheduler",
+            cpu: 0.25,
+            memory: 0.5,
+            buildType: "fromService",
+          },
+        ],
+      },
+    ],
+  };
+
+  const doc2 = {
+    $schema: "https://app.flightcontrol.dev/schema.json",
+    environments: [
+      {
+        id: "production",
+        name: "NLB",
+        region: "eu-west-1",
+        source: {
+          branch: "main",
+          pr: false,
+          trigger: "push",
+        },
+        services: [
+          {
+            id: "nlb-server-2",
+            name: "NLB Server 2",
+            type: "network-server",
+            target: {
+              type: "fargate",
+            },
+            ports: [
+              {
+                id: "tcp-8001",
+                port: 8001,
+                protocol: "tcp",
+                healthCheck: {
+                  type: "tcp",
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+                tls: false,
+              },
+              {
+                id: "udp-8002",
+                port: 8007,
+                protocol: "udp",
+                healthCheck: {
+                  type: "udp",
+                  tcpPort: 8001,
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+              },
+            ],
+            cpu: 1,
+            memory: 2,
+            buildType: "docker",
+          },
+        ],
+      },
+    ],
+  };
+
+  const plan = buildPlan(schema);
+  const patcher = new SchemaPatcher({ plan });
+  const patches = patcher.createPatch(doc1, doc2);
+
+  const expectedPatches: Operation[] = [
+    { op: "remove", path: "/environments/0/services/2" },
+    { op: "remove", path: "/environments/0/services/0" },
+  ];
+
+  // Sort patches by path to ensure deterministic comparison
+  const sortFn = (a: any, b: any) => a.path.localeCompare(b.path);
+  patches.sort(sortFn);
+  expectedPatches.sort(sortFn);
+
+  expect(patches).toEqual(expectedPatches);
+});
