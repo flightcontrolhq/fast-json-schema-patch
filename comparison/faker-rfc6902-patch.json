@@ -2,7 +2,7 @@
   {
     "op": "replace",
     "path": "/username",
-    "value": "Zechariah_Ritchie11"
+    "value": "Chesley_Feeney3"
   },
   {
     "op": "replace",
@@ -10,50 +10,22 @@
     "value": "A totally new title"
   },
   {
-    "op": "replace",
-    "path": "/posts/1/postId",
-    "value": "5472344f-6b77-49b3-9e26-30fa49eac3ae"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/title",
-    "value": "Newly Added Post"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/content",
-    "value": "Color aliquam optio aliquid tabernus trepide. Testimonium tyrannus accusantium. Copiose inflammatio attollo tardus vulariter.\nTenuis alienus solum vestrum arbitro utrimque. Conculco cohaero esse acidus atque curriculum ducimus decumbo usque. Volo turbo cimentarius aliquam excepturi tristis canto.\nTepesco dicta amitto consequuntur nam recusandae animus canto. Compono volva valetudo. Accommodo quasi tracto deleo caries supplanto totam."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/timestamp",
-    "value": "2025-06-22T04:54:39.593Z"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/likes",
-    "value": 0
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/tags/0",
-    "value": "new"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/tags/1",
-    "value": "post"
-  },
-  {
     "op": "remove",
-    "path": "/posts/1/tags/2"
+    "path": "/posts/1"
   },
   {
-    "op": "remove",
-    "path": "/posts/1/tags/2"
-  },
-  {
-    "op": "remove",
-    "path": "/posts/1/tags/2"
+    "op": "add",
+    "path": "/posts/-",
+    "value": {
+      "postId": "1b722707-eb15-4f12-90b1-f23be2d8ccca",
+      "title": "Newly Added Post",
+      "content": "Cito ipsum triumphus asporto. Ater cunae compello tabesco. Avaritia subnecto tenax credo ambitus.\nPeior cribro bellum vox tabella adimpleo trado nulla. Vester tot demum subiungo velum uter harum advenio acer atavus. Atrocitas illum ustilo confero tergum debitis cum quo concido.\nCalco tutamen attollo certus tredecim universe spoliatio. Delicate aranea auditor delego careo casso sint cuius. Contego apparatus perspiciatis pel culpa aperio desolo taceo cunabula undique.",
+      "timestamp": "2025-06-23T05:34:55.307Z",
+      "likes": 0,
+      "tags": [
+        "new",
+        "post"
+      ]
+    }
   }
 ]

@@ -16,6 +16,7 @@
   },
   "scripts": {
     "bench": "bun run bench/index.bench.ts",
+    "compare": "bun run comparison/index.ts",
     "test": "bun test"
   },
   "private": true,
