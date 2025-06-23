@@ -44,7 +44,7 @@ export interface BuildPlanOptions {
   basePath?: string
 }
 
-function _resolveRef(ref: string, schema: Schema): JSONSchema | null {
+export function _resolveRef(ref: string, schema: Schema): JSONSchema | null {
   if (!ref.startsWith("#/")) {
     // We only support local references for now.
     console.warn(`Unsupported reference: ${ref}`)
@@ -65,7 +65,7 @@ function _resolveRef(ref: string, schema: Schema): JSONSchema | null {
   return current as JSONSchema
 }
 
-function _traverseSchema(
+export function _traverseSchema(
   subSchema: JSONSchema | boolean,
   docPath: string,
   plan: Plan,
@@ -235,7 +235,7 @@ export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
   return plan
 }
 
-function deepEqual(obj1: unknown, obj2: unknown): boolean {
+export function deepEqual(obj1: unknown, obj2: unknown): boolean {
   if (obj1 === obj2) return true
 
   // Quick type and null checks
@@ -287,7 +287,7 @@ function deepEqual(obj1: unknown, obj2: unknown): boolean {
 }
 
 // A lightweight hash function for quick object comparison.
-function fastHash(obj: JsonObject, fields: string[]): string {
+export function fastHash(obj: JsonObject, fields: string[]): string {
   // This is a simple, non-cryptographic hash.
   // The goal is speed and reducing collisions for similar objects.
   let hash = ""
