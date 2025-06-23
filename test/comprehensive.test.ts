@@ -7,7 +7,6 @@ import {
   deepEqual, 
   fastHash,
   type Operation,
-  type BuildPlanOptions 
 } from "../src/index";
 
 describe("_resolveRef function", () => {
