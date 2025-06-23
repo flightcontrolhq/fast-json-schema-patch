@@ -556,3 +556,148 @@ test("SchemaPatcher handles multiple removals from array with primary key", () =
 
   expect(patches).toEqual(expectedPatches);
 });
+
+test("SchemaPatcher correctly diffs a single service property", () => {
+  const doc1 = {
+    id: "nlb-server",
+    name: "NLB Server",
+    type: "network-server",
+    target: {
+      type: "fargate",
+    },
+    ports: [
+      {
+        id: "tcp-8001",
+        port: 8001,
+        protocol: "tcp",
+        healthCheck: {
+          type: "tcp",
+          timeoutSecs: 5,
+          intervalSecs: 30,
+        },
+        tls: false,
+      },
+      {
+        id: "udp-8002",
+        port: 8007,
+        protocol: "udp",
+        healthCheck: {
+          type: "udp",
+          tcpPort: 8001,
+          timeoutSecs: 5,
+          intervalSecs: 30,
+        },
+      },
+    ],
+    cpu: 1,
+    memory: 2,
+    buildType: "docker",
+  };
+
+  const doc2 = {
+    id: "nlb-server",
+    name: "NLB Servers",
+    type: "network-server",
+    target: {
+      type: "fargate",
+    },
+    ports: [
+      {
+        id: "tcp-8001",
+        port: 8001,
+        protocol: "tcp",
+        healthCheck: {
+          type: "tcp",
+          timeoutSecs: 5,
+          intervalSecs: 30,
+        },
+        tls: false,
+      },
+      {
+        id: "udp-8002",
+        port: 8002,
+        protocol: "udp",
+        healthCheck: {
+          type: "udp",
+          tcpPort: 8001,
+          timeoutSecs: 5,
+          intervalSecs: 30,
+        },
+      },
+      {
+        id: "http-8004",
+        port: 8004,
+        protocol: "http",
+        healthCheck: {
+          type: "http",
+          path: "/health",
+          timeoutSecs: 5,
+          intervalSecs: 30,
+        },
+        tls: false,
+      },
+    ],
+    cpu: 2,
+    memory: 4,
+    buildType: "docker",
+  };
+
+  const plan = buildPlan(schema, { basePath: "/environments/services" });
+  const patcher = new SchemaPatcher({ plan });
+  const patches = patcher.createPatch(doc1, doc2);
+
+  expect(patches).toMatchInlineSnapshot(`
+    [
+      {
+        "op": "replace",
+        "path": "/name",
+        "value": "NLB Servers",
+      },
+      {
+        "op": "remove",
+        "path": "/ports/1",
+      },
+      {
+        "op": "add",
+        "path": "/ports/-",
+        "value": {
+          "healthCheck": {
+            "intervalSecs": 30,
+            "tcpPort": 8001,
+            "timeoutSecs": 5,
+            "type": "udp",
+          },
+          "id": "udp-8002",
+          "port": 8002,
+          "protocol": "udp",
+        },
+      },
+      {
+        "op": "add",
+        "path": "/ports/-",
+        "value": {
+          "healthCheck": {
+            "intervalSecs": 30,
+            "path": "/health",
+            "timeoutSecs": 5,
+            "type": "http",
+          },
+          "id": "http-8004",
+          "port": 8004,
+          "protocol": "http",
+          "tls": false,
+        },
+      },
+      {
+        "op": "replace",
+        "path": "/cpu",
+        "value": 2,
+      },
+      {
+        "op": "replace",
+        "path": "/memory",
+        "value": 4,
+      },
+    ]
+  `);
+});

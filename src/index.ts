@@ -27,6 +27,7 @@ type Plan = Map<string, ArrayPlan>;
 
 export interface BuildPlanOptions {
   primaryKeyMap?: Record<string, string>;
+  basePath?: string;
 }
 
 function _resolveRef(ref: string, schema: Schema): any {
@@ -208,7 +209,13 @@ function _traverseSchema(
       }
     }
 
-    plan.set(docPath, arrayPlan);
+    if (options?.basePath) {
+      if (docPath.startsWith(options.basePath)) {
+        plan.set(docPath.replace(options.basePath, ""), arrayPlan);
+      }
+    } else {
+      plan.set(docPath, arrayPlan);
+    }
 
     // We continue traversal into array items. The path does not change here
     // as the diffing logic will add array indices.
