@@ -32,7 +32,7 @@ interface ArrayPlan {
   // Fields to use for quick equality hashing before deep comparison
   hashFields?: string[];
   // Strategy hint for array comparison
-  strategy?: "primaryKey" | "lcs" | "lis";
+  strategy?: "primaryKey" | "lcs" | "unique";
 }
 
 type Plan = Map<string, ArrayPlan>;
@@ -144,7 +144,7 @@ export function _traverseSchema(
         itemsSchema.type === "boolean");
 
     if (isPrimitive) {
-      arrayPlan.strategy = "lis";
+      arrayPlan.strategy = "unique";
     }
 
     const customKey = options?.primaryKeyMap?.[docPath];
@@ -355,6 +355,7 @@ export function fastHash(obj: JsonObject, fields: string[]): string {
 
 export class SchemaPatcher {
   private readonly plan: Plan;
+  private pathPlanCache = new Map<string, ArrayPlan | undefined>();
 
   constructor({ plan }: { plan: Plan }) {
     this.plan = plan;
@@ -471,14 +472,7 @@ export class SchemaPatcher {
     path: string,
     patches: Operation[]
   ) {
-    const normalizedPath = path.replace(/\/\d+/g, "");
-    let plan = this.plan.get(normalizedPath);
-    if (!plan) {
-      const parts = normalizedPath.split("/");
-      parts.pop();
-      const parentPath = `${parts.join("/")}/*`;
-      plan = this.plan.get(parentPath);
-    }
+    const plan = this.getPlanForPath(path);
 
     // Use the strategy from the plan, or fallback to LCS
     const strategy = plan?.strategy || "lcs";
@@ -586,13 +580,148 @@ export class SchemaPatcher {
       return;
     }
 
-
-    if (strategy === "lis") {
-      this.diffArrayLIS(arr1, arr2, path, patches);
+    if (strategy === "unique") {
+      this.diffArrayUnique(arr1, arr2, path, patches);
       return;
     }
 
     this.diffArrayLCS(arr1, arr2, path, patches);
+  }
+
+  /**
+   * Optimized diff algorithm for arrays with unique elements.
+   * Time complexity: O(n + m) where n and m are array lengths.
+   * Space complexity: O(min(n, m)) for the sets.
+   * 
+   * This algorithm is highly efficient for:
+   * - Arrays where all elements are unique
+   * - Primitive arrays (strings, numbers, booleans)
+   * - Cases where order is not semantically important
+   * 
+   * Performance characteristics:
+   * - Best case: O(n + m) when arrays have no common elements
+   * - Average case: O(n + m) for typical unique element arrays
+   * - Memory efficient: uses Sets instead of frequency Maps
+   * - Patch optimized: prioritizes replace operations over add/remove pairs
+   */
+  private diffArrayUnique(
+    arr1: JsonArray,
+    arr2: JsonArray,
+    path: string,
+    patches: Operation[]
+  ) {
+    const n = arr1.length;
+    const m = arr2.length;
+
+    // For very small arrays, use simple comparison to avoid Set overhead
+    if (n + m <= 6) {
+      this.diffArraySimple(arr1, arr2, path, patches);
+      return;
+    }
+
+    // Build sets for O(1) lookup
+    const set1 = new Set(arr1);
+    const set2 = new Set(arr2);
+
+    // Phase 1: Generate replace operations for overlapping positions
+    const minLength = Math.min(n, m);
+    const replacedAtIndex = new Set<number>();
+    const replacedValues1 = new Set<JsonValue>();
+    const replacedValues2 = new Set<JsonValue>();
+    
+    for (let i = 0; i < minLength; i++) {
+      const val1 = arr1[i];
+      const val2 = arr2[i];
+      
+      if (val1 !== val2) {
+        patches.push({ op: "replace", path: `${path}/${i}`, value: val2 });
+        replacedAtIndex.add(i);
+        if (val1 !== undefined) replacedValues1.add(val1);
+        if (val2 !== undefined) replacedValues2.add(val2);
+      }
+    }
+
+    // Phase 2: Handle removals - elements in arr1 that aren't in arr2
+    // excluding those already replaced
+    const removalIndices: number[] = [];
+    for (let i = n - 1; i >= 0; i--) {
+      const item = arr1[i];
+      if (item !== undefined && 
+          !set2.has(item) && 
+          !replacedAtIndex.has(i)) {
+        removalIndices.push(i);
+      }
+    }
+
+    // Apply removals
+    for (const index of removalIndices) {
+      patches.push({ op: "remove", path: `${path}/${index}` });
+    }
+
+    // Phase 3: Handle additions - elements in arr2 that aren't in arr1
+    // excluding those already used in replace operations
+    for (const item of set2) {
+      if (item !== undefined && 
+          !set1.has(item) && 
+          !replacedValues2.has(item)) {
+        patches.push({ op: "add", path: `${path}/-`, value: item });
+      }
+    }
+  }
+
+  private getPlanForPath(path: string): ArrayPlan | undefined {
+    if (this.pathPlanCache.has(path)) {
+      return this.pathPlanCache.get(path);
+    }
+    
+    const normalizedPath = path.replace(/\/\d+/g, "");
+    let plan = this.plan.get(normalizedPath);
+    if (!plan) {
+      const parts = normalizedPath.split("/");
+      parts.pop();
+      const parentPath = `${parts.join("/")}/*`;
+      plan = this.plan.get(parentPath);
+    }
+    
+    this.pathPlanCache.set(path, plan);
+    return plan;
+  }
+
+  /**
+   * Simple diff for very small arrays - optimized for minimal patch count
+   * This avoids the overhead of complex algorithms for tiny arrays
+   * and prioritizes replace operations over add/remove pairs
+   */
+  private diffArraySimple(
+    arr1: JsonArray,
+    arr2: JsonArray,
+    path: string,
+    patches: Operation[]
+  ) {
+    const n = arr1.length;
+    const m = arr2.length;
+    const minLength = Math.min(n, m);
+    const maxLength = Math.max(n, m);
+
+    // Phase 1: Handle overlapping positions with replace operations
+    for (let i = 0; i < minLength; i++) {
+      if (arr1[i] !== arr2[i]) {
+        patches.push({ op: "replace", path: `${path}/${i}`, value: arr2[i] });
+      }
+    }
+
+    // Phase 2: Handle length differences
+    if (n > m) {
+      // Array shrunk - remove excess elements from the end
+      for (let i = n - 1; i >= m; i--) {
+        patches.push({ op: "remove", path: `${path}/${i}` });
+      }
+    } else if (m > n) {
+      // Array grew - add new elements
+      for (let i = n; i < m; i++) {
+        patches.push({ op: "add", path: `${path}/${i}`, value: arr2[i] });
+      }
+    }
   }
 
   #collapseReplace(
@@ -614,135 +743,15 @@ export class SchemaPatcher {
     oldVal: JsonValue,
     newVal: JsonValue,
     path: string,
-    patches: Operation[]
+    patches: Operation[],
+    hashFields?: string[]
   ) {
-    if (!deepEqualMemo(oldVal, newVal, this.plan.get(path)?.hashFields ?? [])) {
+    if (!deepEqualMemo(oldVal, newVal, hashFields ?? [])) {
       this.diff(oldVal, newVal, path, patches);
     }
   }
 
-  private diffArrayLIS(
-    arr1: JsonArray,
-    arr2: JsonArray,
-    path: string,
-    patches: Operation[],
-  ) {
-    const a = arr1;
-    const b = arr2;
-    const n = a.length;
-    const m = b.length;
-
-    // Build position map for new array
-    const newPositions = new Map<JsonValue, number>();
-    for (let i = 0; i < m; i++) {
-      newPositions.set(b[i]!, i);
-    }
-
-    // Map old indices to their positions in new array
-    const oldIndicesInNew = new Array(n);
-    for (let i = 0; i < n; i++) {
-      oldIndicesInNew[i] = newPositions.get(a[i]!);
-    }
-
-    // Compute LIS using patience sorting algorithm
-    const p = new Array(n).fill(0);
-    const m_arr = new Array(n + 1).fill(0);
-    let lisLen = 0;
-
-    for (let i = 0; i < n; i++) {
-      if (oldIndicesInNew[i] === undefined) continue;
-
-      let lo = 1;
-      let hi = lisLen;
-      while (lo <= hi) {
-        const mid = Math.ceil((lo + hi) / 2);
-        if (oldIndicesInNew[m_arr[mid]]! < oldIndicesInNew[i]!) {
-          lo = mid + 1;
-        } else {
-          hi = mid - 1;
-        }
-      }
-
-      const newL = lo;
-      p[i] = m_arr[newL - 1];
-      m_arr[newL] = i;
-
-      if (newL > lisLen) {
-        lisLen = newL;
-      }
-    }
-
-    // Reconstruct LIS indices
-    const lisIndices = new Set<number>();
-    let k = m_arr[lisLen];
-    for (let i = 0; i < lisLen; i++) {
-      lisIndices.add(k);
-      k = p[k];
-    }
-
-    // Generate raw operations sequence using a simpler approach
-    const rawOps: ('common' | 'add' | 'remove')[] = [];
-    let ai = 0; // index in old array
-    let bi = 0; // index in new array
-
-    while (ai < n || bi < m) {
-      if (ai < n && bi < m && a[ai] === b[bi]) {
-        // Elements match - this is a common element
-        rawOps.push('common');
-        ai++;
-        bi++;
-      } else if (ai < n && (bi >= m || !newPositions.has(a[ai]!))) {
-        // Element in old array doesn't exist in new array - remove it
-        rawOps.push('remove');
-        ai++;
-      } else if (bi < m && (ai >= n || oldIndicesInNew[ai] === undefined)) {
-        // Element in new array doesn't exist in old array - add it
-        rawOps.push('add');
-        bi++;
-      } else if (ai < n && bi < m) {
-        // Both elements exist but don't match at current position
-        const oldInNewPos = oldIndicesInNew[ai];
-        if (oldInNewPos !== undefined && oldInNewPos > bi) {
-          // Old element appears later in new array - add current new element
-          rawOps.push('add');
-          bi++;
-        } else {
-          // Old element appears earlier or not at all - remove it
-          rawOps.push('remove');
-          ai++;
-        }
-      }
-    }
-
-    // Collapse consecutive remove/add into replace operations
-    const ops2 = this.#collapseReplace(rawOps);
-
-    // Generate JSON-Patch operations
-    ai = 0;
-    bi = 0;
-    for (const op of ops2) {
-      switch (op) {
-        case 'common':
-          this.#refine(a[ai]!, b[bi]!, `${path}/${ai}`, patches);
-          ai++; bi++;
-          break;
-        case 'replace':
-          patches.push({ op: 'replace', path: `${path}/${ai}`, value: b[bi]! });
-          ai++; bi++;
-          break;
-        case 'remove':
-          patches.push({ op: 'remove', path: `${path}/${ai}` });
-          ai++;
-          break;
-        case 'add':
-          patches.push({ op: 'add', path: `${path}/${ai}`, value: b[bi]! });
-          bi++;
-          break;
-      }
-    }
-  }
-
-  diffArrayLCS(
+  private diffArrayLCS(
     arr1: JsonArray,
     arr2: JsonArray,
     path: string,
@@ -757,6 +766,10 @@ export class SchemaPatcher {
     const trace: Record<number, number>[] = [];
     let endD = 0;
 
+    // Pre-compute plan lookup to avoid repeated map access in tight loops
+    const pathPlan = this.getPlanForPath(path);
+    const hashFields = pathPlan?.hashFields ?? [];
+
     // Phase 1: forward pass (Myers)
     for (let d = 0; d <= max; d++) {
       const vPrev = { ...v };
@@ -769,7 +782,7 @@ export class SchemaPatcher {
         let y = x - k;
         while (
           x < n && y < m &&
-          deepEqualMemo(a[x], b[y], this.plan.get(path)?.hashFields ?? [])
+          deepEqualMemo(a[x], b[y], hashFields)
         ) {
           x++; y++;
         }
@@ -824,7 +837,7 @@ export class SchemaPatcher {
     for (const op of ops2) {
       switch (op) {
         case 'common':
-          this.#refine(a[ai]!, b[bi]!, `${path}/${ai}`, patches);
+          this.#refine(a[ai]!, b[bi]!, `${path}/${ai}`, patches, hashFields);
           ai++; bi++;
           break;
         case 'replace':

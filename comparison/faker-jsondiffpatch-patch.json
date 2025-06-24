@@ -1,22 +1,119 @@
 {
   "environments": {
     "0": {
+      "source": {
+        "trigger": [
+          "manual"
+        ]
+      },
       "services": {
-        "56": {
-          "logging": [
+        "12": {
+          "healthCheckIntervalSecs": [
+            38
+          ]
+        },
+        "17": {
+          "stickySessionsDurationSecs": [
+            13668
+          ]
+        },
+        "32": {
+          "envVariables": {
+            "DB_HOST": [
+              "da77:df73:fecb:8b1b:32fc:bf1f:1a1d:bbcb",
+              0,
+              0
+            ]
+          }
+        },
+        "36": {
+          "dockerLabels": [
             {
-              "cloudwatchLogsEnabled": false,
-              "cloudwatchLogsRetentionDays": 30
+              "team": "matrix",
+              "version": "3.12.18",
+              "environment": "env-0"
             }
           ]
         },
-        "98": {
-          "integrations": [
+        "50": {
+          "watchPaths": [
+            [
+              "**/*.js"
+            ]
+          ]
+        },
+        "51": {
+          "envVariables": {
+            "ALARM": [
+              "https://distorted-pile.biz"
+            ]
+          }
+        },
+        "55": {
+          "versionHistoryCount": [
+            15
+          ],
+          "healthCheckTimeoutSecs": [
+            26
+          ]
+        },
+        "69": {
+          "envVariables": {
+            "DATABASE_HOST": [
+              {
+                "fromService": {
+                  "id": "fbfa6411-55a3-43d2-81e6-a8f7dc145d1e",
+                  "value": "host"
+                }
+              }
+            ]
+          }
+        },
+        "71": {
+          "ci": [
             {
-              "uploadSentrySourceMap": true
+              "type": "codebuild"
             }
           ]
         },
+        "83": {
+          "multiAvailabilityZones": [
+            true
+          ],
+          "encryptionAtRest": [
+            false
+          ],
+          "healthCheckGracePeriodSecs": [
+            129
+          ]
+        },
+        "85": {
+          "healthCheckIntervalSecs": [
+            48
+          ]
+        },
+        "89": [
+          {
+            "id": "colo-decor-cilicium",
+            "name": "Internal API",
+            "type": "web-private",
+            "cpu": 2,
+            "memory": 2,
+            "buildType": "docker",
+            "port": 8080
+          }
+        ],
+        "90": [
+          {
+            "id": "creptio-utroque-doloremque",
+            "name": "reboot Worker",
+            "type": "worker",
+            "cpu": 2,
+            "memory": 1,
+            "buildType": "nixpacks",
+            "startCommand": "node amo.js"
+          }
+        ],
         "_t": "a"
       }
     },

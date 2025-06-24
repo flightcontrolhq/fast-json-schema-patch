@@ -374,7 +374,7 @@ describe("buildPlan > ArrayPlan metadata", () => {
     const plan = buildPlan(schema);
     const arrayPlan = plan.get("/tags");
     expect(arrayPlan?.primaryKey).toBe(null);
-    expect(arrayPlan?.strategy).toBe("lis");
+    expect(arrayPlan?.strategy).toBe("unique");
   });
 
   it("should pre-resolve itemSchema for refs", () => {
@@ -1486,7 +1486,7 @@ describe("_traverseSchema function", () => {
     );
 
     const arrayPlan = plan.get("/tags");
-    expect(arrayPlan?.strategy).toBe("lis");
+    expect(arrayPlan?.strategy).toBe("unique");
   });
 
   test("should handle array with object items", () => {
@@ -1976,9 +1976,9 @@ describe("Array diffing strategies", () => {
 
       const plan = buildPlan(schema);
 
-      expect(plan.get("/numbers")?.strategy).toBe("lis");
-      expect(plan.get("/strings")?.strategy).toBe("lis");
-      expect(plan.get("/booleans")?.strategy).toBe("lis");
+      expect(plan.get("/numbers")?.strategy).toBe("unique");
+      expect(plan.get("/strings")?.strategy).toBe("unique");
+      expect(plan.get("/booleans")?.strategy).toBe("unique");
     });
 
     test("should handle number array reordering efficiently", () => {
@@ -2056,7 +2056,7 @@ describe("Array diffing strategies", () => {
 
     test("should handle boolean arrays", () => {
       const plan = new Map([
-        ["/flags", { primaryKey: null, strategy: "lis" as const }],
+        ["/flags", { primaryKey: null, strategy: "unique" as const }],
       ]);
       const patcher = new SchemaPatcher({ plan });
 
@@ -2065,15 +2065,18 @@ describe("Array diffing strategies", () => {
 
       const patches = patcher.createPatch(doc1, doc2);
 
-      // The LIS algorithm generates add/remove operations rather than replace
-      expect(
-        patches.some(
-          (p) => p.op === "add" && p.path === "/flags/1" && p.value === true
-        )
-      ).toBe(true);
-      expect(
-        patches.some((p) => p.op === "remove" && p.path === "/flags/2")
-      ).toBe(true);
+      // The unique algorithm generates replace operations for minimal patch size
+      expect(patches).toHaveLength(2);
+      expect(patches).toContainEqual({
+        op: "replace",
+        path: "/flags/1",
+        value: true
+      });
+      expect(patches).toContainEqual({
+        op: "replace", 
+        path: "/flags/2",
+        value: false
+      });
     });
   });
 
@@ -2113,7 +2116,7 @@ describe("Array diffing strategies", () => {
       };
 
       const plan = buildPlan(schema);
-      expect(plan.get("/numbers")?.strategy).toBe("lis");
+      expect(plan.get("/numbers")?.strategy).toBe("unique");
     });
 
     test("should fallback to lcs for complex arrays without primary keys", () => {
@@ -2195,7 +2198,7 @@ describe("Array diffing strategies", () => {
 
       const plan = buildPlan(schema);
 
-      expect(plan.get("/primitives")?.strategy).toBe("lis");
+      expect(plan.get("/primitives")?.strategy).toBe("unique");
       expect(plan.get("/objects")?.strategy).toBe("primaryKey");
       expect(plan.get("/complex")?.strategy).toBe("lcs");
     });

@@ -3125,7 +3125,7 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/source/filter/toBranches" => {
     "itemSchema": {
@@ -3139,7 +3139,7 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/source/filter/fromBranches" => {
     "itemSchema": {
@@ -3153,7 +3153,7 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services" => {
     "hashFields": [
@@ -6123,35 +6123,35 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/startCommand" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/preDeployCommand" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/postDeployCommand" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/watchPaths" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/sidecars" => {
     "hashFields": [
@@ -6229,14 +6229,14 @@ Set {
       "type": "number",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/sidecars/startCommand" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/logging/firelens/config" => {
     "hashFields": [
@@ -6294,7 +6294,7 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/permissions/inline/*" => {
     "itemSchema": {
@@ -6330,14 +6330,14 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/jobs/*/startCommand" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/cpuArchitecture" => {
     "itemSchema": {
@@ -6350,35 +6350,35 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowHeaders" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowMethods" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowOrigin" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/exposedHeaders" => {
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/lambda/cpuArchitecture" => {
     "itemSchema": {
@@ -6391,7 +6391,7 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lis",
+    "strategy": "unique",
   },
   "/environments/services/bucketPolicy/*" => {
     "itemSchema": {

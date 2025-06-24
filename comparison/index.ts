@@ -9,6 +9,7 @@ import mainSchema from "../test/schema.json";
 import chalk from "chalk";
 import Chartscii from "chartscii";
 import { performance } from "perf_hooks";
+import * as cliProgress from "cli-progress";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -705,29 +706,6 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
   console.log(`• Average complexity score: ${avgComplexity.toFixed(1)}`);
   console.log(`• Libraries tested: ${Object.keys(byLibrary).join(', ')}`);
 
-  console.log('\n⚡ Performance Summary:');
-  const performanceTable = Object.entries(byLibrary).map(([library, metrics]) => {
-    const times = metrics.map(m => m.executionTime);
-    const stats = calculatePerformanceStats(times);
-    const accuracy = metrics.filter(m => m.accuracy).length / metrics.length * 100;
-    const avgPatchSize = metrics.reduce((sum, m) => sum + m.patchSize, 0) / metrics.length;
-    const avgPatchCount = metrics.reduce((sum, m) => sum + m.patchCount, 0) / metrics.length;
-    const avgMemory = metrics.reduce((sum, m) => sum + m.memoryUsage, 0) / metrics.length;
-    const throughput = stats.mean > 0 ? (1000 / stats.mean) : 0; // ops per second
-    
-    return {
-      Library: library,
-      'Avg Time (ms)': stats.mean.toFixed(2),
-      'Throughput (ops/s)': throughput.toFixed(0),
-      'P95 Time (ms)': stats.p95.toFixed(2),
-      'Accuracy (%)': accuracy.toFixed(1),
-      'Avg Patches': avgPatchCount.toFixed(1),
-      'Avg Size (bytes)': avgPatchSize.toFixed(0),
-      'Memory (KB)': (avgMemory / 1024).toFixed(1)
-    };
-  });
-
-  console.table(performanceTable);
   generatePerformanceCharts(allMetrics);
 
   console.log('\n🏆 Schema-Based Advantages Analysis:');
@@ -837,10 +815,17 @@ async function compare() {
 
   console.log(`Running ${numFakerRuns} iterations with varying complexity...`);
   
+  // Create progress bar
+  const progressBar = new cliProgress.SingleBar({
+    format: '  Progress |' + chalk.cyan('{bar}') + '| {percentage}% | {value}/{total} | ETA: {eta}s | Elapsed: {duration}s',
+    barCompleteChar: '\u2588',
+    barIncompleteChar: '\u2591',
+    hideCursor: true
+  });
+  
+  progressBar.start(numFakerRuns, 0);
+  
   for (let i = 0; i < numFakerRuns; i++) {
-    if (i % 100 === 0) {
-      console.log(`  Progress: ${i}/${numFakerRuns} (${(i/numFakerRuns*100).toFixed(1)}%)`);
-    }
 
     const doc1 = createRandomCloudConfig();
     const doc1Size = JSON.stringify(doc1).length;
@@ -2737,7 +2722,13 @@ async function compare() {
         JSON.stringify(diffpatcher.diff(doc1, doc2), null, 2)
       );
     }
+
+    // Update progress bar
+    progressBar.update(i + 1);
   }
+
+  // Stop progress bar
+  progressBar.stop();
 
   console.log('\n✅ Benchmark completed! Generating comprehensive report...\n');
   

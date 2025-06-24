@@ -1,17 +1,115 @@
 [
   {
     "op": "add",
-    "path": "/environments/0/services/56/logging",
+    "path": "/environments/0/source/trigger",
+    "value": "manual"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/12/healthCheckIntervalSecs",
+    "value": 38
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/17/stickySessionsDurationSecs",
+    "value": 13668
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/32/envVariables/DB_HOST"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/36/dockerLabels",
     "value": {
-      "cloudwatchLogsEnabled": false,
-      "cloudwatchLogsRetentionDays": 30
+      "team": "matrix",
+      "version": "3.12.18",
+      "environment": "env-0"
     }
   },
   {
     "op": "add",
-    "path": "/environments/0/services/98/integrations",
+    "path": "/environments/0/services/50/watchPaths",
+    "value": [
+      "**/*.js"
+    ]
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/51/envVariables/ALARM",
+    "value": "https://distorted-pile.biz"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/55/versionHistoryCount",
+    "value": 15
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/55/healthCheckTimeoutSecs",
+    "value": 26
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/69/envVariables/DATABASE_HOST",
     "value": {
-      "uploadSentrySourceMap": true
+      "fromService": {
+        "id": "fbfa6411-55a3-43d2-81e6-a8f7dc145d1e",
+        "value": "host"
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/71/ci",
+    "value": {
+      "type": "codebuild"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/83/multiAvailabilityZones",
+    "value": true
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/83/encryptionAtRest",
+    "value": false
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/83/healthCheckGracePeriodSecs",
+    "value": 129
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/85/healthCheckIntervalSecs",
+    "value": 48
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "colo-decor-cilicium",
+      "name": "Internal API",
+      "type": "web-private",
+      "cpu": 2,
+      "memory": 2,
+      "buildType": "docker",
+      "port": 8080
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "creptio-utroque-doloremque",
+      "name": "reboot Worker",
+      "type": "worker",
+      "cpu": 2,
+      "memory": 1,
+      "buildType": "nixpacks",
+      "startCommand": "node amo.js"
     }
   }
 ]
