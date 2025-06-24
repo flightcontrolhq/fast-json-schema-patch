@@ -8,7 +8,6 @@ Map {
       "region",
       "id",
     ],
-    "isPrimitiveItems": false,
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -3122,15 +3121,13 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/source/filter/labels" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/source/filter/toBranches" => {
-    "isPrimitiveItems": false,
     "itemSchema": {
       "type": "null",
     },
@@ -3138,15 +3135,13 @@ Set {
     "strategy": "lcs",
   },
   "/environments/source/filter/toBranch" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/source/filter/fromBranches" => {
-    "isPrimitiveItems": false,
     "itemSchema": {
       "type": "null",
     },
@@ -3154,12 +3149,11 @@ Set {
     "strategy": "lcs",
   },
   "/environments/source/filter/watchPaths" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services" => {
     "hashFields": [
@@ -3169,7 +3163,6 @@ Set {
       "memory",
       "type",
     ],
-    "isPrimitiveItems": false,
     "itemSchema": {
       "anyOf": [
         {
@@ -6126,44 +6119,39 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/dependsOn" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/startCommand" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/preDeployCommand" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/postDeployCommand" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/watchPaths" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/sidecars" => {
     "hashFields": [
@@ -6172,7 +6160,6 @@ Set {
       "name",
       "image",
     ],
-    "isPrimitiveItems": false,
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -6238,27 +6225,24 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/sidecars/ports" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "number",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/sidecars/startCommand" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/logging/firelens/config" => {
     "hashFields": [
       "name",
       "match",
     ],
-    "isPrimitiveItems": false,
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -6306,15 +6290,13 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/logging/firelens/config/options/*" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/permissions/inline/*" => {
-    "isPrimitiveItems": false,
     "itemSchema": {
       "anyOf": [
         {
@@ -6343,24 +6325,21 @@ Set {
     "strategy": "lcs",
   },
   "/environments/services/permissions/attach" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "pattern": "^arn",
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/jobs/*/startCommand" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/cpuArchitecture" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "enum": [
         "x86_64",
@@ -6371,42 +6350,37 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/lambda/fnUrl/cors/allowHeaders" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/lambda/fnUrl/cors/allowMethods" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/lambda/fnUrl/cors/allowOrigin" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/lambda/fnUrl/cors/exposedHeaders" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/lambda/cpuArchitecture" => {
-    "isPrimitiveItems": true,
     "itemSchema": {
       "enum": [
         "x86_64",
@@ -6417,10 +6391,9 @@ Set {
       "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "lis",
   },
   "/environments/services/bucketPolicy/*" => {
-    "isPrimitiveItems": false,
     "itemSchema": {
       "anyOf": [
         {
@@ -6453,7 +6426,6 @@ Set {
       "port",
       "protocol",
     ],
-    "isPrimitiveItems": false,
     "itemSchema": {
       "anyOf": [
         {

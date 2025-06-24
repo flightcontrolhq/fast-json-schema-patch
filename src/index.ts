@@ -32,9 +32,7 @@ interface ArrayPlan {
   // Fields to use for quick equality hashing before deep comparison
   hashFields?: string[];
   // Strategy hint for array comparison
-  strategy?: "primaryKey" | "lcs";
-  // Whether array items are primitives (for faster comparison)
-  isPrimitiveItems?: boolean;
+  strategy?: "primaryKey" | "lcs" | "lis";
 }
 
 type Plan = Map<string, ArrayPlan>;
@@ -144,7 +142,10 @@ export function _traverseSchema(
       (itemsSchema.type === "string" ||
         itemsSchema.type === "number" ||
         itemsSchema.type === "boolean");
-    arrayPlan.isPrimitiveItems = isPrimitive;
+
+    if (isPrimitive) {
+      arrayPlan.strategy = "lis";
+    }
 
     const customKey = options?.primaryKeyMap?.[docPath];
     if (customKey) {
@@ -585,12 +586,17 @@ export class SchemaPatcher {
       return;
     }
 
-    // Fallback to LCS for complex cases without a primary key
+
+    if (strategy === "lis") {
+      this.diffArrayLIS(arr1, arr2, path, patches);
+      return;
+    }
+
     this.diffArrayLCS(arr1, arr2, path, patches);
   }
 
   #collapseReplace(
-    ops: ('common' | 'add' | 'remove')[]
+    ops: ("common" | "add" | "remove")[]
   ): ('common' | 'add' | 'remove' | 'replace')[] {
     const out: ('common' | 'add' | 'remove' | 'replace')[] = [];
     for (let i = 0; i < ops.length; i++) {
@@ -605,13 +611,134 @@ export class SchemaPatcher {
   }
 
   #refine(
-    oldVal: unknown,
-    newVal: unknown,
+    oldVal: JsonValue,
+    newVal: JsonValue,
     path: string,
     patches: Operation[]
   ) {
     if (!deepEqualMemo(oldVal, newVal, this.plan.get(path)?.hashFields ?? [])) {
-      patches.push({ op: 'replace', path, value: newVal as JsonValue });
+      this.diff(oldVal, newVal, path, patches);
+    }
+  }
+
+  private diffArrayLIS(
+    arr1: JsonArray,
+    arr2: JsonArray,
+    path: string,
+    patches: Operation[],
+  ) {
+    const a = arr1;
+    const b = arr2;
+    const n = a.length;
+    const m = b.length;
+
+    // Build position map for new array
+    const newPositions = new Map<JsonValue, number>();
+    for (let i = 0; i < m; i++) {
+      newPositions.set(b[i]!, i);
+    }
+
+    // Map old indices to their positions in new array
+    const oldIndicesInNew = new Array(n);
+    for (let i = 0; i < n; i++) {
+      oldIndicesInNew[i] = newPositions.get(a[i]!);
+    }
+
+    // Compute LIS using patience sorting algorithm
+    const p = new Array(n).fill(0);
+    const m_arr = new Array(n + 1).fill(0);
+    let lisLen = 0;
+
+    for (let i = 0; i < n; i++) {
+      if (oldIndicesInNew[i] === undefined) continue;
+
+      let lo = 1;
+      let hi = lisLen;
+      while (lo <= hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        if (oldIndicesInNew[m_arr[mid]]! < oldIndicesInNew[i]!) {
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+
+      const newL = lo;
+      p[i] = m_arr[newL - 1];
+      m_arr[newL] = i;
+
+      if (newL > lisLen) {
+        lisLen = newL;
+      }
+    }
+
+    // Reconstruct LIS indices
+    const lisIndices = new Set<number>();
+    let k = m_arr[lisLen];
+    for (let i = 0; i < lisLen; i++) {
+      lisIndices.add(k);
+      k = p[k];
+    }
+
+    // Generate raw operations sequence using a simpler approach
+    const rawOps: ('common' | 'add' | 'remove')[] = [];
+    let ai = 0; // index in old array
+    let bi = 0; // index in new array
+
+    while (ai < n || bi < m) {
+      if (ai < n && bi < m && a[ai] === b[bi]) {
+        // Elements match - this is a common element
+        rawOps.push('common');
+        ai++;
+        bi++;
+      } else if (ai < n && (bi >= m || !newPositions.has(a[ai]!))) {
+        // Element in old array doesn't exist in new array - remove it
+        rawOps.push('remove');
+        ai++;
+      } else if (bi < m && (ai >= n || oldIndicesInNew[ai] === undefined)) {
+        // Element in new array doesn't exist in old array - add it
+        rawOps.push('add');
+        bi++;
+      } else if (ai < n && bi < m) {
+        // Both elements exist but don't match at current position
+        const oldInNewPos = oldIndicesInNew[ai];
+        if (oldInNewPos !== undefined && oldInNewPos > bi) {
+          // Old element appears later in new array - add current new element
+          rawOps.push('add');
+          bi++;
+        } else {
+          // Old element appears earlier or not at all - remove it
+          rawOps.push('remove');
+          ai++;
+        }
+      }
+    }
+
+    // Collapse consecutive remove/add into replace operations
+    const ops2 = this.#collapseReplace(rawOps);
+
+    // Generate JSON-Patch operations
+    ai = 0;
+    bi = 0;
+    for (const op of ops2) {
+      switch (op) {
+        case 'common':
+          this.#refine(a[ai]!, b[bi]!, `${path}/${ai}`, patches);
+          ai++; bi++;
+          break;
+        case 'replace':
+          patches.push({ op: 'replace', path: `${path}/${ai}`, value: b[bi]! });
+          ai++; bi++;
+          break;
+        case 'remove':
+          patches.push({ op: 'remove', path: `${path}/${ai}` });
+          ai++;
+          break;
+        case 'add':
+          patches.push({ op: 'add', path: `${path}/${ai}`, value: b[bi]! });
+          bi++;
+          break;
+      }
     }
   }
 
@@ -697,11 +824,11 @@ export class SchemaPatcher {
     for (const op of ops2) {
       switch (op) {
         case 'common':
-          this.#refine(a[ai], b[bi], `${path}/${ai}`, patches);
+          this.#refine(a[ai]!, b[bi]!, `${path}/${ai}`, patches);
           ai++; bi++;
           break;
         case 'replace':
-          patches.push({ op: 'replace', path: `${path}/${ai}`, value: b[bi] });
+          patches.push({ op: 'replace', path: `${path}/${ai}`, value: b[bi]! });
           ai++; bi++;
           break;
         case 'remove':
@@ -709,7 +836,7 @@ export class SchemaPatcher {
           ai++;
           break;
         case 'add':
-          patches.push({ op: 'add', path: `${path}/${ai}`, value: b[bi] });
+          patches.push({ op: 'add', path: `${path}/${ai}`, value: b[bi]! });
           bi++;
           break;
       }
