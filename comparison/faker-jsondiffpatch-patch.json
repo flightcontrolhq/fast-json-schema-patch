@@ -1,65 +1,3847 @@
 {
   "environments": {
     "0": {
+      "source": {
+        "branch": [
+          "main",
+          "develop"
+        ]
+      },
       "services": {
         "0": {
+          "name": [
+            "any-kettledrum.name",
+            "Load Balancer"
+          ],
+          "type": [
+            "web",
+            "worker"
+          ],
           "cpu": [
-            1.390330372406007,
-            2.441382962401114
+            3.3101258189982596,
+            5.691767011584867
           ],
           "memory": [
-            5.528852567789292,
-            2.2603753078821316
+            5.789914799330696,
+            9.955768407827641
+          ],
+          "healthCheckPath": [
+            "/virga",
+            0,
+            0
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "stickySessionsDurationSecs": [
+            47513
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 80,
+              "cooldownTimerSecs": 410,
+              "requestsPerTarget": 265
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "startCommand": [
+            "node worker.js"
           ]
         },
-        "5": [
+        "1": {
+          "name": [
+            "wry-casket.com",
+            "Backend 1"
+          ],
+          "cpu": [
+            1.086697383318391,
+            1.868578010674846
+          ],
+          "memory": [
+            1.1579930672162437,
+            1.9911710611713334
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 415,
+              "requestsPerTarget": 468
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "2": {
+          "name": [
+            "index-worker",
+            "Backend 2"
+          ],
+          "cpu": [
+            1.8824605366766003,
+            3.2368941149520247
+          ],
+          "memory": [
+            1.9432655642561818,
+            3.3414484639527844
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 74,
+              "memoryThreshold": 76,
+              "cooldownTimerSecs": 329
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "3": {
+          "name": [
+            "hack-worker",
+            "Backend 3"
+          ],
+          "cpu": [
+            0.4039186312349302,
+            0.6945387777807298
+          ],
+          "memory": [
+            1.3837078078205305,
+            2.379287943987802
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 79,
+              "cooldownTimerSecs": 499
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "target": [
+            {
+              "type": "ecs-ec2",
+              "clusterInstanceSize": "t3.large",
+              "clusterMinInstances": 2,
+              "clusterMaxInstances": 9
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "4": {
+          "name": [
+            "sure-footed-merit.com",
+            "Backend 4"
+          ],
+          "cpu": [
+            2.368641082863057,
+            4.072882396296517
+          ],
+          "memory": [
+            3.7664358647383094,
+            6.476392916283555
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 77,
+              "memoryThreshold": 75,
+              "cooldownTimerSecs": 416,
+              "requestsPerTarget": 453
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "target": [
+            {
+              "type": "ecs-ec2",
+              "clusterInstanceSize": "t3.medium",
+              "clusterMinInstances": 3,
+              "clusterMaxInstances": 10
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "5": {
+          "name": [
+            "reboot-worker",
+            "Backend 5"
+          ],
+          "cpu": [
+            1.452559804601569,
+            2.4976790703041605
+          ],
+          "memory": [
+            3.796397276749623,
+            6.527911615520827
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 555
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "6": {
+          "name": [
+            "override-worker",
+            "Backend 6"
+          ],
+          "cpu": [
+            0.8019739749406853,
+            1.3789956226190752
+          ],
+          "memory": [
+            3.873351468826447,
+            6.66023448051651
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 79,
+              "cooldownTimerSecs": 364
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "7": {
+          "name": [
+            "roasted-gloom.org",
+            "Backend 7"
+          ],
+          "cpu": [
+            0.6388521849486332,
+            1.0985074255183338
+          ],
+          "memory": [
+            4.690910427914909,
+            8.066028510053917
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 70,
+              "memoryThreshold": 82,
+              "cooldownTimerSecs": 457,
+              "requestsPerTarget": 717
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": false,
+              "cloudwatchLogsRetentionDays": 7
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "8": {
+          "name": [
+            "bypass-worker",
+            "Backend 8"
+          ],
+          "cpu": [
+            0.3186689065570366,
+            0.5479517302783574
+          ],
+          "memory": [
+            3.6553162648101414,
+            6.285322574007847
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 76,
+              "memoryThreshold": 83,
+              "cooldownTimerSecs": 359
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "9": {
+          "name": [
+            "mysterious-diagram.name",
+            "Backend 9"
+          ],
+          "cpu": [
+            0.6530096099123353,
+            1.122851141976149
+          ],
+          "memory": [
+            6.526333829816213,
+            11.222042191248132
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 452,
+              "requestsPerTarget": 299
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "10": {
+          "name": [
+            "juvenile-platter.name",
+            "Backend 10"
+          ],
+          "cpu": [
+            3.144326779335359,
+            5.406675279092554
+          ],
+          "memory": [
+            5.1958156681130845,
+            8.93421393480191
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 523,
+              "requestsPerTarget": 900
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "experimental": [
+            {
+              "runAsNonRootUser": false
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "11": {
+          "name": [
+            "somber-dish.biz",
+            "Backend 11"
+          ],
+          "cpu": [
+            1.0062819765314264,
+            1.730303581060645
+          ],
+          "memory": [
+            5.946606117361226,
+            10.225199397383749
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 508,
+              "requestsPerTarget": 756
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "12": {
+          "name": [
+            "slow-apparatus.net",
+            "Backend 12"
+          ],
+          "cpu": [
+            1.9421900280685247,
+            3.3395990776371534
+          ],
+          "memory": [
+            2.9493843704543092,
+            5.07147147334603
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 78,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 518,
+              "requestsPerTarget": 600
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "13": {
+          "autoUpgradeMinorVersions": [
+            true
+          ],
+          "deletionProtection": [
+            true
+          ],
+          "backupRetentionPeriodInDays": [
+            17
+          ],
+          "connectionStringEnvVarName": [
+            "RDS_URL"
+          ],
+          "performanceInsights": [
+            false
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "firelens": {
+                "configSource": "file",
+                "configFilePath": "./fluent-bit.conf"
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "f6f679fe-3c8e-4a14-a60e-86a1989b884c"
+            ]
+          ],
+          "private": [
+            false
+          ],
+          "maxStorage": [
+            191
+          ],
+          "applyChangesImmediately": [
+            false
+          ],
+          "deleteBackupsWithRdsDeletion": [
+            true
+          ],
+          "port": [
+            5432
+          ],
+          "multiAvailabilityZones": [
+            true
+          ],
+          "encryptionAtRest": [
+            true
+          ]
+        },
+        "14": {
+          "name": [
+            "physical-adrenalin.name",
+            "Backend 13"
+          ],
+          "cpu": [
+            1.089447891302264,
+            1.8733075138610562
+          ],
+          "memory": [
+            4.277418287054236,
+            7.355028066085107
+          ],
+          "maxInstances": [
+            4,
+            6
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 75,
+              "memoryThreshold": 80,
+              "cooldownTimerSecs": 508,
+              "requestsPerTarget": 988
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "15": {
+          "name": [
+            "reboot-worker",
+            "Backend 14"
+          ],
+          "cpu": [
+            0.6030829651823575,
+            1.0370021909054001
+          ],
+          "memory": [
+            0.6840934925540771,
+            1.1762999313837323
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 70,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 567
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "68d4ed33-cc7a-45d1-a2d9-3c94a6f6aec3",
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "16": {
+          "name": [
+            "indolent-transom.net",
+            "Backend 15"
+          ],
+          "cpu": [
+            3.0608091368529853,
+            5.263066549890118
+          ],
+          "memory": [
+            0.6096135916812981,
+            1.0482316143485553
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 74,
+              "memoryThreshold": 76,
+              "cooldownTimerSecs": 470,
+              "requestsPerTarget": 654
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "target": [
+            {
+              "type": "ecs-ec2",
+              "clusterInstanceSize": "t3.medium",
+              "clusterMinInstances": 3,
+              "clusterMaxInstances": 10
+            }
+          ]
+        },
+        "17": {
+          "name": [
+            "easy-replacement.biz",
+            "Backend 16"
+          ],
+          "cpu": [
+            0.3938568310595703,
+            0.6772374951567951
+          ],
+          "memory": [
+            3.9176569552066143,
+            6.736417840183235
+          ],
+          "maxInstances": [
+            4,
+            6
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 504,
+              "requestsPerTarget": 597
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "18": {
+          "name": [
+            "best-lift.name",
+            "Backend 17"
+          ],
+          "cpu": [
+            1.047730586108899,
+            1.8015745361751292
+          ],
+          "memory": [
+            5.350278864495782,
+            9.19981366537078
+          ],
+          "maxInstances": [
+            4,
+            6
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 85,
+              "cooldownTimerSecs": 545,
+              "requestsPerTarget": 415
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "buildType": [
+            "nodejs"
+          ]
+        },
+        "19": {
+          "name": [
+            "quantify-worker",
+            "Backend 18"
+          ],
+          "cpu": [
+            1.798032192236121,
+            3.0917194321738117
+          ],
+          "memory": [
+            3.890277974797071,
+            6.6893396365054585
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 482
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "target": [
+            {
+              "type": "ecs-ec2"
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "20": {
+          "name": [
+            "bypass-worker",
+            "Backend 19"
+          ],
+          "cpu": [
+            0.8572217214806828,
+            1.4739942173600822
+          ],
+          "memory": [
+            2.6944905051342616,
+            4.633181035636005
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 76,
+              "memoryThreshold": 83,
+              "cooldownTimerSecs": 582
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "envVariables": [
+            {
+              "BACKEND 8_HOST": {
+                "fromService": {
+                  "id": "b796fc2d-c178-4b19-92e2-441d990f2b7f",
+                  "value": "port"
+                }
+              }
+            }
+          ]
+        },
+        "21": {
+          "name": [
+            "back up-worker",
+            "Backend 20"
+          ],
+          "cpu": [
+            0.8551053304531638,
+            1.4703550793657167
+          ],
+          "memory": [
+            0.8609287907069085,
+            1.4803685292398276
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 85,
+              "cooldownTimerSecs": 365
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "22": {
+          "name": [
+            "navigate-worker",
+            "Backend 21"
+          ],
+          "cpu": [
+            1.111974847500621,
+            1.9120426536026711
+          ],
+          "memory": [
+            1.0405607370945114,
+            1.7892459685225297
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 561
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "23": {
+          "name": [
+            "short-cheese.net",
+            "Backend 22"
+          ],
+          "cpu": [
+            2.1937921125253217,
+            3.772229292518402
+          ],
+          "memory": [
+            4.9315276505316294,
+            8.47977023619878
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "originShieldEnabled": [
+            true
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 411,
+              "requestsPerTarget": 696
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "24": {
+          "name": [
+            "index-worker",
+            "Backend 23"
+          ],
+          "cpu": [
+            1.7952442640675288,
+            3.0869255849159263
+          ],
+          "memory": [
+            2.029862564440167,
+            3.490352153993962
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 75,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 407
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "25": {
+          "name": [
+            "hack-worker",
+            "Backend 24"
+          ],
+          "cpu": [
+            1.4643596135241987,
+            2.5179688619439093
+          ],
+          "memory": [
+            3.779609675144653,
+            6.499045305826376
+          ],
+          "startCommand": [
+            "node start-armarium.js",
+            "npm start"
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 577
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "26": {
+          "name": [
+            "connect-worker",
+            "Backend 25"
+          ],
+          "cpu": [
+            1.1243893344816709,
+            1.933389385215995
+          ],
+          "memory": [
+            2.906541242018827,
+            4.997802640668253
+          ],
+          "port": [
+            5506
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 583
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "27": {
+          "name": [
+            "compress-worker",
+            "Backend 26"
+          ],
+          "cpu": [
+            1.3752820591617096,
+            2.3647998547469236
+          ],
+          "memory": [
+            3.6433590541473317,
+            6.26476212980644
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 75,
+              "cooldownTimerSecs": 517
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "28": [
           {
-            "id": "4da3df1b-9cf0-4daf-b042-481605390d27",
-            "name": "mature-precedent.org",
+            "id": "sunt-vorax-cuius",
+            "name": "Backend 27",
             "type": "web",
-            "cpu": 1.7952517830121169,
-            "memory": 1.2608326956237124,
+            "cpu": 1.94293673457349,
+            "memory": 10.690386686444322,
             "minInstances": 1,
-            "maxInstances": 3,
-            "healthCheckPath": "/attonbitus",
+            "maxInstances": 6,
+            "healthCheckPath": "/tristis",
             "envVariables": {
               "NODE_ENV": "production",
-              "DB_HOST": "d6ea:debc:2f7b:ceef:cf74:efc8:2a8d:ae25"
+              "DB_HOST": "181.231.87.137",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "autoscaling": {
+              "cpuThreshold": 80,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 322,
+              "requestsPerTarget": 129
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
             },
             "dependsOn": [
-              "e6231ae0-b866-4dbc-8118-919b023505c0"
+              "b98f111f-3126-425b-9a02-872536995528"
             ]
           }
         ],
-        "6": [
+        "29": {
+          "name": [
+            "quiet-vision.biz",
+            "Backend 28"
+          ],
+          "cpu": [
+            2.359210145560035,
+            4.056665883461393
+          ],
+          "memory": [
+            3.230891854457333,
+            5.555524073934959
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 78,
+              "memoryThreshold": 82,
+              "cooldownTimerSecs": 379,
+              "requestsPerTarget": 913
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "firelens": {
+                "configSource": "file",
+                "configFilePath": "./fluent-bit.conf"
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "30": {
+          "name": [
+            "shadowy-perfection.net",
+            "Backend 29"
+          ],
+          "cpu": [
+            3.4860432084663397,
+            5.994257263886382
+          ],
+          "memory": [
+            4.501661329236919,
+            7.7406143609465765
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 75,
+              "memoryThreshold": 75,
+              "cooldownTimerSecs": 441,
+              "requestsPerTarget": 483
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "31": {
+          "name": [
+            "transmit-worker",
+            "Backend 30"
+          ],
+          "cpu": [
+            1.8743171830127134,
+            3.2228916043883005
+          ],
+          "memory": [
+            1.3820082917270793,
+            2.376365623156115
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 80,
+              "cooldownTimerSecs": 569
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "32": {
+          "name": [
+            "monstrous-executor.org",
+            "Backend 31"
+          ],
+          "cpu": [
+            2.1766496328999105,
+            3.7427527694603726
+          ],
+          "memory": [
+            0.9952918378713969,
+            1.711406018823319
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 82,
+              "cooldownTimerSecs": 353,
+              "requestsPerTarget": 803
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "33": {
+          "name": [
+            "hack-worker",
+            "Backend 32"
+          ],
+          "cpu": [
+            1.2558663791058302,
+            2.159464388491529
+          ],
+          "memory": [
+            3.244840386843391,
+            5.579508599247961
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 77,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 585
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "34": {
+          "name": [
+            "slow-airline.name",
+            "Backend 33"
+          ],
+          "cpu": [
+            2.596018776809158,
+            4.46385873023065
+          ],
+          "memory": [
+            7.555294595537653,
+            12.991341989139432
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 85,
+              "cooldownTimerSecs": 566,
+              "requestsPerTarget": 971
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "healthCheckTimeoutSecs": [
+            11
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "35": {
+          "name": [
+            "snoopy-shark.name",
+            "Backend 34"
+          ],
+          "cpu": [
+            1.025839638313112,
+            1.7639330139703648
+          ],
+          "memory": [
+            0.5855324211681707,
+            1.0068240004324025
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "NAVIGATE-WORKER_HOST": [
+              {
+                "fromService": {
+                  "id": "3c872fa7-0b48-4169-a254-e7014d113679",
+                  "value": "connectionString"
+                }
+              }
+            ],
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 76,
+              "cooldownTimerSecs": 376,
+              "requestsPerTarget": 286
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "36": {
+          "name": [
+            "generate-worker",
+            "Backend 35"
+          ],
+          "cpu": [
+            0.4617547238229973,
+            0.7939880379817668
+          ],
+          "memory": [
+            0.9351040527089973,
+            1.6079130192154143
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 381
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "postBuildCommand": [
+            "echo \"Build complete\""
+          ]
+        },
+        "37": {
+          "name": [
+            "caring-recommendation.biz",
+            "Backend 36"
+          ],
+          "cpu": [
+            0.2519553538871002,
+            0.4332376622713331
+          ],
+          "memory": [
+            5.353295764547999,
+            9.20500123017448
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 77,
+              "cooldownTimerSecs": 589,
+              "requestsPerTarget": 559
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "38": {
+          "name": [
+            "excellent-onset.net",
+            "Backend 37"
+          ],
+          "cpu": [
+            2.4549860933581753,
+            4.221352789636367
+          ],
+          "memory": [
+            4.123649321253547,
+            7.0906220661902895
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 327,
+              "requestsPerTarget": 599
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "39": {
+          "name": [
+            "shameful-guide.net",
+            "Backend 38"
+          ],
+          "cpu": [
+            1.8099755075090969,
+            3.1122559832286156
+          ],
+          "memory": [
+            1.8069997292912814,
+            3.1071391274895546
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 76,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 334,
+              "requestsPerTarget": 868
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "40": {
+          "name": [
+            "alarmed-account.info",
+            "Backend 39"
+          ],
+          "cpu": [
+            0.7404304035204415,
+            1.273171346220159
+          ],
+          "memory": [
+            2.937999104072076,
+            5.051894488314049
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 358,
+              "requestsPerTarget": 983
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "ci": [
+            {
+              "type": "ec2"
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "41": {
+          "name": [
+            "likely-backburn.com",
+            "Backend 40"
+          ],
+          "cpu": [
+            3.8587138060428963,
+            6.63506499430546
+          ],
+          "memory": [
+            3.0495979577097745,
+            5.243788908163615
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 445,
+              "requestsPerTarget": 372
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "42": {
+          "name": [
+            "vivacious-coal.com",
+            "Backend 41"
+          ],
+          "cpu": [
+            2.6676848835256,
+            4.587088723397741
+          ],
+          "memory": [
+            6.844588553845996,
+            11.769281733961934
+          ],
+          "maxInstances": [
+            4,
+            6
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 74,
+              "memoryThreshold": 50,
+              "cooldownTimerSecs": 307,
+              "requestsPerTarget": 797
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "43": {
+          "name": [
+            "outlying-vicinity.name",
+            "Backend 42"
+          ],
+          "cpu": [
+            2.3627750826803315,
+            4.0627957989417105
+          ],
+          "memory": [
+            3.8850994365884377,
+            6.680435131191805
+          ],
+          "maxInstances": [
+            5,
+            8
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 386,
+              "requestsPerTarget": 492
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "44": [
           {
-            "id": "6ea26f57-d1ba-474b-951c-6de8768be7cc",
-            "name": "impish-strategy.info",
+            "id": "tracto-qui-id",
+            "name": "Backend 43",
             "type": "web",
-            "cpu": 3.1715170628355187,
-            "memory": 5.616825557619015,
+            "cpu": 0.8597508558311178,
+            "memory": 1.7195017116622355,
+            "buildType": "nixpacks",
+            "healthCheckPath": "/health",
+            "port": 3000,
             "minInstances": 1,
             "maxInstances": 1,
-            "healthCheckPath": "/canonicus",
+            "autoscaling": {
+              "cpuThreshold": 77,
+              "memoryThreshold": 83,
+              "cooldownTimerSecs": 404,
+              "requestsPerTarget": 249
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            },
+            "envVariables": {
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "dependsOn": [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          }
+        ],
+        "45": {
+          "name": [
+            "scratchy-cope.net",
+            "Backend 44"
+          ],
+          "cpu": [
+            2.7889371652671135,
+            4.795582229395225
+          ],
+          "memory": [
+            5.427421872596675,
+            9.332461199843038
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 378,
+              "requestsPerTarget": 154
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "port": [
+            4924
+          ]
+        },
+        "46": {
+          "name": [
+            "override-worker",
+            "Backend 45"
+          ],
+          "cpu": [
+            1.599561252707504,
+            2.750448311939143
+          ],
+          "memory": [
+            2.0641059274999174,
+            3.5492336753882743
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 78,
+              "memoryThreshold": 83,
+              "cooldownTimerSecs": 379
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "47": {
+          "name": [
+            "program-worker",
+            "Backend 46"
+          ],
+          "cpu": [
+            1.966638577517719,
+            3.3816384002627022
+          ],
+          "memory": [
+            2.7599336458773744,
+            4.74571062816034
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 79,
+              "cooldownTimerSecs": 588
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "48": {
+          "name": [
+            "grimy-heartbeat.net",
+            "Backend 47"
+          ],
+          "cpu": [
+            1.022760185630386,
+            1.7586378898114345
+          ],
+          "memory": [
+            7.210987005269263,
+            12.399304498334635
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 84,
+              "cooldownTimerSecs": 449,
+              "requestsPerTarget": 186
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "49": {
+          "name": [
+            "strong-place.org",
+            "Backend 48"
+          ],
+          "cpu": [
+            1.8451698077931828,
+            3.172772642807856
+          ],
+          "memory": [
+            2.4858320876536233,
+            4.274392529625313
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 83,
+              "cooldownTimerSecs": 314,
+              "requestsPerTarget": 925
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "50": {
+          "name": [
+            "alive-conservative.com",
+            "Backend 49"
+          ],
+          "cpu": [
+            3.151936933295025,
+            5.419760951852213
+          ],
+          "memory": [
+            4.425996018917573,
+            7.610507730339007
+          ],
+          "maxInstances": [
+            3,
+            5
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 79,
+              "cooldownTimerSecs": 528,
+              "requestsPerTarget": 898
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "51": {
+          "name": [
+            "self-assured-whale.net",
+            "Backend 50"
+          ],
+          "cpu": [
+            3.4271508672508166,
+            5.892991782362494
+          ],
+          "memory": [
+            1.8047914201068622,
+            3.1033419360670664
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 80,
+              "memoryThreshold": 85,
+              "cooldownTimerSecs": 319,
+              "requestsPerTarget": 678
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "52": {
+          "name": [
+            "navigate-worker",
+            "Backend 51"
+          ],
+          "cpu": [
+            0.9544862350612964,
+            1.641240714945942
+          ],
+          "memory": [
+            1.0690340810218395,
+            1.838205932142318
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 76,
+              "memoryThreshold": 80,
+              "cooldownTimerSecs": 446
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "buildType": [
+            "docker"
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "53": {
+          "name": [
+            "spotless-finding.com",
+            "Backend 52"
+          ],
+          "cpu": [
+            3.406624690729987,
+            5.857696986701046
+          ],
+          "memory": [
+            2.1976239098032626,
+            3.7788180744965643
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 72,
+              "memoryThreshold": 76,
+              "cooldownTimerSecs": 486,
+              "requestsPerTarget": 150
+            }
+          ],
+          "sidecars": [
+            [
+              {
+                "cpuAllotment": 0.1,
+                "memoryAllotment": 0.2,
+                "name": "logging-sidecar",
+                "image": "fluent/fluent-bit:latest"
+              }
+            ]
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 90,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ],
+          "permissions": [
+            {
+              "inline": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Action": [
+                      "s3:GetObject"
+                    ],
+                    "Resource": [
+                      "arn:aws:s3:::bucket/*"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "54": {
+          "name": [
+            "compress-worker",
+            "Backend 53"
+          ],
+          "cpu": [
+            1.737071494033665,
+            2.9868974072705634
+          ],
+          "memory": [
+            0.7273381747227737,
+            1.2506592363930955
+          ],
+          "watchPaths": [
+            [
+              "app/**"
+            ]
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 68,
+              "memoryThreshold": 72,
+              "cooldownTimerSecs": 549
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "55": {
+          "name": [
+            "happy-consistency.info",
+            "Backend 54"
+          ],
+          "cpu": [
+            2.08863019459325,
+            3.591403194632522
+          ],
+          "memory": [
+            3.66599194552367,
+            6.303679425267919
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 75,
+              "memoryThreshold": 82,
+              "cooldownTimerSecs": 306,
+              "requestsPerTarget": 243
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "experimental": [
+            {
+              "datadog": {
+                "enabled": true,
+                "datadogSite": "datadoghq.com",
+                "datadogApiKey": "ZUwfmf9XOWlwwE1dDXMgowDggZEhX355",
+                "logging": true
+              }
+            }
+          ],
+          "healthCheckIntervalSecs": [
+            25
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "56": {
+          "name": [
+            "parse-worker",
+            "Backend 55"
+          ],
+          "cpu": [
+            0.32666151117405373,
+            0.5616950275979579
+          ],
+          "memory": [
+            3.617236823230301,
+            6.21984490903217
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 71,
+              "memoryThreshold": 78,
+              "cooldownTimerSecs": 533
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "57": {
+          "name": [
+            "back up-worker",
+            "Backend 56"
+          ],
+          "cpu": [
+            1.1157858685174968,
+            1.9185957107643699
+          ],
+          "memory": [
+            2.8882560597867757,
+            4.966361238522185
+          ],
+          "autoscaling": [
+            {
+              "cpuThreshold": 77,
+              "memoryThreshold": 81,
+              "cooldownTimerSecs": 460
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "58": {
+          "name": [
+            "writhing-summary.org",
+            "Backend 57"
+          ],
+          "cpu": [
+            2.8915959184206077,
+            4.972104131159769
+          ],
+          "memory": [
+            1.6190500301189352,
+            2.783959298056303
+          ],
+          "maxInstances": [
+            2,
+            3
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 73,
+              "memoryThreshold": 75,
+              "cooldownTimerSecs": 337,
+              "requestsPerTarget": 252
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "59": {
+          "name": [
+            "bogus-doorpost.net",
+            "Backend 58"
+          ],
+          "cpu": [
+            1.5717479566346566,
+            2.702623301734913
+          ],
+          "memory": [
+            6.344673206697635,
+            10.909676438854108
+          ],
+          "envVariables": {
+            "DATABASE_URL": [
+              {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            ]
+          },
+          "autoscaling": [
+            {
+              "cpuThreshold": 79,
+              "memoryThreshold": 82,
+              "cooldownTimerSecs": 544,
+              "requestsPerTarget": 118
+            }
+          ],
+          "logging": [
+            {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 7,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "dependsOn": [
+            [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          ]
+        },
+        "60": [
+          {
+            "id": "ago-subseco-tantillus",
+            "name": "React App",
+            "type": "static",
+            "buildType": "nodejs",
+            "buildCommand": "npm run build",
+            "outputDirectory": "build",
+            "singlePageApp": true,
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 14,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            },
+            "originShieldEnabled": true
+          }
+        ],
+        "61": [
+          {
+            "id": "vestrum-amita-aperio",
+            "name": "Internal API",
+            "type": "web-private",
+            "cpu": 1,
+            "memory": 1,
+            "buildType": "docker",
+            "port": 8080,
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true,
+              "firelens": {
+                "configSource": "inline",
+                "config": [
+                  {
+                    "name": "forward",
+                    "match": "*",
+                    "options": {
+                      "Host": "logs.example.com",
+                      "Port": "443"
+                    }
+                  }
+                ]
+              }
+            },
+            "dockerLabels": {
+              "team": "feed",
+              "version": "1.4.15",
+              "environment": "env-0"
+            }
+          }
+        ],
+        "62": [
+          {
+            "id": "titulus-conitor-spoliatio",
+            "name": "Backend 59",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 2,
+            "buildType": "nixpacks",
+            "startCommand": "node exercitationem.js",
+            "dockerfilePath": "Dockerfile",
+            "autoscaling": {
+              "cpuThreshold": 74,
+              "memoryThreshold": 73,
+              "cooldownTimerSecs": 505
+            },
+            "dependsOn": [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          }
+        ],
+        "63": [
+          {
+            "id": "voro-accusamus-adsum",
+            "name": "et-bucket",
+            "type": "s3",
+            "bucketNameBase": "quia-terminatio-spiculum",
+            "bucketVersioning": false,
+            "blockAllPublicAccess": true,
+            "bucketPolicy": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": "s3:GetObject",
+                  "Resource": "arn:aws:s3:::quia-terminatio-spiculum/*"
+                }
+              ]
+            }
+          }
+        ],
+        "64": [
+          {
+            "id": "thymum-totam-teneo",
+            "name": "cum-database",
+            "type": "rds",
+            "engine": "postgres",
+            "engineVersion": "15",
+            "instanceSize": "db.t3.micro",
+            "storage": 93,
+            "stickySessionsDurationSecs": 34414
+          }
+        ],
+        "65": [
+          {
+            "id": "peior-bos-admoveo",
+            "name": "redis-cache",
+            "type": "elasticache",
+            "engine": "redis",
+            "engineVersion": "7.0",
+            "instanceSize": "cache.t3.micro",
+            "numberOfReplicas": 2
+          }
+        ],
+        "66": [
+          {
+            "id": "statua-cursus-demergo",
+            "name": "Backend 60",
+            "type": "web",
+            "cpu": 2,
+            "memory": 4,
+            "gpu": 1,
+            "buildType": "docker",
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "privileged": false,
+            "healthCheckPath": "/health",
+            "healthCheckTimeoutSecs": 10,
+            "healthCheckIntervalSecs": 30,
+            "healthCheckGracePeriodSecs": 60,
+            "port": 3000,
+            "minInstances": 2,
+            "maxInstances": 10,
+            "stickySessionsEnabled": true,
+            "stickySessionsDurationSecs": 3600,
+            "originShieldEnabled": true,
+            "cloudfrontAutoCacheInvalidation": true,
+            "containerInsights": true,
+            "storage": 50,
+            "versionHistoryCount": 15,
+            "basePath": ".",
+            "includeEnvVariablesInBuild": true,
+            "injectEnvVariablesInDockerfile": true,
+            "autoscaling": {
+              "cpuThreshold": 75,
+              "memoryThreshold": 80,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
             "envVariables": {
               "NODE_ENV": "production",
-              "DB_HOST": "b38f:edef:dcb8:c0e2:319e:2cdd:b977:cf43"
+              "LOG_LEVEL": "info",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "8b4a6765-9e45-4084-a5a0-67105fe9aa71",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true
+            },
+            "integrations": {
+              "uploadSentrySourceMap": true
+            },
+            "dependsOn": [
+              "b98f111f-3126-425b-9a02-872536995528"
+            ]
+          }
+        ],
+        "67": [
+          {
+            "id": "conforto-infit-umquam",
+            "name": "modi-function",
+            "type": "lambda-function",
+            "buildType": "nixpacks",
+            "outputDirectory": "dist",
+            "lambda": {
+              "packageType": "zip",
+              "handler": "index.handler",
+              "runtime": "nodejs20.x",
+              "memory": 328,
+              "timeoutSecs": 10
+            }
+          }
+        ],
+        "68": [
+          {
+            "id": "auditor-apostolus-crustulum",
+            "name": "Task Scheduler",
+            "type": "scheduler",
+            "cpu": 0.25,
+            "memory": 0.5,
+            "buildType": "nixpacks",
+            "jobs": {
+              "daily-backup": {
+                "startCommand": "npm run backup",
+                "schedule": "0 2 * * *"
+              },
+              "hourly-cleanup": {
+                "startCommand": "npm run cleanup",
+                "schedule": "0 * * * *"
+              },
+              "weekly-report": {
+                "startCommand": "npm run report",
+                "schedule": "0 0 * * 0"
+              }
             }
           }
         ],
         "_t": "a",
         "_0": [
+          "",
+          40,
+          3
+        ],
+        "_2": [
+          "",
+          58,
+          3
+        ],
+        "_3": [
+          "",
+          42,
+          3
+        ],
+        "_4": [
+          "",
+          36,
+          3
+        ],
+        "_5": [
+          "",
+          15,
+          3
+        ],
+        "_6": [
+          "",
+          13,
+          3
+        ],
+        "_7": [
+          "",
+          50,
+          3
+        ],
+        "_8": [
+          "",
+          47,
+          3
+        ],
+        "_9": [
+          "",
+          0,
+          3
+        ],
+        "_10": [
+          "",
+          54,
+          3
+        ],
+        "_13": [
+          "",
+          55,
+          3
+        ],
+        "_14": [
+          "",
+          27,
+          3
+        ],
+        "_15": [
+          "",
+          45,
+          3
+        ],
+        "_17": [
+          "",
+          49,
+          3
+        ],
+        "_18": [
           {
-            "id": "d7241af1-ed18-478e-a62a-fd7cc3e3b28c",
-            "name": "database",
-            "type": "rds",
-            "engine": "postgres",
-            "engineVersion": "15",
-            "instanceSize": "db.t3.micro",
-            "storage": 37
+            "id": "afbab552-b5c2-44a2-826e-03540b3376b4",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.7341525821867585,
+            "memory": 2.79725065101193,
+            "startCommand": "node start-avaritia.js"
           },
           0,
           0
+        ],
+        "_19": [
+          "",
+          59,
+          3
+        ],
+        "_20": [
+          "",
+          6,
+          3
+        ],
+        "_23": [
+          "",
+          31,
+          3
+        ],
+        "_24": [
+          "",
+          18,
+          3
+        ],
+        "_25": [
+          "",
+          14,
+          3
+        ],
+        "_26": [
+          "",
+          39,
+          3
+        ],
+        "_27": [
+          "",
+          4,
+          3
+        ],
+        "_29": [
+          "",
+          32,
+          3
+        ],
+        "_31": [
+          "",
+          17,
+          3
+        ],
+        "_32": [
+          "",
+          46,
+          3
+        ],
+        "_33": [
+          "",
+          57,
+          3
+        ],
+        "_34": [
+          "",
+          34,
+          3
+        ],
+        "_35": [
+          "",
+          52,
+          3
+        ],
+        "_36": [
+          "",
+          51,
+          3
+        ],
+        "_37": [
+          "",
+          53,
+          3
+        ],
+        "_38": [
+          "",
+          8,
+          3
+        ],
+        "_39": [
+          "",
+          3,
+          3
+        ],
+        "_41": [
+          "",
+          5,
+          3
+        ],
+        "_42": [
+          "",
+          56,
+          3
+        ],
+        "_43": [
+          "",
+          37,
+          3
+        ],
+        "_45": [
+          "",
+          43,
+          3
+        ],
+        "_46": [
+          "",
+          19,
+          3
+        ],
+        "_47": [
+          "",
+          35,
+          3
+        ],
+        "_48": [
+          "",
+          24,
+          3
+        ],
+        "_50": [
+          "",
+          20,
+          3
+        ],
+        "_51": [
+          "",
+          12,
+          3
+        ],
+        "_52": [
+          "",
+          11,
+          3
+        ],
+        "_53": [
+          {
+            "id": "749c1f48-380b-42c1-b5bd-f81980055cfa",
+            "name": "naughty-mathematics.name",
+            "type": "web",
+            "cpu": 1.1299417275341126,
+            "memory": 6.217142218550029,
+            "minInstances": 1,
+            "maxInstances": 4,
+            "healthCheckPath": "/tristis",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "181.231.87.137"
+            }
+          },
+          0,
+          0
+        ],
+        "_54": [
+          "",
+          2,
+          3
+        ],
+        "_57": [
+          "",
+          29,
+          3
+        ],
+        "_58": [
+          "",
+          38,
+          3
         ]
       }
     },
