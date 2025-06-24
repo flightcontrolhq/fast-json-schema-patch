@@ -1,160 +1,64 @@
 [
   {
     "op": "replace",
-    "path": "/posts/4/tags/1",
-    "value": "post"
+    "path": "/environments/0/services/29/memory",
+    "value": 3.0008835848929625
   },
   {
     "op": "replace",
-    "path": "/posts/4/tags/0",
-    "value": "new"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/4/likes",
-    "value": 0
-  },
-  {
-    "op": "replace",
-    "path": "/posts/4/timestamp",
-    "value": "2025-06-23T05:34:55.307Z"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/4/content",
-    "value": "Cito ipsum triumphus asporto. Ater cunae compello tabesco. Avaritia subnecto tenax credo ambitus.\nPeior cribro bellum vox tabella adimpleo trado nulla. Vester tot demum subiungo velum uter harum advenio acer atavus. Atrocitas illum ustilo confero tergum debitis cum quo concido.\nCalco tutamen attollo certus tredecim universe spoliatio. Delicate aranea auditor delego careo casso sint cuius. Contego apparatus perspiciatis pel culpa aperio desolo taceo cunabula undique."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/4/title",
-    "value": "Newly Added Post"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/4/postId",
-    "value": "1b722707-eb15-4f12-90b1-f23be2d8ccca"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/3/tags/0",
-    "value": "apud"
+    "path": "/environments/0/services/29/cpu",
+    "value": 2.941305315127563
   },
   {
     "op": "add",
-    "path": "/posts/3/tags/1",
-    "value": "appono"
+    "path": "/environments/0/services/28/dependsOn",
+    "value": [
+      "f13be8aa-1499-4ee2-b464-010454d27f74"
+    ]
   },
   {
     "op": "replace",
-    "path": "/posts/3/likes",
-    "value": 275
+    "path": "/environments/0/services/1/memory",
+    "value": 0.7316314064369154
   },
   {
     "op": "replace",
-    "path": "/posts/3/timestamp",
-    "value": "2025-06-22T21:31:59.542Z"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/3/content",
-    "value": "Harum carpo thema. Super reiciendis coadunatio. Animadverto victoria strues communis assumenda addo basium.\nVilicus eum voluptatem. Depopulo spes expedita aufero cavus. Taceo iusto velum.\nRepudiandae cauda bellum. Adamo deludo una depromo adipisci sollers. Vita vulnus arma."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/3/title",
-    "value": "Corrupti ustilo suffragium termes torrens."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/3/postId",
-    "value": "476313a6-b477-4ddc-8919-65ac02be3054"
-  },
-  {
-    "op": "remove",
-    "path": "/posts/2/tags/2"
-  },
-  {
-    "op": "remove",
-    "path": "/posts/2/tags/1"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/tags/0",
-    "value": "caries"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/likes",
-    "value": 325
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/timestamp",
-    "value": "2025-06-23T06:34:11.079Z"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/content",
-    "value": "Ustilo arcesso addo uter conscendo artificiose beatae umbra. Substantia utrimque convoco. Absum asperiores demens.\nThymbra turpis eos defendo atque audio vos. Cresco timor alveus varius vociferor candidus apostolus sortitus paens caelestis. Reiciendis laborum aestivus tamen vito adipiscor curriculum.\nQuasi cinis vitium unus acer cado cura videlicet. Patior teres teneo tollo provident blandior demum. Campana turbo derideo studio arcesso avarus claro provident appello."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/title",
-    "value": "Doloremque sol corrumpo inventore quia talio antepono."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/2/postId",
-    "value": "4392dfd6-d27c-426f-875c-6c646964ea51"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/tags/0",
-    "value": "rem"
+    "path": "/environments/0/services/1/cpu",
+    "value": 1.4260486305146298
   },
   {
     "op": "add",
-    "path": "/posts/1/tags/1",
-    "value": "arcus"
+    "path": "/environments/0/services/0/envVariables/VAR_VAE",
+    "value": "gWc03hlop4Hty1O"
   },
   {
     "op": "add",
-    "path": "/posts/1/tags/2",
-    "value": "thesaurus"
+    "path": "/environments/0/services/43",
+    "value": {
+      "id": "f13be8aa-1499-4ee2-b464-010454d27f74",
+      "name": "calculate-worker-clone",
+      "type": "worker",
+      "cpu": 1.1543090108356329,
+      "memory": 1.9101933400797384,
+      "startCommand": "node start-solutio.js"
+    }
   },
   {
-    "op": "replace",
-    "path": "/posts/1/likes",
-    "value": 956
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/timestamp",
-    "value": "2025-06-22T20:42:26.279Z"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/content",
-    "value": "Conventus considero peior tristis strenuus commodo spiritus vis caute deputo. Ut attonbitus conitor vociferor caste vehemens abstergo ascisco. Desino volutabrum tricesimus tenax accedo supplanto color bestia contigo.\nCalamitas aliqua argentum cubo magnam paulatim cibus magni apto mollitia. Curiositas taedium virtus tenetur appello stabilis tam cultura caveo in. Dignissimos adulatio abundans vorax creo.\nSint ait crastinus verbum. Adeptio ambitus confido. Vero toties terebro."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/title",
-    "value": "Valens trans studio ex uterque adsidue comis caveo cena dicta."
-  },
-  {
-    "op": "replace",
-    "path": "/posts/1/postId",
-    "value": "7a46350f-9c12-47d0-b521-5acb56ce73fa"
-  },
-  {
-    "op": "replace",
-    "path": "/posts/0/title",
-    "value": "A totally new title"
-  },
-  {
-    "op": "replace",
-    "path": "/username",
-    "value": "Chesley_Feeney3"
+    "op": "add",
+    "path": "/environments/0/services/44",
+    "value": {
+      "id": "e98ffb3c-fcee-4b72-8209-35bd2cc77846",
+      "name": "unrealistic-sediment.net",
+      "type": "web",
+      "cpu": 1.410011989844096,
+      "memory": 4.164484504771137,
+      "minInstances": 1,
+      "maxInstances": 4,
+      "healthCheckPath": "/templum",
+      "envVariables": {
+        "NODE_ENV": "production",
+        "DB_HOST": "44.211.150.209"
+      }
+    }
   }
 ]

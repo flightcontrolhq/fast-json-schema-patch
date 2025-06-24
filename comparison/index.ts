@@ -1,75 +1,179 @@
-import { SchemaPatcher, buildPlan } from "../src/index";
-import schema from "../test/schema.json";
+import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import * as fastJsonPatch from "fast-json-patch";
 import rfc6902 from "rfc6902";
 import * as jsondiffpatch from "jsondiffpatch";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { faker } from "@faker-js/faker";
+import mainSchema from "../test/schema.json";
 
-const userSchema = {
-  type: "object",
-  properties: {
-    userId: { type: "string" },
-    username: { type: "string" },
-    email: { type: "string" },
-    avatar: { type: "string" },
-    password: { type: "string" },
-    birthdate: { type: "string", format: "date-time" },
-    registeredAt: { type: "string", format: "date-time" },
-    address: {
-      type: "object",
-      properties: {
-        street: { type: "string" },
-        city: { type: "string" },
-        zipCode: { type: "string" },
-      },
-      required: ["street", "city", "zipCode"],
-    },
-    posts: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          postId: { type: "string" },
-          title: { type: "string" },
-          content: { type: "string" },
-          timestamp: { type: "string", format: "date-time" },
-          likes: { type: "number" },
-          tags: { type: "array", items: { type: "string" } },
-        },
-        required: ["postId", "title", "content", "timestamp", "likes"],
-      },
-    },
-  },
-  required: ["userId", "username", "email", "registeredAt"],
-};
+function deepSortArrays(obj: any): any {
+  if (Array.isArray(obj)) {
+    // First, recursively sort items within the array
+    const sortedItems = obj.map(deepSortArrays);
 
-function createRandomUser() {
+    // Then, sort the array itself using a stable, deterministic method.
+    // Stringifying is a simple way to achieve this for complex objects.
+    return sortedItems.sort((a, b) => {
+      const aStr = JSON.stringify(a);
+      const bStr = JSON.stringify(b);
+      if (aStr < bStr) return -1;
+      if (aStr > bStr) return 1;
+      return 0;
+    });
+  }
+  if (typeof obj === 'object' && obj !== null) {
+    // Also sort keys for a canonical object representation
+    const newObj: { [key: string]: any } = {};
+    for (const key of Object.keys(obj).sort()) {
+      newObj[key] = deepSortArrays((obj as any)[key]);
+    }
+    return newObj;
+  }
+  return obj;
+}
+
+function isPatchValid(doc1: any, doc2: any, patch: any, library: string) {
+  try {
+    const doc1Copy = JSON.parse(JSON.stringify(doc1));
+    const patchCopy = JSON.parse(JSON.stringify(patch));
+    
+    const {newDocument: patchedDoc} = fastJsonPatch.applyPatch(doc1Copy, patchCopy, true);
+    
+    const sortedPatchedDoc = deepSortArrays(patchedDoc);
+    const sortedDoc2 = deepSortArrays(doc2);
+
+    const valid = deepEqual(sortedPatchedDoc, sortedDoc2);
+
+    if (!valid) {
+      console.error(`Patch from ${library} generated an invalid result. The diff is:`);
+      const delta = diffpatcher.diff(sortedPatchedDoc, sortedDoc2);
+      console.error(JSON.stringify(delta, null, 2));
+    }
+    return valid;
+  } catch (e) {
+    // Errors are expected for invalid patches. We return false and don't log to keep the output clean.
+    return false;
+  }
+}
+
+function createRandomWebService() {
   return {
-    userId: faker.string.uuid(),
-    username: faker.internet.username(),
-    email: faker.internet.email(),
-    avatar: faker.image.avatar(),
-    birthdate: faker.date.past().toISOString(),
-    registeredAt: faker.date.past().toISOString(),
-    address: {
-      street: faker.location.streetAddress(),
-      city: faker.location.city(),
-      zipCode: faker.location.zipCode(),
+    id: faker.string.uuid(),
+    name: faker.internet.domainName(),
+    type: "web",
+    cpu: faker.number.float({ min: 0.25, max: 4 }),
+    memory: faker.number.float({ min: 0.5, max: 8 }),
+    minInstances: 1,
+    maxInstances: faker.number.int({ min: 1, max: 5 }),
+    healthCheckPath: `/${faker.lorem.word()}`,
+    envVariables: {
+      NODE_ENV: "production",
+      DB_HOST: faker.internet.ip(),
     },
-    posts: Array.from({ length: faker.number.int({ min: 2, max: 5 }) }, () => ({
-      postId: faker.string.uuid(),
-      title: faker.lorem.sentence(),
-      content: faker.lorem.paragraphs(),
-      timestamp: faker.date.recent().toISOString(),
-      likes: faker.number.int({ min: 0, max: 1000 }),
-      tags: Array.from(
-        { length: faker.number.int({ min: 1, max: 5 }) },
-        () => faker.lorem.word()
-      ),
-    })),
   };
+}
+
+function createRandomWorkerService() {
+  return {
+    id: faker.string.uuid(),
+    name: `${faker.hacker.verb()}-worker`,
+    type: "worker",
+    cpu: faker.number.float({ min: 0.25, max: 2 }),
+    memory: faker.number.float({ min: 0.5, max: 4 }),
+    startCommand: `node start-${faker.lorem.word()}.js`,
+  };
+}
+
+function createRandomDbService() {
+  return {
+    id: faker.string.uuid(),
+    name: "database",
+    type: "rds",
+    engine: "postgres",
+    engineVersion: "15",
+    instanceSize: "db.t3.micro",
+    storage: faker.number.int({ min: 20, max: 100 }),
+  };
+}
+
+function createRandomCloudConfig() {
+  const config: any = {
+    environments: [],
+  };
+
+  const numEnvs = 1
+  for (let i = 0; i < numEnvs; i++) {
+    const services = [];
+    const numServices = faker.number.int({ min: 2, max: 100 });
+    
+    // Ensure at least one of each for variety
+    services.push(createRandomWebService());
+    services.push(createRandomWorkerService());
+    services.push(createRandomDbService());
+
+    for (let j = 3; j < numServices; j++) {
+      const serviceType = faker.helpers.arrayElement(["web", "worker"]);
+      if (serviceType === "web") {
+        services.push(createRandomWebService());
+      } else {
+        services.push(createRandomWorkerService());
+      }
+    }
+
+    config.environments.push({
+      id: faker.lorem.slug(),
+      name: `env-${i}`,
+      region: faker.location.countryCode(),
+      source: { branch: "main" },
+      services: faker.helpers.shuffle(services),
+    });
+  }
+  return config;
+}
+
+function countRfc6902Patch(patch: any): number {
+  return patch.length;
+}
+
+function countJsonDiffPatch(patch: any): number {
+  if (!patch || typeof patch !== 'object') {
+    return 0;
+  }
+
+  let count = 0;
+  
+  if (Array.isArray(patch)) {
+    if (
+      patch.length === 1 ||
+      patch.length === 2 ||
+      (patch.length === 3 && patch[1] === 0 && patch[2] === 0)
+    ) {
+      return 1;
+    }
+  }
+
+  if (patch._t === 'a') {
+    for (const key in patch) {
+      if (key === '_t') {
+        continue;
+      }
+
+      const val = patch[key];
+      if (Array.isArray(val)) {
+        count++;
+      } else {
+        count += countJsonDiffPatch(val);
+      }
+    }
+    return count;
+  }
+
+  for (const key in patch) {
+    count += countJsonDiffPatch(patch[key]);
+  }
+
+  return count;
 }
 
 // Small Config - from existing test
@@ -197,9 +301,9 @@ const diffpatcher = jsondiffpatch.create({
 
 async function compare() {
   const scenarios = {
-    small: { doc1: smallDoc1, doc2: smallDoc2, schema },
-    large: { doc1: largeDoc1, doc2: largeDoc2, schema },
-    "real-world": { doc1: realWorldDoc1, doc2: realWorldDoc2, schema },
+    small: { doc1: smallDoc1, doc2: smallDoc2, schema: mainSchema },
+    large: { doc1: largeDoc1, doc2: largeDoc2, schema: mainSchema },
+    "real-world": { doc1: realWorldDoc1, doc2: realWorldDoc2, schema: mainSchema },
   };
 
   for (const [name, { doc1, doc2, schema: scenarioSchema }] of Object.entries(scenarios)) {
@@ -231,56 +335,182 @@ async function compare() {
     );
 
     console.log(`- SchemaPatcher patch length: ${schemaPatch.length}`);
-    console.log(`- fast-json-patch patch length: ${fastPatch.length}`);
-    console.log(`- rfc6902 patch length: ${rfcPatch.length}`);
-    console.log(`- jsondiffpatch patch length: ${jsonDiffPatch ? Object.keys(jsonDiffPatch).length : 0}`);
+    console.log(`- fast-json-patch patch length: ${countRfc6902Patch(fastPatch)}`);
+    console.log(`- rfc6902 patch length: ${countRfc6902Patch(rfcPatch)}`);
+    console.log(`- jsondiffpatch patch length: ${countJsonDiffPatch(jsonDiffPatch)}`);
     console.log(`- Wrote patches to comparison/${name}-*.json`);
     console.log("");
   }
 
   // Faker scenario
   console.log("Comparing faker-generated config...");
-  const plan = buildPlan(userSchema as any, { primaryKeyMap: { "/posts": "postId" } });
+  
+  const plan = buildPlan(mainSchema as any);
   const patcher = new SchemaPatcher({ plan });
   let totalSchemaPatches = 0;
+  let schemaPatchTime = 0;
+  let totalSchemaPatchLines = 0;
+  let totalSchemaValid = 0;
   let totalFastPatches = 0;
+  let fastPatchTime = 0;
+  let totalFastPatchLines = 0;
+  let totalFastValid = 0;
   let totalRfcPatches = 0;
+  let rfcPatchTime = 0;
+  let totalRfcPatchLines = 0;
+  let totalRfcValid = 0;
   let totalJsonDiffPatches = 0;
-  const numFakerRuns = 10;
+  let jsonDiffPatchTime = 0;
+  let totalJsonDiffPatchLines = 0;
+  const numFakerRuns = 5000;
+  let totalJsonLines = 0;
 
   for (let i = 0; i < numFakerRuns; i++) {
-    const doc1 = createRandomUser();
+    const doc1 = createRandomCloudConfig();
+    totalJsonLines += JSON.stringify(doc1).length;
     const doc2 = JSON.parse(JSON.stringify(doc1));
 
-    // Make some changes
-    doc2.username = faker.internet.username();
-    if (doc2.posts.length > 1) {
-      doc2.posts.splice(1, 1);
-    }
-    doc2.posts[0].title = "A totally new title";
-    doc2.posts.push({
-      postId: faker.string.uuid(),
-      title: "Newly Added Post",
-      content: faker.lorem.paragraphs(),
-      timestamp: faker.date.recent().toISOString(),
-      likes: 0,
-      tags: ["new", "post"],
-    });
+    // Apply a random number of random modifications based on the new schema
+    const modifications = [
+      (doc: any) => { // Change environment name
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) env.name = faker.lorem.slug();
+      },
+      (doc: any) => { // Add a new service
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) env.services.push(createRandomWebService());
+      },
+      (doc: any) => { // Remove a service
+        const envWithServices = doc.environments.find((e: any) => e.services.length > 1);
+        if (envWithServices) {
+          envWithServices.services.splice(0, 1);
+        }
+      },
+      (doc: any) => { // Modify a service property
+         const envWithServices: any = doc.environments.find((e: any) => e.services.length > 0);
+         if (envWithServices) {
+           const service: any = faker.helpers.arrayElement(envWithServices.services);
+           if (service && service.type === 'web') {
+             service.cpu = faker.number.float({ min: 0.25, max: 4 });
+             service.memory = faker.number.float({ min: 0.5, max: 8 });
+           } else if (service && service.type === 'rds') {
+             service.storage = faker.number.int({ min: 20, max: 200 });
+           }
+         }
+      },
+       (doc: any) => { // Reorder services
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 1) {
+          env.services = faker.helpers.shuffle(env.services);
+        }
+      },
+       (doc: any) => { 
+         //change the id of a service
+         const env: any = faker.helpers.arrayElement(doc.environments);
+         if (env && env.services.length > 0) {
+           const service: any = faker.helpers.arrayElement(env.services);
+           service.id = faker.string.uuid();
+         }
+       },
+       (doc: any) => { // Modify a deeply nested environment variable
+        const webServiceEnv = doc.environments.find((e: any) => e.services.some((s:any) => s.type === 'web'));
+        if (webServiceEnv) {
+          const webService = webServiceEnv.services.find((s: any) => s.type === 'web');
+          if (webService && webService.envVariables) {
+            const newVar = `VAR_${faker.lorem.word().toUpperCase()}`;
+            webService.envVariables[newVar] = faker.internet.password();
+          }
+        }
+      },
+      (doc: any) => { // Move a service from one environment to another
+        if (doc.environments.length > 1) {
+          const sourceEnv: any = faker.helpers.arrayElement(doc.environments.filter((e:any) => e.services.length > 0));
+          const targetEnv: any = faker.helpers.arrayElement(doc.environments.filter((e:any) => e.id !== sourceEnv.id));
+          if (sourceEnv && targetEnv) {
+              const serviceToMove = sourceEnv.services.pop();
+              if (serviceToMove) {
+                  targetEnv.services.push(serviceToMove);
+              }
+          }
+        }
+      },
+      (doc: any) => { // Add a dependsOn relationship between services
+        const envWithMultipleServices = doc.environments.find((e: any) => e.services.length > 1);
+        if (envWithMultipleServices) {
+          const [service1, service2]: any[] = faker.helpers.shuffle(envWithMultipleServices.services);
+          if (service1 && service2 && service1.id !== service2.id) {
+            if (!service1.dependsOn) {
+              service1.dependsOn = [];
+            }
+            if (!service1.dependsOn.includes(service2.id)) {
+              service1.dependsOn.push(service2.id);
+            }
+          }
+        }
+      },
+      (doc: any) => { // Clone a service, modify it, and add a dependency
+        const env: any = faker.helpers.arrayElement(doc.environments.filter((e: any) => e.services.length > 0));
+        if (env) {
+          const originalService: any = faker.helpers.arrayElement(env.services);
+          if(originalService) {
+              const clonedService = JSON.parse(JSON.stringify(originalService));
+              
+              clonedService.id = faker.string.uuid();
+              clonedService.name = `${originalService.name}-clone`;
+              if (clonedService.type === 'web') {
+                  clonedService.cpu = faker.number.float({ min: 0.25, max: 4 });
+              }
+              
+              env.services.push(clonedService);
+      
+              if (!originalService.dependsOn) {
+                  originalService.dependsOn = [];
+              }
+              originalService.dependsOn.push(clonedService.id);
+          }
+        }
+      },
+    ];
 
+    const numModifications = faker.number.int({ min: 3, max: 6 });
+    for (let j = 0; j < numModifications; j++) {
+        const modify = faker.helpers.arrayElement(modifications);
+        modify(doc2);
+    }
+
+    let start = Date.now();
     const schemaPatch = patcher.createPatch(doc1, doc2);
+    schemaPatchTime += Date.now() - start;
+    start = Date.now();
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
+    fastPatchTime += Date.now() - start;
+    start = Date.now();
     const rfcPatch = rfc6902.createPatch(doc1, doc2);
+    rfcPatchTime += Date.now() - start;
+    start = Date.now();
     const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
+    jsonDiffPatchTime += Date.now() - start;
+
+    // Calculate accuracy
+    const schemaValid = isPatchValid(doc1, doc2, schemaPatch, "SchemaPatcher");
+    const fastValid = isPatchValid(doc1, doc2, fastPatch, "fast-json-patch");
+    const rfcValid = isPatchValid(doc1, doc2, rfcPatch, "rfc6902");
+
+    totalSchemaValid += schemaValid ? 1 : 0;
+    totalFastValid += fastValid ? 1 : 0;
+    totalRfcValid += rfcValid ? 1 : 0;
 
     totalSchemaPatches += schemaPatch.length;
-    totalFastPatches += fastPatch.length;
-    totalRfcPatches += rfcPatch.length;
+    totalSchemaPatchLines += JSON.stringify(schemaPatch).length;
+    totalFastPatches += countRfc6902Patch(fastPatch);
+    totalFastPatchLines += JSON.stringify(fastPatch).length;
+    totalRfcPatches += countRfc6902Patch(rfcPatch);
+    totalRfcPatchLines += JSON.stringify(rfcPatch).length;
     if (jsonDiffPatch) {
-      totalJsonDiffPatches += Object.keys(jsonDiffPatch).length;
+      totalJsonDiffPatches += countJsonDiffPatch(jsonDiffPatch);
+      totalJsonDiffPatchLines += JSON.stringify(jsonDiffPatch).length;
     }
-
     if (i === 0) {
-      // Save one example
       await writeFile(
         join(__dirname, "faker-schema-patch.json"),
         JSON.stringify(schemaPatch, null, 2)
@@ -299,13 +529,50 @@ async function compare() {
       );
     }
   }
-  
-  console.log(`- SchemaPatcher average patch length: ${totalSchemaPatches / numFakerRuns}`);
-  console.log(`- fast-json-patch average patch length: ${totalFastPatches / numFakerRuns}`);
-  console.log(`- rfc6902 average patch length: ${totalRfcPatches / numFakerRuns}`);
-  console.log(`- jsondiffpatch average patch length: ${totalJsonDiffPatches / numFakerRuns}`);
-  console.log("- Wrote first faker patches to comparison/faker-*.json");
-  console.log("");
+  console.log(`Ran ${numFakerRuns} faker runs`);
+  console.log(`Total JSON lines: ${totalJsonLines}`);
+  console.log(`Average JSON lines: ${totalJsonLines / numFakerRuns}`);
+  console.table([
+    {
+    name: "SchemaPatcher",
+    totalPatches: totalSchemaPatches,
+    averagePatches: totalSchemaPatches / numFakerRuns,
+    patchLength: totalSchemaPatchLines,
+    averagePatchLength: totalSchemaPatchLines / numFakerRuns,
+    valid: totalSchemaValid,
+    accuracy: totalSchemaValid / numFakerRuns * 100,
+    time: `${schemaPatchTime}ms`,
+    averageTime: `${schemaPatchTime / numFakerRuns}ms`,
+  }, {
+    name: "fast-json-patch",
+    totalPatches: totalFastPatches,
+    averagePatches: totalFastPatches / numFakerRuns,
+    patchLength: totalFastPatchLines,
+    averagePatchLength: totalFastPatchLines / numFakerRuns,
+    valid: totalFastValid,
+    accuracy: totalFastValid / numFakerRuns * 100,
+    time: `${fastPatchTime}ms`,
+    averageTime: `${fastPatchTime / numFakerRuns}ms`,
+  }, {
+    name: "rfc6902",
+    totalPatches: totalRfcPatches,
+    averagePatches: totalRfcPatches / numFakerRuns,
+    patchLength: totalRfcPatchLines,
+    averagePatchLength: totalRfcPatchLines / numFakerRuns,
+    valid: totalRfcValid,
+    accuracy: totalRfcValid / numFakerRuns * 100,
+    time: `${rfcPatchTime}ms`,
+    averageTime: `${rfcPatchTime / numFakerRuns}ms`,
+  }, {
+    name: "jsondiffpatch",
+    totalPatches: totalJsonDiffPatches,
+    averagePatches: totalJsonDiffPatches / numFakerRuns,
+    patchLength: totalJsonDiffPatchLines,
+    averagePatchLength: totalJsonDiffPatchLines / numFakerRuns,
+    time: `${jsonDiffPatchTime}ms`,
+    averageTime: `${jsonDiffPatchTime / numFakerRuns}ms`,
+  },
+  ]);
 }
 
 compare().catch(console.error);

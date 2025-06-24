@@ -3,15 +3,13 @@
   "workspaces": {
     "": {
       "name": "schema-json-patch",
-      "dependencies": {
-        "jsondiffpatch": "^0.7.3",
-      },
       "devDependencies": {
         "@biomejs/biome": "^2.0.4",
         "@faker-js/faker": "^9.8.0",
         "@types/bun": "latest",
         "fast-json-patch": "^3.1.1",
         "json-source-map": "^0.6.1",
+        "jsondiffpatch": "^0.7.3",
         "rfc6902": "^5.1.2",
         "tinybench": "^4.0.1",
       },

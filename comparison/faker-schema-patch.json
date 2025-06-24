@@ -1,31 +1,64 @@
 [
   {
-    "op": "replace",
-    "path": "/username",
-    "value": "Chesley_Feeney3"
+    "op": "add",
+    "path": "/environments/0/services/0/envVariables/VAR_VAE",
+    "value": "gWc03hlop4Hty1O"
   },
   {
     "op": "replace",
-    "path": "/posts/0/title",
-    "value": "A totally new title"
+    "path": "/environments/0/services/1/cpu",
+    "value": 1.4260486305146298
   },
   {
-    "op": "remove",
-    "path": "/posts/1"
+    "op": "replace",
+    "path": "/environments/0/services/1/memory",
+    "value": 0.7316314064369154
   },
   {
     "op": "add",
-    "path": "/posts/-",
+    "path": "/environments/0/services/28/dependsOn",
+    "value": [
+      "f13be8aa-1499-4ee2-b464-010454d27f74"
+    ]
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/29/cpu",
+    "value": 2.941305315127563
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/29/memory",
+    "value": 3.0008835848929625
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
     "value": {
-      "postId": "1b722707-eb15-4f12-90b1-f23be2d8ccca",
-      "title": "Newly Added Post",
-      "content": "Cito ipsum triumphus asporto. Ater cunae compello tabesco. Avaritia subnecto tenax credo ambitus.\nPeior cribro bellum vox tabella adimpleo trado nulla. Vester tot demum subiungo velum uter harum advenio acer atavus. Atrocitas illum ustilo confero tergum debitis cum quo concido.\nCalco tutamen attollo certus tredecim universe spoliatio. Delicate aranea auditor delego careo casso sint cuius. Contego apparatus perspiciatis pel culpa aperio desolo taceo cunabula undique.",
-      "timestamp": "2025-06-23T05:34:55.307Z",
-      "likes": 0,
-      "tags": [
-        "new",
-        "post"
-      ]
+      "id": "f13be8aa-1499-4ee2-b464-010454d27f74",
+      "name": "calculate-worker-clone",
+      "type": "worker",
+      "cpu": 1.1543090108356329,
+      "memory": 1.9101933400797384,
+      "startCommand": "node start-solutio.js"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "e98ffb3c-fcee-4b72-8209-35bd2cc77846",
+      "name": "unrealistic-sediment.net",
+      "type": "web",
+      "cpu": 1.410011989844096,
+      "memory": 4.164484504771137,
+      "minInstances": 1,
+      "maxInstances": 4,
+      "healthCheckPath": "/templum",
+      "envVariables": {
+        "NODE_ENV": "production",
+        "DB_HOST": "44.211.150.209"
+      }
     }
   }
 ]
