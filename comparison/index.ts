@@ -1,6 +1,5 @@
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import * as fastJsonPatch from "fast-json-patch";
-// import rfc6902 from "rfc6902";
 import * as jsondiffpatch from "jsondiffpatch";
 import { writeFile } from "fs/promises";
 import { join } from "path";
@@ -13,9 +12,9 @@ import * as cliProgress from "cli-progress";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
-  SIMPLE = 1,    // Single property changes
-  MEDIUM = 5,    // Service additions/removals, multi-property changes
-  COMPLEX = 10   // Environment changes, dependency chains, batch operations
+  SIMPLE = 1, // Single property changes
+  MEDIUM = 5, // Service additions/removals, multi-property changes
+  COMPLEX = 10, // Environment changes, dependency chains, batch operations
 }
 
 interface BenchmarkMetrics {
@@ -61,11 +60,11 @@ interface ModificationDescriptor {
 
 // Utility Functions
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
@@ -83,11 +82,11 @@ function calculatePerformanceStats(values: number[]): PerformanceStats {
   if (values.length === 0) {
     return { p50: 0, p95: 0, p99: 0, min: 0, max: 0, mean: 0, stdDev: 0 };
   }
-  
+
   const sorted = [...values].sort((a, b) => a - b);
   const len = sorted.length;
   const mean = values.reduce((sum, val) => sum + val, 0) / len;
-  
+
   return {
     p50: sorted[Math.floor(len * 0.5)] || 0,
     p95: sorted[Math.floor(len * 0.95)] || 0,
@@ -95,7 +94,9 @@ function calculatePerformanceStats(values: number[]): PerformanceStats {
     min: sorted[0] || 0,
     max: sorted[len - 1] || 0,
     mean,
-    stdDev: Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / len)
+    stdDev: Math.sqrt(
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / len
+    ),
   };
 }
 
@@ -105,7 +106,7 @@ function measureMemoryUsage<T>(fn: () => T): { result: T; memoryUsed: number } {
   const endMemory = process.memoryUsage().heapUsed;
   return {
     result,
-    memoryUsed: Math.max(0, endMemory - startMemory)
+    memoryUsed: Math.max(0, endMemory - startMemory),
   };
 }
 
@@ -451,17 +452,17 @@ function calculateSemanticAccuracy(
   schema: any
 ): number {
   let score = 100;
-  
+
   try {
     const typeViolations = validateTypePreservation(patch, schema);
     score -= typeViolations * 5;
-    
+
     const arrayEfficiency = calculateArrayHandlingEfficiency(patch);
     score -= (100 - arrayEfficiency) * 0.2;
-    
+
     const semanticScore = calculatePatchSemantics(patch, library);
     score = (score + semanticScore) / 2;
-    
+
     return Math.max(0, Math.min(100, score));
   } catch (error) {
     return 50;
@@ -470,15 +471,19 @@ function calculateSemanticAccuracy(
 
 function validateTypePreservation(patch: any, schema: any): number {
   if (!Array.isArray(patch)) return 0;
-  
+
   let violations = 0;
   for (const operation of patch) {
-    if (operation.op === 'replace' && operation.path && operation.value !== undefined) {
-      const pathParts = operation.path.split('/').filter(Boolean);
+    if (
+      operation.op === "replace" &&
+      operation.path &&
+      operation.value !== undefined
+    ) {
+      const pathParts = operation.path.split("/").filter(Boolean);
       if (pathParts.length > 0) {
         const oldType = typeof operation.oldValue;
         const newType = typeof operation.value;
-        if (oldType !== 'undefined' && oldType !== newType) {
+        if (oldType !== "undefined" && oldType !== newType) {
           violations++;
         }
       }
@@ -489,31 +494,33 @@ function validateTypePreservation(patch: any, schema: any): number {
 
 function calculateArrayHandlingEfficiency(patch: any): number {
   if (!Array.isArray(patch)) return 100;
-  
+
   let arrayOperations = 0;
   let efficientOperations = 0;
-  
+
   for (const operation of patch) {
-    if (operation.path && operation.path.includes('[')) {
+    if (operation.path && operation.path.includes("[")) {
       arrayOperations++;
-      if (operation.op === 'move') {
+      if (operation.op === "move") {
         efficientOperations++;
-      } else if (operation.op === 'add' || operation.op === 'remove') {
+      } else if (operation.op === "add" || operation.op === "remove") {
         efficientOperations += 0.5;
       }
     }
   }
-  
-  return arrayOperations === 0 ? 100 : (efficientOperations / arrayOperations) * 100;
+
+  return arrayOperations === 0
+    ? 100
+    : (efficientOperations / arrayOperations) * 100;
 }
 
 function calculatePatchSemantics(patch: any, library: string): number {
   if (!Array.isArray(patch)) return 50;
-  
+
   let score = 100;
   const paths = new Set();
   let redundant = 0;
-  
+
   for (const operation of patch) {
     if (operation.path) {
       if (paths.has(operation.path)) {
@@ -522,100 +529,176 @@ function calculatePatchSemantics(patch: any, library: string): number {
       paths.add(operation.path);
     }
   }
-  
+
   if (patch.length > 0) {
     score -= (redundant / patch.length) * 30;
   }
-  
+
   return Math.max(0, score);
 }
 
 // Visualization Functions
 function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
-  console.log('\n📊 PERFORMANCE ANALYSIS');
-  console.log('='.repeat(80));
+  console.log("\n📊 PERFORMANCE ANALYSIS");
+  console.log("=".repeat(80));
 
-  const libraryGroups = groupBy(metrics, 'library');
+  const libraryGroups = groupBy(metrics, "library");
   const libraryNames = Object.keys(libraryGroups);
-  const colors = ['green', 'blue', 'purple', 'yellow'];
-  
+  const colors = ["green", "blue", "purple", "yellow"];
+
   // 1. Average Execution Time Chart
-  console.log('\n⚡ Average Execution Time by Library:');
+  console.log("\n⚡ Average Execution Time by Library:");
   const timeData = libraryNames.map((library, index) => {
     const items = libraryGroups[library] || [];
-    const avgTime = items.length > 0 ? items.reduce((sum, item) => sum + item.executionTime, 0) / items.length : 0;
+    const avgTime =
+      items.length > 0
+        ? items.reduce((sum, item) => sum + item.executionTime, 0) /
+          items.length
+        : 0;
     return {
       value: Number(avgTime.toFixed(2)),
-      label: library.replace('SchemaPatcher', 'Schema').replace('fast-json-patch', 'FastJSON').replace('jsondiffpatch', 'JSONDiff'),
-      color: colors[index % colors.length]
+      label: library,
+      color: colors[index % colors.length],
     };
   });
 
   const timeChart = new Chartscii(timeData, {
     width: 60,
     height: 8,
-    theme: 'pastel',
+    theme: "pastel",
     colorLabels: true,
     valueLabels: true,
-    valueLabelsPrefix: '',
-    title: 'Execution Time (ms)',
-    orientation: 'horizontal',
-    sort: true
+    valueLabelsPrefix: "",
+    title: "Execution Time (ms)",
+    orientation: "horizontal",
+    sort: true,
   });
   console.log(timeChart.create());
 
-  // 2. Patch Count Efficiency Chart  
-  console.log('\n📏 Average Patch Count by Library:');
+  // 2. Patch Count Efficiency Chart
+  console.log("\n📏 Average Patch Count by Library:");
   const patchData = libraryNames.map((library, index) => {
     const items = libraryGroups[library] || [];
-    const avgPatches = items.length > 0 ? items.reduce((sum, item) => sum + item.patchCount, 0) / items.length : 0;
+    const avgPatches =
+      items.length > 0
+        ? items.reduce((sum, item) => sum + item.patchCount, 0) / items.length
+        : 0;
     return {
       value: Number(avgPatches.toFixed(1)),
-      label: library.replace('SchemaPatcher', 'Schema').replace('fast-json-patch', 'FastJSON').replace('jsondiffpatch', 'JSONDiff'),
-      color: colors[index % colors.length]
+      label: library,
+      color: colors[index % colors.length],
     };
   });
 
   const patchChart = new Chartscii(patchData, {
     width: 60,
     height: 8,
-    theme: 'pastel',
+    theme: "pastel",
     colorLabels: true,
     valueLabels: true,
-    title: 'Average Patches Generated',
-    orientation: 'horizontal',
-    sort: true
+    title: "Average Patches Generated",
+    orientation: "horizontal",
+    sort: true,
   });
   console.log(patchChart.create());
 
-  console.log('\n🎯 Comparative Algorithm Performance Analysis:');
+  console.log("\n🎯 Comparative Algorithm Performance Analysis:");
+  
+  // Debug: Check data distribution and identify samples outside ranges
+  const allComplexityScores = metrics.map(m => m.complexityScore);
+  const minComplexity = Math.min(...allComplexityScores);
+  const maxComplexity = Math.max(...allComplexityScores);
+  console.log(`\n🔍 DEBUG: Complexity score range: ${minComplexity} to ${maxComplexity}`);
+  
+  const byLibraryDebug = groupBy(metrics, "library");
+  Object.entries(byLibraryDebug).forEach(([library, items]) => {
+    const avgTime = items.reduce((sum, m) => sum + m.executionTime, 0) / items.length;
+    console.log(`${library}: ${items.length} samples, avg time: ${avgTime.toFixed(3)}ms`);
+  });
+  
   const complexityRanges = [
-    { label: 'Low', min: 0, max: 10 },
-    { label: 'Medium', min: 11, max: 30 },
-    { label: 'High', min: 31, max: 50 },
-    { label: 'Very High', min: 51, max: 100 }
+    { label: "Low", min: 0, max: 50 },
+    { label: "Medium", min: 51, max: 200 },
+    { label: "High", min: 201, max: 500 },
+    { label: "Very High", min: 501, max: 3000 }, // Adjusted to capture all samples
   ];
-  
-  const libraries = ['SchemaPatcher', 'fast-json-patch', 'jsondiffpatch'];
-  const libraryColors = ['green', 'blue', 'purple', 'yellow'];
 
-  console.log('\n📏 Total Patch Count by Complexity Range - All Algorithms:');  
-  const allPatchData: any[] = [];
+  const libraries = ["schema-json-patch (our implementation)", "fast-json-patch", "jsondiffpatch", "rfc6902"];
+  const libraryColors = ["green", "blue", "purple", "yellow"];
+
+  console.log("\n📏 Average Time by Complexity Range - All Algorithms:");
   
-  complexityRanges.forEach(range => {
+  // Debug: Check sample distribution across ranges
+  let totalCategorized = 0;
+  complexityRanges.forEach((range) => {
+    const rangeCount = metrics.filter(m => m.complexityScore >= range.min && m.complexityScore <= range.max).length;
+    console.log(`${range.label} (${range.min}-${range.max}): ${rangeCount} samples`);
+    totalCategorized += rangeCount;
+  });
+  console.log(`Total categorized: ${totalCategorized} out of ${metrics.length} total samples`);
+  const uncategorized = metrics.length - totalCategorized;
+  if (uncategorized > 0) {
+    console.log(`⚠️  WARNING: ${uncategorized} samples fall outside complexity ranges!`);
+  }
+  
+  const allTimeData: any[] = [];
+  complexityRanges.forEach((range) => {
     libraries.forEach((library, libIndex) => {
-      const libraryMetrics = metrics.filter(m => 
-        m.library === library && 
-        m.complexityScore >= range.min && 
-        m.complexityScore <= range.max
+      const libraryMetrics = metrics.filter(
+        (m) =>
+          m.library === library &&
+          m.complexityScore >= range.min &&
+          m.complexityScore <= range.max
       );
       if (libraryMetrics.length > 0) {
-        const totalPatches = libraryMetrics.reduce((sum, item) => sum + item.patchCount, 0);
+        const avgTime = libraryMetrics.reduce(
+          (sum, item) => sum + item.executionTime,
+          0
+        ) / libraryMetrics.length;
+        allTimeData.push({
+          value: Number(avgTime.toFixed(3)),
+          label: `${library}-${range.label} (n=${libraryMetrics.length})`,
+          color: libraryColors[libIndex],
+        });
+      }
+    });
+  });
+
+  if (allTimeData.length > 0) {
+    const timeChart = new Chartscii(allTimeData, {
+      width: 90,
+      height: 12,
+      theme: "pastel",
+      colorLabels: true,
+      valueLabels: true,
+      title: "Average Time by Algorithm & Complexity Range",
+      orientation: "horizontal",
+      sort: false,
+    });
+    console.log(timeChart.create());
+  }
+
+  console.log("\n📏 Average Patch Count by Complexity Range - All Algorithms:");
+  const allPatchData: any[] = [];
+
+  complexityRanges.forEach((range) => {
+    libraries.forEach((library, libIndex) => {
+      const libraryMetrics = metrics.filter(
+        (m) =>
+          m.library === library &&
+          m.complexityScore >= range.min &&
+          m.complexityScore <= range.max
+      );
+      if (libraryMetrics.length > 0) {
+        const avgPatches = libraryMetrics.reduce(
+          (sum, item) => sum + item.patchCount,
+          0
+        ) / libraryMetrics.length;
         const sampleCount = libraryMetrics.length;
         allPatchData.push({
-          value: totalPatches,
-          label: `${library.replace('SchemaPatcher', 'Schema').replace('fast-json-patch', 'FastJSON').replace('jsondiffpatch', 'JSONDiff')}-${range.label} (n=${sampleCount})`,
-          color: libraryColors[libIndex]
+          value: Number(avgPatches.toFixed(1)),
+          label: `${library}-${range.label} (n=${sampleCount})`,
+          color: libraryColors[libIndex],
         });
       }
     });
@@ -625,67 +708,75 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     const patchChart = new Chartscii(allPatchData, {
       width: 90,
       height: 12,
-      theme: 'pastel',
+      theme: "pastel",
       colorLabels: true,
       valueLabels: true,
-      title: 'Total Patch Count by Algorithm & Complexity Range',
-      orientation: 'horizontal',
-      sort: false
+      title: "Average Patch Count by Algorithm & Complexity Range",
+      orientation: "horizontal",
+      sort: false,
     });
     console.log(patchChart.create());
   }
 
-  console.log('\n📊 Chart Legend:');
-  console.log('🟢 Schema = SchemaPatcher');
-  console.log('🔵 FastJSON = fast-json-patch'); 
-  console.log('🟡 JSONDiff = jsondiffpatch');
-  console.log('-'.repeat(80));
+  console.log("\n📊 Chart Legend:");
+  console.log("🟢 Schema = schema-json-patch (our implementation)");
+  console.log("🔵 FastJSON = fast-json-patch");
+  console.log("🟡 JSONDiff = jsondiffpatch");
+  console.log("-".repeat(80));
 
   // 5. Compression Efficiency Chart
-  console.log('\n💾 Patch Size Efficiency:');
+  console.log("\n💾 Patch Size Efficiency:");
   const compressionData = libraryNames.map((library, index) => {
     const items = libraryGroups[library] || [];
-    const avgCompression = items.length > 0 ? items.reduce((sum, item) => sum + item.compressionRatio, 0) / items.length : 0;
+    const avgCompression =
+      items.length > 0
+        ? items.reduce((sum, item) => sum + item.compressionRatio, 0) /
+          items.length
+        : 0;
     return {
       value: Number(avgCompression.toFixed(1)),
-      label: library.replace('SchemaPatcher', 'Schema').replace('fast-json-patch', 'FastJSON').replace('jsondiffpatch', 'JSONDiff'),
-      color: colors[index % colors.length]
+      label: library,
+      color: colors[index % colors.length],
     };
   });
 
   const compressionChart = new Chartscii(compressionData, {
     width: 60,
     height: 8,
-    theme: 'standard',
+    theme: "standard",
     colorLabels: true,
     valueLabels: true,
-    valueLabelsPrefix: '',
-    title: 'Compression Ratio (% of document size)',
-    orientation: 'horizontal',
-    sort: true
+    valueLabelsPrefix: "",
+    title: "Compression Ratio (% of document size)",
+    orientation: "horizontal",
+    sort: true,
   });
   console.log(compressionChart.create());
 
   // Summary Statistics Table
-  console.log('\n📊 Detailed Performance Summary:');
+  console.log("\n📊 Detailed Performance Summary:");
   const summaryTable = Object.entries(libraryGroups).map(([library, items]) => {
-    const times = items.map(m => m.executionTime);
+    const times = items.map((m) => m.executionTime);
     const stats = calculatePerformanceStats(times);
-    const accuracy = items.filter(m => m.accuracy).length / items.length * 100;
-    const avgPatchSize = items.reduce((sum, m) => sum + m.patchSize, 0) / items.length;
-    const avgPatchCount = items.reduce((sum, m) => sum + m.patchCount, 0) / items.length;
-    const avgMemory = items.reduce((sum, m) => sum + m.memoryUsage, 0) / items.length;
-    const throughput = stats.mean > 0 ? (1000 / stats.mean) : 0; // ops per second
-    
+    const accuracy =
+      (items.filter((m) => m.accuracy).length / items.length) * 100;
+    const avgPatchSize =
+      items.reduce((sum, m) => sum + m.patchSize, 0) / items.length;
+    const avgPatchCount =
+      items.reduce((sum, m) => sum + m.patchCount, 0) / items.length;
+    const avgMemory =
+      items.reduce((sum, m) => sum + m.memoryUsage, 0) / items.length;
+    const throughput = stats.mean > 0 ? 1000 / stats.mean : 0; // ops per second
+
     return {
       Library: library,
-      'Avg Time (ms)': stats.mean.toFixed(2),
-      'Throughput (ops/s)': throughput.toFixed(0),
-      'P95 Time (ms)': stats.p95.toFixed(2),
-      'Accuracy (%)': accuracy.toFixed(1),
-      'Avg Patches': avgPatchCount.toFixed(1),
-      'Avg Size (bytes)': avgPatchSize.toFixed(0),
-      'Memory (KB)': (avgMemory / 1024).toFixed(1)
+      "Avg Time (ms)": stats.mean.toFixed(2),
+      "Throughput (ops/s)": throughput.toFixed(0),
+      "P95 Time (ms)": stats.p95.toFixed(2),
+      "Accuracy (%)": accuracy.toFixed(1),
+      "Avg Patches": avgPatchCount.toFixed(1),
+      "Avg Size (bytes)": avgPatchSize.toFixed(0),
+      "Memory (KB)": (avgMemory / 1024).toFixed(1),
     };
   });
 
@@ -693,63 +784,104 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
 }
 
 function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
-  const byLibrary = groupBy(allMetrics, 'library');
-  
-  console.log('\n🎯 COMPREHENSIVE BENCHMARK REPORT');
-  console.log('=' .repeat(80));
-  
-  console.log('\n📋 Executive Summary:');
+  const byLibrary = groupBy(allMetrics, "library");
+
+  console.log("\n🎯 COMPREHENSIVE BENCHMARK REPORT");
+  console.log("=".repeat(80));
+
+  console.log("\n📋 Executive Summary:");
   const totalRuns = allMetrics.length / Object.keys(byLibrary).length;
-  const avgComplexity = allMetrics.reduce((sum, m) => sum + m.complexityScore, 0) / allMetrics.length;
+  const avgComplexity =
+    allMetrics.reduce((sum, m) => sum + m.complexityScore, 0) /
+    allMetrics.length;
   console.log(`• Total test runs: ${totalRuns.toFixed(0)} per library`);
   console.log(`• Average complexity score: ${avgComplexity.toFixed(1)}`);
-  console.log(`• Libraries tested: ${Object.keys(byLibrary).join(', ')}`);
+  console.log(`• Libraries tested: ${Object.keys(byLibrary).join(", ")}`);
 
   generatePerformanceCharts(allMetrics);
 
-  console.log('\n🏆 Schema-Based Advantages Analysis:');
-  const schemaMetrics = byLibrary['SchemaPatcher'] || [];
-  const fastJsonMetrics = byLibrary['fast-json-patch'] || [];
-  
+  console.log("\n🏆 Schema-Based Advantages Analysis:");
+  const schemaMetrics = byLibrary["schema-json-patch (our implementation)"] || [];
+  const fastJsonMetrics = byLibrary["fast-json-patch"] || [];
+
   if (schemaMetrics.length > 0 && fastJsonMetrics.length > 0) {
-    const avgSchemaPatches = schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) / schemaMetrics.length;
-    const avgFastPatches = fastJsonMetrics.reduce((sum, m) => sum + m.patchCount, 0) / fastJsonMetrics.length;
-    const avgSchemaTime = schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) / schemaMetrics.length;
-    const avgFastTime = fastJsonMetrics.reduce((sum, m) => sum + m.executionTime, 0) / fastJsonMetrics.length;
-    const avgSchemaSize = schemaMetrics.reduce((sum, m) => sum + m.patchSize, 0) / schemaMetrics.length;
-    const avgFastSize = fastJsonMetrics.reduce((sum, m) => sum + m.patchSize, 0) / fastJsonMetrics.length;
-    const avgSemanticAccuracy = schemaMetrics.reduce((sum, m) => sum + m.semanticAccuracy, 0) / schemaMetrics.length;
-    
-    const patchReduction = Math.max(0, ((avgFastPatches - avgSchemaPatches) / avgFastPatches) * 100);
-    const sizeReduction = Math.max(0, ((avgFastSize - avgSchemaSize) / avgFastSize) * 100);
-    const accuracyRate = schemaMetrics.filter(m => m.accuracy).length / schemaMetrics.length * 100;
-    
-    console.table([{
-      'Patch Count Reduction (%)': patchReduction.toFixed(1),
-      'Size Reduction (%)': sizeReduction.toFixed(1),
-      'Accuracy Rate (%)': accuracyRate.toFixed(1),
-      'Semantic Accuracy Score': avgSemanticAccuracy.toFixed(1),
-      'Avg Time vs fast-json-patch': `${(avgSchemaTime / avgFastTime).toFixed(2)}x`
-    }]);
+    const avgSchemaPatches =
+      schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
+      schemaMetrics.length;
+    const avgFastPatches =
+      fastJsonMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
+      fastJsonMetrics.length;
+    const avgSchemaTime =
+      schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      schemaMetrics.length;
+    const avgFastTime =
+      fastJsonMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      fastJsonMetrics.length;
+    const avgSchemaSize =
+      schemaMetrics.reduce((sum, m) => sum + m.patchSize, 0) /
+      schemaMetrics.length;
+    const avgFastSize =
+      fastJsonMetrics.reduce((sum, m) => sum + m.patchSize, 0) /
+      fastJsonMetrics.length;
+    const avgSemanticAccuracy =
+      schemaMetrics.reduce((sum, m) => sum + m.semanticAccuracy, 0) /
+      schemaMetrics.length;
+
+    const patchReduction = Math.max(
+      0,
+      ((avgFastPatches - avgSchemaPatches) / avgFastPatches) * 100
+    );
+    const sizeReduction = Math.max(
+      0,
+      ((avgFastSize - avgSchemaSize) / avgFastSize) * 100
+    );
+    const accuracyRate =
+      (schemaMetrics.filter((m) => m.accuracy).length / schemaMetrics.length) *
+      100;
+
+    console.table([
+      {
+        "Patch Count Reduction (%)": patchReduction.toFixed(1),
+        "Size Reduction (%)": sizeReduction.toFixed(1),
+        "Accuracy Rate (%)": accuracyRate.toFixed(1),
+        "Semantic Accuracy Score": avgSemanticAccuracy.toFixed(1),
+        "Avg Time vs fast-json-patch": `${(avgSchemaTime / avgFastTime).toFixed(
+          2
+        )}x`,
+      },
+    ]);
   }
 
-  
-
-  console.log('\n🚀 Performance Insights:');
+  console.log("\n🚀 Performance Insights:");
   if (schemaMetrics.length > 0) {
-    const avgSchemaTime = schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) / schemaMetrics.length;
-    const avgSchemaPatches = schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) / schemaMetrics.length;
-    console.log(`• SchemaPatcher generates ${avgSchemaPatches.toFixed(1)} patches on average`);
+    const avgSchemaTime =
+      schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      schemaMetrics.length;
+    const avgSchemaPatches =
+      schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
+      schemaMetrics.length;
+    console.log(
+      `• schema-json-patch (our implementation) generates ${avgSchemaPatches.toFixed(
+        1
+      )} patches on average`
+    );
     console.log(`• Average execution time: ${avgSchemaTime.toFixed(2)}ms`);
-    
+
     if (fastJsonMetrics.length > 0) {
-      const avgFastTime = fastJsonMetrics.reduce((sum, m) => sum + m.executionTime, 0) / fastJsonMetrics.length;
-      const avgFastPatches = fastJsonMetrics.reduce((sum, m) => sum + m.patchCount, 0) / fastJsonMetrics.length;
-      const patchReduction = ((avgFastPatches - avgSchemaPatches) / avgFastPatches * 100);
+      const avgFastTime =
+        fastJsonMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+        fastJsonMetrics.length;
+      const avgFastPatches =
+        fastJsonMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
+        fastJsonMetrics.length;
+      const patchReduction =
+        ((avgFastPatches - avgSchemaPatches) / avgFastPatches) * 100;
       const timeRatio = avgSchemaTime / avgFastTime;
-      
+
       if (patchReduction > 0) {
-        console.log(`• ${patchReduction.toFixed(1)}% fewer patches than fast-json-patch`);
+        console.log(
+          `• ${patchReduction.toFixed(1)}% fewer patches than fast-json-patch`
+        );
       }
       console.log(`• ${timeRatio.toFixed(2)}x time ratio vs fast-json-patch`);
     }
@@ -757,8 +889,8 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
 }
 
 async function compare() {
-  console.log('🚀 Starting Enhanced JSON Patch Benchmark...\n');
-  
+  console.log("🚀 Starting Enhanced JSON Patch Benchmark...\n");
+
   const scenarios = {
     small: { doc1: smallDoc1, doc2: smallDoc2, schema: mainSchema },
     large: { doc1: largeDoc1, doc2: largeDoc2, schema: mainSchema },
@@ -769,8 +901,10 @@ async function compare() {
     },
   };
 
-  console.log('📊 Running static scenarios...');
-  for (const [name, { doc1, doc2, schema: scenarioSchema }] of Object.entries(scenarios)) {
+  console.log("📊 Running static scenarios...");
+  for (const [name, { doc1, doc2, schema: scenarioSchema }] of Object.entries(
+    scenarios
+  )) {
     console.log(`\n📋 Analyzing ${name} configuration...`);
 
     const plan = buildPlan(scenarioSchema as any);
@@ -793,33 +927,37 @@ async function compare() {
       JSON.stringify(jsonDiffPatch, null, 2)
     );
 
-    console.log(`  • SchemaPatcher: ${schemaPatch.length} operations`);
+    console.log(`  • schema-json-patch (our implementation): ${schemaPatch.length} operations`);
     console.log(`  • fast-json-patch: ${fastPatch.length} operations`);
-    console.log(`  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`);
+    console.log(
+      `  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`
+    );
   }
 
   // Enhanced faker scenario with detailed metrics
-  console.log('\n🎲 Running comprehensive faker-based benchmark...');
-  
+  console.log("\n🎲 Running comprehensive faker-based benchmark...");
+
   const plan = buildPlan(mainSchema as any);
   const patcher = new SchemaPatcher({ plan });
   const numFakerRuns = 5000; // Optimized for demonstration
   const allMetrics: BenchmarkMetrics[] = [];
 
   console.log(`Running ${numFakerRuns} iterations with varying complexity...`);
-  
+
   // Create progress bar
   const progressBar = new cliProgress.SingleBar({
-    format: '  Progress |' + chalk.cyan('{bar}') + '| {percentage}% | {value}/{total} | ETA: {eta}s | Elapsed: {duration}s',
-    barCompleteChar: '\u2588',
-    barIncompleteChar: '\u2591',
-    hideCursor: true
+    format:
+      "  Progress |" +
+      chalk.cyan("{bar}") +
+      "| {percentage}% | {value}/{total} | ETA: {eta}s | Elapsed: {duration}s",
+    barCompleteChar: "\u2588",
+    barIncompleteChar: "\u2591",
+    hideCursor: true,
   });
-  
-  progressBar.start(numFakerRuns, 0);
-  
-  for (let i = 0; i < numFakerRuns; i++) {
 
+  progressBar.start(numFakerRuns, 0);
+
+  for (let i = 0; i < numFakerRuns; i++) {
     const doc1 = createRandomCloudConfig();
     const doc1Size = JSON.stringify(doc1).length;
     const doc2 = JSON.parse(JSON.stringify(doc1));
@@ -2648,32 +2786,40 @@ async function compare() {
 
     // Test each library with memory and performance tracking
     const libraries = [
-      { name: 'SchemaPatcher', fn: () => patcher.createPatch(doc1, doc2) },
-      { name: 'fast-json-patch', fn: () => fastJsonPatch.compare(doc1, doc2) },
-      { name: 'jsondiffpatch', fn: () => diffpatcher.diff(doc1, doc2) }
+      { name: "schema-json-patch (our implementation) (our implementation)", fn: () => patcher.createPatch(doc1, doc2) },
+      { name: "fast-json-patch", fn: () => fastJsonPatch.compare(doc1, doc2) },
+      { name: "jsondiffpatch", fn: () => diffpatcher.diff(doc1, doc2) },
     ];
 
     for (const library of libraries) {
       const startTime = performance.now();
       const memoryResult = measureMemoryUsage(() => library.fn() as any);
       const endTime = performance.now();
-      
+
       const patch = memoryResult.result;
-      const patchCount = library.name === 'jsondiffpatch' 
-        ? countJsonDiffPatches(patch)
-        : Array.isArray(patch) ? patch.length : 0;
-      
+      const patchCount =
+        library.name === "jsondiffpatch"
+          ? countJsonDiffPatches(patch)
+          : Array.isArray(patch)
+          ? patch.length
+          : 0;
+
       const patchSize = JSON.stringify(patch || {}).length;
       const executionTime = endTime - startTime;
-      
+
       // Calculate accuracy
-      const isValid = library.name === 'jsondiffpatch' 
-        ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
-        : isPatchValid(doc1, doc2, patch, library.name, appliedModifications);
-      
+      const isValid =
+        library.name === "jsondiffpatch"
+          ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
+          : isPatchValid(doc1, doc2, patch, library.name, appliedModifications);
+
       // Calculate semantic accuracy
       const semanticAccuracy = calculateSemanticAccuracy(
-        doc1, doc2, patch, library.name, mainSchema
+        doc1,
+        doc2,
+        patch,
+        library.name,
+        mainSchema
       );
 
       const metrics: BenchmarkMetrics = {
@@ -2685,10 +2831,10 @@ async function compare() {
         accuracy: isValid,
         compressionRatio: doc1Size > 0 ? (patchSize / doc1Size) * 100 : 0,
         complexityScore: totalComplexity,
-        operationType: appliedModifications.join(','),
+        operationType: appliedModifications.join(","),
         documentSize: doc1Size,
         semanticAccuracy,
-        iteration: i
+        iteration: i,
       };
 
       allMetrics.push(metrics);
@@ -2718,15 +2864,13 @@ async function compare() {
   // Stop progress bar
   progressBar.stop();
 
-  console.log('\n✅ Benchmark completed! Generating comprehensive report...\n');
-  
+  console.log("\n✅ Benchmark completed! Generating comprehensive report...\n");
+
   // Generate comprehensive report
   generateComprehensiveReport(allMetrics);
-  
-  console.log('\n📁 Sample patch files written to comparison/ directory');
-  console.log('🎉 Benchmark analysis complete!');
 
-  console.log(patcher.debug);
+  console.log("\n📁 Sample patch files written to comparison/ directory");
+  console.log("🎉 Benchmark analysis complete!");
 }
 
 compare().catch(console.error);
