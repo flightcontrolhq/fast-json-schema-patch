@@ -19,9 +19,8 @@
     }
   },
   {
-    "op": "replace",
-    "path": "/environments/1/services/0/memory",
-    "value": 8
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/1"
   },
   {
     "op": "replace",
@@ -29,7 +28,8 @@
     "value": 4
   },
   {
-    "op": "remove",
-    "path": "/environments/1/services/0/ports/1"
+    "op": "replace",
+    "path": "/environments/1/services/0/memory",
+    "value": 8
   }
 ]

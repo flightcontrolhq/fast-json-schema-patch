@@ -1066,8 +1066,13 @@ test("SchemaPatcher correctly diffs a single service property", () => {
     [
       {
         "op": "replace",
-        "path": "/name",
-        "value": "NLB Servers",
+        "path": "/memory",
+        "value": 4,
+      },
+      {
+        "op": "replace",
+        "path": "/cpu",
+        "value": 2,
       },
       {
         "op": "remove",
@@ -1106,13 +1111,8 @@ test("SchemaPatcher correctly diffs a single service property", () => {
       },
       {
         "op": "replace",
-        "path": "/cpu",
-        "value": 2,
-      },
-      {
-        "op": "replace",
-        "path": "/memory",
-        "value": 4,
+        "path": "/name",
+        "value": "NLB Servers",
       },
     ]
   `);
