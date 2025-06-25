@@ -292,7 +292,7 @@ function createRandomCloudConfig() {
   const numEnvs = 1;
   for (let i = 0; i < numEnvs; i++) {
     const services = [];
-    const numServices = faker.number.int({ min: 2, max: 100 });
+    const numServices = faker.number.int({ min: 2, max: 1000 });
 
     // Ensure at least one of each for variety
     services.push(createRandomWebService());
@@ -2635,7 +2635,7 @@ async function compare() {
     ];
 
     // Apply random modifications with complexity tracking
-    const numModifications = faker.number.int({ min: 2, max: 20 });
+    const numModifications = faker.number.int({ min: 2, max: 100 });
     let totalComplexity = 0;
     const appliedModifications: string[] = [];
 
