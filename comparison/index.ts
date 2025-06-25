@@ -1,6 +1,6 @@
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import * as fastJsonPatch from "fast-json-patch";
-import rfc6902 from "rfc6902";
+// import rfc6902 from "rfc6902";
 import * as jsondiffpatch from "jsondiffpatch";
 import { writeFile } from "fs/promises";
 import { join } from "path";
@@ -596,7 +596,7 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     { label: 'Very High', min: 51, max: 100 }
   ];
   
-  const libraries = ['SchemaPatcher', 'fast-json-patch', 'rfc6902', 'jsondiffpatch'];
+  const libraries = ['SchemaPatcher', 'fast-json-patch', 'jsondiffpatch'];
   const libraryColors = ['green', 'blue', 'purple', 'yellow'];
 
   console.log('\n📏 Total Patch Count by Complexity Range - All Algorithms:');  
@@ -638,7 +638,6 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.log('\n📊 Chart Legend:');
   console.log('🟢 Schema = SchemaPatcher');
   console.log('🔵 FastJSON = fast-json-patch'); 
-  console.log('🟣 rfc6902 = rfc6902');
   console.log('🟡 JSONDiff = jsondiffpatch');
   console.log('-'.repeat(80));
 
@@ -779,7 +778,6 @@ async function compare() {
 
     const schemaPatch = patcher.createPatch(doc1, doc2);
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
-    const rfcPatch = rfc6902.createPatch(doc1, doc2);
     const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
 
     await writeFile(
@@ -791,17 +789,12 @@ async function compare() {
       JSON.stringify(fastPatch, null, 2)
     );
     await writeFile(
-      join(__dirname, `${name}-rfc6902-patch.json`),
-      JSON.stringify(rfcPatch, null, 2)
-    );
-    await writeFile(
       join(__dirname, `${name}-jsondiffpatch-patch.json`),
       JSON.stringify(jsonDiffPatch, null, 2)
     );
 
     console.log(`  • SchemaPatcher: ${schemaPatch.length} operations`);
     console.log(`  • fast-json-patch: ${fastPatch.length} operations`);
-    console.log(`  • rfc6902: ${rfcPatch.length} operations`);
     console.log(`  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`);
   }
 
@@ -2657,7 +2650,6 @@ async function compare() {
     const libraries = [
       { name: 'SchemaPatcher', fn: () => patcher.createPatch(doc1, doc2) },
       { name: 'fast-json-patch', fn: () => fastJsonPatch.compare(doc1, doc2) },
-      { name: 'rfc6902', fn: () => rfc6902.createPatch(doc1, doc2) },
       { name: 'jsondiffpatch', fn: () => diffpatcher.diff(doc1, doc2) }
     ];
 
@@ -2714,10 +2706,6 @@ async function compare() {
         JSON.stringify(fastJsonPatch.compare(doc1, doc2), null, 2)
       );
       await writeFile(
-        join(__dirname, "faker-rfc6902-patch.json"),
-        JSON.stringify(rfc6902.createPatch(doc1, doc2), null, 2)
-      );
-      await writeFile(
         join(__dirname, "faker-jsondiffpatch-patch.json"),
         JSON.stringify(diffpatcher.diff(doc1, doc2), null, 2)
       );
@@ -2737,6 +2725,8 @@ async function compare() {
   
   console.log('\n📁 Sample patch files written to comparison/ directory');
   console.log('🎉 Benchmark analysis complete!');
+
+  console.log(patcher.debug);
 }
 
 compare().catch(console.error);

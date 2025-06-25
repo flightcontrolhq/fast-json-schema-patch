@@ -256,6 +256,8 @@ await largeConfigBench.run();
 await fakerConfigBench.run();
 await realWorldConfigBench.run();
 
+console.log(patcherWithPlan.debug);
+
 console.table(smallConfigBench.table()); 
 console.table(largeConfigBench.table());
 console.table(fakerConfigBench.table());

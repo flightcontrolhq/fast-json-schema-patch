@@ -1,115 +1,3266 @@
 [
   {
     "op": "add",
-    "path": "/environments/0/source/trigger",
-    "value": "manual"
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/12/healthCheckIntervalSecs",
-    "value": 38
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/17/stickySessionsDurationSecs",
-    "value": 13668
-  },
-  {
-    "op": "remove",
-    "path": "/environments/0/services/32/envVariables/DB_HOST"
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/36/dockerLabels",
+    "path": "/environments/0/services/48/logging",
     "value": {
-      "team": "matrix",
-      "version": "3.12.18",
-      "environment": "env-0"
-    }
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/50/watchPaths",
-    "value": [
-      "**/*.js"
-    ]
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/51/envVariables/ALARM",
-    "value": "https://distorted-pile.biz"
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/55/versionHistoryCount",
-    "value": 15
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/55/healthCheckTimeoutSecs",
-    "value": 26
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/69/envVariables/DATABASE_HOST",
-    "value": {
-      "fromService": {
-        "id": "fbfa6411-55a3-43d2-81e6-a8f7dc145d1e",
-        "value": "host"
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
       }
     }
   },
   {
     "op": "add",
-    "path": "/environments/0/services/71/ci",
+    "path": "/environments/0/services/48/envVariables/DATABASE_URL",
     "value": {
-      "type": "codebuild"
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/48/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/48/memory",
+    "value": 4.974085834512687
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/48/cpu",
+    "value": 0.7467355490913539
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/17/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
     }
   },
   {
     "op": "add",
-    "path": "/environments/0/services/83/multiAvailabilityZones",
-    "value": true
+    "path": "/environments/0/services/17/envVariables",
+    "value": {
+      "STRING_VAR": "conduco",
+      "NUMBER_VAR": 53,
+      "BOOLEAN_VAR": false,
+      "PARAM_VAR": {
+        "fromParameterStore": "/app/acquiro"
+      },
+      "SECRET_VAR": {
+        "fromSecretsManager": "earum-secret"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/17/memory",
+    "value": 0.6138812877548507
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/17/cpu",
+    "value": 0.4770085883916388
   },
   {
     "op": "add",
-    "path": "/environments/0/services/83/encryptionAtRest",
+    "path": "/environments/0/services/76/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/76/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/76/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/76/memory",
+    "value": 4.43757294397282
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/76/cpu",
+    "value": 2.624826794753863
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/6/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/6/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/memory",
+    "value": 0.6596146197848931
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/cpu",
+    "value": 2.159247679483137
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/64/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/64/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/64/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/64/memory",
+    "value": 4.042197430429282
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/64/cpu",
+    "value": 2.310901635463013
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/4/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/4/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/4/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/4/memory",
+    "value": 2.951935619164517
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/4/cpu",
+    "value": 2.5176500982217767
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/66/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/66/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/66/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/66/memory",
+    "value": 0.3742496009975862
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/66/cpu",
+    "value": 1.0124778405373938
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/41/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/41/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/41/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/41/memory",
+    "value": 0.6003787422852217
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/41/cpu",
+    "value": 1.0961540744595932
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/73/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/73/memory",
+    "value": 1.2483648450173703
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/73/cpu",
+    "value": 1.204044833341689
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/16/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/16/memory",
+    "value": 1.1082787155535143
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/16/cpu",
+    "value": 1.1643888315709152
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/56/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/56/memory",
+    "value": 2.1373377928458366
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/56/cpu",
+    "value": 0.9221483470695049
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/67/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/67/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/67/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/67/memory",
+    "value": 5.474530841429682
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/67/cpu",
+    "value": 0.799714425919378
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/34/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/34/memory",
+    "value": 0.6833950719200601
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/34/cpu",
+    "value": 0.9786519040890258
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/50/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/50/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/50/memory",
+    "value": 1.849829244308874
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/50/cpu",
+    "value": 0.37898303316306253
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/24/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/24/memory",
+    "value": 2.470688281740177
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/24/cpu",
+    "value": 1.3346375160335242
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/10/port",
+    "value": 5432
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/10/deleteBackupsWithRdsDeletion",
     "value": false
   },
   {
     "op": "add",
-    "path": "/environments/0/services/83/healthCheckGracePeriodSecs",
-    "value": 129
+    "path": "/environments/0/services/10/applyChangesImmediately",
+    "value": true
   },
   {
     "op": "add",
-    "path": "/environments/0/services/85/healthCheckIntervalSecs",
-    "value": 48
+    "path": "/environments/0/services/10/maxStorage",
+    "value": 689
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/10/private",
+    "value": false
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/10/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ci",
+    "value": {
+      "type": "ec2",
+      "instanceSize": "t3.medium",
+      "instanceStorage": 98,
+      "storageType": "gp3"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/memory",
+    "value": 4.0008457938032445
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/0/cpu",
+    "value": 1.2392216952135133
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/33/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/33/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/33/memory",
+    "value": 3.6240000142573146
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/33/cpu",
+    "value": 0.6125778013848324
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/74/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/74/memory",
+    "value": 1.092485552499884
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/74/cpu",
+    "value": 0.4124660012790687
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/38/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/38/memory",
+    "value": 0.5877565202916896
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/38/cpu",
+    "value": 0.8544832583962092
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/53/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/53/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/53/memory",
+    "value": 3.055811755094524
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/53/cpu",
+    "value": 2.399401846272051
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/77/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/77/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/77/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/77/memory",
+    "value": 5.494411251374127
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/77/cpu",
+    "value": 2.62272256448345
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/15/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/15/memory",
+    "value": 2.1709177645599174
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/15/cpu",
+    "value": 1.2928727947399798
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/43/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/43/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/43/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/43/memory",
+    "value": 4.286901849502134
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/43/cpu",
+    "value": 1.5631023498791528
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/32/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/32/memory",
+    "value": 2.15769955276896
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/32/cpu",
+    "value": 0.6668493090384148
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/42/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/42/memory",
+    "value": 1.087233552540387
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/42/cpu",
+    "value": 0.2738831047758012
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/22/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/22/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/22/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/22/memory",
+    "value": 5.2467825993991335
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/22/cpu",
+    "value": 1.4058999434390291
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/60/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/60/memory",
+    "value": 2.653837513542801
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/60/cpu",
+    "value": 0.9192032345264155
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/36/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/36/memory",
+    "value": 0.8256761963500354
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/36/cpu",
+    "value": 1.2974088328960984
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/37/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/37/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/37/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/37/memory",
+    "value": 3.113509251347962
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/37/cpu",
+    "value": 0.17990325088756795
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/9/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/9/storage",
+    "value": 155
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/memory",
+    "value": 2.2524578993983155
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/cpu",
+    "value": 0.34281259298719563
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/30/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/30/memory",
+    "value": 2.3201238563134297
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/30/cpu",
+    "value": 1.2507513761860594
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/71/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/71/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/71/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/71/memory",
+    "value": 1.817631967498226
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/71/cpu",
+    "value": 2.0191276706153194
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/65/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/65/startCommand",
+    "value": "npm start"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/65/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/65/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/65/memory",
+    "value": 4.006285713659715
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/65/cpu",
+    "value": 0.9482718135602944
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/62/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/62/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/62/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/62/memory",
+    "value": 5.026286645015759
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/62/cpu",
+    "value": 2.2125525919459905
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/35/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/35/memory",
+    "value": 2.496654543173265
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/35/cpu",
+    "value": 0.37868722331305843
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/29/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/29/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/29/memory",
+    "value": 2.804714817611487
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/29/cpu",
+    "value": 0.6212805458215409
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/23/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/23/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/23/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/23/memory",
+    "value": 3.7731374418686343
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/23/cpu",
+    "value": 2.165283595041891
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/11/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/11/memory",
+    "value": 1.1790808806672104
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/11/cpu",
+    "value": 0.7606472520101459
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/51/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/51/memory",
+    "value": 2.402125232069627
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/51/cpu",
+    "value": 1.3317610162373898
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/14/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/14/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/14/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/14/memory",
+    "value": 3.7913656321168108
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/14/cpu",
+    "value": 1.2284570557741772
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/75/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/75/memory",
+    "value": 0.5265619080307387
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/75/cpu",
+    "value": 1.058324931712389
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/39/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/39/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/39/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/39/memory",
+    "value": 0.5746793097747563
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/39/cpu",
+    "value": 0.7568662804927476
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/49/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/49/memory",
+    "value": 0.5899890292159071
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/49/cpu",
+    "value": 0.8481020989841778
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/18/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/18/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/18/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/18/memory",
+    "value": 5.4957586983600635
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/18/cpu",
+    "value": 2.4822316363560155
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/70/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/70/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/70/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/70/memory",
+    "value": 1.9075464733390488
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/70/cpu",
+    "value": 0.503975590269262
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/47/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/47/memory",
+    "value": 2.294207720594029
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/47/cpu",
+    "value": 0.9124819918241194
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/12/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/12/memory",
+    "value": 2.287572194648245
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/12/cpu",
+    "value": 0.941603479893038
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/44/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/44/memory",
+    "value": 1.5003677214589253
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/44/cpu",
+    "value": 0.43679624010118656
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/58/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/58/memory",
+    "value": 1.5721865887509905
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/58/cpu",
+    "value": 0.7137793500087052
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/20/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/20/memory",
+    "value": 2.309261335955092
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/20/cpu",
+    "value": 0.17893708357290958
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/68/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/68/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/68/memory",
+    "value": 0.5965760804398307
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/68/cpu",
+    "value": 0.7035884764579137
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/3/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/3/memory",
+    "value": 1.0794089392707225
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/3/cpu",
+    "value": 1.1004455569271143
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/19/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/19/memory",
+    "value": 1.3661169434869451
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/19/cpu",
+    "value": 0.8896593995696936
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/57/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/57/memory",
+    "value": 2.4349278969807227
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/57/cpu",
+    "value": 0.8148004880660045
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/63/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/63/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/63/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/63/memory",
+    "value": 5.185874293074708
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/63/cpu",
+    "value": 0.8528453773538479
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/31/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/31/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/31/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/31/memory",
+    "value": 4.670247564889941
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/31/cpu",
+    "value": 1.9145388944047301
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/40/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/40/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/40/memory",
+    "value": 4.28346182620631
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/40/cpu",
+    "value": 1.8875011736116691
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/1/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/1/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/memory",
+    "value": 1.145474009660443
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/1/cpu",
+    "value": 0.76238423558488
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/61/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/61/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/61/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/61/memory",
+    "value": 5.386214217567231
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/61/cpu",
+    "value": 2.627311884026139
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/25/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/25/memory",
+    "value": 0.8712587888890516
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/25/cpu",
+    "value": 1.1017233050102129
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/46/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/46/memory",
+    "value": 1.9430769429200367
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/46/cpu",
+    "value": 0.8102713829701856
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/5/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/memory",
+    "value": 2.0592700109089837
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/cpu",
+    "value": 0.6085108530384933
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/27/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/27/memory",
+    "value": 1.2270496436654459
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/27/cpu",
+    "value": 0.34279044916889084
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/52/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/52/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/52/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/52/memory",
+    "value": 1.6939834798839488
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/52/cpu",
+    "value": 2.4029360727876945
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/45/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/45/stickySessionsDurationSecs",
+    "value": 36380
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/45/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/45/maxInstances",
+    "value": 6
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/45/memory",
+    "value": 1.4837346566342497
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/45/cpu",
+    "value": 1.5826353579256296
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/69/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/69/memory",
+    "value": 2.6645986480475856
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/69/cpu",
+    "value": 1.0889119927279098
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/54/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/54/privileged",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/54/memory",
+    "value": 0.9538890440072212
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/54/cpu",
+    "value": 0.9310537283267926
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/13/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/13/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/13/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/13/memory",
+    "value": 4.712630824472771
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/13/cpu",
+    "value": 1.7679044683688308
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/21/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/21/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/21/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/21/memory",
+    "value": 3.9812675661203034
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/21/cpu",
+    "value": 0.7741587410323838
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/26/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/26/memory",
+    "value": 2.1815943691728394
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/26/cpu",
+    "value": 1.3477687247743497
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/55/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/55/memory",
+    "value": 0.8062662205772007
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/55/cpu",
+    "value": 0.41898544872475774
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/28/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 90,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/28/memory",
+    "value": 0.40408484619490853
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/28/cpu",
+    "value": 1.2388996830991028
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/7/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/7/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/memory",
+    "value": 5.542933391475131
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/cpu",
+    "value": 0.27518593712235645
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/59/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 30,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/59/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/59/maxInstances",
+    "value": 3
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/59/memory",
+    "value": 1.4227020334224532
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/59/cpu",
+    "value": 2.6781580505628715
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/72/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 7,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/72/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/72/maxInstances",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/72/memory",
+    "value": 3.347757939618046
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/72/cpu",
+    "value": 0.6724979054050481
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/8/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/8/envVariables/DATABASE_URL",
+    "value": {
+      "fromService": {
+        "id": "01414732-4792-459a-8006-3eec9ed568fb",
+        "value": "connectionString"
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/maxInstances",
+    "value": 2
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/memory",
+    "value": 1.3432197699200412
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/cpu",
+    "value": 1.1770001730684363
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/2/logging",
+    "value": {
+      "cloudwatchLogsEnabled": true,
+      "cloudwatchLogsRetentionDays": 14,
+      "ecsLogsMetadataEnabled": true,
+      "firelens": {
+        "configSource": "inline",
+        "config": [
+          {
+            "name": "forward",
+            "match": "*",
+            "options": {
+              "Host": "logs.example.com",
+              "Port": "443"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/2/memory",
+    "value": 2.5496180652799105
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/2/cpu",
+    "value": 0.49712568971209065
   },
   {
     "op": "add",
     "path": "/environments/0/services/-",
     "value": {
-      "id": "colo-decor-cilicium",
-      "name": "Internal API",
-      "type": "web-private",
-      "cpu": 2,
-      "memory": 2,
-      "buildType": "docker",
-      "port": 8080
+      "id": "ver-certe-cunae",
+      "name": "empower quantum channels",
+      "type": "web",
+      "cpu": 1.3899219845935904,
+      "memory": 0.6949609922967952,
+      "buildType": "nixpacks",
+      "healthCheckPath": "/health",
+      "port": 3000,
+      "minInstances": 1,
+      "maxInstances": 2,
+      "logging": {
+        "cloudwatchLogsEnabled": true,
+        "cloudwatchLogsRetentionDays": 7,
+        "ecsLogsMetadataEnabled": true,
+        "firelens": {
+          "configSource": "inline",
+          "config": [
+            {
+              "name": "forward",
+              "match": "*",
+              "options": {
+                "Host": "logs.example.com",
+                "Port": "443"
+              }
+            }
+          ]
+        }
+      }
     }
   },
   {
     "op": "add",
     "path": "/environments/0/services/-",
     "value": {
-      "id": "creptio-utroque-doloremque",
-      "name": "reboot Worker",
+      "id": "autus-decimus-tardus",
+      "name": "connect Worker",
       "type": "worker",
-      "cpu": 2,
-      "memory": 1,
+      "cpu": 1.3899219845935904,
+      "memory": 1.3899219845935904,
       "buildType": "nixpacks",
-      "startCommand": "node amo.js"
+      "startCommand": "node suffoco.js",
+      "logging": {
+        "cloudwatchLogsEnabled": true,
+        "cloudwatchLogsRetentionDays": 90,
+        "ecsLogsMetadataEnabled": true,
+        "firelens": {
+          "configSource": "inline",
+          "config": [
+            {
+              "name": "forward",
+              "match": "*",
+              "options": {
+                "Host": "logs.example.com",
+                "Port": "443"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "cibo-claustrum-bibo",
+      "name": "React App",
+      "type": "static",
+      "buildType": "nodejs",
+      "buildCommand": "npm run build",
+      "outputDirectory": "build",
+      "singlePageApp": true
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "ratione-dicta-urbs",
+      "name": "vox Site",
+      "type": "static",
+      "buildType": "nodejs",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "suscipit-acquiro-vix",
+      "name": "vinco Site",
+      "type": "static",
+      "buildType": "nodejs",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/-",
+    "value": {
+      "id": "vinitor-vix-nemo",
+      "name": "Full Featured Service",
+      "type": "web",
+      "cpu": 2,
+      "memory": 4,
+      "gpu": 1,
+      "buildType": "docker",
+      "dockerfilePath": "Dockerfile",
+      "dockerContext": ".",
+      "privileged": false,
+      "healthCheckPath": "/health",
+      "healthCheckTimeoutSecs": 10,
+      "healthCheckIntervalSecs": 30,
+      "healthCheckGracePeriodSecs": 60,
+      "port": 3000,
+      "minInstances": 2,
+      "maxInstances": 10,
+      "stickySessionsEnabled": true,
+      "stickySessionsDurationSecs": 3600,
+      "originShieldEnabled": true,
+      "cloudfrontAutoCacheInvalidation": true,
+      "containerInsights": true,
+      "storage": 50,
+      "versionHistoryCount": 15,
+      "basePath": ".",
+      "includeEnvVariablesInBuild": true,
+      "injectEnvVariablesInDockerfile": true,
+      "autoscaling": {
+        "cpuThreshold": 75,
+        "memoryThreshold": 80,
+        "requestsPerTarget": 500,
+        "cooldownTimerSecs": 300
+      },
+      "envVariables": {
+        "NODE_ENV": "production",
+        "LOG_LEVEL": "info"
+      },
+      "logging": {
+        "cloudwatchLogsEnabled": true,
+        "cloudwatchLogsRetentionDays": 30,
+        "ecsLogsMetadataEnabled": true
+      },
+      "integrations": {
+        "uploadSentrySourceMap": true
+      }
     }
   }
 ]
