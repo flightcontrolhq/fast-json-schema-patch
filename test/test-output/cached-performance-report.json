@@ -1,0 +1,59 @@
+{
+  "summary": {
+    "parse": {
+      "avg": 1.3377915000000016,
+      "total": 2.675583000000003,
+      "count": 2
+    },
+    "diffEngine": {
+      "avg": 1.1468750000000014,
+      "total": 1.1468750000000014,
+      "count": 1
+    },
+    "aggregator": {
+      "avg": 0.027542000000003952,
+      "total": 0.055084000000007904,
+      "count": 2
+    }
+  },
+  "entries": {
+    "parse": [
+      {
+        "startTime": 33.860125,
+        "endTime": 36.030416,
+        "duration": 2.170291000000006
+      },
+      {
+        "startTime": 40.453916,
+        "endTime": 40.959208,
+        "duration": 0.5052919999999972
+      }
+    ],
+    "diffEngine": [
+      {
+        "startTime": 36.046833,
+        "endTime": 37.193708,
+        "duration": 1.1468750000000014
+      }
+    ],
+    "aggregator": [
+      {
+        "startTime": 37.196791,
+        "endTime": 37.247208,
+        "duration": 0.05041700000000304
+      },
+      {
+        "startTime": 40.963083,
+        "endTime": 40.96775,
+        "duration": 0.004667000000004862
+      }
+    ]
+  },
+  "context": {
+    "cache": "hit",
+    "inputs": {
+      "doc1_hash": "98a6fff5",
+      "doc2_hash": "c2008133"
+    }
+  }
+}

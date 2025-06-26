@@ -1,3 +1,5 @@
+import type { PerformanceTracker } from './utils/performance-tracker';
+
 export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 export type JsonObject = { [Key in string]?: JsonValue };
 export type JsonArray = JsonValue[];
@@ -73,8 +75,15 @@ export interface IPlanner {
 }
 
 export interface IDiffEngine {
-  // Returns an iterator, which allows for JIT processing.
-  diff(doc1: ParsedDocument, doc2: ParsedDocument, plan: Plan, partialDiffKeys?: string[]): Iterable<DiffDelta>;
+  // Returns an array, which allows for JIT processing.
+  diff(
+    doc1: ParsedDocument,
+    doc2: ParsedDocument,
+    plan: Plan,
+    partialDiffKeys?: string[],
+    performance?: PerformanceTracker | null,
+    eqCache?: WeakMap<object, WeakMap<object, boolean>>
+  ): DiffDelta[];
 }
 
 export interface IAggregator {
@@ -105,8 +114,11 @@ export interface PatcherInstance {
   _plan: Plan;
   _options: PatcherOptions;
   _resultsCache: Map<string, DiffDelta[]>;
+  _eqCache: WeakMap<object, WeakMap<object, boolean>>;
+  performance?: PerformanceTracker | null;
   diff(doc1: string, doc2: string, diffOptions?: DiffOptions): FinalPatch;
   getPlan(): Plan;
+  savePerformanceReport(filePath: string): Promise<void>;
   clearCache(): void;
 }
 
@@ -123,6 +135,7 @@ export interface PatcherOptions {
   parser?: ModuleOption<IParser>;
   diffEngine?: ModuleOption<IDiffEngine>;
   aggregator?: ModuleOption<IAggregator>;
+  verbose?: boolean;
 }
 
 // Options for each individual diff operation.

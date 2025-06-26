@@ -194,7 +194,7 @@ export class SchemaPlanner implements IPlanner {
               }
             }
     
-            return null;
+            return { primaryKey: null, requiredFields: required, hashFields };
         };
 
         const schemas = itemsSchema.anyOf || itemsSchema.oneOf;
@@ -210,16 +210,14 @@ export class SchemaPlanner implements IPlanner {
           metadata = findMetadata(itemsSchema);
         }
 
-        if (metadata?.primaryKey) {
+        if (metadata) {
           arrayPlan.primaryKey = metadata.primaryKey;
           arrayPlan.requiredFields = metadata.requiredFields;
           arrayPlan.hashFields = metadata.hashFields;
-          arrayPlan.strategy = "primaryKey";
+          if (metadata.primaryKey) {
+            arrayPlan.strategy = "primaryKey";
+          }
         }
-      }
-
-      if (arrayPlan.strategy === "lcs" && !isPrimitive) {
-        arrayPlan.strategy = "hash";
       }
 
       arrayPlan.getIdentity = createIdentityGetter(arrayPlan) || undefined;

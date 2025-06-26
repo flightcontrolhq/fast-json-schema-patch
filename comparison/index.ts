@@ -932,10 +932,13 @@ async function compare() {
 
     const plan = buildPlan(scenarioSchema as any);
     const legacyPatcher = new SchemaPatcher({ plan });
-    const newPatcher = createPatcher(scenarioSchema as any);
+    const newPatcher = createPatcher(scenarioSchema as any, {
+      verbose: true,
+    });
 
     const legacySchemaPatch = legacyPatcher.createPatch(doc1, doc2);
     const newSchemaPatch = newPatcher.diff(JSON.stringify(doc1), JSON.stringify(doc2));
+    await newPatcher.savePerformanceReport(join(__dirname, `${name}-performance-report.json`));
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
     const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
 
@@ -979,10 +982,10 @@ async function compare() {
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 1250 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 1250 },
-    { label: "High", min: 201, max: 500, targetSamples: 1250 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 1250 },
+    { label: "Low", min: 0, max: 50, targetSamples: 25 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 25 },
+    { label: "High", min: 201, max: 500, targetSamples: 25 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 25 },
   ];
 
   const allMetrics: BenchmarkMetrics[] = [];
@@ -1047,6 +1050,8 @@ async function compare() {
         actualComplexity >= complexityRange.min &&
         actualComplexity <= complexityRange.max
       ) {
+        const doc1Str = JSON.stringify(doc1);
+        const doc2Str = JSON.stringify(doc2);
         // Test each library with memory and performance tracking
         const libraries = [
           {
@@ -1055,7 +1060,7 @@ async function compare() {
           },
           {
             name: "schema-json-patch (new)",
-            fn: () => newPatcher.diff(JSON.stringify(doc1), JSON.stringify(doc2)),
+            fn: () => newPatcher.diff(doc1Str, doc2Str),
           },
           {
             name: "fast-json-patch",
@@ -1084,7 +1089,7 @@ async function compare() {
 
           // Calculate accuracy
           const isValid =
-            library.name === "jsondiffpatch" || library.name === "schema-json-patch (new)"
+            library.name === "jsondiffpatch"
               ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
               : isPatchValid(
                   doc1,

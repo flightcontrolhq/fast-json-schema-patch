@@ -1,3 +1,38 @@
 {
-  "operations": []
+  "operations": [
+    {
+      "op": "replace",
+      "path": "/environments/0/services/2/cpu",
+      "value": 100,
+      "oldValue": 2.4419107318999447,
+      "explanation": "Replaced value at path '/environments/0/services/2/cpu'."
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/-",
+      "value": {
+        "id": "service-new",
+        "name": "new-service",
+        "type": "worker",
+        "cpu": 1,
+        "memory": 1
+      },
+      "explanation": "Added value at path '/environments/0/services/-'."
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/5",
+      "oldValue": {
+        "id": "service5",
+        "name": "service-name-5",
+        "type": "web",
+        "cpu": 1.8162731741306746,
+        "memory": 6.684189893850618,
+        "dependsOn": [
+          "service4"
+        ]
+      },
+      "explanation": "Removed value from path '/environments/0/services/5'."
+    }
+  ]
 }

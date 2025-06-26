@@ -1,3 +1,56 @@
 {
-  "operations": []
+  "operations": [
+    {
+      "op": "replace",
+      "path": "/environments/0/services/0/ports/3/healthCheck/path",
+      "value": "/new-health",
+      "oldValue": "/health",
+      "explanation": "Replaced value at path '/environments/0/services/0/ports/3/healthCheck/path'."
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/-",
+      "value": {
+        "id": "new-worker-service",
+        "name": "New Worker Service",
+        "type": "worker",
+        "cpu": 1,
+        "memory": 2,
+        "dependsOn": [
+          "nlb-server"
+        ]
+      },
+      "explanation": "Added value at path '/environments/0/services/-'."
+    },
+    {
+      "op": "remove",
+      "path": "/environments/1/services/0/ports/1",
+      "oldValue": {
+        "id": "udp-8002",
+        "port": 8002,
+        "protocol": "udp",
+        "healthCheck": {
+          "type": "udp",
+          "tcpPort": 8001,
+          "timeoutSecs": 5,
+          "intervalSecs": 30
+        }
+      },
+      "explanation": "Removed value from path '/environments/1/services/0/ports/1'."
+    },
+    {
+      "op": "replace",
+      "path": "/environments/1/services/0/cpu",
+      "value": 4,
+      "oldValue": 1,
+      "explanation": "Replaced value at path '/environments/1/services/0/cpu'."
+    },
+    {
+      "op": "replace",
+      "path": "/environments/1/services/0/memory",
+      "value": 8,
+      "oldValue": 2,
+      "explanation": "Replaced value at path '/environments/1/services/0/memory'."
+    }
+  ]
 }

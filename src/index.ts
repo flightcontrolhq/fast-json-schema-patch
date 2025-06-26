@@ -12,6 +12,8 @@ export type {
 	PatcherOptions,
 	DiffOptions,
 	PatcherInstance,
+	Plan,
+	JSONSchema,
 } from "./types";
 
 // Module interfaces

@@ -1,0 +1,49 @@
+{
+  "summary": {
+    "parse": {
+      "avg": 0.014750000000020691,
+      "total": 0.014750000000020691,
+      "count": 1
+    },
+    "diffEngine": {
+      "avg": 0.14724999999998545,
+      "total": 0.14724999999998545,
+      "count": 1
+    },
+    "aggregator": {
+      "avg": 0.0037079999999889424,
+      "total": 0.0037079999999889424,
+      "count": 1
+    }
+  },
+  "entries": {
+    "parse": [
+      {
+        "startTime": 129.737959,
+        "endTime": 129.752709,
+        "duration": 0.014750000000020691
+      }
+    ],
+    "diffEngine": [
+      {
+        "startTime": 129.754792,
+        "endTime": 129.902042,
+        "duration": 0.14724999999998545
+      }
+    ],
+    "aggregator": [
+      {
+        "startTime": 129.903334,
+        "endTime": 129.907042,
+        "duration": 0.0037079999999889424
+      }
+    ]
+  },
+  "context": {
+    "cache": "miss",
+    "inputs": {
+      "doc1_hash": "b4349cb5",
+      "doc2_hash": "8ea67e6b"
+    }
+  }
+}

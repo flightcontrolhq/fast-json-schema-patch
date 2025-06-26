@@ -1,4 +1,4 @@
-import { SchemaPatcher, buildPlan } from "../src/index";
+import { SchemaPatcher, buildPlan } from "../src/legacy/SchemaJsonPatcher";
 
 describe("Unique Array Performance", () => {
 	test("should handle unique primitive arrays efficiently with minimal patches", () => {

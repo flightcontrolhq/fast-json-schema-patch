@@ -1,4 +1,4 @@
-import type { JsonObject } from '../types';
+import { type JsonObject, type JsonValue } from "../types";
 
 export function deepEqual(obj1: unknown, obj2: unknown): boolean {
   if (obj1 === obj2) return true;
@@ -35,61 +35,27 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
 
     for (i = length; i-- !== 0; ) {
       key = keys[i] as string;
-      if (!deepEqual((obj1 as JsonObject)[key], (obj2 as JsonObject)[key]))
+      if (
+        !deepEqual(
+          (obj1 as JsonObject)[key] as JsonValue,
+          (obj2 as JsonObject)[key] as JsonValue
+        )
+      )
         return false;
     }
 
     return true;
   }
 
-  return obj1 === obj2;
-}
-
-
-const eqCache = new WeakMap<object, WeakMap<object, boolean>>();
-
-function fastHash(obj: JsonObject, fields: string[]): string {
-  let hash = "";
-  for (const key of fields) {
-    hash += `${obj[key]}|`;
-  }
-  return hash;
+  // Handle NaN case
+  return Number.isNaN(obj1) && Number.isNaN(obj2);
 }
 
 export function deepEqualMemo(
   obj1: unknown,
   obj2: unknown,
-  hotFields: string[] = []
+  hotFields: string[] = [],
+  eqCache?: WeakMap<object, WeakMap<object, boolean>> | null
 ): boolean {
-  if (obj1 === obj2) return true;
-  if (obj1 == null || obj2 == null) return obj1 === obj2;
-
-  const type1 = typeof obj1;
-  const type2 = typeof obj2;
-  if (type1 !== type2) return false;
-  if (type1 !== "object") {
-    return obj1 === obj2;
-  }
-
-  const a = obj1 as JsonObject;
-  const b = obj2 as JsonObject;
-
-  if (hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
-    const h1 = fastHash(a, hotFields);
-    const h2 = fastHash(b, hotFields);
-    if (h1 !== h2) return false;
-  }
-
-  let inner = eqCache.get(a);
-  if (inner?.has(b)) return inner.get(b) ?? false;
-
-  const result = deepEqual(a, b);
-
-  if (!inner) {
-    inner = new WeakMap();
-    eqCache.set(a, inner);
-  }
-  inner.set(b, result);
-
-  return result;
+ return deepEqual(obj1, obj2);
 } 

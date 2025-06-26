@@ -19,7 +19,18 @@ const schema = originalSchema as any;
 
 // Helper to convert FinalPatch to a simplified format for tests
 function toLegacy(patch: FinalPatch): FastJsonPatchOperation[] {
-  return patch.operations.map(({ op, path, value }) => ({ op, path, value }));
+  return patch.operations.map((op: any) => {
+    const { op: opType, path, value, from } = op;
+    switch (opType) {
+      case "remove":
+        return { op: "remove", path };
+      case "move":
+      case "copy":
+        return { op: opType, path, from };
+      default:
+        return { op: opType, path, value };
+    }
+  });
 }
 
 const userSchema = {
@@ -240,9 +251,13 @@ describe("Patcher Instance", () => {
     const result = patcher.diff(JSON.stringify(doc1), JSON.stringify(doc2));
     const patches = toLegacy(result);
 
-    const expectedPatches = [
+    const expectedPatches: FastJsonPatchOperation[] = [
       { op: "remove", path: "/environments/0/services/1" },
-      { op: "replace", path: "/environments/0/services/0/name", value: "api-updated" },
+      {
+        op: "replace",
+        path: "/environments/0/services/0/name",
+        value: "api-updated",
+      },
       {
         op: "add",
         path: "/environments/0/services/-",
@@ -320,7 +335,6 @@ describe("Patcher Instance", () => {
     expect(patch).toContainEqual({
       op: "remove",
       path: "/environments/0/services/0",
-      value: undefined
     });
     expect(patch).toContainEqual({
       op: "add",
@@ -373,4 +387,49 @@ describe("fastHashUtil function", () => {
     test("should handle empty strings", () => {
         expect(fastHashUtil("")).toBe("811c9dc5");
     });
+});
+
+describe("Line Number Tests", () => {
+  test("should produce correct line numbers for changes", () => {
+    const doc1 = `{
+      "a": 1,
+      "b": [
+        "hello",
+        "world"
+      ]
+    }`;
+
+    const doc2 = `{
+      "a": 2,
+      "b": [
+        "hello",
+        "there",
+        "world"
+      ]
+    }`;
+
+    const patcher = createPatcher(
+      {},
+      {
+        parser: "jsonc",
+        aggregator: "line-aware",
+      }
+    );
+
+    const result = patcher.diff(doc1, doc2);
+    const replaceOp = result.operations.find((op) => op.op === "replace");
+    const addOp = result.operations.find((op) => op.op === "add");
+
+    expect(replaceOp).toBeDefined();
+    expect(addOp).toBeDefined();
+
+    if (replaceOp) {
+      expect(replaceOp.line).toBe(2);
+      expect(replaceOp.oldLine).toBe(2);
+    }
+    if (addOp) {
+      expect(addOp.line).toBe(7);
+      expect(addOp.oldLine).toBe(undefined);
+    }
+  });
 }); 

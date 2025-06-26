@@ -39,11 +39,18 @@ export class LineAwareAggregator implements IAggregator {
     }
 
     for (const delta of deltas) {
-      const locationOld = parsedDoc1.getNodeLocation(delta.path);
-      const locationNew = parsedDoc2.getNodeLocation(delta.path);
+      let line: number | undefined;
+      let oldLine: number | undefined;
 
-      let line = locationNew.line;
-      let oldLine = locationOld.line;
+      if (delta.op !== "add") {
+        const locationOld = parsedDoc1.getNodeLocation(delta.path);
+        oldLine = locationOld.line;
+      }
+
+      if (delta.op !== "remove") {
+        const locationNew = parsedDoc2.getNodeLocation(delta.path);
+        line = locationNew.line;
+      }
 
       if (isPartial && partialKeys && partialKeys.length > 0) {
         // Find the most specific matching partial key for the current delta.
@@ -54,8 +61,12 @@ export class LineAwareAggregator implements IAggregator {
         if (matchingKey) {
           const baseLocations = partialKeyLocations.get(matchingKey);
           if (baseLocations) {
-            line = locationNew.line - baseLocations.new.line + 1;
-            oldLine = locationOld.line - baseLocations.old.line + 1;
+            if (line !== undefined) {
+              line = line - baseLocations.new.line + 1;
+            }
+            if (oldLine !== undefined) {
+              oldLine = oldLine - baseLocations.old.line + 1;
+            }
           }
         }
       }

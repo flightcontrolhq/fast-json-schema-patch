@@ -53,12 +53,28 @@ export class JsoncParser implements IParser {
         const node = JSONC.findNodeAtLocation(root, pathSegments);
         if (node) {
           const { offset } = node;
-          const { line, character } = this.getLineAndCharacter(jsonString, offset);
+          const { line, character } = this.getLineAndCharacter(
+            jsonString,
+            offset
+          );
           return {
             line,
             column: character,
             position: offset,
           };
+        } else if (pathSegments.length > 0) {
+          // If node not found, try to find parent to get end location for additions
+          const parentPath = pathSegments.slice(0, -1);
+          const parentNode = JSONC.findNodeAtLocation(root, parentPath);
+          if (parentNode) {
+            const { offset, length } = parentNode;
+            const endPosition = offset + length -1;
+            const { line, character } = this.getLineAndCharacter(
+              jsonString,
+              endPosition
+            );
+            return { line, column: character, position: endPosition };
+          }
         }
         return { line: 0, column: 0, position: 0 };
       },
