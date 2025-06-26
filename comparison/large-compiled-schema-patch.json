@@ -1,0 +1,31 @@
+[
+  {
+    "op": "replace",
+    "path": "/environments/0/services/2",
+    "value": {
+      "id": "service2",
+      "name": "service-name-2",
+      "type": "web",
+      "cpu": 100,
+      "memory": 5.58778293015622,
+      "dependsOn": [
+        "service1"
+      ]
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/5"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/10",
+    "value": {
+      "id": "service-new",
+      "name": "new-service",
+      "type": "worker",
+      "cpu": 1,
+      "memory": 1
+    }
+  }
+]

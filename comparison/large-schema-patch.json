@@ -1,22 +1,3 @@
-[
-  {
-    "op": "replace",
-    "path": "/environments/0/services/2/cpu",
-    "value": 100
-  },
-  {
-    "op": "remove",
-    "path": "/environments/0/services/5"
-  },
-  {
-    "op": "add",
-    "path": "/environments/0/services/-",
-    "value": {
-      "id": "service-new",
-      "name": "new-service",
-      "type": "worker",
-      "cpu": 1,
-      "memory": 1
-    }
-  }
-]
+{
+  "operations": []
+}

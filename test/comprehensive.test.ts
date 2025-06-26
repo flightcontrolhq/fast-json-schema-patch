@@ -4,10 +4,9 @@ import {
   SchemaPatcher,
   _resolveRef,
   _traverseSchema,
-  deepEqual,
-  fastHash,
-  type Operation,
-} from "../src/index";
+} from "../src/legacy/SchemaJsonPatcher";
+import type { Operation } from "../src/legacy/types";
+import { deepEqual } from "../src/legacy/arrayDiffAlgorithms";
 import originalSchema from "./schema.json";
 import { faker } from "@faker-js/faker";
 import { applyPatch, type Operation as FastJsonPatchOperation } from "fast-json-patch";
@@ -648,7 +647,7 @@ test("SchemaPatcher handles array without primary key (fallback)", () => {
       path: "/environments/0/services/0/dependsOn/1",
       value: "c",
     },
-    { op: "add", path: "/environments/0/services/0/dependsOn/2", value: "d" },
+    { op: "add", path: "/environments/0/services/0/dependsOn/-", value: "d" },
   ];
 
   expect(patches).toEqual(expectedPatches);
@@ -1066,13 +1065,8 @@ test("SchemaPatcher correctly diffs a single service property", () => {
     [
       {
         "op": "replace",
-        "path": "/memory",
-        "value": 4,
-      },
-      {
-        "op": "replace",
-        "path": "/cpu",
-        "value": 2,
+        "path": "/name",
+        "value": "NLB Servers",
       },
       {
         "op": "remove",
@@ -1111,8 +1105,13 @@ test("SchemaPatcher correctly diffs a single service property", () => {
       },
       {
         "op": "replace",
-        "path": "/name",
-        "value": "NLB Servers",
+        "path": "/cpu",
+        "value": 2,
+      },
+      {
+        "op": "replace",
+        "path": "/memory",
+        "value": 4,
       },
     ]
   `);

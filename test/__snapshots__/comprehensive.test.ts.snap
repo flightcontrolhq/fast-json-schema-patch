@@ -3,6 +3,7 @@
 exports[`SchemaPatcher should match snapshot for schema.json 1`] = `
 Map {
   "/environments" => {
+    "compiledDiff": [Function],
     "hashFields": [
       "name",
       "region",
@@ -3121,6 +3122,7 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/source/filter/labels" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -3128,6 +3130,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/source/filter/toBranches" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "null",
     },
@@ -3135,6 +3138,7 @@ Set {
     "strategy": "lcs",
   },
   "/environments/source/filter/toBranch" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -3142,6 +3146,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/source/filter/fromBranches" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "null",
     },
@@ -3149,6 +3154,7 @@ Set {
     "strategy": "lcs",
   },
   "/environments/source/filter/watchPaths" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -3156,6 +3162,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services" => {
+    "compiledDiff": [Function],
     "hashFields": [
       "id",
       "name",
@@ -6119,6 +6126,7 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/dependsOn" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6126,6 +6134,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/startCommand" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6133,6 +6142,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/preDeployCommand" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6140,6 +6150,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/postDeployCommand" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6147,6 +6158,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/watchPaths" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6154,6 +6166,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/sidecars" => {
+    "compiledDiff": [Function],
     "hashFields": [
       "cpuAllotment",
       "memoryAllotment",
@@ -6225,6 +6238,7 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/sidecars/ports" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "number",
     },
@@ -6232,6 +6246,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/sidecars/startCommand" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6239,6 +6254,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/logging/firelens/config" => {
+    "compiledDiff": [Function],
     "hashFields": [
       "name",
       "match",
@@ -6290,6 +6306,7 @@ Set {
     "strategy": "primaryKey",
   },
   "/environments/services/logging/firelens/config/options/*" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6297,6 +6314,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/permissions/inline/*" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "anyOf": [
         {
@@ -6325,6 +6343,7 @@ Set {
     "strategy": "lcs",
   },
   "/environments/services/permissions/attach" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "pattern": "^arn",
       "type": "string",
@@ -6333,6 +6352,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/jobs/*/startCommand" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6340,6 +6360,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/cpuArchitecture" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "enum": [
         "x86_64",
@@ -6353,6 +6374,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowHeaders" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6360,6 +6382,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowMethods" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6367,6 +6390,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/allowOrigin" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6374,6 +6398,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/lambda/fnUrl/cors/exposedHeaders" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "type": "string",
     },
@@ -6381,6 +6406,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/lambda/cpuArchitecture" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "enum": [
         "x86_64",
@@ -6394,6 +6420,7 @@ Set {
     "strategy": "unique",
   },
   "/environments/services/bucketPolicy/*" => {
+    "compiledDiff": [Function],
     "itemSchema": {
       "anyOf": [
         {
@@ -6422,6 +6449,7 @@ Set {
     "strategy": "lcs",
   },
   "/environments/services/ports" => {
+    "compiledDiff": [Function],
     "hashFields": [
       "port",
       "protocol",

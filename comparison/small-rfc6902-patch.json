@@ -1,27 +1,27 @@
 [
-  {
-    "op": "replace",
-    "path": "/environments/0/services/0/cpu",
-    "value": 2
-  },
-  {
-    "op": "replace",
-    "path": "/environments/0/services/1/id",
-    "value": "service3"
-  },
-  {
-    "op": "replace",
-    "path": "/environments/0/services/1/name",
-    "value": "new-worker"
-  },
-  {
-    "op": "replace",
-    "path": "/environments/0/services/1/cpu",
-    "value": 1
-  },
-  {
-    "op": "replace",
-    "path": "/environments/0/services/1/memory",
-    "value": 2
-  }
+	{
+		"op": "replace",
+		"path": "/environments/0/services/0/cpu",
+		"value": 2
+	},
+	{
+		"op": "replace",
+		"path": "/environments/0/services/1/id",
+		"value": "service3"
+	},
+	{
+		"op": "replace",
+		"path": "/environments/0/services/1/name",
+		"value": "new-worker"
+	},
+	{
+		"op": "replace",
+		"path": "/environments/0/services/1/cpu",
+		"value": 1
+	},
+	{
+		"op": "replace",
+		"path": "/environments/0/services/1/memory",
+		"value": 2
+	}
 ]
