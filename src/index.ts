@@ -513,9 +513,22 @@ export function getEffectiveHashFields(
 
 export class SchemaPatcher {
   private plan: Plan;
+  // Path lookup optimizations
+  private planLookupCache = new Map<string, ArrayPlan | undefined>();
+  private wildcardPathCache = new Map<string, string | null>();
 
   constructor(options: { plan: Plan }) {
     this.plan = options.plan;
+  }
+
+  private getWildcardPathCached(path: string): string | null {
+    if (this.wildcardPathCache.has(path)) {
+      return this.wildcardPathCache.get(path) as string | null;
+    }
+    
+    const wildcardPath = getWildcardPath(path);
+    this.wildcardPathCache.set(path, wildcardPath);
+    return wildcardPath;
   }
 
   createPatch(doc1: JsonValue, doc2: JsonValue): Operation[] {
@@ -624,9 +637,17 @@ export class SchemaPatcher {
   }
 
   private getPlanForPath(path: string): ArrayPlan | undefined {
+    // Check cache first
+    if (this.planLookupCache.has(path)) {
+      return this.planLookupCache.get(path);
+    }
+
+    let plan: ArrayPlan | undefined;
+
     // Try exact match first
-    let plan = this.plan.get(path);
+    plan = this.plan.get(path);
     if (plan) {
+      this.planLookupCache.set(path, plan);
       return plan;
     }
 
@@ -634,15 +655,18 @@ export class SchemaPatcher {
     const normalizedPath = normalizePath(path);
     plan = this.plan.get(normalizedPath);
     if (plan) {
+      this.planLookupCache.set(path, plan);
       return plan;
     }
 
     // Try parent wildcard path
-    const wildcardPath = getWildcardPath(path);
+    const wildcardPath = this.getWildcardPathCached(path);
     if (wildcardPath) {
       plan = this.plan.get(wildcardPath);
     }
 
+    // Cache the result (even if undefined)
+    this.planLookupCache.set(path, plan);
     return plan;
   }
 
