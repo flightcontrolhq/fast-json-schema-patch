@@ -2,11 +2,19 @@
   {
     "op": "replace",
     "path": "/environments/0/services/0/cpu",
-    "value": 2
+    "value": 2,
+    "oldValue": 1
   },
   {
     "op": "remove",
-    "path": "/environments/0/services/1"
+    "path": "/environments/0/services/1",
+    "oldValue": {
+      "id": "service2",
+      "name": "worker",
+      "type": "worker",
+      "cpu": 0.5,
+      "memory": 1
+    }
   },
   {
     "op": "add",

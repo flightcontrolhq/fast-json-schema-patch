@@ -1,10 +1,12 @@
+import type {
+  JsonValue,
+  JsonObject,
+  JsonArray,
+  Operation,
+} from "./types";
 import {
-  type JsonValue,
-  type JsonObject,
-  type JsonArray,
-  type Operation,
-  deepEqual,
   deepEqualMemo,
+  deepEqual,
 } from "./index";
 
 type ModificationCallback = (
@@ -90,17 +92,19 @@ export function diffArrayByPrimaryKey(
     }
   }
 
-  const removalIndices: number[] = [];
+  const removalIndices: { index: number; value: JsonValue }[] = [];
   for (const [key, oldEntry] of map1.entries()) {
     if (!seenKeys.has(key)) {
-      removalIndices.push(oldEntry.index);
+      removalIndices.push({ index: oldEntry.index, value: oldEntry.item });
     }
   }
 
-  removalIndices.sort((a, b) => b - a);
-  const removalPatches: Operation[] = removalIndices.map(index => ({
+  // Sort by index in descending order to avoid index shifting issues
+  removalIndices.sort((a, b) => b.index - a.index);
+  const removalPatches: Operation[] = removalIndices.map(({ index, value }) => ({
     op: "remove",
     path: `${path}/${index}`,
+    oldValue: value,
   }));
 
   patches.push(...modificationPatches, ...removalPatches, ...additionPatches);

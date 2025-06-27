@@ -1,0 +1,102 @@
+import { describe, test, expect } from "bun:test";
+import { buildPlan, SchemaPatcher } from "../src/index";
+import { DiffFormatter, generateUnifiedDiff } from "../src/diff-formatters";
+import { faker } from "@faker-js/faker";
+
+const userSchema = {
+  type: "object",
+  properties: {
+    userId: { type: "string" },
+    username: { type: "string" },
+    email: { type: "string" },
+    posts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          postId: { type: "string" },
+          title: { type: "string" },
+          content: { type: "string" },
+          tags: { type: "array", items: { type: "string" } },
+        },
+        required: ["postId", "title", "content"],
+      },
+    },
+    metadata: {
+      type: "object",
+      additionalProperties: true,
+    },
+  },
+  required: ["userId", "username", "email"],
+};
+
+function createRandomUser() {
+  return {
+    userId: faker.string.uuid(),
+    username: faker.internet.username(),
+    email: faker.internet.email(),
+    posts: Array.from(
+      { length: faker.number.int({ min: 2, max: 3 }) },
+      () => ({
+        postId: faker.string.uuid(),
+        title: faker.lorem.sentence(),
+        content: faker.lorem.paragraphs(),
+        tags: Array.from(
+          { length: faker.number.int({ min: 1, max: 3 }) },
+          () => faker.lorem.word()
+        ),
+      })
+    ),
+    metadata: {
+      createdAt: new Date("2025-01-01").toISOString(),
+      updatedAt: new Date("2025-01-01").toISOString(),
+      source: "faker",
+    },
+  };
+}
+
+describe("DiffFormatter E2E Integration", () => {
+  test("should generate correct side-by-side and unified diffs for a set of changes", () => {
+    faker.seed(123); // for reproducible tests
+    const doc1 = createRandomUser();
+    const doc2 = JSON.parse(JSON.stringify(doc1));
+
+    // --- Introduce a variety of changes ---
+    // 1. Replace a simple value
+    doc2.username = "new-test-user";
+
+    // 2. Add a new property to a nested object
+    doc2.metadata.newProp = 12345;
+
+    // 3. Remove a property from the root
+    delete doc2.email;
+
+    // 4. Modify an array: remove an element from the middle
+    doc2.posts.splice(1, 1);
+
+    // 5. Modify an array: change a value in a remaining element
+    doc2.posts[0].title = "A Completely New Title";
+
+    // 6. Modify an array: add a new element to the end
+    doc2.posts.push({
+      postId: "new-post-id",
+      title: "A Fresh Post",
+      content: "This is a brand new post added to the list.",
+      tags: ["new", "exciting"],
+    });
+    // --- End of changes ---
+
+    const plan = buildPlan(userSchema, { primaryKeyMap: { "/posts": "postId" } });
+    const patcher = new SchemaPatcher({ plan });
+    const patch = patcher.createPatch(doc1, doc2);
+
+    const formatter = new DiffFormatter(doc1, doc2);
+    const sideBySideDiff = formatter.format(patch);
+
+    const unifiedDiff = generateUnifiedDiff(sideBySideDiff);
+
+    // Using snapshot testing to verify the complex diff structures
+    expect(sideBySideDiff).toMatchSnapshot("side-by-side-diff");
+    expect(unifiedDiff).toMatchSnapshot("unified-diff");
+  });
+});

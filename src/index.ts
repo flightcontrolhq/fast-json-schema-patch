@@ -3,10 +3,12 @@ import {
   diffArrayLCS,
   diffArrayUnique,
 } from "./diffing-utils";
-
-export type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
-export type JsonObject = { [Key in string]?: JsonValue };
-export type JsonArray = JsonValue[];
+import type {
+  JsonArray,
+  JsonObject,
+  JsonValue,
+  Operation,
+} from "./types";
 
 interface JSONSchema extends JsonObject {
   $ref?: string;
@@ -18,13 +20,6 @@ interface JSONSchema extends JsonObject {
   oneOf?: JSONSchema[];
   allOf?: JSONSchema[];
   required?: string[];
-}
-
-export interface Operation {
-  op: "add" | "remove" | "replace" | "move" | "copy" | "test";
-  path: string;
-  value?: JsonValue;
-  from?: string;
 }
 
 type Schema = JSONSchema;
@@ -356,9 +351,6 @@ export function fastHash(obj: JsonObject, fields: string[]): string {
 
 export class SchemaPatcher {
   private plan: Plan;
-  private plugins: {
-    
-  }[] = [];
 
   constructor(options: { plan: Plan }) {
     this.plan = options.plan;
@@ -384,7 +376,7 @@ export class SchemaPatcher {
     }
 
     if (obj2 === undefined) {
-      patches.push({ op: "remove", path });
+      patches.push({ op: "remove", path, oldValue: obj1 });
       return;
     }
 
@@ -395,7 +387,7 @@ export class SchemaPatcher {
       obj2 === null ||
       Array.isArray(obj1) !== Array.isArray(obj2)
     ) {
-      patches.push({ op: "replace", path, value: obj2 });
+      patches.push({ op: "replace", path, value: obj2, oldValue: obj1 });
       return;
     }
 
@@ -422,10 +414,10 @@ export class SchemaPatcher {
       const val1 = obj1[key];
       const val2 = obj2[key];
 
-      if (val1 === undefined) {
+      if (val1 === undefined && val2 !== undefined) {
         patches.push({ op: "add", path: newPath, value: val2 });
-      } else if (val2 === undefined) {
-        patches.push({ op: "remove", path: newPath });
+      } else if (val2 === undefined && val1 !== undefined) {
+        patches.push({ op: "remove", path: newPath, oldValue: val1 });
       } else {
         this.diff(val1, val2, newPath, patches);
       }
