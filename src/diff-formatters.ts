@@ -1,24 +1,14 @@
 import { parse } from "json-source-map";
 import { resolvePatchPath } from "./path-utils";
+import { cachedJsonStringify, cachedBuildPathMap } from "./json-cache";
 import type {
   DiffLine,
-  JsonObject,
   JsonValue,
   Operation,
   PathMap,
   SideBySideDiff,
   UnifiedDiffLine,
 } from "./types";
-
-function buildPathMap(jsonText: string): PathMap {
-  try {
-    const { pointers } = parse(jsonText);
-    return pointers as unknown as PathMap;
-  } catch (error) {
-    console.error("Error building path map:", error);
-    return {};
-  }
-}
 
 
 
@@ -62,10 +52,8 @@ export class DiffFormatter {
   constructor(originalJson: JsonValue, newJson: JsonValue) {
     this.originalJson = originalJson;
     this.newJson = newJson;
-    const originalFormatted = JSON.stringify(originalJson, null, 2);
-    this.originalPathMap = buildPathMap(originalFormatted);
-    const newFormatted = JSON.stringify(newJson, null, 2);
-    this.newPathMap = buildPathMap(newFormatted);
+    this.originalPathMap = cachedBuildPathMap(originalJson);
+    this.newPathMap = cachedBuildPathMap(newJson);
   }
 
   format(patches: Operation[]): SideBySideDiff {
@@ -102,8 +90,8 @@ export class DiffFormatter {
       }
     }
 
-    const originalFormatted = JSON.stringify(this.originalJson, null, 2);
-    const newFormatted = JSON.stringify(this.newJson, null, 2);
+    const originalFormatted = cachedJsonStringify(this.originalJson);
+    const newFormatted = cachedJsonStringify(this.newJson);
 
     const originalLines = originalFormatted.split("\n");
     const newLines = newFormatted.split("\n");

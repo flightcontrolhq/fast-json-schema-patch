@@ -107,7 +107,7 @@ export function resolvePatchPath(
  */
 export function normalizePath(path: string): string {
   if (normalizedPathCache.has(path)) {
-    return normalizedPathCache.get(path)!;
+    return normalizedPathCache.get(path) as string;
   }
   
   const normalized = path.replace(/\/\d+/g, "");
@@ -158,13 +158,5 @@ export function splitPath(path: string): string[] {
  */
 export function joinPath(parts: string[]): string {
   if (parts.length === 0) return "";
-  return "/" + parts.map(escapeJsonPointer).join("/");
+  return `/${parts.map(escapeJsonPointer).join("/")}`;
 }
-
-/**
- * Clears the path resolution cache (useful for testing or memory management)
- */
-export function clearPathCache(): void {
-  pathResolutionCache.clear();
-  normalizedPathCache.clear();
-} 

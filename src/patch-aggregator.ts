@@ -1,6 +1,8 @@
 import { DiffFormatter } from "./diff-formatters";
 import { getValueByPath } from "./path-utils";
+import { getCachedFormatter } from "./json-cache";
 import type { JsonValue, JsonObject, Operation, SideBySideDiff } from "./types";
+import type { Plan, ArrayPlan } from ".";
 
 function countChangedLines(diff: SideBySideDiff): {
   addCount: number;
@@ -17,7 +19,8 @@ function countChangedLines(diff: SideBySideDiff): {
 
 export interface AggregationConfig {
   pathPrefix: string;
-  idKey: string;
+  idKey?: string; // Optional - will be inferred from plan if not provided
+  plan?: Plan; // Optional schema plan for optimization
 }
 
 export interface AggregatedDiffResult {
@@ -53,11 +56,52 @@ export class PatchAggregator {
     this.newDoc = newDoc;
   }
 
+  private getIdKeyForPath(pathPrefix: string, config: AggregationConfig): string {
+    if (config.idKey) {
+      return config.idKey;
+    }
+
+    if (config.plan) {
+      const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
+      if (arrayPlan?.primaryKey) {
+        return arrayPlan.primaryKey;
+      }
+    }
+
+    return "id";
+  }
+
+  private getArrayPlanForPath(path: string, plan: Plan): ArrayPlan | undefined {
+    let arrayPlan = plan.get(path);
+    if (arrayPlan) {
+      return arrayPlan;
+    }
+
+    if (path.startsWith("/")) {
+      const pathWithoutSlash = path.substring(1);
+      arrayPlan = plan.get(pathWithoutSlash);
+      if (arrayPlan) {
+        return arrayPlan;
+      }
+    }
+
+    if (!path.startsWith("/")) {
+      const pathWithSlash = "/" + path;
+      arrayPlan = plan.get(pathWithSlash);
+      if (arrayPlan) {
+        return arrayPlan;
+      }
+    }
+
+    return undefined;
+  }
+
   aggregate(
     patches: Operation[],
     config: AggregationConfig
   ): AggregatedDiffResult {
-    const { pathPrefix, idKey } = config;
+    const { pathPrefix } = config;
+    const idKey = this.getIdKeyForPath(pathPrefix, config);
 
     const parentPatches: Operation[] = [];
     const childPatchesById = new Map<string, Operation[]>();
@@ -127,7 +171,11 @@ export class PatchAggregator {
       childArrayKey
     );
 
-    const parentFormatter = new DiffFormatter(originalParent, newParent);
+    const parentFormatter = getCachedFormatter(
+      originalParent, 
+      newParent, 
+      (orig, newVal) => new DiffFormatter(orig, newVal)
+    );
     const parentDiffLines = parentFormatter.format(parentPatches);
     const parentLineCounts = countChangedLines(parentDiffLines);
 
@@ -178,7 +226,11 @@ export class PatchAggregator {
         }
       });
 
-      const formatter = new DiffFormatter(originalChild, newChild);
+      const formatter = getCachedFormatter(
+        originalChild, 
+        newChild, 
+        (orig, newVal) => new DiffFormatter(orig, newVal)
+      );
       let diffLines: SideBySideDiff;
       let lineCounts: { addCount: number; removeCount: number };
 

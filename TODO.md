@@ -33,20 +33,20 @@ This document outlines the steps to refactor the `SchemaPatcher` to use an aggre
 ## 5. Performance Optimizations & Caching
 
 ### 5.1 Eliminate Redundant Path Resolution Logic
-- [ ] **Extract Common Path Utilities**: Create a shared `src/path-utils.ts` module to consolidate path resolution logic from:
+- [x] **Extract Common Path Utilities**: Create a shared `src/path-utils.ts` module to consolidate path resolution logic from:
   - `getValueByPath` in `patch-aggregator.ts`
   - `resolvePatchPath` in `diff-formatters.ts` 
   - Path traversal in schema plan lookups (`index.ts`)
-- [ ] **Unified Path Resolution**: Implement a single, optimized path resolution function with consistent JSON Pointer handling (including `~0` and `~1` escaping)
+- [x] **Unified Path Resolution**: Implement a single, optimized path resolution function with consistent JSON Pointer handling (including `~0` and `~1` escaping)
 
 ### 5.2 JSON Serialization & Path Map Caching
-- [ ] **JSON String Cache**: Implement a WeakMap cache for `JSON.stringify(obj, null, 2)` results to avoid repeated serialization of the same objects
-- [ ] **Path Map Cache**: Cache `buildPathMap()` results using object identity as keys, since path maps are expensive to compute
-- [ ] **Memoized Formatting**: Cache `DiffFormatter` instances for identical (original, new) JSON pairs
+- [x] **JSON String Cache**: Implement a WeakMap cache for `JSON.stringify(obj, null, 2)` results to avoid repeated serialization of the same objects
+- [x] **Path Map Cache**: Cache `buildPathMap()` results using object identity as keys, since path maps are expensive to compute
+- [x] **Memoized Formatting**: Cache `DiffFormatter` instances for identical (original, new) JSON pairs
 
 ### 5.3 Schema Plan Integration in PatchAggregator
-- [ ] **Plan-Aware Aggregation**: Modify `PatchAggregator` constructor to accept a `Plan` parameter
-- [ ] **Schema-Driven Array Detection**: Use plan information to identify arrays and their primary keys instead of hardcoded `idKey` parameter
+- [x] **Plan-Aware Aggregation**: Modify `PatchAggregator` constructor to accept a `Plan` parameter
+- [x] **Schema-Driven Array Detection**: Use plan information to identify arrays and their primary keys instead of hardcoded `idKey` parameter
 - [ ] **Strategy-Aware Processing**: Leverage the plan's diffing strategies (primaryKey, lcs, unique) for optimized aggregation
 - [ ] **Remove Hardcoded Array Logic**: Replace manual array detection with schema-based path resolution
 

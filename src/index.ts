@@ -25,7 +25,7 @@ interface JSONSchema extends JsonObject {
 
 type Schema = JSONSchema;
 
-interface ArrayPlan {
+export interface ArrayPlan {
   primaryKey: string | null;
   // Pre-resolved item schema to avoid repeated $ref resolution
   itemSchema?: JSONSchema;
@@ -37,7 +37,7 @@ interface ArrayPlan {
   strategy?: "primaryKey" | "lcs" | "unique";
 }
 
-type Plan = Map<string, ArrayPlan>;
+export type Plan = Map<string, ArrayPlan>;
 
 export interface BuildPlanOptions {
   primaryKeyMap?: Record<string, string>;

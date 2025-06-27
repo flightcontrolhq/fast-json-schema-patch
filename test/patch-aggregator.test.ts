@@ -245,7 +245,7 @@ describe("PatchAggregator", () => {
   const aggregator = new PatchAggregator(originalDoc, newDoc);
   const result = aggregator.aggregate(patches, {
     pathPrefix: "/environments/0/services",
-    idKey: "id",
+    plan: buildPlan(schema as any),
   });
 
   it("should produce correct diffLines", () => {
