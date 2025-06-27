@@ -1,16 +1,11 @@
-import type {
-  JsonValue,
-  JsonObject,
-  JsonArray,
-  Operation,
-} from "./types";
+import type { JsonValue, JsonObject, JsonArray, Operation } from "../types";
 import {
   deepEqualMemo,
   deepEqual,
   deepEqualSchemaAware,
-  getEffectiveHashFields,
-} from "./index";
-import type { ArrayPlan } from "./index";
+} from "../performance/deepEqual";
+import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
+import type { ArrayPlan } from "../core/buildPlan";
 
 type ModificationCallback = (
   item1: JsonValue,
@@ -29,7 +24,12 @@ export function diffArrayByPrimaryKey(
   hashFields?: string[],
   plan?: ArrayPlan
 ) {
-  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || []);
+  const effectiveHashFields = getEffectiveHashFields(
+    plan,
+    undefined,
+    undefined,
+    hashFields || []
+  );
   const map1 = new Map<string | number, { item: JsonValue; index: number }>();
   for (let i = 0; i < arr1.length; i++) {
     const item = arr1[i];
@@ -67,7 +67,12 @@ export function diffArrayByPrimaryKey(
       let needsDiff = false;
 
       if (plan) {
-        needsDiff = !deepEqualSchemaAware(oldItem, newItem, plan, effectiveHashFields);
+        needsDiff = !deepEqualSchemaAware(
+          oldItem,
+          newItem,
+          plan,
+          effectiveHashFields
+        );
       } else if (effectiveHashFields.length > 0) {
         let hashFieldsDiffer = false;
         for (let j = 0; j < effectiveHashFields.length; j++) {
@@ -80,7 +85,9 @@ export function diffArrayByPrimaryKey(
             break;
           }
         }
-        needsDiff = hashFieldsDiffer || (oldItem !== newItem && !deepEqual(oldItem, newItem));
+        needsDiff =
+          hashFieldsDiffer ||
+          (oldItem !== newItem && !deepEqual(oldItem, newItem));
       } else {
         needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem);
       }
@@ -106,11 +113,13 @@ export function diffArrayByPrimaryKey(
   }
 
   removalIndices.sort((a, b) => b.index - a.index);
-  const removalPatches: Operation[] = removalIndices.map(({ index, value }) => ({
-    op: "remove",
-    path: `${path}/${index}`,
-    oldValue: value,
-  }));
+  const removalPatches: Operation[] = removalIndices.map(
+    ({ index, value }) => ({
+      op: "remove",
+      path: `${path}/${index}`,
+      oldValue: value,
+    })
+  );
 
   patches.push(...modificationPatches, ...removalPatches, ...additionPatches);
 }
@@ -139,8 +148,13 @@ export function diffArrayLCS(
   hashFields?: string[],
   plan?: ArrayPlan
 ) {
-  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || []);
-  
+  const effectiveHashFields = getEffectiveHashFields(
+    plan,
+    undefined,
+    undefined,
+    hashFields || []
+  );
+
   const n = arr1.length;
   const m = arr2.length;
   const max = n + m;
@@ -159,7 +173,12 @@ export function diffArrayLCS(
       while (x < n && y < m) {
         let itemsEqual = false;
         if (plan) {
-          itemsEqual = deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields);
+          itemsEqual = deepEqualSchemaAware(
+            arr1[x],
+            arr2[y],
+            plan,
+            effectiveHashFields
+          );
         } else {
           itemsEqual = deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
         }

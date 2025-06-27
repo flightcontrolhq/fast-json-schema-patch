@@ -1,13 +1,16 @@
-import { DiffFormatter } from "./diff-formatters";
-import { getValueByPath } from "./path-utils";
-import { getCachedFormatter } from "./json-cache";
-import { 
-  deepEqualSchemaAware, 
-  getEffectiveHashFields, 
-  fastHash 
-} from "./index";
-import type { JsonValue, JsonObject, Operation, SideBySideDiff } from "./types";
-import type { Plan, ArrayPlan } from ".";
+import { DiffFormatter } from "./DiffFormatter";
+import { getValueByPath } from "../utils/pathUtils";
+import { getCachedFormatter } from "../performance/cache";
+import { deepEqualSchemaAware } from "../performance/deepEqual";
+import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
+import { fastHash } from "../performance/fashHash";
+import type {
+  JsonValue,
+  JsonObject,
+  Operation,
+  SideBySideDiff,
+} from "../types";
+import type { Plan, ArrayPlan } from "../core/buildPlan";
 
 function countChangedLines(diff: SideBySideDiff): {
   addCount: number;
@@ -19,8 +22,6 @@ function countChangedLines(diff: SideBySideDiff): {
   ).length;
   return { addCount, removeCount };
 }
-
-
 
 export interface AggregationConfig {
   pathPrefix: string;
@@ -61,7 +62,10 @@ export class PatchAggregator {
     this.newDoc = newDoc;
   }
 
-  private getIdKeyForPath(pathPrefix: string, config: AggregationConfig): string {
+  private getIdKeyForPath(
+    pathPrefix: string,
+    config: AggregationConfig
+  ): string {
     if (config.idKey) {
       return config.idKey;
     }
@@ -76,34 +80,42 @@ export class PatchAggregator {
     return "id";
   }
 
-  private getArrayStrategy(pathPrefix: string, config: AggregationConfig): "primaryKey" | "lcs" | "unique" {
+  private getArrayStrategy(
+    pathPrefix: string,
+    config: AggregationConfig
+  ): "primaryKey" | "lcs" | "unique" {
     if (config.plan) {
       const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
       if (arrayPlan?.strategy) {
         return arrayPlan.strategy;
       }
     }
-    
+
     // Default to primaryKey if we have an idKey or if the plan suggests a primary key
     if (config.idKey) {
       return "primaryKey";
     }
-    
+
     if (config.plan) {
       const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
       if (arrayPlan?.primaryKey) {
         return "primaryKey";
       }
     }
-    
+
     return "lcs";
   }
 
-  private supportsAggregation(pathPrefix: string, config: AggregationConfig): boolean {
+  private supportsAggregation(
+    pathPrefix: string,
+    config: AggregationConfig
+  ): boolean {
     // Support aggregation if we have any way to identify array items
     const hasIdKey = Boolean(config.idKey);
-    const hasSchemaKey = config.plan && this.getArrayPlanForPath(pathPrefix, config.plan)?.primaryKey;
-    
+    const hasSchemaKey =
+      config.plan &&
+      this.getArrayPlanForPath(pathPrefix, config.plan)?.primaryKey;
+
     return hasIdKey || Boolean(hasSchemaKey);
   }
 
@@ -119,11 +131,9 @@ export class PatchAggregator {
     // Fallback: check if the path actually points to an array in the data
     const originalValue = getValueByPath(this.originalDoc, pathPrefix);
     const newValue = getValueByPath(this.newDoc, pathPrefix);
-    
+
     return Array.isArray(originalValue) || Array.isArray(newValue);
   }
-
-
 
   private getArrayPlanForPath(path: string, plan: Plan): ArrayPlan | undefined {
     // Try exact match first
@@ -146,7 +156,7 @@ export class PatchAggregator {
       if (arrayPlan) {
         return arrayPlan;
       }
-      
+
       // Also try normalized version without leading slash
       const normalizedWithoutSlash = normalizedPath.substring(1);
       arrayPlan = plan.get(normalizedWithoutSlash);
@@ -186,8 +196,8 @@ export class PatchAggregator {
     );
 
     const parentFormatter = getCachedFormatter(
-      originalParent, 
-      newParent, 
+      originalParent,
+      newParent,
       (orig, newVal) => new DiffFormatter(orig, newVal)
     );
     const parentDiffLines = parentFormatter.format(patches);
@@ -213,12 +223,12 @@ export class PatchAggregator {
   ): boolean {
     if (obj1 === obj2) return true;
     if (!obj1 || !obj2) return false;
-    
+
     // Use schema-aware equality when plan is available
     if (plan) {
       return deepEqualSchemaAware(obj1, obj2, plan);
     }
-    
+
     // Fallback to enhanced hash-based comparison
     const hashFields = getEffectiveHashFields(plan, obj1, obj2);
     if (hashFields.length > 0) {
@@ -226,7 +236,7 @@ export class PatchAggregator {
       const h2 = fastHash(obj2, hashFields);
       if (h1 !== h2) return false;
     }
-    
+
     // Final deep comparison (will use memoization)
     return JSON.stringify(obj1) === JSON.stringify(obj2);
   }
@@ -236,19 +246,23 @@ export class PatchAggregator {
     config: AggregationConfig
   ): AggregatedDiffResult {
     const { pathPrefix } = config;
-    
+
     // Validate that the path actually represents an array
     if (!this.isArrayPath(pathPrefix, config)) {
-      throw new Error(`Path ${pathPrefix} does not represent an array in the schema or data`);
+      throw new Error(
+        `Path ${pathPrefix} does not represent an array in the schema or data`
+      );
     }
-    
+
     // Check if this array configuration supports proper aggregation
     if (!this.supportsAggregation(pathPrefix, config)) {
       return this.aggregateWithoutChildSeparation(patches, config);
     }
 
     const idKey = this.getIdKeyForPath(pathPrefix, config);
-    const arrayPlan = config.plan ? this.getArrayPlanForPath(pathPrefix, config.plan) : undefined;
+    const arrayPlan = config.plan
+      ? this.getArrayPlanForPath(pathPrefix, config.plan)
+      : undefined;
     const parentPatches: Operation[] = [];
     const childPatchesById = new Map<string, Operation[]>();
 
@@ -277,7 +291,7 @@ export class PatchAggregator {
         } else if (matchIndex !== "-") {
           // This is a specific index operation
           const index = Number.parseInt(matchIndex, 10);
-          
+
           if (patch.op === "add") {
             childId = (patch.value as JsonObject)?.[idKey] as string;
           } else {
@@ -319,8 +333,8 @@ export class PatchAggregator {
     );
 
     const parentFormatter = getCachedFormatter(
-      originalParent, 
-      newParent, 
+      originalParent,
+      newParent,
       (orig, newVal) => new DiffFormatter(orig, newVal)
     );
     const parentDiffLines = parentFormatter.format(parentPatches);
@@ -346,7 +360,11 @@ export class PatchAggregator {
       const patchesForChild = childPatchesById.get(childId) || [];
 
       // Enhanced optimization: skip processing if objects are identical
-      if (originalChild && newChild && this.compareObjects(originalChild, newChild, arrayPlan)) {
+      if (
+        originalChild &&
+        newChild &&
+        this.compareObjects(originalChild, newChild, arrayPlan)
+      ) {
         continue; // Skip identical children - no diff needed
       }
 
@@ -367,7 +385,11 @@ export class PatchAggregator {
           return { ...p, path: p.path.substring(childPathPrefix.length) };
         } else {
           // For remove operations, we need to find the path differently
-          const pathMatch = p.path.match(new RegExp(`^${pathPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/(\d+)`));
+          const pathMatch = p.path.match(
+            new RegExp(
+              `^${pathPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(\d+)`
+            )
+          );
           const pathIndex = pathMatch?.[1];
           if (pathIndex) {
             const index = Number.parseInt(pathIndex, 10);
@@ -379,8 +401,8 @@ export class PatchAggregator {
       });
 
       const formatter = getCachedFormatter(
-        originalChild, 
-        newChild, 
+        originalChild,
+        newChild,
         (orig, newVal) => new DiffFormatter(orig, newVal)
       );
       let diffLines: SideBySideDiff;
@@ -392,15 +414,15 @@ export class PatchAggregator {
         // For removed objects, count all original lines as removed
         lineCounts = {
           addCount: 0,
-          removeCount: diffLines.originalLines.length
+          removeCount: diffLines.originalLines.length,
         };
       } else if (!originalChild && newChild) {
-        // Entire object was added - generate diff without patches  
+        // Entire object was added - generate diff without patches
         diffLines = formatter.format([]);
         // For added objects, count all new lines as added
         lineCounts = {
           addCount: diffLines.newLines.length,
-          removeCount: 0
+          removeCount: 0,
         };
       } else {
         // Normal case - use transformed patches

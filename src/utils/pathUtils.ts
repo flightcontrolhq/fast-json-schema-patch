@@ -1,4 +1,4 @@
-import type { JsonValue, JsonObject } from "./types";
+import type { JsonValue, JsonObject } from "../types";
 
 /**
  * Cache for path resolution results to avoid repeated computations

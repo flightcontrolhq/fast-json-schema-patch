@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { buildPlan, SchemaPatcher } from "../src/index";
-import { DiffFormatter } from "../src/diff-formatters";
+import { DiffFormatter } from "../src/formatting/DiffFormatter";
 import { faker } from "@faker-js/faker";
 
 const userSchema = {

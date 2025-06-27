@@ -1,5 +1,5 @@
 import { parse } from "json-source-map";
-import type { JsonValue, PathMap } from "./types";
+import type { JsonValue, PathMap } from "../types";
 
 /**
  * Cache for JSON.stringify results
