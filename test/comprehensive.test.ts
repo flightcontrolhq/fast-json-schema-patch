@@ -2,11 +2,14 @@ import { describe, test, expect, spyOn, it } from "bun:test";
 import {
   buildPlan,
   SchemaPatcher,
-  _resolveRef,
-  _traverseSchema,
+  // _resolveRef,
+  // _traverseSchema,
   deepEqual,
-  fastHash,
+  // fastHash,
 } from "../src/index";
+import { fastHash } from "../src/performance/fashHash";
+import { _resolveRef } from "../src/core/buildPlan";
+import { _traverseSchema } from "../src/core/buildPlan";
 import type { Operation } from "../src/types";
 import originalSchema from "./schema.json";
 import { faker } from "@faker-js/faker";
