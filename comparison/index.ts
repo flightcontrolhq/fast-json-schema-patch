@@ -7,7 +7,10 @@ import * as fastJsonPatch from "fast-json-patch";
 import { writeFile } from "fs/promises";
 import * as jsondiffpatch from "jsondiffpatch";
 import { performance } from "perf_hooks";
+import * as rfc6902 from "rfc6902";
+import { Differ } from "json-diff-kit";
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
+import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import mainSchema from "../test/schema.json";
 
 // Enhanced Types and Interfaces
@@ -29,6 +32,18 @@ interface BenchmarkMetrics {
   operationType: string;
   documentSize: number;
   semanticAccuracy: number;
+  iteration: number;
+}
+
+interface FormattedDiffMetrics {
+  library: string;
+  executionTime: number;
+  memoryUsage: number;
+  outputSize: number;
+  compressionRatio: number;
+  complexityScore: number;
+  operationType: string;
+  documentSize: number;
   iteration: number;
 }
 
@@ -445,6 +460,13 @@ const diffpatcher = jsondiffpatch.create({
   },
 });
 
+const jsonDiffKitDiffer = new Differ({
+  detectCircular: true,
+  maxDepth: Infinity,
+  showModifications: true,
+  arrayDiffMethod: "lcs", // Use LCS for better array handling
+});
+
 // Enhanced Semantic Accuracy Functions
 function calculateSemanticAccuracy(
   originalDoc: any,
@@ -630,11 +652,7 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     { label: "Very High", min: 501, max: 3000 }, // Adjusted to capture all samples
   ];
 
-  const libraries = [
-    "schema-json-patch",
-    "fast-json-patch",
-    "jsondiffpatch",
-  ];
+  const libraries = ["schema-json-patch", "fast-json-patch", "jsondiffpatch"];
   const libraryColors = ["green", "blue", "purple", "yellow"];
 
   console.log("\n📏 Average Time by Complexity Range - All Algorithms:");
@@ -800,6 +818,82 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.table(summaryTable);
 }
 
+function generateFormattedDiffReport(formattedMetrics: FormattedDiffMetrics[]) {
+  const byLibrary = groupBy(formattedMetrics, "library");
+
+  console.log("\n🎨 FORMATTED DIFF COMPARISON REPORT");
+  console.log("=".repeat(80));
+
+  console.log("\n📋 SchemaPatch + PatchAggregator vs json-diff-kit:");
+  console.log(
+    "  This compares formatted, human-readable diff generation capabilities"
+  );
+
+  const schemaMetrics = byLibrary["schema-aggregated"] || [];
+  const jsonDiffKitMetrics = byLibrary["json-diff-kit"] || [];
+
+  if (schemaMetrics.length > 0 && jsonDiffKitMetrics.length > 0) {
+    const avgSchemaTime =
+      schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      schemaMetrics.length;
+    const avgJsonDiffKitTime =
+      jsonDiffKitMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      jsonDiffKitMetrics.length;
+
+    const avgSchemaSize =
+      schemaMetrics.reduce((sum, m) => sum + m.outputSize, 0) /
+      schemaMetrics.length;
+    const avgJsonDiffKitSize =
+      jsonDiffKitMetrics.reduce((sum, m) => sum + m.outputSize, 0) /
+      jsonDiffKitMetrics.length;
+
+    const avgSchemaMemory =
+      schemaMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      schemaMetrics.length;
+    const avgJsonDiffKitMemory =
+      jsonDiffKitMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+      jsonDiffKitMetrics.length;
+
+    console.table([
+      {
+        Library: "SchemaPatch + Aggregator",
+        "Avg Time (ms)": avgSchemaTime.toFixed(2),
+        "Avg Output Size": formatBytes(avgSchemaSize),
+        "Avg Memory (KB)": (avgSchemaMemory / 1024).toFixed(1),
+        "Throughput (ops/s)": (1000 / avgSchemaTime).toFixed(0),
+      },
+      {
+        Library: "json-diff-kit",
+        "Avg Time (ms)": avgJsonDiffKitTime.toFixed(2),
+        "Avg Output Size": formatBytes(avgJsonDiffKitSize),
+        "Avg Memory (KB)": (avgJsonDiffKitMemory / 1024).toFixed(1),
+        "Throughput (ops/s)": (1000 / avgJsonDiffKitTime).toFixed(0),
+      },
+    ]);
+
+    const timeRatio = avgSchemaTime / avgJsonDiffKitTime;
+    const sizeRatio = avgSchemaSize / avgJsonDiffKitSize;
+    const memoryRatio = avgSchemaMemory / avgJsonDiffKitMemory;
+
+    console.log("\n🏆 Formatted Diff Comparison Summary:");
+    console.log(
+      `  • Performance: ${
+        timeRatio > 1 ? "json-diff-kit" : "SchemaPatch"
+      } is ${Math.abs(timeRatio - 1).toFixed(2)}x faster`
+    );
+    console.log(
+      `  • Output size: ${
+        sizeRatio > 1 ? "json-diff-kit" : "SchemaPatch"
+      } produces ${Math.abs(sizeRatio - 1).toFixed(2)}x smaller output`
+    );
+    console.log(
+      `  • Memory usage: ${
+        memoryRatio > 1 ? "json-diff-kit" : "SchemaPatch"
+      } uses ${Math.abs(memoryRatio - 1).toFixed(2)}x less memory`
+    );
+  }
+}
+
 function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
   const byLibrary = groupBy(allMetrics, "library");
 
@@ -829,11 +923,15 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
       fastJsonMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
       fastJsonMetrics.length;
     const avgSchemaTime =
-      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
-      newSchemaMetrics.length;
+      newSchemaMetrics.reduce(
+        (sum: number, m: any) => sum + m.executionTime,
+        0
+      ) / newSchemaMetrics.length;
     const avgFastTime =
-      fastJsonMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
-      fastJsonMetrics.length;
+      fastJsonMetrics.reduce(
+        (sum: number, m: any) => sum + m.executionTime,
+        0
+      ) / fastJsonMetrics.length;
     const avgSchemaSize =
       newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchSize, 0) /
       newSchemaMetrics.length;
@@ -841,8 +939,10 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
       fastJsonMetrics.reduce((sum: number, m: any) => sum + m.patchSize, 0) /
       fastJsonMetrics.length;
     const avgSemanticAccuracy =
-      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.semanticAccuracy, 0) /
-      newSchemaMetrics.length;
+      newSchemaMetrics.reduce(
+        (sum: number, m: any) => sum + m.semanticAccuracy,
+        0
+      ) / newSchemaMetrics.length;
 
     const patchReduction = Math.max(
       0,
@@ -853,7 +953,8 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
       ((avgFastSize - avgSchemaSize) / avgFastSize) * 100
     );
     const accuracyRate =
-      (newSchemaMetrics.filter((m: any) => m.accuracy).length / newSchemaMetrics.length) *
+      (newSchemaMetrics.filter((m: any) => m.accuracy).length /
+        newSchemaMetrics.length) *
       100;
 
     console.table([
@@ -872,8 +973,10 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
   console.log("\n🚀 Performance Insights:");
   if (newSchemaMetrics.length > 0) {
     const avgSchemaTime =
-      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
-      newSchemaMetrics.length;
+      newSchemaMetrics.reduce(
+        (sum: number, m: any) => sum + m.executionTime,
+        0
+      ) / newSchemaMetrics.length;
     const avgSchemaPatches =
       newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
       newSchemaMetrics.length;
@@ -944,9 +1047,7 @@ async function compare() {
       JSON.stringify(jsonDiffPatch, null, 2)
     );
 
-    console.log(
-      `  • schema-json-patch: ${newSchemaPatch.length} operations`
-    );
+    console.log(`  • schema-json-patch: ${newSchemaPatch.length} operations`);
     console.log(`  • fast-json-patch: ${fastPatch.length} operations`);
     console.log(
       `  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`
@@ -963,13 +1064,14 @@ async function compare() {
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 250 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 250 },
-    { label: "High", min: 201, max: 500, targetSamples: 250 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 250 },
+    { label: "Low", min: 0, max: 50, targetSamples: 1250 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 1250 },
+    { label: "High", min: 201, max: 500, targetSamples: 1250 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 1250 },
   ];
 
   const allMetrics: BenchmarkMetrics[] = [];
+  const formattedDiffMetrics: FormattedDiffMetrics[] = [];
   const totalTargetSamples = complexityRanges.reduce(
     (sum, range) => sum + range.targetSamples,
     0
@@ -1100,8 +1202,68 @@ async function compare() {
           allMetrics.push(metrics);
         }
 
+        // Run formatted diff comparison for this sample
+        const formattedDiffLibraries = [
+          {
+            name: "schema-aggregated",
+            fn: () => {
+              const freshPatcher = new SchemaPatcher({ plan });
+              const aggregator = new PatchAggregator(doc1, doc2);
+              const rawPatch = freshPatcher.createPatch(doc1, doc2);
+              return aggregator.aggregate(rawPatch, {
+                pathPrefix: "/environments/0/services",
+                plan: plan,
+              });
+            },
+          },
+          {
+            name: "json-diff-kit",
+            fn: () => jsonDiffKitDiffer.diff(doc1, doc2),
+          },
+        ];
+
+        for (const [index , library] of formattedDiffLibraries.entries()) {
+          const startTime = performance.now();
+          const memoryResult = measureMemoryUsage(() => library.fn() as any);
+          const endTime = performance.now();
+
+          const result = memoryResult.result;
+          const outputSize = JSON.stringify(result || {}).length;
+          const executionTime = endTime - startTime;
+
+          const formattedMetrics: FormattedDiffMetrics = {
+            library: library.name,
+            executionTime,
+            memoryUsage: memoryResult.memoryUsed,
+            outputSize,
+            compressionRatio: doc1Size > 0 ? (outputSize / doc1Size) * 100 : 0,
+            complexityScore: actualComplexity,
+            operationType: appliedModifications.join(","),
+            documentSize: doc1Size,
+            iteration: samplesGenerated,
+          };
+
+          formattedDiffMetrics.push(formattedMetrics);
+          if (attempts === 500) {
+            await writeFile(
+              join(__dirname, "formatted-diff", `${library.name}-input.json`),
+              JSON.stringify(doc1, null, 2)
+            );
+            await writeFile(
+              join(__dirname, "formatted-diff", `${library.name}-output.json`),
+              JSON.stringify(doc2, null, 2)
+            );
+            await writeFile(
+              join(__dirname, "formatted-diff", `${library.name}-formatted-diff.json`),
+              JSON.stringify(result, null, 2)
+            );
+          }
+        }
+
         samplesGenerated++;
-        progressBar.update(allMetrics.length / 4); // Divide by 4 since we test 4 libraries per sample
+        progressBar.update(
+          (allMetrics.length + formattedDiffMetrics.length) / 5
+        ); // 3 patch libraries + 2 formatted diff libraries
       }
     }
 
@@ -1122,8 +1284,32 @@ async function compare() {
   // Generate comprehensive report
   generateComprehensiveReport(allMetrics);
 
+  // Generate formatted diff report
+  generateFormattedDiffReport(formattedDiffMetrics);
+
+  // Export metrics to CSV
+  const csvFilename = join(
+    __dirname,
+    `benchmark-results-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  console.log("\n💾 Exporting detailed metrics to CSV...");
+  await exportMetricsToCSV(allMetrics, csvFilename);
+  console.log(`✅ Metrics exported to: ${csvFilename}`);
+
+  // Export formatted diff metrics to CSV
+  const formattedCsvFilename = join(
+    __dirname,
+    `formatted-diff-results-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  console.log("\n💾 Exporting formatted diff metrics to CSV...");
+  await exportFormattedDiffMetricsToCSV(
+    formattedDiffMetrics,
+    formattedCsvFilename
+  );
+  console.log(`✅ Formatted diff metrics exported to: ${formattedCsvFilename}`);
+
   console.log("\n📁 Sample patch files written to comparison/ directory");
-  console.log("🎉 Benchmark analysis complete!");
+  console.log("🎉 Comprehensive benchmark analysis complete!");
 }
 
 // Helper function to apply modifications targeting a specific complexity score
@@ -3059,6 +3245,142 @@ function selectModificationsForComplexity(
   }
 
   return selectedMods;
+}
+
+// CSV Export Functions
+function exportFormattedDiffMetricsToCSV(
+  metrics: FormattedDiffMetrics[],
+  filename: string
+): Promise<void> {
+  const headers = [
+    "library",
+    "executionTime",
+    "memoryUsage",
+    "outputSize",
+    "compressionRatio",
+    "complexityScore",
+    "operationType",
+    "documentSize",
+    "iteration",
+    "timestamp",
+    "complexityRange",
+    "throughput",
+    "memoryKB",
+    "outputSizeKB",
+  ];
+
+  const csvRows = [headers.join(",")];
+
+  metrics.forEach((metric) => {
+    // Determine complexity range
+    let complexityRange = "Unknown";
+    if (metric.complexityScore >= 0 && metric.complexityScore <= 50)
+      complexityRange = "Low";
+    else if (metric.complexityScore >= 51 && metric.complexityScore <= 200)
+      complexityRange = "Medium";
+    else if (metric.complexityScore >= 201 && metric.complexityScore <= 500)
+      complexityRange = "High";
+    else if (metric.complexityScore >= 501) complexityRange = "Very High";
+
+    // Calculate additional metrics
+    const throughput =
+      metric.executionTime > 0 ? 1000 / metric.executionTime : 0;
+    const memoryKB = metric.memoryUsage / 1024;
+    const outputSizeKB = metric.outputSize / 1024;
+
+    const row = [
+      `"${metric.library}"`,
+      metric.executionTime,
+      metric.memoryUsage,
+      metric.outputSize,
+      metric.compressionRatio,
+      metric.complexityScore,
+      `"${metric.operationType.replace(/"/g, '""')}"`,
+      metric.documentSize,
+      metric.iteration,
+      new Date().toISOString(),
+      `"${complexityRange}"`,
+      throughput.toFixed(2),
+      memoryKB.toFixed(2),
+      outputSizeKB.toFixed(2),
+    ];
+
+    csvRows.push(row.join(","));
+  });
+
+  return writeFile(filename, csvRows.join("\n"));
+}
+
+function exportMetricsToCSV(
+  metrics: BenchmarkMetrics[],
+  filename: string
+): Promise<void> {
+  const headers = [
+    "library",
+    "patchCount",
+    "patchSize",
+    "executionTime",
+    "memoryUsage",
+    "accuracy",
+    "compressionRatio",
+    "complexityScore",
+    "operationType",
+    "documentSize",
+    "semanticAccuracy",
+    "iteration",
+    "timestamp",
+    "complexityRange",
+    "throughput",
+    "memoryKB",
+    "patchEfficiency",
+  ];
+
+  const csvRows = [headers.join(",")];
+
+  metrics.forEach((metric) => {
+    // Determine complexity range
+    let complexityRange = "Unknown";
+    if (metric.complexityScore >= 0 && metric.complexityScore <= 50)
+      complexityRange = "Low";
+    else if (metric.complexityScore >= 51 && metric.complexityScore <= 200)
+      complexityRange = "Medium";
+    else if (metric.complexityScore >= 201 && metric.complexityScore <= 500)
+      complexityRange = "High";
+    else if (metric.complexityScore >= 501) complexityRange = "Very High";
+
+    // Calculate additional metrics
+    const throughput =
+      metric.executionTime > 0 ? 1000 / metric.executionTime : 0;
+    const memoryKB = metric.memoryUsage / 1024;
+    const patchEfficiency =
+      metric.documentSize > 0
+        ? (metric.patchCount / metric.documentSize) * 1000
+        : 0;
+
+    const row = [
+      `"${metric.library}"`,
+      metric.patchCount,
+      metric.patchSize,
+      metric.executionTime,
+      metric.memoryUsage,
+      metric.accuracy,
+      metric.compressionRatio,
+      metric.complexityScore,
+      `"${metric.operationType.replace(/"/g, '""')}"`, // Escape quotes in operation type
+      metric.documentSize,
+      metric.semanticAccuracy,
+      metric.iteration,
+      new Date().toISOString(),
+      `"${complexityRange}"`,
+      throughput.toFixed(2),
+      memoryKB.toFixed(2),
+      patchEfficiency.toFixed(4),
+    ];
+
+    csvRows.push(row.join(","));
+  });
+
+  return writeFile(filename, csvRows.join("\n"));
 }
 
 compare().catch(console.error);

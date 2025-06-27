@@ -2,10 +2,7 @@ import { describe, test, expect, spyOn, it } from "bun:test";
 import {
   buildPlan,
   SchemaPatcher,
-  // _resolveRef,
-  // _traverseSchema,
   deepEqual,
-  // fastHash,
 } from "../src/index";
 import { fastHash } from "../src/performance/fashHash";
 import { _resolveRef } from "../src/core/buildPlan";

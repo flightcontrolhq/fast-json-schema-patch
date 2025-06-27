@@ -14,8 +14,10 @@
     "chartscii": "^3.2.0",
     "cli-progress": "^3.12.0",
     "fast-json-patch": "^3.1.1",
+    "json-diff-kit": "^1.0.31",
     "json-source-map": "^0.6.1",
     "jsondiffpatch": "^0.7.3",
+    "react": "^19.1.0",
     "rfc6902": "^5.1.2",
     "tinybench": "^4.0.1"
   },

@@ -73,3 +73,74 @@ This document outlines the steps to refactor the `SchemaPatcher` to use an aggre
 - Enhanced `PatchAggregator` with `compareObjects()` method for optimized child comparisons
 - Added comprehensive caching in `DiffFormatter` with cache size management and content-based keys
 - All three files now leverage enhanced equality checking and memoization strategies 
+
+## 6. Benchmark Data Export & Visualization 📊
+
+### 6.1 CSV Data Export
+- [x] **Enhanced CSV Export**: Implement comprehensive CSV export functionality for benchmark results
+  - Export all `BenchmarkMetrics` fields: library, patchCount, patchSize, executionTime, memoryUsage, accuracy, compressionRatio, complexityScore, operationType, documentSize, semanticAccuracy, iteration
+  - Add computed fields: timestamp, complexityRange, throughput (ops/sec), memoryKB, patchEfficiency
+  - Handle CSV escaping for string fields (operation types)
+  - Generate filename with timestamp for unique exports
+  - Export location: `comparison/benchmark-results-YYYY-MM-DD.csv`
+
+### 6.2 Jupyter Notebook Analysis Suite
+- [x] **Interactive Analysis Notebook**: Create `analysis/benchmark_visualization.ipynb` with comprehensive visualization capabilities
+  - **Main Line Graph**: Performance trends across complexity ranges for each library (primary deliverable)
+  - **Interactive Plotly Charts**: Hover details, zooming, and interactive exploration
+  - **Multi-Metric Dashboard**: 4-panel comparison of execution time, patch count, memory usage, and throughput
+  - **Statistical Analysis**: Performance rankings, improvement analysis, and comparative metrics
+  - **Data Preprocessing**: Automatic feature engineering and data preparation
+
+### 6.3 Notebook Features & Capabilities
+- [x] **Comprehensive Visualizations**:
+  - **Primary Line Graph**: Execution time vs complexity score with error bars and sample sizes
+  - **Interactive Charts**: Plotly-based interactive visualizations with hover details
+  - **Multi-Metric Dashboard**: Patch count, memory usage, throughput trends over complexity
+  - **Performance Summary**: Rankings and comparative analysis tables
+  - **Statistical Insights**: Performance improvement percentages and throughput ratios
+
+### 6.4 Dependencies & Setup
+```bash
+# Install required Python packages
+pip install pandas matplotlib seaborn plotly numpy scipy jupyter
+
+# Start Jupyter notebook
+jupyter notebook analysis/benchmark_visualization.ipynb
+```
+
+### 6.5 Usage Workflow
+1. **Generate Benchmark Data**:
+   ```bash
+   npm run comparison  # Generates CSV with 5000 stratified samples
+   ```
+
+2. **Update CSV Path** in notebook:
+   ```python
+   CSV_PATH = '../comparison/benchmark-results-YYYY-MM-DD.csv'
+   ```
+
+3. **Run Notebook Cells** sequentially for complete analysis
+
+4. **Export Results**: Notebook automatically saves processed data and summary statistics
+
+### 6.6 Expected Deliverables
+- [x] **CSV Export**: Automated generation of comprehensive benchmark data
+- [x] **Primary Line Graph**: Clear visualization showing performance trends across complexity ranges
+- [x] **Interactive Analysis**: Jupyter notebook for ongoing benchmark exploration  
+- [x] **Performance Insights**: Data-driven conclusions about library performance characteristics
+- [x] **Multi-Metric Analysis**: Comprehensive dashboard comparing all performance aspects
+
+**Key Visualizations Implemented:**
+- ✅ Primary: Execution Time vs Complexity Score (line graph with error bars)
+- ✅ Interactive: Plotly version with hover details and zooming
+- ✅ Dashboard: Multi-metric performance comparison across complexity ranges
+- ✅ Rankings: Performance improvement analysis and library comparisons
+- ✅ Statistics: Comprehensive performance insights and comparative metrics
+
+**Notebook Structure:**
+1. **Data Loading & Preprocessing** - CSV import and feature engineering
+2. **Main Comparative Line Graph** - Primary visualization with error bars
+3. **Interactive Plotly Visualization** - Enhanced interactive version
+4. **Multi-Metric Dashboard** - 4-panel performance comparison
+5. **Performance Insights** - Statistical analysis and rankings 

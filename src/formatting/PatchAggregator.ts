@@ -384,7 +384,9 @@ export class PatchAggregator {
           const childPathPrefix = `${pathPrefix}/${originalIndex}`;
           return { ...p, path: p.path.substring(childPathPrefix.length) };
         } else {
-          // For remove operations, we need to find the path differently
+          // For remove operations, the original array index isn't available since the child was deleted.
+          // Extract the array index from the patch path using regex: ^<escapedPathPrefix>/(\d+)
+          // This matches paths like "/environments/0" and captures the index "0"
           const pathMatch = p.path.match(
             new RegExp(
               `^${pathPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(\d+)`
@@ -409,19 +411,57 @@ export class PatchAggregator {
       let lineCounts: { addCount: number; removeCount: number };
 
       if (originalChild && !newChild) {
-        // Entire object was removed - generate diff without patches
-        diffLines = formatter.format([]);
-        // For removed objects, count all original lines as removed
+        // Entire object was removed - create manual diff
+        const originalFormatted = JSON.stringify(originalChild, null, 2);
+        const originalLines = originalFormatted.split("\n");
+        
+        diffLines = {
+          originalLines: originalLines.map((line, index) => ({
+            lineNumber: index + 1,
+            content: line,
+            type: "removed" as const,
+          })),
+          newLines: [{
+            lineNumber: 1,
+            content: "null",
+            type: "unchanged" as const,
+          }],
+          unifiedDiffLines: originalLines.map((line, index) => ({
+            type: "removed" as const,
+            content: line,
+            oldLineNumber: index + 1,
+            key: `removed-${index + 1}`,
+          })),
+        };
         lineCounts = {
           addCount: 0,
-          removeCount: diffLines.originalLines.length,
+          removeCount: originalLines.length,
         };
       } else if (!originalChild && newChild) {
-        // Entire object was added - generate diff without patches
-        diffLines = formatter.format([]);
-        // For added objects, count all new lines as added
+        // Entire object was added - create manual diff
+        const newFormatted = JSON.stringify(newChild, null, 2);
+        const newLines = newFormatted.split("\n");
+        
+        diffLines = {
+          originalLines: [{
+            lineNumber: 1,
+            content: "null",
+            type: "unchanged" as const,
+          }],
+          newLines: newLines.map((line, index) => ({
+            lineNumber: index + 1,
+            content: line,
+            type: "added" as const,
+          })),
+          unifiedDiffLines: newLines.map((line, index) => ({
+            type: "added" as const,
+            content: line,
+            newLineNumber: index + 1,
+            key: `added-${index + 1}`,
+          })),
+        };
         lineCounts = {
-          addCount: diffLines.newLines.length,
+          addCount: newLines.length,
           removeCount: 0,
         };
       } else {
