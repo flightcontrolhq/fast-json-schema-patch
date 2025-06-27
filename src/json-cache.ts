@@ -85,25 +85,3 @@ export function getCachedFormatter<T>(
   innerCache.set(newObj, formatter);
   return formatter;
 }
-
-/**
- * Clear all caches (useful for testing or memory management)
- */
-export function clearJsonCaches(): void {
-  // WeakMaps don't have a clear method, but we can create new instances
-  // Note: This won't actually clear existing caches since they're module-level
-  // In practice, WeakMaps automatically clean up when objects are garbage collected
-  console.warn("clearJsonCaches: WeakMaps will be cleared automatically when objects are garbage collected");
-}
-
-/**
- * Get cache statistics (for debugging/monitoring)
- */
-export function getCacheStats(): {
-  message: string;
-} {
-  // WeakMaps don't expose size information for privacy/security reasons
-  return {
-    message: "Cache statistics not available for WeakMaps - they automatically clean up when objects are garbage collected"
-  };
-} 

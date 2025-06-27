@@ -7,7 +7,10 @@ import type {
 import {
   deepEqualMemo,
   deepEqual,
+  deepEqualSchemaAware,
+  getEffectiveHashFields,
 } from "./index";
+import type { ArrayPlan } from "./index";
 
 type ModificationCallback = (
   item1: JsonValue,
@@ -23,9 +26,10 @@ export function diffArrayByPrimaryKey(
   path: string,
   patches: Operation[],
   onModification: ModificationCallback,
-  hashFields?: string[]
+  hashFields?: string[],
+  plan?: ArrayPlan
 ) {
-  const useHashing = hashFields && hashFields.length > 0;
+  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || []);
   const map1 = new Map<string | number, { item: JsonValue; index: number }>();
   for (let i = 0; i < arr1.length; i++) {
     const item = arr1[i];
@@ -62,10 +66,12 @@ export function diffArrayByPrimaryKey(
       const oldItem = oldEntry.item;
       let needsDiff = false;
 
-      if (useHashing && hashFields && hashFields.length > 0) {
+      if (plan) {
+        needsDiff = !deepEqualSchemaAware(oldItem, newItem, plan, effectiveHashFields);
+      } else if (effectiveHashFields.length > 0) {
         let hashFieldsDiffer = false;
-        for (let j = 0; j < hashFields.length; j++) {
-          const field = hashFields[j];
+        for (let j = 0; j < effectiveHashFields.length; j++) {
+          const field = effectiveHashFields[j];
           if (
             field &&
             (oldItem as JsonObject)[field] !== (newItem as JsonObject)[field]
@@ -99,7 +105,6 @@ export function diffArrayByPrimaryKey(
     }
   }
 
-  // Sort by index in descending order to avoid index shifting issues
   removalIndices.sort((a, b) => b.index - a.index);
   const removalPatches: Operation[] = removalIndices.map(({ index, value }) => ({
     op: "remove",
@@ -131,8 +136,11 @@ export function diffArrayLCS(
   path: string,
   patches: Operation[],
   onModification: ModificationCallback,
-  hashFields?: string[]
+  hashFields?: string[],
+  plan?: ArrayPlan
 ) {
+  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || []);
+  
   const n = arr1.length;
   const m = arr2.length;
   const max = n + m;
@@ -148,7 +156,14 @@ export function diffArrayLCS(
         (k !== d && (vPrev[k - 1] ?? -Infinity) < (vPrev[k + 1] ?? -Infinity));
       let x = down ? (vPrev[k + 1] as number) : (vPrev[k - 1] as number) + 1;
       let y = x - k;
-      while (x < n && y < m && deepEqualMemo(arr1[x], arr2[y], hashFields)) {
+      while (x < n && y < m) {
+        let itemsEqual = false;
+        if (plan) {
+          itemsEqual = deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields);
+        } else {
+          itemsEqual = deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
+        }
+        if (!itemsEqual) break;
         x++;
         y++;
       }

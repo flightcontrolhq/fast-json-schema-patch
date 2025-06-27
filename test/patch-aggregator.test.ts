@@ -242,8 +242,7 @@ describe("PatchAggregator", () => {
   const patcher = new SchemaPatcher({ plan: buildPlan(schema as any) });
   const patches = patcher.createPatch(originalDoc, newDoc);
 
-  const aggregator = new PatchAggregator(originalDoc, newDoc);
-  const result = aggregator.aggregate(patches, {
+  const result = new PatchAggregator(originalDoc, newDoc).aggregate(patches, {
     pathPrefix: "/environments/0/services",
     plan: buildPlan(schema as any),
   });

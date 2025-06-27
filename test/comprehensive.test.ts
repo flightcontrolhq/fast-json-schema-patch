@@ -1423,13 +1423,15 @@ describe("fastHash function", () => {
   test("should generate hash from fields", () => {
     const obj = { id: 1, name: "test", unused: "ignored" };
     const hash = fastHash(obj, ["id", "name"]);
-    expect(hash).toBe("1|test|");
+    expect(typeof hash).toBe("string");
+    expect(hash.length).toBeGreaterThan(0);
   });
 
   test("should handle missing fields", () => {
     const obj = { id: 1 };
     const hash = fastHash(obj, ["id", "missing"]);
-    expect(hash).toBe("1|undefined|");
+    expect(typeof hash).toBe("string");
+    expect(hash.length).toBeGreaterThan(0);
   });
 
   test("should handle empty fields", () => {
@@ -1441,7 +1443,24 @@ describe("fastHash function", () => {
   test("should handle null/undefined values", () => {
     const obj = { id: null, name: undefined };
     const hash = fastHash(obj, ["id", "name"]);
-    expect(hash).toBe("null|undefined|");
+    expect(typeof hash).toBe("string");
+    expect(hash.length).toBeGreaterThan(0);
+  });
+
+  test("should produce consistent hashes for same input", () => {
+    const obj1 = { id: 1, name: "test" };
+    const obj2 = { id: 1, name: "test" };
+    const hash1 = fastHash(obj1, ["id", "name"]);
+    const hash2 = fastHash(obj2, ["id", "name"]);
+    expect(hash1).toBe(hash2);
+  });
+
+  test("should produce different hashes for different inputs", () => {
+    const obj1 = { id: 1, name: "test" };
+    const obj2 = { id: 2, name: "test" };
+    const hash1 = fastHash(obj1, ["id", "name"]);
+    const hash2 = fastHash(obj2, ["id", "name"]);
+    expect(hash1).not.toBe(hash2);
   });
 });
 

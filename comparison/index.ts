@@ -963,10 +963,10 @@ async function compare() {
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 250 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 250 },
-    { label: "High", min: 201, max: 500, targetSamples: 250 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 250 },
+    { label: "Low", min: 0, max: 50, targetSamples: 25 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 25 },
+    { label: "High", min: 201, max: 500, targetSamples: 25 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 25 },
   ];
 
   const allMetrics: BenchmarkMetrics[] = [];

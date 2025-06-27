@@ -295,6 +295,9 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
 }
 
 const eqCache = new WeakMap<object, WeakMap<object, boolean>>();
+// Enhanced cache for schema-aware equality with plan information
+const schemaEqCache = new WeakMap<object, WeakMap<object, Map<string, boolean>>>();
+
 export function deepEqualMemo(
   obj1: unknown,
   obj2: unknown,
@@ -315,7 +318,7 @@ export function deepEqualMemo(
   const a = obj1 as JsonObject;
   const b = obj2 as JsonObject;
 
-  // fast pre-hash: if both plain objects and hotFields provided
+  // Enhanced hash-based pre-filtering - use for all object comparisons
   if (hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
     const h1 = fastHash(a, hotFields);
     const h2 = fastHash(b, hotFields);
@@ -339,15 +342,160 @@ export function deepEqualMemo(
   return result;
 }
 
-// A lightweight hash function for quick object comparison.
-export function fastHash(obj: JsonObject, fields: string[]): string {
-  // This is a simple, non-cryptographic hash.
-  // The goal is speed and reducing collisions for similar objects.
-  let hash = "";
-  for (const key of fields) {
-    hash += `${obj[key]}|`;
+/**
+ * Schema-aware deep equality that prioritizes comparison of significant fields first
+ * Uses plan information to optimize equality checks
+ */
+export function deepEqualSchemaAware(
+  obj1: unknown,
+  obj2: unknown,
+  plan?: ArrayPlan,
+  hotFields?: string[]
+): boolean {
+  if (obj1 === obj2) return true;
+  if (obj1 == null || obj2 == null) return obj1 === obj2;
+
+  const type1 = typeof obj1;
+  const type2 = typeof obj2;
+  if (type1 !== type2) return false;
+  if (type1 !== "object") {
+    return obj1 === obj2;
   }
-  return hash;
+
+  const a = obj1 as JsonObject;
+  const b = obj2 as JsonObject;
+
+  // Use plan-derived hash fields for faster pre-filtering
+  const effectiveHashFields = plan?.hashFields || hotFields || [];
+  
+  // Enhanced hash-based pre-filtering with plan information
+  if (effectiveHashFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
+    const h1 = fastHash(a, effectiveHashFields);
+    const h2 = fastHash(b, effectiveHashFields);
+    if (h1 !== h2) return false;
+  }
+
+  // Schema-aware memoization cache with plan fingerprint
+  const planFingerprint = plan ? 
+    `${plan.primaryKey || ''}-${plan.hashFields?.join(',') || ''}-${plan.strategy || ''}` : 
+    'default';
+  
+  let planCache = schemaEqCache.get(a);
+  if (planCache?.has(b)) {
+    const cached = planCache.get(b)?.get(planFingerprint);
+    if (cached !== undefined) return cached;
+  }
+
+  // Schema-aware comparison: check significant fields first
+  if (plan?.requiredFields && plan.requiredFields.size > 0) {
+    // Check required fields first - early exit if they differ
+    for (const field of plan.requiredFields) {
+      if (!deepEqual(a[field], b[field])) {
+        // Cache the negative result
+        if (!planCache) {
+          planCache = new WeakMap();
+          schemaEqCache.set(a, planCache);
+        }
+        if (!planCache.has(b)) {
+          planCache.set(b, new Map());
+        }
+        planCache.get(b)?.set(planFingerprint, false);
+        return false;
+      }
+    }
+  }
+
+  // Check primary key field with high priority if available
+  if (plan?.primaryKey && plan.primaryKey in a && plan.primaryKey in b) {
+    const primaryKey = plan.primaryKey;
+    const keyEqual = deepEqual(a[primaryKey], b[primaryKey]);
+    if (!keyEqual) {
+      // Cache the negative result
+      if (!planCache) {
+        planCache = new WeakMap();
+        schemaEqCache.set(a, planCache);
+      }
+      if (!planCache.has(b)) {
+        planCache.set(b, new Map());
+      }
+      planCache.get(b)?.set(planFingerprint, false);
+      return false;
+    }
+  }
+
+  // Fall back to full deep equality check
+  const result = deepEqual(a, b);
+
+  // Cache the result with plan fingerprint
+  if (!planCache) {
+    planCache = new WeakMap();
+    schemaEqCache.set(a, planCache);
+  }
+  if (!planCache.has(b)) {
+    planCache.set(b, new Map());
+  }
+  planCache.get(b)?.set(planFingerprint, result);
+
+  return result;
+}
+
+// Enhanced fastHash with better collision resistance
+export function fastHash(obj: JsonObject, fields: string[]): string {
+  if (fields.length === 0) return '';
+  
+  // Use a simple but effective hash combining strategy
+  let hash = 0;
+  for (let i = 0; i < fields.length; i++) {
+    const key = fields[i];
+    if (!key) continue;
+    const value = obj[key];
+    if (value !== undefined) {
+      // Create a string representation and hash it
+      const str = typeof value === 'string' ? value : JSON.stringify(value);
+      for (let j = 0; j < str.length; j++) {
+        hash = ((hash << 5) - hash + str.charCodeAt(j)) & 0x7fffffff;
+      }
+      // Mix in the field position to avoid collision from field reordering
+      hash = ((hash << 1) + i) & 0x7fffffff;
+    }
+  }
+  return hash.toString(36);
+}
+
+/**
+ * Utility to create hash fields from a plan or infer them from objects
+ */
+export function getEffectiveHashFields(
+  plan?: ArrayPlan,
+  obj1?: JsonObject,
+  obj2?: JsonObject,
+  fallbackFields: string[] = []
+): string[] {
+  if (plan?.hashFields && plan.hashFields.length > 0) {
+    return plan.hashFields;
+  }
+  
+  if (plan?.primaryKey) {
+    return [plan.primaryKey];
+  }
+  
+  if (fallbackFields.length > 0) {
+    return fallbackFields;
+  }
+  
+  // Infer common fields from both objects
+  if (obj1 && obj2) {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    const commonKeys = keys1.filter(k => keys2.includes(k));
+    // Prioritize likely identifier fields
+    const idFields = commonKeys.filter(k => 
+      k.includes('id') || k.includes('key') || k.includes('name')
+    );
+    return idFields.length > 0 ? idFields.slice(0, 3) : commonKeys.slice(0, 3);
+  }
+  
+  return [];
 }
 
 export class SchemaPatcher {

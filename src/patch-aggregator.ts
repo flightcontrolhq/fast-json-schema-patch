@@ -1,6 +1,11 @@
 import { DiffFormatter } from "./diff-formatters";
 import { getValueByPath } from "./path-utils";
 import { getCachedFormatter } from "./json-cache";
+import { 
+  deepEqualSchemaAware, 
+  getEffectiveHashFields, 
+  fastHash 
+} from "./index";
 import type { JsonValue, JsonObject, Operation, SideBySideDiff } from "./types";
 import type { Plan, ArrayPlan } from ".";
 
@@ -71,21 +76,84 @@ export class PatchAggregator {
     return "id";
   }
 
+  private getArrayStrategy(pathPrefix: string, config: AggregationConfig): "primaryKey" | "lcs" | "unique" {
+    if (config.plan) {
+      const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
+      if (arrayPlan?.strategy) {
+        return arrayPlan.strategy;
+      }
+    }
+    
+    // Default to primaryKey if we have an idKey or if the plan suggests a primary key
+    if (config.idKey) {
+      return "primaryKey";
+    }
+    
+    if (config.plan) {
+      const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
+      if (arrayPlan?.primaryKey) {
+        return "primaryKey";
+      }
+    }
+    
+    return "lcs";
+  }
+
+  private supportsAggregation(pathPrefix: string, config: AggregationConfig): boolean {
+    // Support aggregation if we have any way to identify array items
+    const hasIdKey = Boolean(config.idKey);
+    const hasSchemaKey = config.plan && this.getArrayPlanForPath(pathPrefix, config.plan)?.primaryKey;
+    
+    return hasIdKey || Boolean(hasSchemaKey);
+  }
+
+  private isArrayPath(pathPrefix: string, config: AggregationConfig): boolean {
+    // First check if we have plan information
+    if (config.plan) {
+      const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan);
+      if (arrayPlan) {
+        return true; // Found in plan, definitely an array
+      }
+    }
+
+    // Fallback: check if the path actually points to an array in the data
+    const originalValue = getValueByPath(this.originalDoc, pathPrefix);
+    const newValue = getValueByPath(this.newDoc, pathPrefix);
+    
+    return Array.isArray(originalValue) || Array.isArray(newValue);
+  }
+
+
+
   private getArrayPlanForPath(path: string, plan: Plan): ArrayPlan | undefined {
+    // Try exact match first
     let arrayPlan = plan.get(path);
     if (arrayPlan) {
       return arrayPlan;
     }
 
+    // Normalize path by removing array indices (e.g., /environments/0/services -> /environments/services)
+    const normalizedPath = path.replace(/\/\d+/g, "");
+    arrayPlan = plan.get(normalizedPath);
+    if (arrayPlan) {
+      return arrayPlan;
+    }
+
+    // Try with/without leading slash variants
     if (path.startsWith("/")) {
       const pathWithoutSlash = path.substring(1);
       arrayPlan = plan.get(pathWithoutSlash);
       if (arrayPlan) {
         return arrayPlan;
       }
-    }
-
-    if (!path.startsWith("/")) {
+      
+      // Also try normalized version without leading slash
+      const normalizedWithoutSlash = normalizedPath.substring(1);
+      arrayPlan = plan.get(normalizedWithoutSlash);
+      if (arrayPlan) {
+        return arrayPlan;
+      }
+    } else {
       const pathWithSlash = "/" + path;
       arrayPlan = plan.get(pathWithSlash);
       if (arrayPlan) {
@@ -96,13 +164,91 @@ export class PatchAggregator {
     return undefined;
   }
 
+  private aggregateWithoutChildSeparation(
+    patches: Operation[],
+    config: AggregationConfig
+  ): AggregatedDiffResult {
+    const { pathPrefix } = config;
+    // For non-primaryKey strategies, we can't meaningfully separate child patches
+    // So we treat all patches as "parent" patches and don't generate child diffs
+    const pathParts = pathPrefix.split("/").filter(Boolean);
+    const childArrayKey = pathParts.pop();
+
+    const originalParent = this.stripChildArray(
+      this.originalDoc,
+      pathParts,
+      childArrayKey
+    );
+    const newParent = this.stripChildArray(
+      this.newDoc,
+      pathParts,
+      childArrayKey
+    );
+
+    const parentFormatter = getCachedFormatter(
+      originalParent, 
+      newParent, 
+      (orig, newVal) => new DiffFormatter(orig, newVal)
+    );
+    const parentDiffLines = parentFormatter.format(patches);
+    const parentLineCounts = countChangedLines(parentDiffLines);
+
+    return {
+      parentDiff: {
+        original: originalParent,
+        new: newParent,
+        patches: patches,
+        diffLines: parentDiffLines,
+        ...parentLineCounts,
+      },
+      childDiffs: new Map(), // Empty - no child separation for non-primaryKey strategies
+    };
+  }
+
+  // Enhanced comparison using schema-aware equality
+  private compareObjects(
+    obj1: JsonObject | null,
+    obj2: JsonObject | null,
+    plan?: ArrayPlan
+  ): boolean {
+    if (obj1 === obj2) return true;
+    if (!obj1 || !obj2) return false;
+    
+    // Use schema-aware equality when plan is available
+    if (plan) {
+      return deepEqualSchemaAware(obj1, obj2, plan);
+    }
+    
+    // Fallback to enhanced hash-based comparison
+    const hashFields = getEffectiveHashFields(plan, obj1, obj2);
+    if (hashFields.length > 0) {
+      const h1 = fastHash(obj1, hashFields);
+      const h2 = fastHash(obj2, hashFields);
+      if (h1 !== h2) return false;
+    }
+    
+    // Final deep comparison (will use memoization)
+    return JSON.stringify(obj1) === JSON.stringify(obj2);
+  }
+
   aggregate(
     patches: Operation[],
     config: AggregationConfig
   ): AggregatedDiffResult {
     const { pathPrefix } = config;
-    const idKey = this.getIdKeyForPath(pathPrefix, config);
+    
+    // Validate that the path actually represents an array
+    if (!this.isArrayPath(pathPrefix, config)) {
+      throw new Error(`Path ${pathPrefix} does not represent an array in the schema or data`);
+    }
+    
+    // Check if this array configuration supports proper aggregation
+    if (!this.supportsAggregation(pathPrefix, config)) {
+      return this.aggregateWithoutChildSeparation(patches, config);
+    }
 
+    const idKey = this.getIdKeyForPath(pathPrefix, config);
+    const arrayPlan = config.plan ? this.getArrayPlanForPath(pathPrefix, config.plan) : undefined;
     const parentPatches: Operation[] = [];
     const childPatchesById = new Map<string, Operation[]>();
 
@@ -112,6 +258,7 @@ export class PatchAggregator {
       (child) => child[idKey] as string
     );
 
+    // Enhanced child identification using schema information
     for (const patch of patches) {
       if (!patch.path.startsWith(pathPrefix)) {
         parentPatches.push(patch);
@@ -197,6 +344,11 @@ export class PatchAggregator {
       const originalChild = originalChildrenById.get(childId) || null;
       const newChild = newChildrenById.get(childId) || null;
       const patchesForChild = childPatchesById.get(childId) || [];
+
+      // Enhanced optimization: skip processing if objects are identical
+      if (originalChild && newChild && this.compareObjects(originalChild, newChild, arrayPlan)) {
+        continue; // Skip identical children - no diff needed
+      }
 
       const transformedPatches = patchesForChild.map((p) => {
         const originalIndex = originalChildren.findIndex(

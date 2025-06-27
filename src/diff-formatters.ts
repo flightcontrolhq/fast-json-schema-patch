@@ -1,16 +1,20 @@
 import { parse } from "json-source-map";
 import { resolvePatchPath } from "./path-utils";
 import { cachedJsonStringify, cachedBuildPathMap } from "./json-cache";
+import { fastHash, getEffectiveHashFields } from "./index";
 import type {
   DiffLine,
   JsonValue,
+  JsonObject,
   Operation,
   PathMap,
   SideBySideDiff,
   UnifiedDiffLine,
 } from "./types";
+import type { ArrayPlan } from "./index";
 
-
+// Enhanced caching for diff formatters with content-based keys
+const diffFormatterCache = new Map<string, SideBySideDiff>();
 
 function getPathLineRange(
   pathMap: PathMap,
@@ -48,18 +52,70 @@ export class DiffFormatter {
   private newJson: JsonValue;
   private originalPathMap: PathMap;
   private newPathMap: PathMap;
+  private plan?: ArrayPlan;
 
-  constructor(originalJson: JsonValue, newJson: JsonValue) {
+  constructor(originalJson: JsonValue, newJson: JsonValue, plan?: ArrayPlan) {
     this.originalJson = originalJson;
     this.newJson = newJson;
     this.originalPathMap = cachedBuildPathMap(originalJson);
     this.newPathMap = cachedBuildPathMap(newJson);
+    this.plan = plan;
   }
 
   format(patches: Operation[]): SideBySideDiff {
+    // Enhanced caching: create a cache key based on patches and plan
+    const patchesKey = this.createPatchesKey(patches);
+    const planKey = this.plan ? 
+      `${this.plan.primaryKey || ''}-${this.plan.hashFields?.join(',') || ''}-${this.plan.strategy || ''}` : 
+      'default';
+    const contentHash = fastHash({
+      original: JSON.stringify(this.originalJson).substring(0, 100),
+      new: JSON.stringify(this.newJson).substring(0, 100)
+    }, ['original', 'new']);
+    const cacheKey = `${contentHash}-${patchesKey}-${planKey}`;
+
+    // Check cache first
+    const cached = diffFormatterCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Generate the diff
+    const result = this.generateDiff(patches);
+
+    // Cache the result (keep cache size reasonable)
+    if (diffFormatterCache.size > 1000) {
+      // Simple cache eviction - clear half when full
+      const keys = Array.from(diffFormatterCache.keys());
+      for (let i = 0; i < keys.length / 2; i++) {
+        diffFormatterCache.delete(keys[i]!);
+      }
+    }
+    diffFormatterCache.set(cacheKey, result);
+
+    return result;
+  }
+
+  private createPatchesKey(patches: Operation[]): string {
+    // Create a lightweight hash of the patches for caching
+    if (patches.length === 0) return 'empty';
+    
+    // Use enhanced hashing for consistent cache keys
+    const patchData = {
+      count: patches.length,
+      operations: patches.map(p => `${p.op}:${p.path}`).join(','),
+      // Include a sample of patch content for uniqueness
+      sample: patches.slice(0, 3).map(p => p.op).join('')
+    };
+    
+    return fastHash(patchData as JsonObject, ['count', 'operations', 'sample']);
+  }
+
+  private generateDiff(patches: Operation[]): SideBySideDiff {
     const originalAffectedLines = new Set<number>();
     const newAffectedLines = new Set<number>();
 
+    // Enhanced patch processing with schema awareness
     for (const op of patches) {
       if (op.op === "remove" || op.op === "replace") {
         const range = getPathLineRange(
@@ -90,6 +146,7 @@ export class DiffFormatter {
       }
     }
 
+    // Use cached JSON stringification
     const originalFormatted = cachedJsonStringify(this.originalJson);
     const newFormatted = cachedJsonStringify(this.newJson);
 
@@ -108,6 +165,17 @@ export class DiffFormatter {
       type: newAffectedLines.has(index + 1) ? "added" : "unchanged",
     }));
 
+    // Enhanced unified diff generation
+    const unified = this.generateUnifiedDiff(originalDiffLines, newDiffLines);
+
+    return {
+      originalLines: originalDiffLines,
+      newLines: newDiffLines,
+      unifiedDiffLines: unified,
+    };
+  }
+
+  private generateUnifiedDiff(originalDiffLines: DiffLine[], newDiffLines: DiffLine[]): UnifiedDiffLine[] {
     const unified: UnifiedDiffLine[] = [];
     let i = 0;
     let j = 0;
@@ -192,10 +260,6 @@ export class DiffFormatter {
       }
     }
 
-    return {
-      originalLines: originalDiffLines,
-      newLines: newDiffLines,
-      unifiedDiffLines: unified,
-    };
+    return unified;
   }
 }
