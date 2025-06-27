@@ -1228,7 +1228,17 @@ async function compare() {
           const endTime = performance.now();
 
           const result = memoryResult.result;
-          const outputSize = JSON.stringify(result || {}).length;
+          
+          // Convert Map to plain object for proper serialization
+          let serializableResult = result;
+          if (library.name === "schema-aggregated" && result && result.childDiffs instanceof Map) {
+            serializableResult = {
+              parentDiff: result.parentDiff,
+              childDiffs: Object.fromEntries(result.childDiffs)
+            };
+          }
+          
+          const outputSize = JSON.stringify(serializableResult || {}).length;
           const executionTime = endTime - startTime;
 
           const formattedMetrics: FormattedDiffMetrics = {
@@ -1244,7 +1254,7 @@ async function compare() {
           };
 
           formattedDiffMetrics.push(formattedMetrics);
-          if (attempts === 500) {
+          if (attempts === 1) {
             await writeFile(
               join(__dirname, "formatted-diff", `${library.name}-input.json`),
               JSON.stringify(doc1, null, 2)
@@ -1255,7 +1265,7 @@ async function compare() {
             );
             await writeFile(
               join(__dirname, "formatted-diff", `${library.name}-formatted-diff.json`),
-              JSON.stringify(result, null, 2)
+              JSON.stringify(serializableResult, null, 2)
             );
           }
         }
