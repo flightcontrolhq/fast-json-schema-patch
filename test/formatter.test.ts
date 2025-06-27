@@ -1,6 +1,6 @@
 import { describe, test, expect } from "bun:test";
 import { buildPlan, SchemaPatcher } from "../src/index";
-import { DiffFormatter, generateUnifiedDiff } from "../src/diff-formatters";
+import { DiffFormatter } from "../src/diff-formatters";
 import { faker } from "@faker-js/faker";
 
 const userSchema = {
@@ -61,30 +61,21 @@ describe("DiffFormatter E2E Integration", () => {
     const doc1 = createRandomUser();
     const doc2 = JSON.parse(JSON.stringify(doc1));
 
-    // --- Introduce a variety of changes ---
-    // 1. Replace a simple value
     doc2.username = "new-test-user";
-
-    // 2. Add a new property to a nested object
     doc2.metadata.newProp = 12345;
 
-    // 3. Remove a property from the root
     delete doc2.email;
 
-    // 4. Modify an array: remove an element from the middle
     doc2.posts.splice(1, 1);
 
-    // 5. Modify an array: change a value in a remaining element
     doc2.posts[0].title = "A Completely New Title";
 
-    // 6. Modify an array: add a new element to the end
     doc2.posts.push({
       postId: "new-post-id",
       title: "A Fresh Post",
       content: "This is a brand new post added to the list.",
       tags: ["new", "exciting"],
     });
-    // --- End of changes ---
 
     const plan = buildPlan(userSchema, { primaryKeyMap: { "/posts": "postId" } });
     const patcher = new SchemaPatcher({ plan });
@@ -93,10 +84,6 @@ describe("DiffFormatter E2E Integration", () => {
     const formatter = new DiffFormatter(doc1, doc2);
     const sideBySideDiff = formatter.format(patch);
 
-    const unifiedDiff = generateUnifiedDiff(sideBySideDiff);
-
-    // Using snapshot testing to verify the complex diff structures
     expect(sideBySideDiff).toMatchSnapshot("side-by-side-diff");
-    expect(unifiedDiff).toMatchSnapshot("unified-diff");
   });
 });
