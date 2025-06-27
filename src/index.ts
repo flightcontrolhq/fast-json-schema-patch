@@ -356,6 +356,9 @@ export function fastHash(obj: JsonObject, fields: string[]): string {
 
 export class SchemaPatcher {
   private plan: Plan;
+  private plugins: {
+    
+  }[] = [];
 
   constructor(options: { plan: Plan }) {
     this.plan = options.plan;
