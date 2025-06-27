@@ -1,14 +1,14 @@
-import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
-import * as fastJsonPatch from "fast-json-patch";
-import * as jsondiffpatch from "jsondiffpatch";
-import { writeFile } from "fs/promises";
 import { join } from "path";
 import { faker } from "@faker-js/faker";
-import mainSchema from "../test/schema.json";
 import chalk from "chalk";
 import Chartscii from "chartscii";
-import { performance } from "perf_hooks";
 import * as cliProgress from "cli-progress";
+import * as fastJsonPatch from "fast-json-patch";
+import { writeFile } from "fs/promises";
+import * as jsondiffpatch from "jsondiffpatch";
+import { performance } from "perf_hooks";
+import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
+import mainSchema from "../test/schema.json";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -64,7 +64,9 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  return (
+    Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  );
 }
 
 function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
@@ -603,19 +605,24 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.log(patchChart.create());
 
   console.log("\n🎯 Comparative Algorithm Performance Analysis:");
-  
+
   // Debug: Check data distribution and identify samples outside ranges
-  const allComplexityScores = metrics.map(m => m.complexityScore);
+  const allComplexityScores = metrics.map((m) => m.complexityScore);
   const minComplexity = Math.min(...allComplexityScores);
   const maxComplexity = Math.max(...allComplexityScores);
-  console.log(`\n🔍 DEBUG: Complexity score range: ${minComplexity} to ${maxComplexity}`);
-  
+  console.log(
+    `\n🔍 DEBUG: Complexity score range: ${minComplexity} to ${maxComplexity}`
+  );
+
   const byLibraryDebug = groupBy(metrics, "library");
   Object.entries(byLibraryDebug).forEach(([library, items]) => {
-    const avgTime = items.reduce((sum, m) => sum + m.executionTime, 0) / items.length;
-    console.log(`${library}: ${items.length} samples, avg time: ${avgTime.toFixed(3)}ms`);
+    const avgTime =
+      items.reduce((sum, m) => sum + m.executionTime, 0) / items.length;
+    console.log(
+      `${library}: ${items.length} samples, avg time: ${avgTime.toFixed(3)}ms`
+    );
   });
-  
+
   const complexityRanges = [
     { label: "Low", min: 0, max: 50 },
     { label: "Medium", min: 51, max: 200 },
@@ -623,24 +630,36 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     { label: "Very High", min: 501, max: 3000 }, // Adjusted to capture all samples
   ];
 
-  const libraries = ["schema-json-patch (our implementation)", "fast-json-patch", "jsondiffpatch", "rfc6902"];
+  const libraries = [
+    "schema-json-patch",
+    "fast-json-patch",
+    "jsondiffpatch",
+  ];
   const libraryColors = ["green", "blue", "purple", "yellow"];
 
   console.log("\n📏 Average Time by Complexity Range - All Algorithms:");
-  
+
   // Debug: Check sample distribution across ranges
   let totalCategorized = 0;
   complexityRanges.forEach((range) => {
-    const rangeCount = metrics.filter(m => m.complexityScore >= range.min && m.complexityScore <= range.max).length;
-    console.log(`${range.label} (${range.min}-${range.max}): ${rangeCount} samples`);
+    const rangeCount = metrics.filter(
+      (m) => m.complexityScore >= range.min && m.complexityScore <= range.max
+    ).length;
+    console.log(
+      `${range.label} (${range.min}-${range.max}): ${rangeCount} samples`
+    );
     totalCategorized += rangeCount;
   });
-  console.log(`Total categorized: ${totalCategorized} out of ${metrics.length} total samples`);
+  console.log(
+    `Total categorized: ${totalCategorized} out of ${metrics.length} total samples`
+  );
   const uncategorized = metrics.length - totalCategorized;
   if (uncategorized > 0) {
-    console.log(`⚠️  WARNING: ${uncategorized} samples fall outside complexity ranges!`);
+    console.log(
+      `⚠️  WARNING: ${uncategorized} samples fall outside complexity ranges!`
+    );
   }
-  
+
   const allTimeData: any[] = [];
   complexityRanges.forEach((range) => {
     libraries.forEach((library, libIndex) => {
@@ -651,10 +670,9 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
           m.complexityScore <= range.max
       );
       if (libraryMetrics.length > 0) {
-        const avgTime = libraryMetrics.reduce(
-          (sum, item) => sum + item.executionTime,
-          0
-        ) / libraryMetrics.length;
+        const avgTime =
+          libraryMetrics.reduce((sum, item) => sum + item.executionTime, 0) /
+          libraryMetrics.length;
         allTimeData.push({
           value: Number(avgTime.toFixed(3)),
           label: `${library}-${range.label} (n=${libraryMetrics.length})`,
@@ -690,10 +708,9 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
           m.complexityScore <= range.max
       );
       if (libraryMetrics.length > 0) {
-        const avgPatches = libraryMetrics.reduce(
-          (sum, item) => sum + item.patchCount,
-          0
-        ) / libraryMetrics.length;
+        const avgPatches =
+          libraryMetrics.reduce((sum, item) => sum + item.patchCount, 0) /
+          libraryMetrics.length;
         const sampleCount = libraryMetrics.length;
         allPatchData.push({
           value: Number(avgPatches.toFixed(1)),
@@ -719,9 +736,9 @@ function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   }
 
   console.log("\n📊 Chart Legend:");
-  console.log("🟢 Schema = schema-json-patch (our implementation)");
-  console.log("🔵 FastJSON = fast-json-patch");
-  console.log("🟡 JSONDiff = jsondiffpatch");
+  console.log("🟢 Schema = schema-json-patch");
+  console.log("🟡 FastJSON = fast-json-patch");
+  console.log("🟠 JSONDiff = jsondiffpatch");
   console.log("-".repeat(80));
 
   // 5. Compression Efficiency Chart
@@ -801,31 +818,31 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
   generatePerformanceCharts(allMetrics);
 
   console.log("\n🏆 Schema-Based Advantages Analysis:");
-  const schemaMetrics = byLibrary["schema-json-patch (our implementation)"] || [];
+  const newSchemaMetrics = byLibrary["schema-json-patch"] || [];
   const fastJsonMetrics = byLibrary["fast-json-patch"] || [];
 
-  if (schemaMetrics.length > 0 && fastJsonMetrics.length > 0) {
+  if (newSchemaMetrics.length > 0 && fastJsonMetrics.length > 0) {
     const avgSchemaPatches =
-      schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
+      newSchemaMetrics.length;
     const avgFastPatches =
-      fastJsonMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
+      fastJsonMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
       fastJsonMetrics.length;
     const avgSchemaTime =
-      schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
+      newSchemaMetrics.length;
     const avgFastTime =
-      fastJsonMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+      fastJsonMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
       fastJsonMetrics.length;
     const avgSchemaSize =
-      schemaMetrics.reduce((sum, m) => sum + m.patchSize, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchSize, 0) /
+      newSchemaMetrics.length;
     const avgFastSize =
-      fastJsonMetrics.reduce((sum, m) => sum + m.patchSize, 0) /
+      fastJsonMetrics.reduce((sum: number, m: any) => sum + m.patchSize, 0) /
       fastJsonMetrics.length;
     const avgSemanticAccuracy =
-      schemaMetrics.reduce((sum, m) => sum + m.semanticAccuracy, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.semanticAccuracy, 0) /
+      newSchemaMetrics.length;
 
     const patchReduction = Math.max(
       0,
@@ -836,7 +853,7 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
       ((avgFastSize - avgSchemaSize) / avgFastSize) * 100
     );
     const accuracyRate =
-      (schemaMetrics.filter((m) => m.accuracy).length / schemaMetrics.length) *
+      (newSchemaMetrics.filter((m: any) => m.accuracy).length / newSchemaMetrics.length) *
       100;
 
     console.table([
@@ -853,15 +870,15 @@ function generateComprehensiveReport(allMetrics: BenchmarkMetrics[]) {
   }
 
   console.log("\n🚀 Performance Insights:");
-  if (schemaMetrics.length > 0) {
+  if (newSchemaMetrics.length > 0) {
     const avgSchemaTime =
-      schemaMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.executionTime, 0) /
+      newSchemaMetrics.length;
     const avgSchemaPatches =
-      schemaMetrics.reduce((sum, m) => sum + m.patchCount, 0) /
-      schemaMetrics.length;
+      newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
+      newSchemaMetrics.length;
     console.log(
-      `• schema-json-patch (our implementation) generates ${avgSchemaPatches.toFixed(
+      `• schema-json-patch (new) generates ${avgSchemaPatches.toFixed(
         1
       )} patches on average`
     );
@@ -908,15 +925,15 @@ async function compare() {
     console.log(`\n📋 Analyzing ${name} configuration...`);
 
     const plan = buildPlan(scenarioSchema as any);
-    const patcher = new SchemaPatcher({ plan });
+    const newPatcher = new SchemaPatcher({ plan });
 
-    const schemaPatch = patcher.createPatch(doc1, doc2);
+    const newSchemaPatch = newPatcher.createPatch(doc1, doc2);
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
     const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
 
     await writeFile(
       join(__dirname, `${name}-schema-patch.json`),
-      JSON.stringify(schemaPatch, null, 2)
+      JSON.stringify(newSchemaPatch, null, 2)
     );
     await writeFile(
       join(__dirname, `${name}-fast-json-patch.json`),
@@ -927,22 +944,45 @@ async function compare() {
       JSON.stringify(jsonDiffPatch, null, 2)
     );
 
-    console.log(`  • schema-json-patch (our implementation): ${schemaPatch.length} operations`);
+    console.log(
+      `  • schema-json-patch: ${newSchemaPatch.length} operations`
+    );
     console.log(`  • fast-json-patch: ${fastPatch.length} operations`);
     console.log(
       `  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`
     );
   }
 
-  // Enhanced faker scenario with detailed metrics
-  console.log("\n🎲 Running comprehensive faker-based benchmark...");
+  // Enhanced faker scenario with stratified sampling for balanced complexity distribution
+  console.log(
+    "\n🎲 Running comprehensive faker-based benchmark with stratified sampling..."
+  );
 
   const plan = buildPlan(mainSchema as any);
-  const patcher = new SchemaPatcher({ plan });
-  const numFakerRuns = 5000; // Optimized for demonstration
-  const allMetrics: BenchmarkMetrics[] = [];
+  const newPatcher = new SchemaPatcher({ plan });
 
-  console.log(`Running ${numFakerRuns} iterations with varying complexity...`);
+  // Define complexity ranges and target sample counts
+  const complexityRanges = [
+    { label: "Low", min: 0, max: 50, targetSamples: 250 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 250 },
+    { label: "High", min: 201, max: 500, targetSamples: 250 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 250 },
+  ];
+
+  const allMetrics: BenchmarkMetrics[] = [];
+  const totalTargetSamples = complexityRanges.reduce(
+    (sum, range) => sum + range.targetSamples,
+    0
+  );
+
+  console.log(
+    `Running stratified sampling for ${totalTargetSamples} balanced samples across complexity ranges...`
+  );
+  complexityRanges.forEach((range) => {
+    console.log(
+      `  • ${range.label} (${range.min}-${range.max}): ${range.targetSamples} samples`
+    );
+  });
 
   // Create progress bar
   const progressBar = new cliProgress.SingleBar({
@@ -955,1922 +995,2070 @@ async function compare() {
     hideCursor: true,
   });
 
-  progressBar.start(numFakerRuns, 0);
+  progressBar.start(totalTargetSamples, 0);
 
-  for (let i = 0; i < numFakerRuns; i++) {
-    const doc1 = createRandomCloudConfig();
-    const doc1Size = JSON.stringify(doc1).length;
-    const doc2 = JSON.parse(JSON.stringify(doc1));
+  // Generate samples for each complexity range
+  for (const complexityRange of complexityRanges) {
+    let samplesGenerated = 0;
+    let attempts = 0;
+    const maxAttempts = complexityRange.targetSamples * 10; // Prevent infinite loops
 
-    const modifications = [
-      // SIMPLE MODIFICATIONS (1-30) - Basic property changes
-      {
-        name: "Change environment name",
-        complexity: 2, // Single property change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) env.name = faker.lorem.words(2);
-        },
-      },
-      {
-        name: "Change environment region",
-        complexity: 2, // Single property change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env)
-            env.region = faker.helpers.arrayElement([
-              "us-east-1",
-              "us-west-2",
-              "eu-west-1",
-              "ap-southeast-1",
-            ]);
-        },
-      },
-      {
-        name: "Change environment ID",
-        complexity: 3, // Single property change with potential cascading effects
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) env.id = faker.lorem.slug();
-        },
-      },
-      {
-        name: "Change source branch",
-        complexity: 2, // Single nested property change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.source && !env.source.pr)
-            env.source.branch = faker.helpers.arrayElement([
-              "main",
-              "develop",
-              "staging",
-            ]);
-        },
-      },
-      {
-        name: "Toggle source trigger",
-        complexity: 2, // Single nested property change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.source)
-            env.source.trigger = faker.helpers.arrayElement(["push", "manual"]);
-        },
-      },
-      {
-        name: "Change service ID",
-        complexity: 4, // Service property change with high impact
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.id = faker.lorem.slug();
-          }
-        },
-      },
-      {
-        name: "Change service name",
-        complexity: 3, // Service property change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.name = faker.company.buzzPhrase();
-          }
-        },
-      },
-      {
-        name: "Change service CPU",
-        complexity: 3, // Resource allocation change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(
-              env.services.filter((s: any) => s.cpu !== undefined)
-            );
-            if (service)
-              service.cpu = faker.helpers.arrayElement([
-                0.125, 0.25, 0.5, 1, 2, 4,
-              ]);
-          }
-        },
-      },
-      {
-        name: "Change service memory",
-        complexity: 3, // Resource allocation change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) service.gpu = faker.number.int({ min: 0, max: 4 });
-          }
-        },
-      },
-      {
-        name: "Toggle container insights",
-        complexity: 2, // Simple boolean toggle
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) service.containerInsights = faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Change storage size",
-        complexity: 3, // Resource allocation change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.storage = faker.number.int({ min: 20, max: 200 });
-          }
-        },
-      },
-      {
-        name: "Change min instances",
-        complexity: 4, // Scaling configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.minInstances = faker.number.int({ min: 1, max: 3 });
-          }
-        },
-      },
-      {
-        name: "Change max instances",
-        complexity: 4, // Scaling configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.maxInstances = faker.number.int({ min: 1, max: 10 });
-          }
-        },
-      },
-      {
-        name: "Change version history count",
-        complexity: 2, // Simple configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.versionHistoryCount = faker.number.int({
-                min: 1,
-                max: 20,
-              });
-          }
-        },
-      },
-      {
-        name: "Change base path",
-        complexity: 3, // Build configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.basePath = faker.helpers.arrayElement([
-                ".",
-                "./src",
-                "./app",
-              ]);
-          }
-        },
-      },
-      {
-        name: "Change build type",
-        complexity: 5, // Significant build configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.buildType = faker.helpers.arrayElement([
-                "nodejs",
-                "nixpacks",
-                "docker",
-              ]);
-          }
-        },
-      },
-      {
-        name: "Change dockerfile path",
-        complexity: 3, // Docker configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.dockerfilePath = faker.helpers.arrayElement([
-                "Dockerfile",
-                "Dockerfile.prod",
-                "docker/Dockerfile",
-              ]);
-          }
-        },
-      },
-      {
-        name: "Change docker context",
-        complexity: 3, // Docker configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.dockerContext = faker.helpers.arrayElement([
-                ".",
-                "./app",
-                "./src",
-              ]);
-          }
-        },
-      },
-      {
-        name: "Toggle privileged mode",
-        complexity: 4, // Security configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) service.privileged = faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Change health check path",
-        complexity: 3, // Health monitoring configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.healthCheckPath = faker.helpers.arrayElement([
-                "/",
-                "/health",
-                "/status",
-                "/ping",
-              ]);
-          }
-        },
-      },
-      {
-        name: "Change health check timeout",
-        complexity: 3, // Health monitoring configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.healthCheckTimeoutSecs = faker.number.int({
-                min: 2,
-                max: 30,
-              });
-          }
-        },
-      },
-      {
-        name: "Change health check interval",
-        complexity: 3, // Health monitoring configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.healthCheckTimeoutSecs = faker.number.int({
-                min: 2,
-                max: 30,
-              });
-          }
-        },
-      },
-      {
-        name: "Change health check interval",
-        complexity: 3, // Health monitoring configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.healthCheckIntervalSecs = faker.number.int({
-                min: 5,
-                max: 60,
-              });
-          }
-        },
-      },
-      {
-        name: "Change port number",
-        complexity: 4, // Network configuration change
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.port = faker.number.int({ min: 3000, max: 8080 });
-          }
-        },
-      },
-      {
-        name: "Toggle sticky sessions",
-        complexity: 3, // Load balancer configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.stickySessionsEnabled = faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Change sticky sessions duration",
-        complexity: 3, // Load balancer configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.stickySessionsDurationSecs = faker.number.int({
-                min: 3600,
-                max: 86400,
-              });
-          }
-        },
-      },
-      {
-        name: "Toggle origin shield",
-        complexity: 3, // CDN configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) service.originShieldEnabled = faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Toggle CloudFront cache invalidation",
-        complexity: 3, // CDN configuration
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service)
-              service.cloudfrontAutoCacheInvalidation =
-                faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Add single environment variable",
-        complexity: 5, // Object creation + property addition
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              if (!service.envVariables) service.envVariables = {};
-              const key = faker.hacker.noun().toUpperCase();
-              service.envVariables[key] = faker.internet.url();
-            }
-          }
-        },
-      },
-      {
-        name: "Remove environment variable",
-        complexity: 4, // Property deletion
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service && service.envVariables) {
-              const keys = Object.keys(service.envVariables);
-              if (keys.length > 0) {
-                const keyToRemove = faker.helpers.arrayElement(keys);
-                delete service.envVariables[keyToRemove];
-              }
-            }
-          }
-        },
-      },
+    while (
+      samplesGenerated < complexityRange.targetSamples &&
+      attempts < maxAttempts
+    ) {
+      attempts++;
 
-      // MEDIUM COMPLEXITY MODIFICATIONS (31-70) - Service-level changes
-      {
-        name: "Add new web service",
-        complexity: 25, // Create complete service object with 10+ properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: faker.company.buzzPhrase(),
-              type: "web",
-              cpu: faker.helpers.arrayElement([0.25, 0.5, 1, 2]),
-              memory: faker.helpers.arrayElement([0.5, 1, 2, 4]),
-              buildType: "nixpacks",
-              healthCheckPath: "/health",
-              port: 3000,
-              minInstances: 1,
-              maxInstances: faker.number.int({ min: 1, max: 5 }),
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add new worker service",
-        complexity: 20, // Create service object with 7+ properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: `${faker.hacker.verb()} Worker`,
-              type: "worker",
-              cpu: faker.helpers.arrayElement([0.25, 0.5, 1, 2]),
-              memory: faker.helpers.arrayElement([0.5, 1, 2, 4]),
-              buildType: "nixpacks",
-              startCommand: `node ${faker.lorem.word()}.js`,
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add new RDS service",
-        complexity: 22, // Create database service with 8+ properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const engine = faker.helpers.arrayElement(["postgres", "mysql"]);
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: `${faker.lorem.word()}-database`,
-              type: "rds",
-              engine: engine,
-              engineVersion: engine === "postgres" ? "15" : "8.0",
-              instanceSize: "db.t3.micro",
-              storage: faker.number.int({ min: 20, max: 100 }),
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add new static service",
-        complexity: 18, // Create static service with 6+ properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: `${faker.lorem.word()} Site`,
-              type: "static",
-              buildType: "nodejs",
-              buildCommand: "npm run build",
-              outputDirectory: "dist",
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add elasticache service",
-        complexity: 20, // Create cache service with 7+ properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "redis-cache",
-              type: "elasticache",
-              engine: "redis",
-              engineVersion: "7.0",
-              instanceSize: "cache.t3.micro",
-              numberOfReplicas: faker.number.int({ min: 1, max: 3 }),
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Remove a service",
-        complexity: 15, // Array splice operation with potential cascading effects
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(
-            doc.environments.filter((e: any) => e.services.length > 1)
-          );
-          if (env) {
-            const indexToRemove = faker.number.int({
-              min: 0,
-              max: env.services.length - 1,
-            });
-            env.services.splice(indexToRemove, 1);
-          }
-        },
-      },
-      {
-        name: "Reorder services",
-        complexity: 12, // Array shuffle operation affecting multiple services
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 1) {
-            env.services = faker.helpers.shuffle(env.services);
-          }
-        },
-      },
-      {
-        name: "Add dependency between services",
-        complexity: 8, // Add array property and push dependency
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length >= 2) {
-            const [service1, service2]: any[] = faker.helpers.shuffle(
-              env.services
-            );
-            if (!service1.dependsOn) service1.dependsOn = [];
-            if (!service1.dependsOn.includes(service2.id)) {
-              service1.dependsOn.push(service2.id);
-            }
-          }
-        },
-      },
-      {
-        name: "Remove dependencies",
-        complexity: 6, // Delete property
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) delete service.dependsOn;
-          }
-        },
-      },
-      {
-        name: "Add autoscaling configuration",
-        complexity: 12, // Create object with 3 nested properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.autoscaling = {
-                cpuThreshold: faker.number.int({ min: 60, max: 80 }),
-                memoryThreshold: faker.number.int({ min: 60, max: 80 }),
-                cooldownTimerSecs: faker.number.int({ min: 300, max: 600 }),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Modify autoscaling thresholds",
-        complexity: 7, // Modify 2 nested properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service && service.autoscaling) {
-              service.autoscaling.cpuThreshold = faker.number.int({
-                min: 50,
-                max: 90,
-              });
-              service.autoscaling.memoryThreshold = faker.number.int({
-                min: 50,
-                max: 90,
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add CI configuration",
-        complexity: 8, // Create nested object with type property
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.ci = {
-              type: faker.helpers.arrayElement(["codebuild", "ec2"]),
-            };
-          }
-        },
-      },
-      {
-        name: "Add logging configuration",
-        complexity: 10, // Create nested object with 2 properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.logging = {
-              cloudwatchLogsEnabled: faker.datatype.boolean(),
-              cloudwatchLogsRetentionDays: faker.helpers.arrayElement([
-                7, 14, 30, 90,
-              ]),
-            };
-          }
-        },
-      },
-      {
-        name: "Add docker labels",
-        complexity: 11, // Create nested object with 3 properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.dockerLabels = {
-              team: faker.hacker.noun(),
-              version: faker.system.semver(),
-              environment: env.name,
-            };
-          }
-        },
-      },
-      {
-        name: "Add watch paths",
-        complexity: 6, // Create array with 1 element
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.watchPaths = [
-              faker.helpers.arrayElement([
-                "src/**",
-                "app/**",
-                "**/*.js",
-                "**/*.ts",
-              ]),
-            ];
-          }
-        },
-      },
-      {
-        name: "Add build commands",
-        complexity: 8, // Add 2 properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.buildCommand = faker.helpers.arrayElement([
-                "npm run build",
-                "yarn build",
-                "pnpm build",
-              ]);
-              service.installCommand = faker.helpers.arrayElement([
-                "npm install",
-                "yarn install",
-                "pnpm install",
-              ]);
-            }
-          }
-        },
-      },
-      {
-        name: "Add start command",
-        complexity: 4, // Add single property
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.startCommand = faker.helpers.arrayElement([
-                "npm start",
-                "node server.js",
-                "yarn start",
-              ]);
-            }
-          }
-        },
-      },
-      {
-        name: "Add pre/post deploy commands",
-        complexity: 8, // Add 2 properties
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.preDeployCommand = 'echo "Pre-deploy"';
-              service.postDeployCommand = 'echo "Post-deploy"';
-            }
-          }
-        },
-      },
-      {
-        name: "Change target type",
-        complexity: 8, // Create nested object with type
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.target = {
-                type: faker.helpers.arrayElement(["fargate", "ecs-ec2"]),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Modify RDS settings",
-        complexity: 11, // Modify 3 properties of specific service type
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const rdsService: any = env.services.find(
-              (s: any) => s.type === "rds"
-            );
-            if (rdsService) {
-              rdsService.autoUpgradeMinorVersions = faker.datatype.boolean();
-              rdsService.deletionProtection = faker.datatype.boolean();
-              rdsService.backupRetentionPeriodInDays = faker.number.int({
-                min: 1,
-                max: 35,
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add network server ports",
-        complexity: 18, // Create complex port object with nested healthCheck and push to array
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = env.services.find(
-              (s: any) => s.type === "network-server"
-            );
-            if (service && service.ports) {
-              const newPort = {
-                id: faker.lorem.slug(),
-                port: faker.number.int({ min: 8000, max: 9000 }),
-                protocol: faker.helpers.arrayElement(["tcp", "udp", "http"]),
-                healthCheck: {
-                  type: "tcp",
-                  timeoutSecs: 5,
-                  intervalSecs: 30,
-                },
-              };
-              service.ports.push(newPort);
-            }
-          }
-        },
-      },
-      {
-        name: "Modify port configuration",
-        complexity: 12, // Modify 1 property + 2 nested properties conditionally
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = env.services.find(
-              (s: any) => s.ports && s.ports.length > 0
-            );
-            if (service) {
-              const port: any = faker.helpers.arrayElement(service.ports);
-              port.port = faker.number.int({ min: 8000, max: 9000 });
-              if (port.healthCheck) {
-                port.healthCheck.timeoutSecs = faker.number.int({
-                  min: 2,
-                  max: 10,
-                });
-                port.healthCheck.intervalSecs = faker.number.int({
-                  min: 10,
-                  max: 60,
-                });
-              }
-            }
-          }
-        },
-      },
-      {
-        name: "Add scheduler jobs",
-        complexity: 25, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const schedulerService: any = env.services.find(
-              (s: any) => s.type === "scheduler"
-            );
-            if (schedulerService && schedulerService.jobs) {
-              const jobName = faker.lorem.slug();
-              schedulerService.jobs[jobName] = {
-                startCommand: faker.helpers.arrayElement([
-                  "npm run job",
-                  "node job.js",
-                ]),
-                schedule: faker.helpers.arrayElement([
-                  "0 * * * *",
-                  "0 0 * * *",
-                  "manual",
-                ]),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add environment-level env variables",
-        complexity: 60, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            if (!env.envVariables) env.envVariables = {};
-            const key = `ENV_${faker.hacker.noun().toUpperCase()}`;
-            env.envVariables[key] = faker.internet.url();
-          }
-        },
-      },
-      {
-        name: "Add VPC configuration",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            env.vpc = {
-              id: faker.string.alphanumeric(10),
-              cidr: "10.0.0.0/16",
-              private: faker.datatype.boolean(),
-            };
-          }
-        },
-      },
-      {
-        name: "Change service type from web to worker",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const webService: any = env.services.find(
-              (s: any) => s.type === "web"
-            );
-            if (webService) {
-              webService.type = "worker";
-              delete webService.healthCheckPath;
-              delete webService.port;
-              delete webService.stickySessionsEnabled;
-              webService.startCommand = "node worker.js";
-            }
-          }
-        },
-      },
-      {
-        name: "Modify container image source",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service && service.containerImage) {
-              service.containerImage = {
-                fromService: faker.helpers.arrayElement(
-                  env.services.map((s: any) => s.id)
-                ),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add lambda function service",
-        complexity: 45, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: `${faker.lorem.word()}-function`,
-              type: "lambda-function",
-              buildType: "nixpacks",
-              outputDirectory: "dist",
-              lambda: {
-                packageType: "zip",
-                handler: "index.handler",
-                runtime: "nodejs20.x",
-                memory: faker.number.int({ min: 128, max: 1024 }),
-                timeoutSecs: faker.number.int({ min: 3, max: 60 }),
-              },
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add S3 bucket service",
-        complexity: 45, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: `${faker.lorem.word()}-bucket`,
-              type: "s3",
-              bucketNameBase: faker.lorem.slug(),
-              bucketVersioning: faker.datatype.boolean(),
-              blockAllPublicAccess: faker.datatype.boolean(),
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Add fromService environment variable",
-        complexity: 20, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length >= 2) {
-            const [service1, service2]: any[] = faker.helpers.shuffle(
-              env.services
-            );
-            if (!service1.envVariables) service1.envVariables = {};
-            const key = `${service2.name.toUpperCase()}_HOST`;
-            service1.envVariables[key] = {
-              fromService: {
-                id: service2.id,
-                value: faker.helpers.arrayElement([
-                  "host",
-                  "port",
-                  "connectionString",
-                ]),
-              },
-            };
-          }
-        },
-      },
-      {
-        name: "Change PR source configuration",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.source) {
-            env.source = {
-              pr: true,
-              trigger: faker.helpers.arrayElement(["push", "manual"]),
-              filter: {
-                toBranches: ["main", "develop"],
-                labels: [faker.lorem.word()],
-              },
-            };
-          }
-        },
-      },
-      {
-        name: "Add experimental features",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.experimental = {
-              runAsNonRootUser: faker.datatype.boolean(),
-            };
-          }
-        },
-      },
-      {
-        name: "Add permissions configuration",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.permissions = {
-              inline: {
-                Version: "2012-10-17",
-                Statement: [
-                  {
-                    Effect: "Allow",
-                    Action: ["s3:GetObject"],
-                    Resource: ["arn:aws:s3:::bucket/*"],
-                  },
-                ],
-              },
-            };
-          }
-        },
-      },
-      {
-        name: "Add sidecar containers",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(
-              env.services.filter((s: any) =>
-                ["web", "worker"].includes(s.type)
-              )
-            );
-            if (service) {
-              service.sidecars = [
-                {
-                  cpuAllotment: 0.1,
-                  memoryAllotment: 0.2,
-                  name: "logging-sidecar",
-                  image: "fluent/fluent-bit:latest",
-                },
-              ];
-            }
-          }
-        },
-      },
-      {
-        name: "Modify storage type for RDS",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const rdsService: any = env.services.find(
-              (s: any) => s.type === "rds"
-            );
-            if (rdsService) {
-              rdsService.storageType = faker.helpers.arrayElement([
-                "gp2",
-                "gp3",
-                "io1",
-              ]);
-              if (rdsService.storageType === "io1") {
-                rdsService.storageProvisionedIops = faker.number.int({
-                  min: 1000,
-                  max: 3000,
-                });
-              }
-            }
-          }
-        },
-      },
-      {
-        name: "Toggle multi-AZ for RDS",
-        complexity: 10, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const rdsService: any = env.services.find(
-              (s: any) => s.type === "rds"
-            );
-            if (rdsService) {
-              rdsService.multiAvailabilityZones = faker.datatype.boolean();
-              rdsService.encryptionAtRest = faker.datatype.boolean();
-            }
-          }
-        },
-      },
-      {
-        name: "Add integrations",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.integrations = {
-              uploadSentrySourceMap: faker.datatype.boolean(),
-            };
-          }
-        },
-      },
-      {
-        name: "Configure lambda function URL",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const lambdaService: any = env.services.find(
-              (s: any) => s.type === "lambda-function"
-            );
-            if (lambdaService && lambdaService.lambda) {
-              lambdaService.lambda.fnUrl = {
-                enabled: true,
-                authType: "None",
-                cors: {
-                  allowMethods: ["GET", "POST"],
-                  allowOrigin: ["*"],
-                },
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add health check grace period",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service) {
-              service.healthCheckGracePeriodSecs = faker.number.int({
-                min: 0,
-                max: 300,
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Toggle inject env variables",
-        complexity: 10, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (service.injectEnvVariablesInDockerfile !== undefined) {
-              service.injectEnvVariablesInDockerfile = faker.datatype.boolean();
-            }
-            if (service.includeEnvVariablesInBuild !== undefined) {
-              service.includeEnvVariablesInBuild = faker.datatype.boolean();
-            }
-          }
-        },
-      },
+      const doc1 = createRandomCloudConfig();
+      const doc1Size = JSON.stringify(doc1).length;
+      const doc2 = JSON.parse(JSON.stringify(doc1));
 
-      // COMPLEX MODIFICATIONS (71-100) - Multi-service and environment-level changes
-      {
-        name: "Create service dependency chain",
-        complexity: 75, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length >= 3) {
-            const services = faker.helpers
-              .shuffle([...env.services])
-              .slice(0, 3);
+      // Generate complexity score within target range
+      const targetComplexity = faker.number.int({
+        min: complexityRange.min,
+        max: complexityRange.max,
+      });
 
-            // Clear existing dependencies
-            services.forEach((service: any) => delete service.dependsOn);
+      const { appliedModifications, actualComplexity } =
+        applyModificationsForTargetComplexity(
+          doc2,
+          targetComplexity,
+          complexityRange
+        );
 
-            // Create chain: service1 -> service2 -> service3
-            services[1].dependsOn = [services[0].id];
-            services[2].dependsOn = [services[1].id];
-          }
-        },
-      },
-      {
-        name: "Batch update service resources",
-        complexity: 75, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const scalingFactor = faker.number.float({ min: 0.5, max: 2.0 });
+      // Only keep samples that fall within the target range
+      if (
+        actualComplexity >= complexityRange.min &&
+        actualComplexity <= complexityRange.max
+      ) {
+        const libraries = [
+          {
+            name: "schema-json-patch",
+            fn: () => newPatcher.createPatch(doc1, doc2),
+          },
+          {
+            name: "fast-json-patch",
+            fn: () => fastJsonPatch.compare(doc1, doc2),
+          },
+          { name: "jsondiffpatch", fn: () => diffpatcher.diff(doc1, doc2) },
+        ];
 
-            env.services.forEach((service: any) => {
-              if (service.cpu)
-                service.cpu = Math.max(0.125, service.cpu * scalingFactor);
-              if (service.memory)
-                service.memory = Math.max(
-                  0.125,
-                  service.memory * scalingFactor
+        for (const library of libraries) {
+          const startTime = performance.now();
+          const memoryResult = measureMemoryUsage(() => library.fn() as any);
+          const endTime = performance.now();
+
+          const patch = memoryResult.result;
+          const patchCount =
+            library.name === "jsondiffpatch"
+              ? countJsonDiffPatches(patch)
+              : library.name === "schema-json-patch (new)"
+              ? patch.operations.length
+              : Array.isArray(patch)
+              ? patch.length
+              : 0;
+
+          const patchSize = JSON.stringify(patch || {}).length;
+          const executionTime = endTime - startTime;
+
+          // Calculate accuracy
+          const isValid =
+            library.name === "jsondiffpatch"
+              ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
+              : isPatchValid(
+                  doc1,
+                  doc2,
+                  patch,
+                  library.name,
+                  appliedModifications
                 );
-              if (service.maxInstances)
-                service.maxInstances = Math.max(
-                  1,
-                  Math.floor(service.maxInstances * scalingFactor)
-                );
-            });
-          }
-        },
-      },
-      {
-        name: "Add comprehensive logging setup",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            env.services.forEach((service: any) => {
-              service.logging = {
-                cloudwatchLogsEnabled: true,
-                cloudwatchLogsRetentionDays: faker.helpers.arrayElement([
-                  7, 14, 30, 90,
-                ]),
-                ecsLogsMetadataEnabled: true,
-                firelens: {
-                  configSource: "inline",
-                  config: [
-                    {
-                      name: "forward",
-                      match: "*",
-                      options: {
-                        Host: "logs.example.com",
-                        Port: "443",
-                      },
-                    },
-                  ],
-                },
-              };
-            });
-          }
-        },
-      },
-      {
-        name: "Setup multi-service network configuration",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length >= 2) {
-            const networkServices = env.services.filter((s: any) =>
-              ["web", "worker"].includes(s.type)
-            );
 
-            if (networkServices.length >= 2) {
-              // Create a load balancer setup
-              const mainService = networkServices[0];
-              const backendServices = networkServices.slice(1);
-
-              mainService.name = "Load Balancer";
-              backendServices.forEach((service: any, index: number) => {
-                service.name = `Backend ${index + 1}`;
-                if (!service.dependsOn) service.dependsOn = [];
-                service.dependsOn.push(mainService.id);
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Configure cross-service environment variables",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length >= 2) {
-            const services = env.services;
-            const rdsService = services.find((s: any) => s.type === "rds");
-            const webServices = services.filter((s: any) => s.type === "web");
-
-            if (rdsService && webServices.length > 0) {
-              webServices.forEach((service: any) => {
-                if (!service.envVariables) service.envVariables = {};
-                service.envVariables.DATABASE_URL = {
-                  fromService: {
-                    id: rdsService.id,
-                    value: "connectionString",
-                  },
-                };
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add comprehensive autoscaling",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const scalableServices = env.services.filter((s: any) =>
-              ["web", "worker"].includes(s.type)
-            );
-
-            scalableServices.forEach((service: any) => {
-              service.autoscaling = {
-                cpuThreshold: faker.number.int({ min: 70, max: 80 }),
-                memoryThreshold: faker.number.int({ min: 75, max: 85 }),
-                cooldownTimerSecs: faker.number.int({ min: 300, max: 600 }),
-              };
-
-              if (service.type === "web") {
-                service.autoscaling.requestsPerTarget = faker.number.int({
-                  min: 100,
-                  max: 1000,
-                });
-              }
-            });
-          }
-        },
-      },
-      {
-        name: "Setup scheduler with multiple jobs",
-        complexity: 45, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const schedulerService = {
-              id: generateUniqueServiceId(env),
-              name: "Task Scheduler",
-              type: "scheduler",
-              cpu: 0.25,
-              memory: 0.5,
-              buildType: "nixpacks",
-              jobs: {
-                "daily-backup": {
-                  startCommand: "npm run backup",
-                  schedule: "0 2 * * *", // Daily at 2 AM
-                },
-                "hourly-cleanup": {
-                  startCommand: "npm run cleanup",
-                  schedule: "0 * * * *", // Every hour
-                },
-                "weekly-report": {
-                  startCommand: "npm run report",
-                  schedule: "0 0 * * 0", // Weekly on Sunday
-                },
-              },
-            };
-            env.services.push(schedulerService);
-          }
-        },
-      },
-      {
-        name: "Configure comprehensive permissions",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const s3Service = env.services.find((s: any) => s.type === "s3");
-            const otherServices = env.services.filter((s: any) =>
-              ["web", "worker"].includes(s.type)
-            );
-
-            if (s3Service && otherServices.length > 0) {
-              otherServices.forEach((service: any) => {
-                service.permissions = {
-                  inline: {
-                    Version: "2012-10-17",
-                    Statement: [
-                      {
-                        Effect: "Allow",
-                        Action: ["s3:GetObject", "s3:PutObject"],
-                        Resource: [
-                          `arn:aws:s3:::${s3Service.bucketNameBase}/*`,
-                        ],
-                      },
-                    ],
-                  },
-                };
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add network-server service",
-        complexity: 45, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "Network Load Balancer",
-              type: "network-server",
-              cpu: 1,
-              memory: 2,
-              ports: [
-                {
-                  id: "tcp-8000",
-                  port: 8000,
-                  protocol: "tcp",
-                  healthCheck: {
-                    timeoutSecs: 5,
-                    intervalSecs: 30,
-                  },
-                },
-              ],
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Modify elasticache settings",
-        complexity: 15, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          const elasticacheService: any = env.services.find(
-            (s: any) => s.type === "elasticache"
+          // Calculate semantic accuracy
+          const semanticAccuracy = calculateSemanticAccuracy(
+            doc1,
+            doc2,
+            patch,
+            library.name,
+            mainSchema
           );
-          if (elasticacheService) {
-            elasticacheService.evictionPolicy = faker.helpers.arrayElement([
-              "volatile-lru",
-              "allkeys-lru",
-              "noeviction",
-            ]);
-            elasticacheService.port = faker.helpers.arrayElement([6379, 6380]);
-            elasticacheService.encryptionAtRest = faker.datatype.boolean();
-          }
-        },
-      },
-      {
-        name: "Add lambda function with docker",
-        complexity: 15, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "Docker Lambda",
-              type: "lambda-function",
-              buildType: "docker",
-              dockerfilePath: "Dockerfile.lambda",
-              lambda: {
-                packageType: "image",
-                memory: faker.number.int({ min: 512, max: 2048 }),
-                timeoutSecs: faker.number.int({ min: 30, max: 300 }),
-              },
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Configure RDS connection string env var",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const rdsService: any = env.services.find(
-              (s: any) => s.type === "rds"
-            );
-            if (rdsService) {
-              rdsService.connectionStringEnvVarName =
-                faker.helpers.arrayElement([
-                  "DATABASE_URL",
-                  "DB_CONNECTION_STRING",
-                  "RDS_URL",
-                ]);
-              rdsService.performanceInsights = faker.datatype.boolean();
-            }
-          }
-        },
-      },
-      {
-        name: "Add static site with SPA config",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "React App",
-              type: "static",
-              buildType: "nodejs",
-              buildCommand: "npm run build",
-              outputDirectory: "build",
-              singlePageApp: true,
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Configure target with ECS EC2",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const eligibleServices = env.services.filter((s: any) =>
-              ["web", "worker"].includes(s.type)
-            );
-            if (eligibleServices.length > 0) {
-              const service: any = faker.helpers.arrayElement(eligibleServices);
-              service.target = {
-                type: "ecs-ec2",
-                clusterInstanceSize: faker.helpers.arrayElement([
-                  "t3.medium",
-                  "t3.large",
-                ]),
-                clusterMinInstances: faker.number.int({ min: 1, max: 3 }),
-                clusterMaxInstances: faker.number.int({ min: 3, max: 10 }),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add comprehensive CI config",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.ci = {
-              type: "ec2",
-              instanceSize: "t3.medium",
-              instanceStorage: faker.number.int({ min: 30, max: 100 }),
-              storageType: "gp3",
-            };
-          }
-        },
-      },
-      {
-        name: "Add firelens logging config",
-        complexity: 15, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.logging = {
-              cloudwatchLogsEnabled: true,
-              firelens: {
-                configSource: "file",
-                configFilePath: "./fluent-bit.conf",
-              },
-            };
-          }
-        },
-      },
-      {
-        name: "Configure container registry",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const eligibleServices = env.services.filter(
-              (s: any) => s.buildType === "fromRepository"
-            );
-            if (eligibleServices.length > 0) {
-              const service: any = faker.helpers.arrayElement(eligibleServices);
-              service.containerImage = {
-                registryId: faker.string.alphanumeric(12),
-                repository: faker.lorem.slug(),
-                tag: faker.system.semver(),
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add S3 bucket policy",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const s3Service: any = env.services.find(
-              (s: any) => s.type === "s3"
-            );
-            if (s3Service) {
-              s3Service.bucketPolicy = {
-                Version: "2012-10-17",
-                Statement: [
-                  {
-                    Effect: "Allow",
-                    Principal: "*",
-                    Action: "s3:GetObject",
-                    Resource: `arn:aws:s3:::${s3Service.bucketNameBase}/*`,
-                  },
-                ],
-              };
-            }
-          }
-        },
-      },
-      {
-        name: "Add private web service",
-        complexity: 45, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "Internal API",
-              type: "web-private",
-              cpu: faker.helpers.arrayElement([0.5, 1, 2]),
-              memory: faker.helpers.arrayElement([1, 2, 4]),
-              buildType: "docker",
-              port: 8080,
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-      {
-        name: "Configure datadog integration",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            service.experimental = {
-              datadog: {
-                enabled: true,
-                datadogSite: "datadoghq.com",
-                datadogApiKey: faker.string.alphanumeric(32),
-                logging: faker.datatype.boolean(),
-              },
-            };
-          }
-        },
-      },
-      {
-        name: "Add post build command",
-        complexity: 15, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const eligibleServices = env.services.filter((s: any) =>
-              ["web", "worker", "static"].includes(s.type)
-            );
-            if (eligibleServices.length > 0) {
-              const service: any = faker.helpers.arrayElement(eligibleServices);
-              service.postBuildCommand = faker.helpers.arrayElement([
-                "npm run postbuild",
-                'echo "Build complete"',
-                "cp -r dist/ public/",
-              ]);
-            }
-          }
-        },
-      },
-      {
-        name: "Configure Lambda VPC",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const lambdaService: any = env.services.find(
-              (s: any) => s.type === "lambda-function"
-            );
-            if (lambdaService && lambdaService.lambda) {
-              lambdaService.lambda.vpc = true;
-              lambdaService.lambda.tracing = faker.datatype.boolean();
-              lambdaService.lambda.reservedConcurrency = faker.number.int({
-                min: 1,
-                max: 100,
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add environment variables with different types",
-        complexity: 25, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const service: any = faker.helpers.arrayElement(env.services);
-            if (!service.envVariables) service.envVariables = {};
 
-            // String env var
-            service.envVariables.STRING_VAR = faker.lorem.word();
+          const metrics: BenchmarkMetrics = {
+            library: library.name,
+            patchCount,
+            patchSize,
+            executionTime,
+            memoryUsage: memoryResult.memoryUsed,
+            accuracy: isValid,
+            compressionRatio: doc1Size > 0 ? (patchSize / doc1Size) * 100 : 0,
+            complexityScore: actualComplexity,
+            operationType: appliedModifications.join(","),
+            documentSize: doc1Size,
+            semanticAccuracy,
+            iteration: samplesGenerated,
+          };
 
-            // Number env var
-            service.envVariables.NUMBER_VAR = faker.number.int({
-              min: 1,
-              max: 100,
-            });
+          allMetrics.push(metrics);
+        }
 
-            // Boolean env var
-            service.envVariables.BOOLEAN_VAR = faker.datatype.boolean();
-
-            // Parameter store env var
-            service.envVariables.PARAM_VAR = {
-              fromParameterStore: `/app/${faker.lorem.word()}`,
-            };
-
-            // Secrets manager env var
-            service.envVariables.SECRET_VAR = {
-              fromSecretsManager: `${faker.lorem.word()}-secret`,
-            };
-          }
-        },
-      },
-      {
-        name: "Configure port health checks for network server",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const networkService: any = env.services.find((s: any) =>
-              ["network-server", "private-network-server"].includes(s.type)
-            );
-            if (
-              networkService &&
-              networkService.ports &&
-              networkService.ports.length > 0
-            ) {
-              networkService.ports.forEach((port: any) => {
-                if (port.healthCheck) {
-                  port.healthCheck.gracePeriodSecs = faker.number.int({
-                    min: 0,
-                    max: 300,
-                  });
-                  if (port.protocol === "http" || port.protocol === "http2") {
-                    port.healthCheck.path = faker.helpers.arrayElement([
-                      "/health",
-                      "/status",
-                      "/ping",
-                    ]);
-                  }
-                }
-              });
-            }
-          }
-        },
-      },
-      {
-        name: "Add scheduler with job timeout and resource overrides",
-        complexity: 8, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const schedulerService: any = env.services.find(
-              (s: any) => s.type === "scheduler"
-            );
-            if (schedulerService && schedulerService.jobs) {
-              const jobNames = Object.keys(schedulerService.jobs);
-              if (jobNames.length > 0) {
-                const jobName = faker.helpers.arrayElement(jobNames);
-                schedulerService.jobs[jobName].timeout = faker.number.int({
-                  min: 60,
-                  max: 1440,
-                });
-                schedulerService.jobs[jobName].cpu = faker.number.float({
-                  min: 0.125,
-                  max: 2,
-                });
-                schedulerService.jobs[jobName].memory = faker.number.float({
-                  min: 0.25,
-                  max: 4,
-                });
-              }
-            }
-          }
-        },
-      },
-      {
-        name: "Configure RDS with advanced settings",
-        complexity: 35, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env && env.services.length > 0) {
-            const rdsService: any = env.services.find(
-              (s: any) => s.type === "rds"
-            );
-            if (rdsService) {
-              rdsService.private = faker.datatype.boolean();
-              rdsService.maxStorage = faker.number.int({ min: 100, max: 1000 });
-              rdsService.applyChangesImmediately = faker.datatype.boolean();
-              rdsService.deleteBackupsWithRdsDeletion =
-                faker.datatype.boolean();
-
-              if (rdsService.port === undefined) {
-                rdsService.port =
-                  rdsService.engine === "postgres" ? 5432 : 3306;
-              }
-            }
-          }
-        },
-      },
-      {
-        name: "Add comprehensive service with all features",
-        complexity: 65, // Auto-generated based on operation complexity
-        modify: (doc: any) => {
-          const env: any = faker.helpers.arrayElement(doc.environments);
-          if (env) {
-            const newService = {
-              id: generateUniqueServiceId(env),
-              name: "Full Featured Service",
-              type: "web",
-              cpu: 2,
-              memory: 4,
-              gpu: 1,
-              buildType: "docker",
-              dockerfilePath: "Dockerfile",
-              dockerContext: ".",
-              privileged: false,
-              healthCheckPath: "/health",
-              healthCheckTimeoutSecs: 10,
-              healthCheckIntervalSecs: 30,
-              healthCheckGracePeriodSecs: 60,
-              port: 3000,
-              minInstances: 2,
-              maxInstances: 10,
-              stickySessionsEnabled: true,
-              stickySessionsDurationSecs: 3600,
-              originShieldEnabled: true,
-              cloudfrontAutoCacheInvalidation: true,
-              containerInsights: true,
-              storage: 50,
-              versionHistoryCount: 15,
-              basePath: ".",
-              includeEnvVariablesInBuild: true,
-              injectEnvVariablesInDockerfile: true,
-              autoscaling: {
-                cpuThreshold: 75,
-                memoryThreshold: 80,
-                requestsPerTarget: 500,
-                cooldownTimerSecs: 300,
-              },
-              envVariables: {
-                NODE_ENV: "production",
-                LOG_LEVEL: "info",
-              },
-              logging: {
-                cloudwatchLogsEnabled: true,
-                cloudwatchLogsRetentionDays: 30,
-                ecsLogsMetadataEnabled: true,
-              },
-              integrations: {
-                uploadSentrySourceMap: true,
-              },
-            };
-            env.services.push(newService);
-          }
-        },
-      },
-    ];
-
-    // Apply random modifications with complexity tracking
-    const numModifications = faker.number.int({ min: 2, max: 100 });
-    let totalComplexity = 0;
-    const appliedModifications: string[] = [];
-
-    for (let j = 0; j < numModifications; j++) {
-      const modification = faker.helpers.arrayElement(modifications);
-      modification.modify(doc2);
-      totalComplexity += modification.complexity || 1; // Use actual complexity from modification
-      appliedModifications.push(modification.name);
+        samplesGenerated++;
+        progressBar.update(allMetrics.length / 4); // Divide by 4 since we test 4 libraries per sample
+      }
     }
 
-    // Test each library with memory and performance tracking
-    const libraries = [
-      { name: "schema-json-patch (our implementation) (our implementation)", fn: () => patcher.createPatch(doc1, doc2) },
-      { name: "fast-json-patch", fn: () => fastJsonPatch.compare(doc1, doc2) },
-      { name: "jsondiffpatch", fn: () => diffpatcher.diff(doc1, doc2) },
-    ];
-
-    for (const library of libraries) {
-      const startTime = performance.now();
-      const memoryResult = measureMemoryUsage(() => library.fn() as any);
-      const endTime = performance.now();
-
-      const patch = memoryResult.result;
-      const patchCount =
-        library.name === "jsondiffpatch"
-          ? countJsonDiffPatches(patch)
-          : Array.isArray(patch)
-          ? patch.length
-          : 0;
-
-      const patchSize = JSON.stringify(patch || {}).length;
-      const executionTime = endTime - startTime;
-
-      // Calculate accuracy
-      const isValid =
-        library.name === "jsondiffpatch"
-          ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
-          : isPatchValid(doc1, doc2, patch, library.name, appliedModifications);
-
-      // Calculate semantic accuracy
-      const semanticAccuracy = calculateSemanticAccuracy(
-        doc1,
-        doc2,
-        patch,
-        library.name,
-        mainSchema
-      );
-
-      const metrics: BenchmarkMetrics = {
-        library: library.name,
-        patchCount,
-        patchSize,
-        executionTime,
-        memoryUsage: memoryResult.memoryUsed,
-        accuracy: isValid,
-        compressionRatio: doc1Size > 0 ? (patchSize / doc1Size) * 100 : 0,
-        complexityScore: totalComplexity,
-        operationType: appliedModifications.join(","),
-        documentSize: doc1Size,
-        semanticAccuracy,
-        iteration: i,
-      };
-
-      allMetrics.push(metrics);
-    }
-
-    // Save sample patches for first iteration
-    if (i === 0) {
-      const samplePatch = patcher.createPatch(doc1, doc2);
-      await writeFile(
-        join(__dirname, "faker-schema-patch.json"),
-        JSON.stringify(samplePatch, null, 2)
-      );
-      await writeFile(
-        join(__dirname, "faker-fast-json-patch.json"),
-        JSON.stringify(fastJsonPatch.compare(doc1, doc2), null, 2)
-      );
-      await writeFile(
-        join(__dirname, "faker-jsondiffpatch-patch.json"),
-        JSON.stringify(diffpatcher.diff(doc1, doc2), null, 2)
+    if (attempts >= maxAttempts) {
+      console.warn(
+        `\n⚠️  Warning: Could only generate ${samplesGenerated}/${complexityRange.targetSamples} samples for ${complexityRange.label} range after ${maxAttempts} attempts`
       );
     }
-
-    // Update progress bar
-    progressBar.update(i + 1);
   }
 
   // Stop progress bar
   progressBar.stop();
 
-  console.log("\n✅ Benchmark completed! Generating comprehensive report...\n");
+  console.log(
+    "\n✅ Stratified benchmark completed! Generating comprehensive report...\n"
+  );
 
   // Generate comprehensive report
   generateComprehensiveReport(allMetrics);
 
   console.log("\n📁 Sample patch files written to comparison/ directory");
   console.log("🎉 Benchmark analysis complete!");
+}
+
+// Helper function to apply modifications targeting a specific complexity score
+function applyModificationsForTargetComplexity(
+  doc: any,
+  targetComplexity: number,
+  complexityRange: { label: string; min: number; max: number }
+): { appliedModifications: string[]; actualComplexity: number } {
+  const modifications = [
+    // SIMPLE MODIFICATIONS (1-30) - Basic property changes
+    {
+      name: "Change environment name",
+      complexity: 2, // Single property change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) env.name = faker.lorem.words(2);
+      },
+    },
+    {
+      name: "Change environment region",
+      complexity: 2, // Single property change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env)
+          env.region = faker.helpers.arrayElement([
+            "us-east-1",
+            "us-west-2",
+            "eu-west-1",
+            "ap-southeast-1",
+          ]);
+      },
+    },
+    {
+      name: "Change environment ID",
+      complexity: 3, // Single property change with potential cascading effects
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) env.id = faker.lorem.slug();
+      },
+    },
+    {
+      name: "Change source branch",
+      complexity: 2, // Single nested property change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.source && !env.source.pr)
+          env.source.branch = faker.helpers.arrayElement([
+            "main",
+            "develop",
+            "staging",
+          ]);
+      },
+    },
+    {
+      name: "Toggle source trigger",
+      complexity: 2, // Single nested property change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.source)
+          env.source.trigger = faker.helpers.arrayElement(["push", "manual"]);
+      },
+    },
+    {
+      name: "Change service ID",
+      complexity: 4, // Service property change with high impact
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.id = faker.lorem.slug();
+        }
+      },
+    },
+    {
+      name: "Change service name",
+      complexity: 3, // Service property change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.name = faker.company.buzzPhrase();
+        }
+      },
+    },
+    {
+      name: "Change service CPU",
+      complexity: 3, // Resource allocation change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(
+            env.services.filter((s: any) => s.cpu !== undefined)
+          );
+          if (service)
+            service.cpu = faker.helpers.arrayElement([
+              0.125, 0.25, 0.5, 1, 2, 4,
+            ]);
+        }
+      },
+    },
+    {
+      name: "Change service memory",
+      complexity: 3, // Resource allocation change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) service.gpu = faker.number.int({ min: 0, max: 4 });
+        }
+      },
+    },
+    {
+      name: "Toggle container insights",
+      complexity: 2, // Simple boolean toggle
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) service.containerInsights = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Change storage size",
+      complexity: 3, // Resource allocation change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.storage = faker.number.int({ min: 20, max: 200 });
+        }
+      },
+    },
+    {
+      name: "Change min instances",
+      complexity: 4, // Scaling configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.minInstances = faker.number.int({ min: 1, max: 3 });
+        }
+      },
+    },
+    {
+      name: "Change max instances",
+      complexity: 4, // Scaling configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.maxInstances = faker.number.int({ min: 1, max: 10 });
+        }
+      },
+    },
+    {
+      name: "Change version history count",
+      complexity: 2, // Simple configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.versionHistoryCount = faker.number.int({
+              min: 1,
+              max: 20,
+            });
+        }
+      },
+    },
+    {
+      name: "Change base path",
+      complexity: 3, // Build configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.basePath = faker.helpers.arrayElement([
+              ".",
+              "./src",
+              "./app",
+            ]);
+        }
+      },
+    },
+    {
+      name: "Change build type",
+      complexity: 5, // Significant build configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.buildType = faker.helpers.arrayElement([
+              "nodejs",
+              "nixpacks",
+              "docker",
+            ]);
+        }
+      },
+    },
+    {
+      name: "Change dockerfile path",
+      complexity: 3, // Docker configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.dockerfilePath = faker.helpers.arrayElement([
+              "Dockerfile",
+              "Dockerfile.prod",
+              "docker/Dockerfile",
+            ]);
+        }
+      },
+    },
+    {
+      name: "Change docker context",
+      complexity: 3, // Docker configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.dockerContext = faker.helpers.arrayElement([
+              ".",
+              "./app",
+              "./src",
+            ]);
+        }
+      },
+    },
+    {
+      name: "Toggle privileged mode",
+      complexity: 4, // Security configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) service.privileged = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Change health check path",
+      complexity: 3, // Health monitoring configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.healthCheckPath = faker.helpers.arrayElement([
+              "/",
+              "/health",
+              "/status",
+              "/ping",
+            ]);
+        }
+      },
+    },
+    {
+      name: "Change health check timeout",
+      complexity: 3, // Health monitoring configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.healthCheckTimeoutSecs = faker.number.int({
+              min: 2,
+              max: 30,
+            });
+        }
+      },
+    },
+    {
+      name: "Change health check interval",
+      complexity: 3, // Health monitoring configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.healthCheckTimeoutSecs = faker.number.int({
+              min: 2,
+              max: 30,
+            });
+        }
+      },
+    },
+    {
+      name: "Change health check interval",
+      complexity: 3, // Health monitoring configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.healthCheckIntervalSecs = faker.number.int({
+              min: 5,
+              max: 60,
+            });
+        }
+      },
+    },
+    {
+      name: "Change port number",
+      complexity: 4, // Network configuration change
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.port = faker.number.int({ min: 3000, max: 8080 });
+        }
+      },
+    },
+    {
+      name: "Toggle sticky sessions",
+      complexity: 3, // Load balancer configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) service.stickySessionsEnabled = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Change sticky sessions duration",
+      complexity: 3, // Load balancer configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.stickySessionsDurationSecs = faker.number.int({
+              min: 3600,
+              max: 86400,
+            });
+        }
+      },
+    },
+    {
+      name: "Toggle origin shield",
+      complexity: 3, // CDN configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) service.originShieldEnabled = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Toggle CloudFront cache invalidation",
+      complexity: 3, // CDN configuration
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service)
+            service.cloudfrontAutoCacheInvalidation = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Add single environment variable",
+      complexity: 5, // Object creation + property addition
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            if (!service.envVariables) service.envVariables = {};
+            const key = faker.hacker.noun().toUpperCase();
+            service.envVariables[key] = faker.internet.url();
+          }
+        }
+      },
+    },
+    {
+      name: "Remove environment variable",
+      complexity: 4, // Property deletion
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service && service.envVariables) {
+            const keys = Object.keys(service.envVariables);
+            if (keys.length > 0) {
+              const keyToRemove = faker.helpers.arrayElement(keys);
+              delete service.envVariables[keyToRemove];
+            }
+          }
+        }
+      },
+    },
+
+    // MEDIUM COMPLEXITY MODIFICATIONS (31-70) - Service-level changes
+    {
+      name: "Add new web service",
+      complexity: 25, // Create complete service object with 10+ properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: faker.company.buzzPhrase(),
+            type: "web",
+            cpu: faker.helpers.arrayElement([0.25, 0.5, 1, 2]),
+            memory: faker.helpers.arrayElement([0.5, 1, 2, 4]),
+            buildType: "nixpacks",
+            healthCheckPath: "/health",
+            port: 3000,
+            minInstances: 1,
+            maxInstances: faker.number.int({ min: 1, max: 5 }),
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add new worker service",
+      complexity: 20, // Create service object with 7+ properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: `${faker.hacker.verb()} Worker`,
+            type: "worker",
+            cpu: faker.helpers.arrayElement([0.25, 0.5, 1, 2]),
+            memory: faker.helpers.arrayElement([0.5, 1, 2, 4]),
+            buildType: "nixpacks",
+            startCommand: `node ${faker.lorem.word()}.js`,
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add new RDS service",
+      complexity: 22, // Create database service with 8+ properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const engine = faker.helpers.arrayElement(["postgres", "mysql"]);
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: `${faker.lorem.word()}-database`,
+            type: "rds",
+            engine: engine,
+            engineVersion: engine === "postgres" ? "15" : "8.0",
+            instanceSize: "db.t3.micro",
+            storage: faker.number.int({ min: 20, max: 100 }),
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add new static service",
+      complexity: 18, // Create static service with 6+ properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: `${faker.lorem.word()} Site`,
+            type: "static",
+            buildType: "nodejs",
+            buildCommand: "npm run build",
+            outputDirectory: "dist",
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add elasticache service",
+      complexity: 20, // Create cache service with 7+ properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "redis-cache",
+            type: "elasticache",
+            engine: "redis",
+            engineVersion: "7.0",
+            instanceSize: "cache.t3.micro",
+            numberOfReplicas: faker.number.int({ min: 1, max: 3 }),
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Remove a service",
+      complexity: 15, // Array splice operation with potential cascading effects
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(
+          doc.environments.filter((e: any) => e.services.length > 1)
+        );
+        if (env) {
+          const indexToRemove = faker.number.int({
+            min: 0,
+            max: env.services.length - 1,
+          });
+          env.services.splice(indexToRemove, 1);
+        }
+      },
+    },
+    {
+      name: "Reorder services",
+      complexity: 12, // Array shuffle operation affecting multiple services
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 1) {
+          env.services = faker.helpers.shuffle(env.services);
+        }
+      },
+    },
+    {
+      name: "Add dependency between services",
+      complexity: 8, // Add array property and push dependency
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length >= 2) {
+          const [service1, service2]: any[] = faker.helpers.shuffle(
+            env.services
+          );
+          if (!service1.dependsOn) service1.dependsOn = [];
+          if (!service1.dependsOn.includes(service2.id)) {
+            service1.dependsOn.push(service2.id);
+          }
+        }
+      },
+    },
+    {
+      name: "Remove dependencies",
+      complexity: 6, // Delete property
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) delete service.dependsOn;
+        }
+      },
+    },
+    {
+      name: "Add autoscaling configuration",
+      complexity: 12, // Create object with 3 nested properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.autoscaling = {
+              cpuThreshold: faker.number.int({ min: 60, max: 80 }),
+              memoryThreshold: faker.number.int({ min: 60, max: 80 }),
+              cooldownTimerSecs: faker.number.int({ min: 300, max: 600 }),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Modify autoscaling thresholds",
+      complexity: 7, // Modify 2 nested properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service && service.autoscaling) {
+            service.autoscaling.cpuThreshold = faker.number.int({
+              min: 50,
+              max: 90,
+            });
+            service.autoscaling.memoryThreshold = faker.number.int({
+              min: 50,
+              max: 90,
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add CI configuration",
+      complexity: 8, // Create nested object with type property
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.ci = {
+            type: faker.helpers.arrayElement(["codebuild", "ec2"]),
+          };
+        }
+      },
+    },
+    {
+      name: "Add logging configuration",
+      complexity: 10, // Create nested object with 2 properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.logging = {
+            cloudwatchLogsEnabled: faker.datatype.boolean(),
+            cloudwatchLogsRetentionDays: faker.helpers.arrayElement([
+              7, 14, 30, 90,
+            ]),
+          };
+        }
+      },
+    },
+    {
+      name: "Add docker labels",
+      complexity: 11, // Create nested object with 3 properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.dockerLabels = {
+            team: faker.hacker.noun(),
+            version: faker.system.semver(),
+            environment: env.name,
+          };
+        }
+      },
+    },
+    {
+      name: "Add watch paths",
+      complexity: 6, // Create array with 1 element
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.watchPaths = [
+            faker.helpers.arrayElement([
+              "src/**",
+              "app/**",
+              "**/*.js",
+              "**/*.ts",
+            ]),
+          ];
+        }
+      },
+    },
+    {
+      name: "Add build commands",
+      complexity: 8, // Add 2 properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.buildCommand = faker.helpers.arrayElement([
+              "npm run build",
+              "yarn build",
+              "pnpm build",
+            ]);
+            service.installCommand = faker.helpers.arrayElement([
+              "npm install",
+              "yarn install",
+              "pnpm install",
+            ]);
+          }
+        }
+      },
+    },
+    {
+      name: "Add start command",
+      complexity: 4, // Add single property
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.startCommand = faker.helpers.arrayElement([
+              "npm start",
+              "node server.js",
+              "yarn start",
+            ]);
+          }
+        }
+      },
+    },
+    {
+      name: "Add pre/post deploy commands",
+      complexity: 8, // Add 2 properties
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.preDeployCommand = 'echo "Pre-deploy"';
+            service.postDeployCommand = 'echo "Post-deploy"';
+          }
+        }
+      },
+    },
+    {
+      name: "Change target type",
+      complexity: 8, // Create nested object with type
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.target = {
+              type: faker.helpers.arrayElement(["fargate", "ecs-ec2"]),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Modify RDS settings",
+      complexity: 11, // Modify 3 properties of specific service type
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const rdsService: any = env.services.find(
+            (s: any) => s.type === "rds"
+          );
+          if (rdsService) {
+            rdsService.autoUpgradeMinorVersions = faker.datatype.boolean();
+            rdsService.deletionProtection = faker.datatype.boolean();
+            rdsService.backupRetentionPeriodInDays = faker.number.int({
+              min: 1,
+              max: 35,
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add network server ports",
+      complexity: 18, // Create complex port object with nested healthCheck and push to array
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = env.services.find(
+            (s: any) => s.type === "network-server"
+          );
+          if (service && service.ports) {
+            const newPort = {
+              id: faker.lorem.slug(),
+              port: faker.number.int({ min: 8000, max: 9000 }),
+              protocol: faker.helpers.arrayElement(["tcp", "udp", "http"]),
+              healthCheck: {
+                type: "tcp",
+                timeoutSecs: 5,
+                intervalSecs: 30,
+              },
+            };
+            service.ports.push(newPort);
+          }
+        }
+      },
+    },
+    {
+      name: "Modify port configuration",
+      complexity: 12, // Modify 1 property + 2 nested properties conditionally
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = env.services.find(
+            (s: any) => s.ports && s.ports.length > 0
+          );
+          if (service) {
+            const port: any = faker.helpers.arrayElement(service.ports);
+            port.port = faker.number.int({ min: 8000, max: 9000 });
+            if (port.healthCheck) {
+              port.healthCheck.timeoutSecs = faker.number.int({
+                min: 2,
+                max: 10,
+              });
+              port.healthCheck.intervalSecs = faker.number.int({
+                min: 10,
+                max: 60,
+              });
+            }
+          }
+        }
+      },
+    },
+    {
+      name: "Add scheduler jobs",
+      complexity: 25, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const schedulerService: any = env.services.find(
+            (s: any) => s.type === "scheduler"
+          );
+          if (schedulerService && schedulerService.jobs) {
+            const jobName = faker.lorem.slug();
+            schedulerService.jobs[jobName] = {
+              startCommand: faker.helpers.arrayElement([
+                "npm run job",
+                "node job.js",
+              ]),
+              schedule: faker.helpers.arrayElement([
+                "0 * * * *",
+                "0 0 * * *",
+                "manual",
+              ]),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add environment-level env variables",
+      complexity: 60, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          if (!env.envVariables) env.envVariables = {};
+          const key = `ENV_${faker.hacker.noun().toUpperCase()}`;
+          env.envVariables[key] = faker.internet.url();
+        }
+      },
+    },
+    {
+      name: "Add VPC configuration",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          env.vpc = {
+            id: faker.string.alphanumeric(10),
+            cidr: "10.0.0.0/16",
+            private: faker.datatype.boolean(),
+          };
+        }
+      },
+    },
+    {
+      name: "Change service type from web to worker",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const webService: any = env.services.find(
+            (s: any) => s.type === "web"
+          );
+          if (webService) {
+            webService.type = "worker";
+            delete webService.healthCheckPath;
+            delete webService.port;
+            delete webService.stickySessionsEnabled;
+            webService.startCommand = "node worker.js";
+          }
+        }
+      },
+    },
+    {
+      name: "Modify container image source",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service && service.containerImage) {
+            service.containerImage = {
+              fromService: faker.helpers.arrayElement(
+                env.services.map((s: any) => s.id)
+              ),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add lambda function service",
+      complexity: 45, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: `${faker.lorem.word()}-function`,
+            type: "lambda-function",
+            buildType: "nixpacks",
+            outputDirectory: "dist",
+            lambda: {
+              packageType: "zip",
+              handler: "index.handler",
+              runtime: "nodejs20.x",
+              memory: faker.number.int({ min: 128, max: 1024 }),
+              timeoutSecs: faker.number.int({ min: 3, max: 60 }),
+            },
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add S3 bucket service",
+      complexity: 45, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: `${faker.lorem.word()}-bucket`,
+            type: "s3",
+            bucketNameBase: faker.lorem.slug(),
+            bucketVersioning: faker.datatype.boolean(),
+            blockAllPublicAccess: faker.datatype.boolean(),
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Add fromService environment variable",
+      complexity: 20, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length >= 2) {
+          const [service1, service2]: any[] = faker.helpers.shuffle(
+            env.services
+          );
+          if (!service1.envVariables) service1.envVariables = {};
+          const key = `${service2.name.toUpperCase()}_HOST`;
+          service1.envVariables[key] = {
+            fromService: {
+              id: service2.id,
+              value: faker.helpers.arrayElement([
+                "host",
+                "port",
+                "connectionString",
+              ]),
+            },
+          };
+        }
+      },
+    },
+    {
+      name: "Change PR source configuration",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.source) {
+          env.source = {
+            pr: true,
+            trigger: faker.helpers.arrayElement(["push", "manual"]),
+            filter: {
+              toBranches: ["main", "develop"],
+              labels: [faker.lorem.word()],
+            },
+          };
+        }
+      },
+    },
+    {
+      name: "Add experimental features",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.experimental = {
+            runAsNonRootUser: faker.datatype.boolean(),
+          };
+        }
+      },
+    },
+    {
+      name: "Add permissions configuration",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.permissions = {
+            inline: {
+              Version: "2012-10-17",
+              Statement: [
+                {
+                  Effect: "Allow",
+                  Action: ["s3:GetObject"],
+                  Resource: ["arn:aws:s3:::bucket/*"],
+                },
+              ],
+            },
+          };
+        }
+      },
+    },
+    {
+      name: "Add sidecar containers",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(
+            env.services.filter((s: any) => ["web", "worker"].includes(s.type))
+          );
+          if (service) {
+            service.sidecars = [
+              {
+                cpuAllotment: 0.1,
+                memoryAllotment: 0.2,
+                name: "logging-sidecar",
+                image: "fluent/fluent-bit:latest",
+              },
+            ];
+          }
+        }
+      },
+    },
+    {
+      name: "Modify storage type for RDS",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const rdsService: any = env.services.find(
+            (s: any) => s.type === "rds"
+          );
+          if (rdsService) {
+            rdsService.storageType = faker.helpers.arrayElement([
+              "gp2",
+              "gp3",
+              "io1",
+            ]);
+            if (rdsService.storageType === "io1") {
+              rdsService.storageProvisionedIops = faker.number.int({
+                min: 1000,
+                max: 3000,
+              });
+            }
+          }
+        }
+      },
+    },
+    {
+      name: "Toggle multi-AZ for RDS",
+      complexity: 10, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const rdsService: any = env.services.find(
+            (s: any) => s.type === "rds"
+          );
+          if (rdsService) {
+            rdsService.multiAvailabilityZones = faker.datatype.boolean();
+            rdsService.encryptionAtRest = faker.datatype.boolean();
+          }
+        }
+      },
+    },
+    {
+      name: "Add integrations",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.integrations = {
+            uploadSentrySourceMap: faker.datatype.boolean(),
+          };
+        }
+      },
+    },
+    {
+      name: "Configure lambda function URL",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const lambdaService: any = env.services.find(
+            (s: any) => s.type === "lambda-function"
+          );
+          if (lambdaService && lambdaService.lambda) {
+            lambdaService.lambda.fnUrl = {
+              enabled: true,
+              authType: "None",
+              cors: {
+                allowMethods: ["GET", "POST"],
+                allowOrigin: ["*"],
+              },
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add health check grace period",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service) {
+            service.healthCheckGracePeriodSecs = faker.number.int({
+              min: 0,
+              max: 300,
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Toggle inject env variables",
+      complexity: 10, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (service.injectEnvVariablesInDockerfile !== undefined) {
+            service.injectEnvVariablesInDockerfile = faker.datatype.boolean();
+          }
+          if (service.includeEnvVariablesInBuild !== undefined) {
+            service.includeEnvVariablesInBuild = faker.datatype.boolean();
+          }
+        }
+      },
+    },
+
+    // COMPLEX MODIFICATIONS (71-100) - Multi-service and environment-level changes
+    {
+      name: "Create service dependency chain",
+      complexity: 75, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length >= 3) {
+          const services = faker.helpers.shuffle([...env.services]).slice(0, 3);
+
+          // Clear existing dependencies
+          services.forEach((service: any) => delete service.dependsOn);
+
+          // Create chain: service1 -> service2 -> service3
+          services[1].dependsOn = [services[0].id];
+          services[2].dependsOn = [services[1].id];
+        }
+      },
+    },
+    {
+      name: "Batch update service resources",
+      complexity: 75, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const scalingFactor = faker.number.float({ min: 0.5, max: 2.0 });
+
+          env.services.forEach((service: any) => {
+            if (service.cpu)
+              service.cpu = Math.max(0.125, service.cpu * scalingFactor);
+            if (service.memory)
+              service.memory = Math.max(0.125, service.memory * scalingFactor);
+            if (service.maxInstances)
+              service.maxInstances = Math.max(
+                1,
+                Math.floor(service.maxInstances * scalingFactor)
+              );
+          });
+        }
+      },
+    },
+    {
+      name: "Add comprehensive logging setup",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          env.services.forEach((service: any) => {
+            service.logging = {
+              cloudwatchLogsEnabled: true,
+              cloudwatchLogsRetentionDays: faker.helpers.arrayElement([
+                7, 14, 30, 90,
+              ]),
+              ecsLogsMetadataEnabled: true,
+              firelens: {
+                configSource: "inline",
+                config: [
+                  {
+                    name: "forward",
+                    match: "*",
+                    options: {
+                      Host: "logs.example.com",
+                      Port: "443",
+                    },
+                  },
+                ],
+              },
+            };
+          });
+        }
+      },
+    },
+    {
+      name: "Setup multi-service network configuration",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length >= 2) {
+          const networkServices = env.services.filter((s: any) =>
+            ["web", "worker"].includes(s.type)
+          );
+
+          if (networkServices.length >= 2) {
+            // Create a load balancer setup
+            const mainService = networkServices[0];
+            const backendServices = networkServices.slice(1);
+
+            mainService.name = "Load Balancer";
+            backendServices.forEach((service: any, index: number) => {
+              service.name = `Backend ${index + 1}`;
+              if (!service.dependsOn) service.dependsOn = [];
+              service.dependsOn.push(mainService.id);
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Configure cross-service environment variables",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length >= 2) {
+          const services = env.services;
+          const rdsService = services.find((s: any) => s.type === "rds");
+          const webServices = services.filter((s: any) => s.type === "web");
+
+          if (rdsService && webServices.length > 0) {
+            webServices.forEach((service: any) => {
+              if (!service.envVariables) service.envVariables = {};
+              service.envVariables.DATABASE_URL = {
+                fromService: {
+                  id: rdsService.id,
+                  value: "connectionString",
+                },
+              };
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add comprehensive autoscaling",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const scalableServices = env.services.filter((s: any) =>
+            ["web", "worker"].includes(s.type)
+          );
+
+          scalableServices.forEach((service: any) => {
+            service.autoscaling = {
+              cpuThreshold: faker.number.int({ min: 70, max: 80 }),
+              memoryThreshold: faker.number.int({ min: 75, max: 85 }),
+              cooldownTimerSecs: faker.number.int({ min: 300, max: 600 }),
+            };
+
+            if (service.type === "web") {
+              service.autoscaling.requestsPerTarget = faker.number.int({
+                min: 100,
+                max: 1000,
+              });
+            }
+          });
+        }
+      },
+    },
+    {
+      name: "Setup scheduler with multiple jobs",
+      complexity: 45, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const schedulerService = {
+            id: generateUniqueServiceId(env),
+            name: "Task Scheduler",
+            type: "scheduler",
+            cpu: 0.25,
+            memory: 0.5,
+            buildType: "nixpacks",
+            jobs: {
+              "daily-backup": {
+                startCommand: "npm run backup",
+                schedule: "0 2 * * *", // Daily at 2 AM
+              },
+              "hourly-cleanup": {
+                startCommand: "npm run cleanup",
+                schedule: "0 * * * *", // Every hour
+              },
+              "weekly-report": {
+                startCommand: "npm run report",
+                schedule: "0 0 * * 0", // Weekly on Sunday
+              },
+            },
+          };
+          env.services.push(schedulerService);
+        }
+      },
+    },
+    {
+      name: "Configure comprehensive permissions",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const s3Service = env.services.find((s: any) => s.type === "s3");
+          const otherServices = env.services.filter((s: any) =>
+            ["web", "worker"].includes(s.type)
+          );
+
+          if (s3Service && otherServices.length > 0) {
+            otherServices.forEach((service: any) => {
+              service.permissions = {
+                inline: {
+                  Version: "2012-10-17",
+                  Statement: [
+                    {
+                      Effect: "Allow",
+                      Action: ["s3:GetObject", "s3:PutObject"],
+                      Resource: [`arn:aws:s3:::${s3Service.bucketNameBase}/*`],
+                    },
+                  ],
+                },
+              };
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add network-server service",
+      complexity: 45, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "Network Load Balancer",
+            type: "network-server",
+            cpu: 1,
+            memory: 2,
+            ports: [
+              {
+                id: "tcp-8000",
+                port: 8000,
+                protocol: "tcp",
+                healthCheck: {
+                  timeoutSecs: 5,
+                  intervalSecs: 30,
+                },
+              },
+            ],
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Modify elasticache settings",
+      complexity: 15, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        const elasticacheService: any = env.services.find(
+          (s: any) => s.type === "elasticache"
+        );
+        if (elasticacheService) {
+          elasticacheService.evictionPolicy = faker.helpers.arrayElement([
+            "volatile-lru",
+            "allkeys-lru",
+            "noeviction",
+          ]);
+          elasticacheService.port = faker.helpers.arrayElement([6379, 6380]);
+          elasticacheService.encryptionAtRest = faker.datatype.boolean();
+        }
+      },
+    },
+    {
+      name: "Add lambda function with docker",
+      complexity: 15, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "Docker Lambda",
+            type: "lambda-function",
+            buildType: "docker",
+            dockerfilePath: "Dockerfile.lambda",
+            lambda: {
+              packageType: "image",
+              memory: faker.number.int({ min: 512, max: 2048 }),
+              timeoutSecs: faker.number.int({ min: 30, max: 300 }),
+            },
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Configure RDS connection string env var",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const rdsService: any = env.services.find(
+            (s: any) => s.type === "rds"
+          );
+          if (rdsService) {
+            rdsService.connectionStringEnvVarName = faker.helpers.arrayElement([
+              "DATABASE_URL",
+              "DB_CONNECTION_STRING",
+              "RDS_URL",
+            ]);
+            rdsService.performanceInsights = faker.datatype.boolean();
+          }
+        }
+      },
+    },
+    {
+      name: "Add static site with SPA config",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "React App",
+            type: "static",
+            buildType: "nodejs",
+            buildCommand: "npm run build",
+            outputDirectory: "build",
+            singlePageApp: true,
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Configure target with ECS EC2",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const eligibleServices = env.services.filter((s: any) =>
+            ["web", "worker"].includes(s.type)
+          );
+          if (eligibleServices.length > 0) {
+            const service: any = faker.helpers.arrayElement(eligibleServices);
+            service.target = {
+              type: "ecs-ec2",
+              clusterInstanceSize: faker.helpers.arrayElement([
+                "t3.medium",
+                "t3.large",
+              ]),
+              clusterMinInstances: faker.number.int({ min: 1, max: 3 }),
+              clusterMaxInstances: faker.number.int({ min: 3, max: 10 }),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add comprehensive CI config",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.ci = {
+            type: "ec2",
+            instanceSize: "t3.medium",
+            instanceStorage: faker.number.int({ min: 30, max: 100 }),
+            storageType: "gp3",
+          };
+        }
+      },
+    },
+    {
+      name: "Add firelens logging config",
+      complexity: 15, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.logging = {
+            cloudwatchLogsEnabled: true,
+            firelens: {
+              configSource: "file",
+              configFilePath: "./fluent-bit.conf",
+            },
+          };
+        }
+      },
+    },
+    {
+      name: "Configure container registry",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const eligibleServices = env.services.filter(
+            (s: any) => s.buildType === "fromRepository"
+          );
+          if (eligibleServices.length > 0) {
+            const service: any = faker.helpers.arrayElement(eligibleServices);
+            service.containerImage = {
+              registryId: faker.string.alphanumeric(12),
+              repository: faker.lorem.slug(),
+              tag: faker.system.semver(),
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add S3 bucket policy",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const s3Service: any = env.services.find((s: any) => s.type === "s3");
+          if (s3Service) {
+            s3Service.bucketPolicy = {
+              Version: "2012-10-17",
+              Statement: [
+                {
+                  Effect: "Allow",
+                  Principal: "*",
+                  Action: "s3:GetObject",
+                  Resource: `arn:aws:s3:::${s3Service.bucketNameBase}/*`,
+                },
+              ],
+            };
+          }
+        }
+      },
+    },
+    {
+      name: "Add private web service",
+      complexity: 45, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "Internal API",
+            type: "web-private",
+            cpu: faker.helpers.arrayElement([0.5, 1, 2]),
+            memory: faker.helpers.arrayElement([1, 2, 4]),
+            buildType: "docker",
+            port: 8080,
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+    {
+      name: "Configure datadog integration",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          service.experimental = {
+            datadog: {
+              enabled: true,
+              datadogSite: "datadoghq.com",
+              datadogApiKey: faker.string.alphanumeric(32),
+              logging: faker.datatype.boolean(),
+            },
+          };
+        }
+      },
+    },
+    {
+      name: "Add post build command",
+      complexity: 15, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const eligibleServices = env.services.filter((s: any) =>
+            ["web", "worker", "static"].includes(s.type)
+          );
+          if (eligibleServices.length > 0) {
+            const service: any = faker.helpers.arrayElement(eligibleServices);
+            service.postBuildCommand = faker.helpers.arrayElement([
+              "npm run postbuild",
+              'echo "Build complete"',
+              "cp -r dist/ public/",
+            ]);
+          }
+        }
+      },
+    },
+    {
+      name: "Configure Lambda VPC",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const lambdaService: any = env.services.find(
+            (s: any) => s.type === "lambda-function"
+          );
+          if (lambdaService && lambdaService.lambda) {
+            lambdaService.lambda.vpc = true;
+            lambdaService.lambda.tracing = faker.datatype.boolean();
+            lambdaService.lambda.reservedConcurrency = faker.number.int({
+              min: 1,
+              max: 100,
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add environment variables with different types",
+      complexity: 25, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const service: any = faker.helpers.arrayElement(env.services);
+          if (!service.envVariables) service.envVariables = {};
+
+          // String env var
+          service.envVariables.STRING_VAR = faker.lorem.word();
+
+          // Number env var
+          service.envVariables.NUMBER_VAR = faker.number.int({
+            min: 1,
+            max: 100,
+          });
+
+          // Boolean env var
+          service.envVariables.BOOLEAN_VAR = faker.datatype.boolean();
+
+          // Parameter store env var
+          service.envVariables.PARAM_VAR = {
+            fromParameterStore: `/app/${faker.lorem.word()}`,
+          };
+
+          // Secrets manager env var
+          service.envVariables.SECRET_VAR = {
+            fromSecretsManager: `${faker.lorem.word()}-secret`,
+          };
+        }
+      },
+    },
+    {
+      name: "Configure port health checks for network server",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const networkService: any = env.services.find((s: any) =>
+            ["network-server", "private-network-server"].includes(s.type)
+          );
+          if (
+            networkService &&
+            networkService.ports &&
+            networkService.ports.length > 0
+          ) {
+            networkService.ports.forEach((port: any) => {
+              if (port.healthCheck) {
+                port.healthCheck.gracePeriodSecs = faker.number.int({
+                  min: 0,
+                  max: 300,
+                });
+                if (port.protocol === "http" || port.protocol === "http2") {
+                  port.healthCheck.path = faker.helpers.arrayElement([
+                    "/health",
+                    "/status",
+                    "/ping",
+                  ]);
+                }
+              }
+            });
+          }
+        }
+      },
+    },
+    {
+      name: "Add scheduler with job timeout and resource overrides",
+      complexity: 8, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const schedulerService: any = env.services.find(
+            (s: any) => s.type === "scheduler"
+          );
+          if (schedulerService && schedulerService.jobs) {
+            const jobNames = Object.keys(schedulerService.jobs);
+            if (jobNames.length > 0) {
+              const jobName = faker.helpers.arrayElement(jobNames);
+              schedulerService.jobs[jobName].timeout = faker.number.int({
+                min: 60,
+                max: 1440,
+              });
+              schedulerService.jobs[jobName].cpu = faker.number.float({
+                min: 0.125,
+                max: 2,
+              });
+              schedulerService.jobs[jobName].memory = faker.number.float({
+                min: 0.25,
+                max: 4,
+              });
+            }
+          }
+        }
+      },
+    },
+    {
+      name: "Configure RDS with advanced settings",
+      complexity: 35, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env && env.services.length > 0) {
+          const rdsService: any = env.services.find(
+            (s: any) => s.type === "rds"
+          );
+          if (rdsService) {
+            rdsService.private = faker.datatype.boolean();
+            rdsService.maxStorage = faker.number.int({ min: 100, max: 1000 });
+            rdsService.applyChangesImmediately = faker.datatype.boolean();
+            rdsService.deleteBackupsWithRdsDeletion = faker.datatype.boolean();
+
+            if (rdsService.port === undefined) {
+              rdsService.port = rdsService.engine === "postgres" ? 5432 : 3306;
+            }
+          }
+        }
+      },
+    },
+    {
+      name: "Add comprehensive service with all features",
+      complexity: 65, // Auto-generated based on operation complexity
+      modify: (doc: any) => {
+        const env: any = faker.helpers.arrayElement(doc.environments);
+        if (env) {
+          const newService = {
+            id: generateUniqueServiceId(env),
+            name: "Full Featured Service",
+            type: "web",
+            cpu: 2,
+            memory: 4,
+            gpu: 1,
+            buildType: "docker",
+            dockerfilePath: "Dockerfile",
+            dockerContext: ".",
+            privileged: false,
+            healthCheckPath: "/health",
+            healthCheckTimeoutSecs: 10,
+            healthCheckIntervalSecs: 30,
+            healthCheckGracePeriodSecs: 60,
+            port: 3000,
+            minInstances: 2,
+            maxInstances: 10,
+            stickySessionsEnabled: true,
+            stickySessionsDurationSecs: 3600,
+            originShieldEnabled: true,
+            cloudfrontAutoCacheInvalidation: true,
+            containerInsights: true,
+            storage: 50,
+            versionHistoryCount: 15,
+            basePath: ".",
+            includeEnvVariablesInBuild: true,
+            injectEnvVariablesInDockerfile: true,
+            autoscaling: {
+              cpuThreshold: 75,
+              memoryThreshold: 80,
+              requestsPerTarget: 500,
+              cooldownTimerSecs: 300,
+            },
+            envVariables: {
+              NODE_ENV: "production",
+              LOG_LEVEL: "info",
+            },
+            logging: {
+              cloudwatchLogsEnabled: true,
+              cloudwatchLogsRetentionDays: 30,
+              ecsLogsMetadataEnabled: true,
+            },
+            integrations: {
+              uploadSentrySourceMap: true,
+            },
+          };
+          env.services.push(newService);
+        }
+      },
+    },
+  ];
+
+  // Apply intelligent modification selection based on target complexity
+  const selectedModifications = selectModificationsForComplexity(
+    modifications,
+    targetComplexity,
+    complexityRange
+  );
+  let totalComplexity = 0;
+  const appliedModifications: string[] = [];
+
+  for (const modification of selectedModifications) {
+    modification.modify(doc);
+    totalComplexity += modification.complexity || 1;
+    appliedModifications.push(modification.name);
+  }
+
+  return { appliedModifications, actualComplexity: totalComplexity };
+}
+
+// Intelligent modification selection to hit target complexity ranges
+function selectModificationsForComplexity(
+  modifications: any[],
+  targetComplexity: number,
+  complexityRange: { label: string; min: number; max: number }
+): any[] {
+  // Sort modifications by complexity for better selection
+  const sortedMods = [...modifications].sort(
+    (a, b) => a.complexity - b.complexity
+  );
+
+  // Categorize modifications
+  const lowComplexity = sortedMods.filter((m) => m.complexity <= 10);
+  const mediumComplexity = sortedMods.filter(
+    (m) => m.complexity > 10 && m.complexity <= 35
+  );
+  const highComplexity = sortedMods.filter((m) => m.complexity > 35);
+
+  const selectedMods: any[] = [];
+  let currentComplexity = 0;
+
+  if (complexityRange.label === "Low") {
+    // For low complexity, use 2-8 simple modifications
+    const numMods = faker.number.int({ min: 2, max: 8 });
+    for (let i = 0; i < numMods && currentComplexity < targetComplexity; i++) {
+      const mod = faker.helpers.arrayElement(lowComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+  } else if (complexityRange.label === "Medium") {
+    // Mix of low and medium complexity modifications
+    const numMedium = faker.number.int({ min: 1, max: 3 });
+    const numLow = faker.number.int({ min: 3, max: 8 });
+
+    for (
+      let i = 0;
+      i < numMedium && currentComplexity < targetComplexity - 20;
+      i++
+    ) {
+      const mod = faker.helpers.arrayElement(mediumComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+
+    for (let i = 0; i < numLow && currentComplexity < targetComplexity; i++) {
+      const mod = faker.helpers.arrayElement(lowComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+  } else if (complexityRange.label === "High") {
+    // Mix with some high complexity modifications
+    const numHigh = faker.number.int({ min: 1, max: 2 });
+    const numMedium = faker.number.int({ min: 2, max: 4 });
+    const numLow = faker.number.int({ min: 3, max: 6 });
+
+    for (
+      let i = 0;
+      i < numHigh && currentComplexity < targetComplexity - 100;
+      i++
+    ) {
+      const mod = faker.helpers.arrayElement(highComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+
+    for (
+      let i = 0;
+      i < numMedium && currentComplexity < targetComplexity - 50;
+      i++
+    ) {
+      const mod = faker.helpers.arrayElement(mediumComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+
+    for (let i = 0; i < numLow && currentComplexity < targetComplexity; i++) {
+      const mod = faker.helpers.arrayElement(lowComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+  } else {
+    // Very High
+    // Many high complexity modifications
+    const numHigh = faker.number.int({ min: 3, max: 8 });
+    const numMedium = faker.number.int({ min: 5, max: 10 });
+    const numLow = faker.number.int({ min: 5, max: 15 });
+
+    for (
+      let i = 0;
+      i < numHigh && currentComplexity < targetComplexity - 200;
+      i++
+    ) {
+      const mod = faker.helpers.arrayElement(highComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+
+    for (
+      let i = 0;
+      i < numMedium && currentComplexity < targetComplexity - 100;
+      i++
+    ) {
+      const mod = faker.helpers.arrayElement(mediumComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+
+    for (let i = 0; i < numLow && currentComplexity < targetComplexity; i++) {
+      const mod = faker.helpers.arrayElement(lowComplexity);
+      selectedMods.push(mod);
+      currentComplexity += mod.complexity;
+    }
+  }
+
+  return selectedMods;
 }
 
 compare().catch(console.error);
