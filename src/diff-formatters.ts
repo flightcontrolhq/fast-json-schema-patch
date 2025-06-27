@@ -1,4 +1,5 @@
 import { parse } from "json-source-map";
+import { resolvePatchPath } from "./path-utils";
 import type {
   DiffLine,
   JsonObject,
@@ -19,48 +20,7 @@ function buildPathMap(jsonText: string): PathMap {
   }
 }
 
-function resolvePatchPath(
-  path: string,
-  jsonObj: JsonValue,
-  isForNewVersion = false
-): string | null {
-  if (path.endsWith("/-")) {
-    const parentPath = path.slice(0, -2);
-    if (parentPath === "") {
-      if (Array.isArray(jsonObj)) {
-        if (isForNewVersion) {
-          return `/${jsonObj.length - 1}`;
-        }
-        return `/${jsonObj.length}`;
-      }
-      return null;
-    }
-    const pathParts = parentPath.split("/").filter((p) => p !== "");
-    let current: JsonValue = jsonObj;
 
-    for (const part of pathParts) {
-      if (typeof current !== "object" || current === null) return null;
-      let next: JsonValue | undefined;
-      if (Array.isArray(current)) {
-        next = current[Number.parseInt(part)];
-      } else {
-        const obj = current as JsonObject;
-        if (!Object.hasOwn(obj, part)) return null;
-        next = obj[part];
-      }
-      if (next === undefined) return null;
-      current = next;
-    }
-
-    if (Array.isArray(current)) {
-      if (isForNewVersion) {
-        return `${parentPath}/${current.length - 1}`;
-      }
-      return parentPath;
-    }
-  }
-  return path;
-}
 
 function getPathLineRange(
   pathMap: PathMap,

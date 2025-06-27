@@ -3,6 +3,7 @@ import {
   diffArrayLCS,
   diffArrayUnique,
 } from "./diffing-utils";
+import { normalizePath, getWildcardPath } from "./path-utils";
 import type {
   JsonArray,
   JsonObject,
@@ -469,17 +470,16 @@ export class SchemaPatcher {
     }
 
     // Try normalized path (remove array indices)
-    const normalizedPath = path.replace(/\/\d+/g, "");
+    const normalizedPath = normalizePath(path);
     plan = this.plan.get(normalizedPath);
     if (plan) {
       return plan;
     }
 
     // Try parent wildcard path
-    const lastSlash = normalizedPath.lastIndexOf("/");
-    if (lastSlash >= 0) {
-      const parentPath = `${normalizedPath.substring(0, lastSlash)}/*`;
-      plan = this.plan.get(parentPath);
+    const wildcardPath = getWildcardPath(path);
+    if (wildcardPath) {
+      plan = this.plan.get(wildcardPath);
     }
 
     return plan;

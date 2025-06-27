@@ -1,4 +1,5 @@
 import { DiffFormatter } from "./diff-formatters";
+import { getValueByPath } from "./path-utils";
 import type { JsonValue, JsonObject, Operation, SideBySideDiff } from "./types";
 
 function countChangedLines(diff: SideBySideDiff): {
@@ -12,24 +13,7 @@ function countChangedLines(diff: SideBySideDiff): {
   return { addCount, removeCount };
 }
 
-function getValueByPath<T = JsonValue>(
-  obj: JsonValue,
-  path: string
-): T | undefined {
-  if (path === "") return obj as T;
-  const parts = path.split("/").slice(1);
-  let current: JsonValue = obj;
-  for (const part of parts) {
-    if (typeof current !== "object" || current === null) return undefined;
-    const key = part.replace(/~1/g, "/").replace(/~0/g, "~");
-    if (Array.isArray(current)) {
-      current = current[Number.parseInt(key, 10)] as JsonValue;
-    } else {
-      current = (current as JsonObject)[key] as JsonValue;
-    }
-  }
-  return current as T;
-}
+
 
 export interface AggregationConfig {
   pathPrefix: string;
