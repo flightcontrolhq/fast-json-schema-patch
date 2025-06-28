@@ -6,6 +6,83 @@
     "oldValue": "/health"
   },
   {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/4",
+    "oldValue": {
+      "id": "http2-8005",
+      "port": 8005,
+      "protocol": "http2",
+      "healthCheck": {
+        "type": "http",
+        "path": "/echo",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": true
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/3",
+    "oldValue": {
+      "id": "http-8004",
+      "port": 8004,
+      "protocol": "http",
+      "healthCheck": {
+        "type": "http",
+        "path": "/health",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/2",
+    "oldValue": {
+      "id": "grpc-8003",
+      "port": 8003,
+      "protocol": "grpc",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/1",
+    "oldValue": {
+      "id": "udp-8002",
+      "port": 8007,
+      "protocol": "udp",
+      "healthCheck": {
+        "type": "udp",
+        "tcpPort": 8001,
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      }
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/0/ports/0",
+    "oldValue": {
+      "id": "tcp-8001",
+      "port": 8001,
+      "protocol": "tcp",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
     "op": "add",
     "path": "/environments/0/services/0/ports/0",
     "value": {
@@ -83,9 +160,42 @@
     }
   },
   {
-    "op": "move",
-    "from": "/environments/0/services/1",
-    "path": "/environments/0/services/2"
+    "op": "remove",
+    "path": "/environments/0/services/1",
+    "oldValue": {
+      "id": "nlb-client-scheduler",
+      "name": "NLB Client Scheduler",
+      "type": "scheduler",
+      "target": {
+        "type": "fargate"
+      },
+      "cpu": 0.25,
+      "memory": 0.5,
+      "containerImage": {
+        "fromService": "nlb-server"
+      },
+      "jobs": {
+        "nlb-client-test": {
+          "startCommand": [
+            "/bin/sh",
+            "-c",
+            ". ./certs.env && ./client"
+          ],
+          "schedule": "manual"
+        }
+      },
+      "envVariables": {
+        "LOAD_BALANCER_HOST": {
+          "fromService": {
+            "id": "nlb-server",
+            "value": "loadBalancerHost"
+          }
+        }
+      },
+      "buildType": "fromService",
+      "containerInsights": false,
+      "versionHistoryCount": 10
+    }
   },
   {
     "op": "add",
@@ -99,6 +209,91 @@
       "dependsOn": [
         "nlb-server"
       ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/2",
+    "value": {
+      "id": "nlb-client-scheduler",
+      "name": "NLB Client Scheduler",
+      "type": "scheduler",
+      "target": {
+        "type": "fargate"
+      },
+      "cpu": 0.25,
+      "memory": 0.5,
+      "containerImage": {
+        "fromService": "nlb-server"
+      },
+      "jobs": {
+        "nlb-client-test": {
+          "startCommand": [
+            "/bin/sh",
+            "-c",
+            ". ./certs.env && ./client"
+          ],
+          "schedule": "manual"
+        }
+      },
+      "envVariables": {
+        "LOAD_BALANCER_HOST": {
+          "fromService": {
+            "id": "nlb-server",
+            "value": "loadBalancerHost"
+          }
+        }
+      },
+      "buildType": "fromService",
+      "containerInsights": false,
+      "versionHistoryCount": 10
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/4",
+    "oldValue": {
+      "id": "http2-8005",
+      "port": 8005,
+      "protocol": "http2",
+      "healthCheck": {
+        "type": "http",
+        "path": "/echo",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": true
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/3",
+    "oldValue": {
+      "id": "http-8004",
+      "port": 8004,
+      "protocol": "http",
+      "healthCheck": {
+        "type": "http",
+        "path": "/health",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/1/services/0/ports/2",
+    "oldValue": {
+      "id": "grpc-8003",
+      "port": 8003,
+      "protocol": "grpc",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
     }
   },
   {
@@ -117,9 +312,19 @@
     }
   },
   {
-    "op": "move",
-    "from": "/environments/1/services/0/ports/2",
-    "path": "/environments/1/services/0/ports/1"
+    "op": "add",
+    "path": "/environments/1/services/0/ports/1",
+    "value": {
+      "id": "grpc-8003",
+      "port": 8003,
+      "protocol": "grpc",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
   },
   {
     "op": "add",

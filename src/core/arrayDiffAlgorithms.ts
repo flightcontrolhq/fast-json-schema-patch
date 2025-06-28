@@ -108,11 +108,19 @@ export function diffArrayByPrimaryKey(
   }
 
   // 3. Determine moves vs. add/remove for positional changes.
+  // Create a map of old indices that are targets of moves.
+  const targetOldIndices = new Set(
+    Array.from(commonItems.values())
+      .filter((c) => c.oldIndex !== c.newIndex)
+      .map((c) => c.oldIndex)
+  );
+
   const finalAdditions = [...additions];
   const movePatches: Operation[] = [];
 
   // An item can only be "moved" if its original spot isn't taken by another moved item.
   // Otherwise, it's a "remove" (already handled) and an "add".
+  const oldIndicesOccupiedByMoves = new Set<number>();
   const moveCandidates = Array.from(commonItems.values()).filter(
     (c) => c.oldIndex !== c.newIndex
   );

@@ -1,0 +1,2210 @@
+{
+  "library": "schema-json-patch",
+  "modifications": [
+    "Batch update service resources",
+    "Add comprehensive service with all features",
+    "Configure cross-service environment variables",
+    "Remove a service",
+    "Configure port health checks for network server",
+    "Add new RDS service",
+    "Change PR source configuration",
+    "Change service CPU",
+    "Add logging configuration",
+    "Change docker context",
+    "Change health check interval",
+    "Change service memory"
+  ],
+  "originalDocument": {
+    "environments": [
+      {
+        "id": "videlicet-infit-cervus",
+        "name": "env-0",
+        "region": "LK",
+        "source": {
+          "branch": "main"
+        },
+        "services": [
+          {
+            "id": "dee99a3a-bb40-4fd8-813f-a8290f8521f2",
+            "name": "happy-go-lucky-siege.name",
+            "type": "web",
+            "cpu": 1.3115786012409503,
+            "memory": 1.4216842431021142,
+            "minInstances": 1,
+            "maxInstances": 2,
+            "healthCheckPath": "/alienus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "143.230.207.252"
+            }
+          },
+          {
+            "id": "2f594f57-c6ad-443f-99be-8e99866e354f",
+            "name": "bony-academics.org",
+            "type": "web",
+            "cpu": 1.8847995559907549,
+            "memory": 4.914969277960553,
+            "minInstances": 1,
+            "maxInstances": 4,
+            "healthCheckPath": "/condico",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "9c0e:b0cf:517b:6bcc:3b6c:84e2:8abb:feb5"
+            }
+          },
+          {
+            "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+            "name": "database",
+            "type": "rds",
+            "engine": "postgres",
+            "engineVersion": "15",
+            "instanceSize": "db.t3.micro",
+            "storage": 50
+          },
+          {
+            "id": "dadfb814-5c2d-4a3a-8107-581feb8679f2",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 1.5271595914275375,
+            "memory": 2.2919538991386803,
+            "startCommand": "node start-tantillus.js"
+          },
+          {
+            "id": "f4e00dc0-9209-4746-a089-ed977ded8d9b",
+            "name": "aware-aftermath.info",
+            "type": "web",
+            "cpu": 3.5532846641246874,
+            "memory": 4.271143585043697,
+            "minInstances": 1,
+            "maxInstances": 2,
+            "healthCheckPath": "/audentia",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "afef:e28a:d8bd:bfb3:16a5:13f8:d3d1:fbee"
+            }
+          },
+          {
+            "id": "9c02f625-8e29-4184-b3f2-9a58fb7fea73",
+            "name": "grandiose-ferret.biz",
+            "type": "web",
+            "cpu": 1.4858621221726005,
+            "memory": 6.3630523053662795,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/eos",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "38bf:f8b7:3b84:f2fc:80f7:1ba2:b114:1258"
+            }
+          },
+          {
+            "id": "73176920-183e-4b92-a0b5-ef5da9582813",
+            "name": "calculate-worker",
+            "type": "worker",
+            "cpu": 0.6267645905313619,
+            "memory": 1.7843693452957725,
+            "startCommand": "node start-adipisci.js"
+          },
+          {
+            "id": "a1eb005f-63ee-4b69-9e42-0d0f4f7b6cbe",
+            "name": "compress-worker",
+            "type": "worker",
+            "cpu": 1.7850240606097014,
+            "memory": 1.4930567270153836,
+            "startCommand": "node start-sollicito.js"
+          },
+          {
+            "id": "04d70f0f-8bba-4729-879d-783b76882c84",
+            "name": "extroverted-license.info",
+            "type": "web",
+            "cpu": 3.2615899059305025,
+            "memory": 3.2067594133526565,
+            "minInstances": 1,
+            "maxInstances": 2,
+            "healthCheckPath": "/appono",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "e32a:33ba:655e:c0d4:b3ed:14b9:a819:35db"
+            }
+          },
+          {
+            "id": "439e14f7-1738-495b-b6d2-eb52eda2024c",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.5307896857791693,
+            "memory": 3.435649265031599,
+            "startCommand": "node start-error.js"
+          },
+          {
+            "id": "5071e4f3-e5a1-44ca-ae2b-1a2f047bad73",
+            "name": "overcooked-pigsty.net",
+            "type": "web",
+            "cpu": 1.7045158725110272,
+            "memory": 7.796920462722945,
+            "minInstances": 1,
+            "maxInstances": 4,
+            "healthCheckPath": "/vilicus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "116.133.92.51"
+            }
+          },
+          {
+            "id": "03b08ab2-eac4-419f-a2cd-8dfa8108d5af",
+            "name": "pointed-finer.org",
+            "type": "web",
+            "cpu": 1.6646499947093751,
+            "memory": 2.142721999890215,
+            "minInstances": 1,
+            "maxInstances": 2,
+            "healthCheckPath": "/quae",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "168.25.61.128"
+            }
+          },
+          {
+            "id": "09d98eaa-61a2-4b40-888b-8cbc55996dd1",
+            "name": "enlightened-deployment.com",
+            "type": "web",
+            "cpu": 0.960296093352808,
+            "memory": 7.965541112102835,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/deprecator",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "d745:ca4c:c18b:337f:ebdb:b130:3acd:1734"
+            }
+          },
+          {
+            "id": "2949211d-c3bd-4d93-862c-6b04393ba154",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 1.4483140574253075,
+            "memory": 0.8278586044119021,
+            "startCommand": "node start-vester.js"
+          },
+          {
+            "id": "7827f67a-5555-4a32-b026-13955ac60e07",
+            "name": "flawed-elevation.com",
+            "type": "web",
+            "cpu": 2.250599628396248,
+            "memory": 4.053801804000262,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "healthCheckPath": "/vinitor",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "218.206.73.135"
+            }
+          },
+          {
+            "id": "0f1f70e5-7f69-4fbe-9732-fec48ea92c42",
+            "name": "override-worker",
+            "type": "worker",
+            "cpu": 0.6669376323907458,
+            "memory": 1.7465407974048104,
+            "startCommand": "node start-ea.js"
+          },
+          {
+            "id": "9b56a11e-2ffa-43f9-b504-6ff8a0db65ff",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.8841715828265093,
+            "memory": 3.8156463380275154,
+            "startCommand": "node start-accusator.js"
+          },
+          {
+            "id": "af029e5f-1505-4411-8abc-1ae8b99b5291",
+            "name": "sleepy-leading.name",
+            "type": "web",
+            "cpu": 2.911137484467174,
+            "memory": 7.008318967073526,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/sponte",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "99bc:4d1b:07a5:fb2b:35e4:6afa:5fd5:0cef"
+            }
+          },
+          {
+            "id": "fc6b9a3f-8da7-413b-9326-8c811ff055dd",
+            "name": "heavenly-bog.org",
+            "type": "web",
+            "cpu": 2.12251944784862,
+            "memory": 6.288337826570817,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/credo",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "0.178.202.3"
+            }
+          },
+          {
+            "id": "bcc4815c-7bd4-4d6c-a982-e1e34d5c7c05",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 1.7475687713732027,
+            "memory": 2.6913884473088965,
+            "startCommand": "node start-tempora.js"
+          },
+          {
+            "id": "346b46e1-6e70-4c63-91ef-8bd9699a1ede",
+            "name": "beneficial-cutlet.com",
+            "type": "web",
+            "cpu": 2.4905309800877484,
+            "memory": 1.0526367655268027,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/omnis",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "a7e4:d079:d114:ba7c:bb80:dfbe:55dc:ed96"
+            }
+          },
+          {
+            "id": "2cc05405-546e-4698-9192-65098d8a19ab",
+            "name": "hack-worker",
+            "type": "worker",
+            "cpu": 1.7237911348988917,
+            "memory": 3.8446994238111127,
+            "startCommand": "node start-summopere.js"
+          }
+        ]
+      }
+    ]
+  },
+  "expectedDocument": {
+    "environments": [
+      {
+        "id": "videlicet-infit-cervus",
+        "name": "env-0",
+        "region": "LK",
+        "source": {
+          "pr": true,
+          "trigger": "manual",
+          "filter": {
+            "toBranches": [
+              "main",
+              "develop"
+            ],
+            "labels": [
+              "universe"
+            ]
+          }
+        },
+        "services": [
+          {
+            "id": "dee99a3a-bb40-4fd8-813f-a8290f8521f2",
+            "name": "happy-go-lucky-siege.name",
+            "type": "web",
+            "cpu": 2.3516469229209553,
+            "memory": 2.549065204702967,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/alienus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "143.230.207.252",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "2f594f57-c6ad-443f-99be-8e99866e354f",
+            "name": "bony-academics.org",
+            "type": "web",
+            "cpu": 3.3794261906794922,
+            "memory": 8.812489291782516,
+            "minInstances": 1,
+            "maxInstances": 7,
+            "healthCheckPath": "/condico",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "9c0e:b0cf:517b:6bcc:3b6c:84e2:8abb:feb5",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+            "name": "database",
+            "type": "rds",
+            "engine": "postgres",
+            "engineVersion": "15",
+            "instanceSize": "db.t3.micro",
+            "storage": 50
+          },
+          {
+            "id": "dadfb814-5c2d-4a3a-8107-581feb8679f2",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 2.7381814178668704,
+            "memory": 4.109449734302268,
+            "startCommand": "node start-tantillus.js"
+          },
+          {
+            "id": "f4e00dc0-9209-4746-a089-ed977ded8d9b",
+            "name": "aware-aftermath.info",
+            "type": "web",
+            "cpu": 6.371002804364865,
+            "memory": 7.6581164557108865,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/audentia",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "afef:e28a:d8bd:bfb3:16a5:13f8:d3d1:fbee",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "9c02f625-8e29-4184-b3f2-9a58fb7fea73",
+            "name": "grandiose-ferret.biz",
+            "type": "web",
+            "cpu": 2.664135480851805,
+            "memory": 11.408887244837512,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/eos",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "38bf:f8b7:3b84:f2fc:80f7:1ba2:b114:1258",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "dockerContext": "./app"
+          },
+          {
+            "id": "73176920-183e-4b92-a0b5-ef5da9582813",
+            "name": "calculate-worker",
+            "type": "worker",
+            "cpu": 1.12378245522177,
+            "memory": 3.1993558573226504,
+            "startCommand": "node start-adipisci.js"
+          },
+          {
+            "id": "04d70f0f-8bba-4729-879d-783b76882c84",
+            "name": "extroverted-license.info",
+            "type": "web",
+            "cpu": 5.847997107344113,
+            "memory": 5.749686598899607,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/appono",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "e32a:33ba:655e:c0d4:b3ed:14b9:a819:35db",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "439e14f7-1738-495b-b6d2-eb52eda2024c",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.951700439531227,
+            "memory": 6.16008374542162,
+            "startCommand": "node start-error.js"
+          },
+          {
+            "id": "5071e4f3-e5a1-44ca-ae2b-1a2f047bad73",
+            "name": "overcooked-pigsty.net",
+            "type": "web",
+            "cpu": 3.056179403100903,
+            "memory": 13.979798082306019,
+            "minInstances": 1,
+            "maxInstances": 7,
+            "healthCheckPath": "/vilicus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "116.133.92.51",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "03b08ab2-eac4-419f-a2cd-8dfa8108d5af",
+            "name": "pointed-finer.org",
+            "type": "web",
+            "cpu": 2.984700294816355,
+            "memory": 3.841878476020636,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/quae",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "168.25.61.128",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "09d98eaa-61a2-4b40-888b-8cbc55996dd1",
+            "name": "enlightened-deployment.com",
+            "type": "web",
+            "cpu": 1.721801004445693,
+            "memory": 14.282133169871466,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/deprecator",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "d745:ca4c:c18b:337f:ebdb:b130:3acd:1734",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30
+            }
+          },
+          {
+            "id": "2949211d-c3bd-4d93-862c-6b04393ba154",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 2.596812187500523,
+            "memory": 1.4843419508650808,
+            "startCommand": "node start-vester.js"
+          },
+          {
+            "id": "7827f67a-5555-4a32-b026-13955ac60e07",
+            "name": "flawed-elevation.com",
+            "type": "web",
+            "cpu": 4,
+            "memory": 7.26842488089458,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "healthCheckPath": "/vinitor",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "218.206.73.135",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "0f1f70e5-7f69-4fbe-9732-fec48ea92c42",
+            "name": "override-worker",
+            "type": "worker",
+            "cpu": 1.1958123054980776,
+            "memory": 3.131529660583713,
+            "startCommand": "node start-ea.js"
+          },
+          {
+            "id": "9b56a11e-2ffa-43f9-b504-6ff8a0db65ff",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 1.5853105411454713,
+            "memory": 6.841414583378505,
+            "startCommand": "node start-accusator.js"
+          },
+          {
+            "id": "af029e5f-1505-4411-8abc-1ae8b99b5291",
+            "name": "sleepy-leading.name",
+            "type": "web",
+            "cpu": 5.219639525278749,
+            "memory": 12.565843723108504,
+            "minInstances": 1,
+            "maxInstances": 8,
+            "healthCheckPath": "/sponte",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "99bc:4d1b:07a5:fb2b:35e4:6afa:5fd5:0cef",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "fc6b9a3f-8da7-413b-9326-8c811ff055dd",
+            "name": "heavenly-bog.org",
+            "type": "web",
+            "cpu": 3.8056555082939467,
+            "memory": 11.27492495390752,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/credo",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "0.178.202.3",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "bcc4815c-7bd4-4d6c-a982-e1e34d5c7c05",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 3.1333728073210305,
+            "memory": 4.825631765042983,
+            "startCommand": "node start-tempora.js"
+          },
+          {
+            "id": "346b46e1-6e70-4c63-91ef-8bd9699a1ede",
+            "name": "beneficial-cutlet.com",
+            "type": "web",
+            "cpu": 4.4654963951235604,
+            "memory": 1.8873668785556919,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/omnis",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "a7e4:d079:d114:ba7c:bb80:dfbe:55dc:ed96",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "healthCheckIntervalSecs": 16
+          },
+          {
+            "id": "2cc05405-546e-4698-9192-65098d8a19ab",
+            "name": "hack-worker",
+            "type": "worker",
+            "cpu": 3.090739750029427,
+            "memory": 6.893506466945157,
+            "startCommand": "node start-summopere.js",
+            "gpu": 2
+          },
+          {
+            "id": "vulpes-creo-appono",
+            "name": "Full Featured Service",
+            "type": "web",
+            "cpu": 2,
+            "memory": 4,
+            "gpu": 1,
+            "buildType": "docker",
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "privileged": false,
+            "healthCheckPath": "/health",
+            "healthCheckTimeoutSecs": 10,
+            "healthCheckIntervalSecs": 30,
+            "healthCheckGracePeriodSecs": 60,
+            "port": 3000,
+            "minInstances": 2,
+            "maxInstances": 10,
+            "stickySessionsEnabled": true,
+            "stickySessionsDurationSecs": 3600,
+            "originShieldEnabled": true,
+            "cloudfrontAutoCacheInvalidation": true,
+            "containerInsights": true,
+            "storage": 50,
+            "versionHistoryCount": 15,
+            "basePath": ".",
+            "includeEnvVariablesInBuild": true,
+            "injectEnvVariablesInDockerfile": true,
+            "autoscaling": {
+              "cpuThreshold": 75,
+              "memoryThreshold": 80,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
+            "envVariables": {
+              "NODE_ENV": "production",
+              "LOG_LEVEL": "info",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true
+            },
+            "integrations": {
+              "uploadSentrySourceMap": true
+            }
+          },
+          {
+            "id": "vester-subnecto-theca",
+            "name": "comminor-database",
+            "type": "rds",
+            "engine": "mysql",
+            "engineVersion": "8.0",
+            "instanceSize": "db.t3.micro",
+            "storage": 63
+          }
+        ]
+      }
+    ]
+  },
+  "generatedPatch": [
+    {
+      "op": "remove",
+      "path": "/environments/0/source/branch",
+      "oldValue": "main"
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/source/pr",
+      "value": true
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/source/trigger",
+      "value": "manual"
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/source/filter",
+      "value": {
+        "toBranches": [
+          "main",
+          "develop"
+        ],
+        "labels": [
+          "universe"
+        ]
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/0/cpu",
+      "value": 2.3516469229209553,
+      "oldValue": 1.3115786012409503
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/0/memory",
+      "value": 2.549065204702967,
+      "oldValue": 1.4216842431021142
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/0/maxInstances",
+      "value": 3,
+      "oldValue": 2
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/0/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/1/cpu",
+      "value": 3.3794261906794922,
+      "oldValue": 1.8847995559907549
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/1/memory",
+      "value": 8.812489291782516,
+      "oldValue": 4.914969277960553
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/1/maxInstances",
+      "value": 7,
+      "oldValue": 4
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/1/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/3/cpu",
+      "value": 2.7381814178668704,
+      "oldValue": 1.5271595914275375
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/3/memory",
+      "value": 4.109449734302268,
+      "oldValue": 2.2919538991386803
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/4/cpu",
+      "value": 6.371002804364865,
+      "oldValue": 3.5532846641246874
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/4/memory",
+      "value": 7.6581164557108865,
+      "oldValue": 4.271143585043697
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/4/maxInstances",
+      "value": 3,
+      "oldValue": 2
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/4/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/5/cpu",
+      "value": 2.664135480851805,
+      "oldValue": 1.4858621221726005
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/5/memory",
+      "value": 11.408887244837512,
+      "oldValue": 6.3630523053662795
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/5/maxInstances",
+      "value": 5,
+      "oldValue": 3
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/5/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/5/dockerContext",
+      "value": "./app"
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/6/cpu",
+      "value": 1.12378245522177,
+      "oldValue": 0.6267645905313619
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/6/memory",
+      "value": 3.1993558573226504,
+      "oldValue": 1.7843693452957725
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/8/cpu",
+      "value": 5.847997107344113,
+      "oldValue": 3.2615899059305025
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/8/memory",
+      "value": 5.749686598899607,
+      "oldValue": 3.2067594133526565
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/8/maxInstances",
+      "value": 3,
+      "oldValue": 2
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/8/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/9/cpu",
+      "value": 0.951700439531227,
+      "oldValue": 0.5307896857791693
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/9/memory",
+      "value": 6.16008374542162,
+      "oldValue": 3.435649265031599
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/10/cpu",
+      "value": 3.056179403100903,
+      "oldValue": 1.7045158725110272
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/10/memory",
+      "value": 13.979798082306019,
+      "oldValue": 7.796920462722945
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/10/maxInstances",
+      "value": 7,
+      "oldValue": 4
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/10/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/11/cpu",
+      "value": 2.984700294816355,
+      "oldValue": 1.6646499947093751
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/11/memory",
+      "value": 3.841878476020636,
+      "oldValue": 2.142721999890215
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/11/maxInstances",
+      "value": 3,
+      "oldValue": 2
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/11/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/12/cpu",
+      "value": 1.721801004445693,
+      "oldValue": 0.960296093352808
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/12/memory",
+      "value": 14.282133169871466,
+      "oldValue": 7.965541112102835
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/12/maxInstances",
+      "value": 5,
+      "oldValue": 3
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/12/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/12/logging",
+      "value": {
+        "cloudwatchLogsEnabled": true,
+        "cloudwatchLogsRetentionDays": 30
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/13/cpu",
+      "value": 2.596812187500523,
+      "oldValue": 1.4483140574253075
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/13/memory",
+      "value": 1.4843419508650808,
+      "oldValue": 0.8278586044119021
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/14/cpu",
+      "value": 4,
+      "oldValue": 2.250599628396248
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/14/memory",
+      "value": 7.26842488089458,
+      "oldValue": 4.053801804000262
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/14/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/15/cpu",
+      "value": 1.1958123054980776,
+      "oldValue": 0.6669376323907458
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/15/memory",
+      "value": 3.131529660583713,
+      "oldValue": 1.7465407974048104
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/16/cpu",
+      "value": 1.5853105411454713,
+      "oldValue": 0.8841715828265093
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/16/memory",
+      "value": 6.841414583378505,
+      "oldValue": 3.8156463380275154
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/17/cpu",
+      "value": 5.219639525278749,
+      "oldValue": 2.911137484467174
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/17/memory",
+      "value": 12.565843723108504,
+      "oldValue": 7.008318967073526
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/17/maxInstances",
+      "value": 8,
+      "oldValue": 5
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/17/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/18/cpu",
+      "value": 3.8056555082939467,
+      "oldValue": 2.12251944784862
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/18/memory",
+      "value": 11.27492495390752,
+      "oldValue": 6.288337826570817
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/18/maxInstances",
+      "value": 5,
+      "oldValue": 3
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/18/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/19/cpu",
+      "value": 3.1333728073210305,
+      "oldValue": 1.7475687713732027
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/19/memory",
+      "value": 4.825631765042983,
+      "oldValue": 2.6913884473088965
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/20/cpu",
+      "value": 4.4654963951235604,
+      "oldValue": 2.4905309800877484
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/20/memory",
+      "value": 1.8873668785556919,
+      "oldValue": 1.0526367655268027
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/20/maxInstances",
+      "value": 5,
+      "oldValue": 3
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/20/envVariables/DATABASE_URL",
+      "value": {
+        "fromService": {
+          "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+          "value": "connectionString"
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/20/healthCheckIntervalSecs",
+      "value": 16
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/21/cpu",
+      "value": 3.090739750029427,
+      "oldValue": 1.7237911348988917
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/21/memory",
+      "value": 6.893506466945157,
+      "oldValue": 3.8446994238111127
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/21/gpu",
+      "value": 2
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/7",
+      "oldValue": {
+        "id": "a1eb005f-63ee-4b69-9e42-0d0f4f7b6cbe",
+        "name": "compress-worker",
+        "type": "worker",
+        "cpu": 1.7850240606097014,
+        "memory": 1.4930567270153836,
+        "startCommand": "node start-sollicito.js"
+      }
+    },
+    {
+      "op": "move",
+      "from": "/environments/0/services/8",
+      "path": "/environments/0/services/7"
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/8",
+      "value": {
+        "id": "439e14f7-1738-495b-b6d2-eb52eda2024c",
+        "name": "index-worker",
+        "type": "worker",
+        "cpu": 0.951700439531227,
+        "memory": 6.16008374542162,
+        "startCommand": "node start-error.js"
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/9",
+      "value": {
+        "id": "5071e4f3-e5a1-44ca-ae2b-1a2f047bad73",
+        "name": "overcooked-pigsty.net",
+        "type": "web",
+        "cpu": 3.056179403100903,
+        "memory": 13.979798082306019,
+        "minInstances": 1,
+        "maxInstances": 7,
+        "healthCheckPath": "/vilicus",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "116.133.92.51",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/10",
+      "value": {
+        "id": "03b08ab2-eac4-419f-a2cd-8dfa8108d5af",
+        "name": "pointed-finer.org",
+        "type": "web",
+        "cpu": 2.984700294816355,
+        "memory": 3.841878476020636,
+        "minInstances": 1,
+        "maxInstances": 3,
+        "healthCheckPath": "/quae",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "168.25.61.128",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/11",
+      "value": {
+        "id": "09d98eaa-61a2-4b40-888b-8cbc55996dd1",
+        "name": "enlightened-deployment.com",
+        "type": "web",
+        "cpu": 1.721801004445693,
+        "memory": 14.282133169871466,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/deprecator",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "d745:ca4c:c18b:337f:ebdb:b130:3acd:1734",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        },
+        "logging": {
+          "cloudwatchLogsEnabled": true,
+          "cloudwatchLogsRetentionDays": 30
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/12",
+      "value": {
+        "id": "2949211d-c3bd-4d93-862c-6b04393ba154",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 2.596812187500523,
+        "memory": 1.4843419508650808,
+        "startCommand": "node start-vester.js"
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/13",
+      "value": {
+        "id": "7827f67a-5555-4a32-b026-13955ac60e07",
+        "name": "flawed-elevation.com",
+        "type": "web",
+        "cpu": 4,
+        "memory": 7.26842488089458,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/vinitor",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "218.206.73.135",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/14",
+      "value": {
+        "id": "0f1f70e5-7f69-4fbe-9732-fec48ea92c42",
+        "name": "override-worker",
+        "type": "worker",
+        "cpu": 1.1958123054980776,
+        "memory": 3.131529660583713,
+        "startCommand": "node start-ea.js"
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/15",
+      "value": {
+        "id": "9b56a11e-2ffa-43f9-b504-6ff8a0db65ff",
+        "name": "index-worker",
+        "type": "worker",
+        "cpu": 1.5853105411454713,
+        "memory": 6.841414583378505,
+        "startCommand": "node start-accusator.js"
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/16",
+      "value": {
+        "id": "af029e5f-1505-4411-8abc-1ae8b99b5291",
+        "name": "sleepy-leading.name",
+        "type": "web",
+        "cpu": 5.219639525278749,
+        "memory": 12.565843723108504,
+        "minInstances": 1,
+        "maxInstances": 8,
+        "healthCheckPath": "/sponte",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "99bc:4d1b:07a5:fb2b:35e4:6afa:5fd5:0cef",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/17",
+      "value": {
+        "id": "fc6b9a3f-8da7-413b-9326-8c811ff055dd",
+        "name": "heavenly-bog.org",
+        "type": "web",
+        "cpu": 3.8056555082939467,
+        "memory": 11.27492495390752,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/credo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "0.178.202.3",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/18",
+      "value": {
+        "id": "bcc4815c-7bd4-4d6c-a982-e1e34d5c7c05",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 3.1333728073210305,
+        "memory": 4.825631765042983,
+        "startCommand": "node start-tempora.js"
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/19",
+      "value": {
+        "id": "346b46e1-6e70-4c63-91ef-8bd9699a1ede",
+        "name": "beneficial-cutlet.com",
+        "type": "web",
+        "cpu": 4.4654963951235604,
+        "memory": 1.8873668785556919,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/omnis",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "a7e4:d079:d114:ba7c:bb80:dfbe:55dc:ed96",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        },
+        "healthCheckIntervalSecs": 16
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/20",
+      "value": {
+        "id": "2cc05405-546e-4698-9192-65098d8a19ab",
+        "name": "hack-worker",
+        "type": "worker",
+        "cpu": 3.090739750029427,
+        "memory": 6.893506466945157,
+        "startCommand": "node start-summopere.js",
+        "gpu": 2
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/21",
+      "value": {
+        "id": "vulpes-creo-appono",
+        "name": "Full Featured Service",
+        "type": "web",
+        "cpu": 2,
+        "memory": 4,
+        "gpu": 1,
+        "buildType": "docker",
+        "dockerfilePath": "Dockerfile",
+        "dockerContext": ".",
+        "privileged": false,
+        "healthCheckPath": "/health",
+        "healthCheckTimeoutSecs": 10,
+        "healthCheckIntervalSecs": 30,
+        "healthCheckGracePeriodSecs": 60,
+        "port": 3000,
+        "minInstances": 2,
+        "maxInstances": 10,
+        "stickySessionsEnabled": true,
+        "stickySessionsDurationSecs": 3600,
+        "originShieldEnabled": true,
+        "cloudfrontAutoCacheInvalidation": true,
+        "containerInsights": true,
+        "storage": 50,
+        "versionHistoryCount": 15,
+        "basePath": ".",
+        "includeEnvVariablesInBuild": true,
+        "injectEnvVariablesInDockerfile": true,
+        "autoscaling": {
+          "cpuThreshold": 75,
+          "memoryThreshold": 80,
+          "requestsPerTarget": 500,
+          "cooldownTimerSecs": 300
+        },
+        "envVariables": {
+          "NODE_ENV": "production",
+          "LOG_LEVEL": "info",
+          "DATABASE_URL": {
+            "fromService": {
+              "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+              "value": "connectionString"
+            }
+          }
+        },
+        "logging": {
+          "cloudwatchLogsEnabled": true,
+          "cloudwatchLogsRetentionDays": 30,
+          "ecsLogsMetadataEnabled": true
+        },
+        "integrations": {
+          "uploadSentrySourceMap": true
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/22",
+      "value": {
+        "id": "vester-subnecto-theca",
+        "name": "comminor-database",
+        "type": "rds",
+        "engine": "mysql",
+        "engineVersion": "8.0",
+        "instanceSize": "db.t3.micro",
+        "storage": 63
+      }
+    }
+  ],
+  "patchedDocument": {
+    "environments": [
+      {
+        "id": "videlicet-infit-cervus",
+        "name": "env-0",
+        "region": "LK",
+        "source": {
+          "pr": true,
+          "trigger": "manual",
+          "filter": {
+            "toBranches": [
+              "main",
+              "develop"
+            ],
+            "labels": [
+              "universe"
+            ]
+          }
+        },
+        "services": [
+          {
+            "id": "dee99a3a-bb40-4fd8-813f-a8290f8521f2",
+            "name": "happy-go-lucky-siege.name",
+            "type": "web",
+            "cpu": 2.3516469229209553,
+            "memory": 2.549065204702967,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/alienus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "143.230.207.252",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "2f594f57-c6ad-443f-99be-8e99866e354f",
+            "name": "bony-academics.org",
+            "type": "web",
+            "cpu": 3.3794261906794922,
+            "memory": 8.812489291782516,
+            "minInstances": 1,
+            "maxInstances": 7,
+            "healthCheckPath": "/condico",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "9c0e:b0cf:517b:6bcc:3b6c:84e2:8abb:feb5",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+            "name": "database",
+            "type": "rds",
+            "engine": "postgres",
+            "engineVersion": "15",
+            "instanceSize": "db.t3.micro",
+            "storage": 50
+          },
+          {
+            "id": "dadfb814-5c2d-4a3a-8107-581feb8679f2",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 2.7381814178668704,
+            "memory": 4.109449734302268,
+            "startCommand": "node start-tantillus.js"
+          },
+          {
+            "id": "f4e00dc0-9209-4746-a089-ed977ded8d9b",
+            "name": "aware-aftermath.info",
+            "type": "web",
+            "cpu": 6.371002804364865,
+            "memory": 7.6581164557108865,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/audentia",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "afef:e28a:d8bd:bfb3:16a5:13f8:d3d1:fbee",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "9c02f625-8e29-4184-b3f2-9a58fb7fea73",
+            "name": "grandiose-ferret.biz",
+            "type": "web",
+            "cpu": 2.664135480851805,
+            "memory": 11.408887244837512,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/eos",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "38bf:f8b7:3b84:f2fc:80f7:1ba2:b114:1258",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "dockerContext": "./app"
+          },
+          {
+            "id": "73176920-183e-4b92-a0b5-ef5da9582813",
+            "name": "calculate-worker",
+            "type": "worker",
+            "cpu": 1.12378245522177,
+            "memory": 3.1993558573226504,
+            "startCommand": "node start-adipisci.js"
+          },
+          {
+            "id": "439e14f7-1738-495b-b6d2-eb52eda2024c",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.951700439531227,
+            "memory": 6.16008374542162,
+            "startCommand": "node start-error.js"
+          },
+          {
+            "id": "439e14f7-1738-495b-b6d2-eb52eda2024c",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 0.951700439531227,
+            "memory": 6.16008374542162,
+            "startCommand": "node start-error.js"
+          },
+          {
+            "id": "5071e4f3-e5a1-44ca-ae2b-1a2f047bad73",
+            "name": "overcooked-pigsty.net",
+            "type": "web",
+            "cpu": 3.056179403100903,
+            "memory": 13.979798082306019,
+            "minInstances": 1,
+            "maxInstances": 7,
+            "healthCheckPath": "/vilicus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "116.133.92.51",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "03b08ab2-eac4-419f-a2cd-8dfa8108d5af",
+            "name": "pointed-finer.org",
+            "type": "web",
+            "cpu": 2.984700294816355,
+            "memory": 3.841878476020636,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/quae",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "168.25.61.128",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "09d98eaa-61a2-4b40-888b-8cbc55996dd1",
+            "name": "enlightened-deployment.com",
+            "type": "web",
+            "cpu": 1.721801004445693,
+            "memory": 14.282133169871466,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/deprecator",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "d745:ca4c:c18b:337f:ebdb:b130:3acd:1734",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30
+            }
+          },
+          {
+            "id": "2949211d-c3bd-4d93-862c-6b04393ba154",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 2.596812187500523,
+            "memory": 1.4843419508650808,
+            "startCommand": "node start-vester.js"
+          },
+          {
+            "id": "7827f67a-5555-4a32-b026-13955ac60e07",
+            "name": "flawed-elevation.com",
+            "type": "web",
+            "cpu": 4,
+            "memory": 7.26842488089458,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "healthCheckPath": "/vinitor",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "218.206.73.135",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "0f1f70e5-7f69-4fbe-9732-fec48ea92c42",
+            "name": "override-worker",
+            "type": "worker",
+            "cpu": 1.1958123054980776,
+            "memory": 3.131529660583713,
+            "startCommand": "node start-ea.js"
+          },
+          {
+            "id": "9b56a11e-2ffa-43f9-b504-6ff8a0db65ff",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 1.5853105411454713,
+            "memory": 6.841414583378505,
+            "startCommand": "node start-accusator.js"
+          },
+          {
+            "id": "af029e5f-1505-4411-8abc-1ae8b99b5291",
+            "name": "sleepy-leading.name",
+            "type": "web",
+            "cpu": 5.219639525278749,
+            "memory": 12.565843723108504,
+            "minInstances": 1,
+            "maxInstances": 8,
+            "healthCheckPath": "/sponte",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "99bc:4d1b:07a5:fb2b:35e4:6afa:5fd5:0cef",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "fc6b9a3f-8da7-413b-9326-8c811ff055dd",
+            "name": "heavenly-bog.org",
+            "type": "web",
+            "cpu": 3.8056555082939467,
+            "memory": 11.27492495390752,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/credo",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "0.178.202.3",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "bcc4815c-7bd4-4d6c-a982-e1e34d5c7c05",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 3.1333728073210305,
+            "memory": 4.825631765042983,
+            "startCommand": "node start-tempora.js"
+          },
+          {
+            "id": "346b46e1-6e70-4c63-91ef-8bd9699a1ede",
+            "name": "beneficial-cutlet.com",
+            "type": "web",
+            "cpu": 4.4654963951235604,
+            "memory": 1.8873668785556919,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/omnis",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "a7e4:d079:d114:ba7c:bb80:dfbe:55dc:ed96",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "healthCheckIntervalSecs": 16
+          },
+          {
+            "id": "2cc05405-546e-4698-9192-65098d8a19ab",
+            "name": "hack-worker",
+            "type": "worker",
+            "cpu": 3.090739750029427,
+            "memory": 6.893506466945157,
+            "startCommand": "node start-summopere.js",
+            "gpu": 2
+          },
+          {
+            "id": "vulpes-creo-appono",
+            "name": "Full Featured Service",
+            "type": "web",
+            "cpu": 2,
+            "memory": 4,
+            "gpu": 1,
+            "buildType": "docker",
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "privileged": false,
+            "healthCheckPath": "/health",
+            "healthCheckTimeoutSecs": 10,
+            "healthCheckIntervalSecs": 30,
+            "healthCheckGracePeriodSecs": 60,
+            "port": 3000,
+            "minInstances": 2,
+            "maxInstances": 10,
+            "stickySessionsEnabled": true,
+            "stickySessionsDurationSecs": 3600,
+            "originShieldEnabled": true,
+            "cloudfrontAutoCacheInvalidation": true,
+            "containerInsights": true,
+            "storage": 50,
+            "versionHistoryCount": 15,
+            "basePath": ".",
+            "includeEnvVariablesInBuild": true,
+            "injectEnvVariablesInDockerfile": true,
+            "autoscaling": {
+              "cpuThreshold": 75,
+              "memoryThreshold": 80,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
+            "envVariables": {
+              "NODE_ENV": "production",
+              "LOG_LEVEL": "info",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true
+            },
+            "integrations": {
+              "uploadSentrySourceMap": true
+            }
+          },
+          {
+            "id": "vester-subnecto-theca",
+            "name": "comminor-database",
+            "type": "rds",
+            "engine": "mysql",
+            "engineVersion": "8.0",
+            "instanceSize": "db.t3.micro",
+            "storage": 63
+          },
+          {
+            "id": "04d70f0f-8bba-4729-879d-783b76882c84",
+            "name": "extroverted-license.info",
+            "type": "web",
+            "cpu": 5.847997107344113,
+            "memory": 5.749686598899607,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/appono",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "e32a:33ba:655e:c0d4:b3ed:14b9:a819:35db",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "5071e4f3-e5a1-44ca-ae2b-1a2f047bad73",
+            "name": "overcooked-pigsty.net",
+            "type": "web",
+            "cpu": 3.056179403100903,
+            "memory": 13.979798082306019,
+            "minInstances": 1,
+            "maxInstances": 7,
+            "healthCheckPath": "/vilicus",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "116.133.92.51",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "03b08ab2-eac4-419f-a2cd-8dfa8108d5af",
+            "name": "pointed-finer.org",
+            "type": "web",
+            "cpu": 2.984700294816355,
+            "memory": 3.841878476020636,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "healthCheckPath": "/quae",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "168.25.61.128",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "09d98eaa-61a2-4b40-888b-8cbc55996dd1",
+            "name": "enlightened-deployment.com",
+            "type": "web",
+            "cpu": 1.721801004445693,
+            "memory": 14.282133169871466,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/deprecator",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "d745:ca4c:c18b:337f:ebdb:b130:3acd:1734",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30
+            }
+          },
+          {
+            "id": "2949211d-c3bd-4d93-862c-6b04393ba154",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 2.596812187500523,
+            "memory": 1.4843419508650808,
+            "startCommand": "node start-vester.js"
+          },
+          {
+            "id": "7827f67a-5555-4a32-b026-13955ac60e07",
+            "name": "flawed-elevation.com",
+            "type": "web",
+            "cpu": 4,
+            "memory": 7.26842488089458,
+            "minInstances": 1,
+            "maxInstances": 1,
+            "healthCheckPath": "/vinitor",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "218.206.73.135",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "0f1f70e5-7f69-4fbe-9732-fec48ea92c42",
+            "name": "override-worker",
+            "type": "worker",
+            "cpu": 1.1958123054980776,
+            "memory": 3.131529660583713,
+            "startCommand": "node start-ea.js"
+          },
+          {
+            "id": "9b56a11e-2ffa-43f9-b504-6ff8a0db65ff",
+            "name": "index-worker",
+            "type": "worker",
+            "cpu": 1.5853105411454713,
+            "memory": 6.841414583378505,
+            "startCommand": "node start-accusator.js"
+          },
+          {
+            "id": "af029e5f-1505-4411-8abc-1ae8b99b5291",
+            "name": "sleepy-leading.name",
+            "type": "web",
+            "cpu": 5.219639525278749,
+            "memory": 12.565843723108504,
+            "minInstances": 1,
+            "maxInstances": 8,
+            "healthCheckPath": "/sponte",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "99bc:4d1b:07a5:fb2b:35e4:6afa:5fd5:0cef",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "fc6b9a3f-8da7-413b-9326-8c811ff055dd",
+            "name": "heavenly-bog.org",
+            "type": "web",
+            "cpu": 3.8056555082939467,
+            "memory": 11.27492495390752,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/credo",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "0.178.202.3",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            }
+          },
+          {
+            "id": "bcc4815c-7bd4-4d6c-a982-e1e34d5c7c05",
+            "name": "generate-worker",
+            "type": "worker",
+            "cpu": 3.1333728073210305,
+            "memory": 4.825631765042983,
+            "startCommand": "node start-tempora.js"
+          },
+          {
+            "id": "346b46e1-6e70-4c63-91ef-8bd9699a1ede",
+            "name": "beneficial-cutlet.com",
+            "type": "web",
+            "cpu": 4.4654963951235604,
+            "memory": 1.8873668785556919,
+            "minInstances": 1,
+            "maxInstances": 5,
+            "healthCheckPath": "/omnis",
+            "envVariables": {
+              "NODE_ENV": "production",
+              "DB_HOST": "a7e4:d079:d114:ba7c:bb80:dfbe:55dc:ed96",
+              "DATABASE_URL": {
+                "fromService": {
+                  "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+                  "value": "connectionString"
+                }
+              }
+            },
+            "healthCheckIntervalSecs": 16
+          },
+          {
+            "id": "2cc05405-546e-4698-9192-65098d8a19ab",
+            "name": "hack-worker",
+            "type": "worker",
+            "cpu": 3.090739750029427,
+            "memory": 6.893506466945157,
+            "startCommand": "node start-summopere.js",
+            "gpu": 2
+          }
+        ]
+      }
+    ]
+  },
+  "diff": [
+    {
+      "op": "remove",
+      "path": "/environments/0/services/35"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/34"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/33"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/32"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/31"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/30"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/29"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/28"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/27"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/26"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/25"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/24"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/23"
+    },
+    {
+      "op": "remove",
+      "path": "/environments/0/services/7/startCommand"
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/7/memory",
+      "value": 5.749686598899607
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/7/cpu",
+      "value": 5.847997107344113
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/7/type",
+      "value": "web"
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/7/name",
+      "value": "extroverted-license.info"
+    },
+    {
+      "op": "replace",
+      "path": "/environments/0/services/7/id",
+      "value": "04d70f0f-8bba-4729-879d-783b76882c84"
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/7/minInstances",
+      "value": 1
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/7/maxInstances",
+      "value": 3
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/7/healthCheckPath",
+      "value": "/appono"
+    },
+    {
+      "op": "add",
+      "path": "/environments/0/services/7/envVariables",
+      "value": {
+        "NODE_ENV": "production",
+        "DB_HOST": "e32a:33ba:655e:c0d4:b3ed:14b9:a819:35db",
+        "DATABASE_URL": {
+          "fromService": {
+            "id": "916abcd4-c0ca-4913-90af-08e4c6b9690b",
+            "value": "connectionString"
+          }
+        }
+      }
+    }
+  ]
+}

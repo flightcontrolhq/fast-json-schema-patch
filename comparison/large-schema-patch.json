@@ -3,7 +3,63 @@
     "op": "replace",
     "path": "/environments/0/services/2/cpu",
     "value": 100,
-    "oldValue": 1.2736676227863928
+    "oldValue": 1.806692232270822
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/9",
+    "oldValue": {
+      "id": "service9",
+      "name": "service-name-9",
+      "type": "web",
+      "cpu": 3.7467353012660154,
+      "memory": 4.568624062272369,
+      "dependsOn": [
+        "service8"
+      ]
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/8",
+    "oldValue": {
+      "id": "service8",
+      "name": "service-name-8",
+      "type": "web",
+      "cpu": 1.7887501021691072,
+      "memory": 5.310191892061675,
+      "dependsOn": [
+        "service7"
+      ]
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/7",
+    "oldValue": {
+      "id": "service7",
+      "name": "service-name-7",
+      "type": "web",
+      "cpu": 3.1756775836074325,
+      "memory": 4.585411523124009,
+      "dependsOn": [
+        "service6"
+      ]
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/environments/0/services/6",
+    "oldValue": {
+      "id": "service6",
+      "name": "service-name-6",
+      "type": "web",
+      "cpu": 1.9981008262971245,
+      "memory": 1.4818095157305669,
+      "dependsOn": [
+        "service5"
+      ]
+    }
   },
   {
     "op": "remove",
@@ -12,17 +68,26 @@
       "id": "service5",
       "name": "service-name-5",
       "type": "web",
-      "cpu": 1.3504828936458249,
-      "memory": 0.3254905245442954,
+      "cpu": 2.0196243372519085,
+      "memory": 6.2728174105189005,
       "dependsOn": [
         "service4"
       ]
     }
   },
   {
-    "op": "move",
-    "from": "/environments/0/services/6",
-    "path": "/environments/0/services/5"
+    "op": "add",
+    "path": "/environments/0/services/5",
+    "value": {
+      "id": "service6",
+      "name": "service-name-6",
+      "type": "web",
+      "cpu": 1.9981008262971245,
+      "memory": 1.4818095157305669,
+      "dependsOn": [
+        "service5"
+      ]
+    }
   },
   {
     "op": "add",
@@ -31,8 +96,8 @@
       "id": "service7",
       "name": "service-name-7",
       "type": "web",
-      "cpu": 2.3844380750499217,
-      "memory": 0.8351026487439643,
+      "cpu": 3.1756775836074325,
+      "memory": 4.585411523124009,
       "dependsOn": [
         "service6"
       ]
@@ -45,8 +110,8 @@
       "id": "service8",
       "name": "service-name-8",
       "type": "web",
-      "cpu": 2.352785477221008,
-      "memory": 0.6360907730008796,
+      "cpu": 1.7887501021691072,
+      "memory": 5.310191892061675,
       "dependsOn": [
         "service7"
       ]
@@ -59,8 +124,8 @@
       "id": "service9",
       "name": "service-name-9",
       "type": "web",
-      "cpu": 2.809578809545011,
-      "memory": 0.8905140628414063,
+      "cpu": 3.7467353012660154,
+      "memory": 4.568624062272369,
       "dependsOn": [
         "service8"
       ]

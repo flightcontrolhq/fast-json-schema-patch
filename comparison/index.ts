@@ -12,7 +12,6 @@ import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import mainSchema from "../test/schema.json";
 import { isDeepStrictEqual } from "node:util";
-import rfc6902 from "rfc6902";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -197,7 +196,7 @@ async function isPatchValid(
     const doc1Copy = JSON.parse(JSON.stringify(doc1));
     const patchCopy = JSON.parse(JSON.stringify(patch));
 
-    rfc6902.applyPatch(
+    fastJsonPatch.applyPatch(
       doc1Copy,
       patchCopy,
     );
@@ -205,13 +204,7 @@ async function isPatchValid(
     const valid = isDeepStrictEqual(doc1Copy, doc2);
 
     if (!valid) {
-      // console.error(
-      //   `Patch from ${library} generated an invalid result for ${modificationIndexs.join(
-      //     ", "
-      //   )}. The diff is:`
-      // );
-      const delta = rfc6902.createPatch(doc1Copy, doc2);
-      // console.error(JSON.stringify(delta, null, 2));
+      const delta = fastJsonPatch.compare(doc1Copy, doc2);
 
       const errorData = {
         library,
