@@ -1,6 +1,7 @@
 import type { ArrayPlan, Plan } from "./core/buildPlan";
 import {
   diffArrayByPrimaryKey,
+  diffArrayByPrimaryKeyWithMoves,
   diffArrayLCS,
   diffArrayUnique,
 } from "./core/arrayDiffAlgorithms";
@@ -109,7 +110,7 @@ export class SchemaPatcher {
     const strategy = plan?.strategy || "lcs";
 
     if (strategy === "primaryKey" && plan?.primaryKey) {
-      diffArrayByPrimaryKey(
+      diffArrayByPrimaryKeyWithMoves(
         arr1,
         arr2,
         plan.primaryKey,

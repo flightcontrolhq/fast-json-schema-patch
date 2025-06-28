@@ -18,7 +18,7 @@
   },
   {
     "op": "add",
-    "path": "/environments/0/services/-",
+    "path": "/environments/0/services/1",
     "value": {
       "id": "service3",
       "name": "new-worker",

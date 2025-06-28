@@ -1,0 +1,1789 @@
+{
+  "parentDiff": {
+    "original": {
+      "environments": [
+        {
+          "id": "voluntarius-suadeo-caute",
+          "name": "env-0",
+          "region": "NC",
+          "source": {
+            "branch": "main"
+          }
+        }
+      ]
+    },
+    "new": {
+      "environments": [
+        {
+          "id": "voluntarius-suadeo-caute",
+          "name": "env-0",
+          "region": "NC",
+          "source": {
+            "pr": true,
+            "trigger": "push",
+            "filter": {
+              "toBranches": [
+                "main",
+                "develop"
+              ],
+              "labels": [
+                "civitas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "patches": [
+      {
+        "op": "remove",
+        "path": "/environments/0/source/branch",
+        "oldValue": "main"
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/pr",
+        "value": true
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/trigger",
+        "value": "push"
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/filter",
+        "value": {
+          "toBranches": [
+            "main",
+            "develop"
+          ],
+          "labels": [
+            "civitas"
+          ]
+        }
+      }
+    ],
+    "diffLines": {
+      "originalLines": [
+        {
+          "lineNumber": 1,
+          "content": "{",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 2,
+          "content": "  \"environments\": [",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 3,
+          "content": "    {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 4,
+          "content": "      \"id\": \"voluntarius-suadeo-caute\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 5,
+          "content": "      \"name\": \"env-0\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 6,
+          "content": "      \"region\": \"NC\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 7,
+          "content": "      \"source\": {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 8,
+          "content": "        \"branch\": \"main\"",
+          "type": "removed"
+        },
+        {
+          "lineNumber": 9,
+          "content": "      }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 10,
+          "content": "    }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 11,
+          "content": "  ]",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 12,
+          "content": "}",
+          "type": "unchanged"
+        }
+      ],
+      "newLines": [
+        {
+          "lineNumber": 1,
+          "content": "{",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 2,
+          "content": "  \"environments\": [",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 3,
+          "content": "    {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 4,
+          "content": "      \"id\": \"voluntarius-suadeo-caute\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 5,
+          "content": "      \"name\": \"env-0\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 6,
+          "content": "      \"region\": \"NC\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 7,
+          "content": "      \"source\": {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 8,
+          "content": "        \"pr\": true,",
+          "type": "added"
+        },
+        {
+          "lineNumber": 9,
+          "content": "        \"trigger\": \"push\",",
+          "type": "added"
+        },
+        {
+          "lineNumber": 10,
+          "content": "        \"filter\": {",
+          "type": "added"
+        },
+        {
+          "lineNumber": 11,
+          "content": "          \"toBranches\": [",
+          "type": "added"
+        },
+        {
+          "lineNumber": 12,
+          "content": "            \"main\",",
+          "type": "added"
+        },
+        {
+          "lineNumber": 13,
+          "content": "            \"develop\"",
+          "type": "added"
+        },
+        {
+          "lineNumber": 14,
+          "content": "          ],",
+          "type": "added"
+        },
+        {
+          "lineNumber": 15,
+          "content": "          \"labels\": [",
+          "type": "added"
+        },
+        {
+          "lineNumber": 16,
+          "content": "            \"civitas\"",
+          "type": "added"
+        },
+        {
+          "lineNumber": 17,
+          "content": "          ]",
+          "type": "added"
+        },
+        {
+          "lineNumber": 18,
+          "content": "        }",
+          "type": "added"
+        },
+        {
+          "lineNumber": 19,
+          "content": "      }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 20,
+          "content": "    }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 21,
+          "content": "  ]",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 22,
+          "content": "}",
+          "type": "unchanged"
+        }
+      ],
+      "unifiedDiffLines": [
+        {
+          "type": "unchanged",
+          "content": "{",
+          "oldLineNumber": 1,
+          "newLineNumber": 1,
+          "key": "unchanged-1-1"
+        },
+        {
+          "type": "unchanged",
+          "content": "  \"environments\": [",
+          "oldLineNumber": 2,
+          "newLineNumber": 2,
+          "key": "unchanged-2-2"
+        },
+        {
+          "type": "unchanged",
+          "content": "    {",
+          "oldLineNumber": 3,
+          "newLineNumber": 3,
+          "key": "unchanged-3-3"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"id\": \"voluntarius-suadeo-caute\",",
+          "oldLineNumber": 4,
+          "newLineNumber": 4,
+          "key": "unchanged-4-4"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"name\": \"env-0\",",
+          "oldLineNumber": 5,
+          "newLineNumber": 5,
+          "key": "unchanged-5-5"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"region\": \"NC\",",
+          "oldLineNumber": 6,
+          "newLineNumber": 6,
+          "key": "unchanged-6-6"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"source\": {",
+          "oldLineNumber": 7,
+          "newLineNumber": 7,
+          "key": "unchanged-7-7"
+        },
+        {
+          "type": "removed",
+          "content": "        \"branch\": \"main\"",
+          "oldLineNumber": 8,
+          "key": "removed-8"
+        },
+        {
+          "type": "added",
+          "content": "        \"pr\": true,",
+          "newLineNumber": 8,
+          "key": "added-8"
+        },
+        {
+          "type": "added",
+          "content": "        \"trigger\": \"push\",",
+          "newLineNumber": 9,
+          "key": "added-9"
+        },
+        {
+          "type": "added",
+          "content": "        \"filter\": {",
+          "newLineNumber": 10,
+          "key": "added-10"
+        },
+        {
+          "type": "added",
+          "content": "          \"toBranches\": [",
+          "newLineNumber": 11,
+          "key": "added-11"
+        },
+        {
+          "type": "added",
+          "content": "            \"main\",",
+          "newLineNumber": 12,
+          "key": "added-12"
+        },
+        {
+          "type": "added",
+          "content": "            \"develop\"",
+          "newLineNumber": 13,
+          "key": "added-13"
+        },
+        {
+          "type": "added",
+          "content": "          ],",
+          "newLineNumber": 14,
+          "key": "added-14"
+        },
+        {
+          "type": "added",
+          "content": "          \"labels\": [",
+          "newLineNumber": 15,
+          "key": "added-15"
+        },
+        {
+          "type": "added",
+          "content": "            \"civitas\"",
+          "newLineNumber": 16,
+          "key": "added-16"
+        },
+        {
+          "type": "added",
+          "content": "          ]",
+          "newLineNumber": 17,
+          "key": "added-17"
+        },
+        {
+          "type": "added",
+          "content": "        }",
+          "newLineNumber": 18,
+          "key": "added-18"
+        },
+        {
+          "type": "unchanged",
+          "content": "      }",
+          "oldLineNumber": 9,
+          "newLineNumber": 19,
+          "key": "unchanged-9-19"
+        },
+        {
+          "type": "unchanged",
+          "content": "    }",
+          "oldLineNumber": 10,
+          "newLineNumber": 20,
+          "key": "unchanged-10-20"
+        },
+        {
+          "type": "unchanged",
+          "content": "  ]",
+          "oldLineNumber": 11,
+          "newLineNumber": 21,
+          "key": "unchanged-11-21"
+        },
+        {
+          "type": "unchanged",
+          "content": "}",
+          "oldLineNumber": 12,
+          "newLineNumber": 22,
+          "key": "unchanged-12-22"
+        }
+      ]
+    },
+    "addCount": 11,
+    "removeCount": 1
+  },
+  "childDiffs": {
+    "f918576c-fcb0-4db9-b5e3-9c4917cedd1e": {
+      "id": "f918576c-fcb0-4db9-b5e3-9c4917cedd1e",
+      "original": {
+        "id": "f918576c-fcb0-4db9-b5e3-9c4917cedd1e",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 0.604596920688088,
+        "memory": 3.410443850050425,
+        "startCommand": "node start-aspicio.js"
+      },
+      "new": {
+        "id": "f918576c-fcb0-4db9-b5e3-9c4917cedd1e",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 0.604596920688088,
+        "memory": 3.410443850050425,
+        "startCommand": "node start-aspicio.js",
+        "minInstances": 1
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/minInstances",
+          "value": 1
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f918576c-fcb0-4db9-b5e3-9c4917cedd1e\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"generate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.604596920688088,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.410443850050425,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-aspicio.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f918576c-fcb0-4db9-b5e3-9c4917cedd1e\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"generate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.604596920688088,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.410443850050425,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-aspicio.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"minInstances\": 1",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"f918576c-fcb0-4db9-b5e3-9c4917cedd1e\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"generate-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 0.604596920688088,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 3.410443850050425,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-aspicio.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"minInstances\": 1",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 9,
+            "key": "unchanged-8-9"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "be88ffde-da55-4513-bc4e-f8b2f89bc8b9": {
+      "id": "be88ffde-da55-4513-bc4e-f8b2f89bc8b9",
+      "original": {
+        "id": "be88ffde-da55-4513-bc4e-f8b2f89bc8b9",
+        "name": "synthesize-worker",
+        "type": "worker",
+        "cpu": 1.9715144036184573,
+        "memory": 3.8035955973858298,
+        "startCommand": "node start-cura.js"
+      },
+      "new": {
+        "id": "be88ffde-da55-4513-bc4e-f8b2f89bc8b9",
+        "name": "drive bleeding-edge blockchains",
+        "type": "worker",
+        "cpu": 1.9715144036184573,
+        "memory": 3.8035955973858298,
+        "startCommand": "node start-cura.js"
+      },
+      "patches": [
+        {
+          "op": "replace",
+          "path": "/name",
+          "value": "drive bleeding-edge blockchains",
+          "oldValue": "synthesize-worker"
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"be88ffde-da55-4513-bc4e-f8b2f89bc8b9\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"synthesize-worker\",",
+            "type": "removed"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.9715144036184573,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.8035955973858298,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-cura.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"be88ffde-da55-4513-bc4e-f8b2f89bc8b9\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"drive bleeding-edge blockchains\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.9715144036184573,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.8035955973858298,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-cura.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"be88ffde-da55-4513-bc4e-f8b2f89bc8b9\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "removed",
+            "content": "  \"name\": \"synthesize-worker\",",
+            "oldLineNumber": 3,
+            "key": "removed-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"drive bleeding-edge blockchains\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.9715144036184573,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 3.8035955973858298,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-cura.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 1
+    },
+    "2409b772-123b-4aa8-b7d0-1589d28db606": {
+      "id": "2409b772-123b-4aa8-b7d0-1589d28db606",
+      "original": {
+        "id": "2409b772-123b-4aa8-b7d0-1589d28db606",
+        "name": "navigate-worker",
+        "type": "worker",
+        "cpu": 1.2381075577539638,
+        "memory": 3.5272118568889854,
+        "startCommand": "node start-debitis.js"
+      },
+      "new": {
+        "id": "2409b772-123b-4aa8-b7d0-1589d28db606",
+        "name": "navigate-worker",
+        "type": "worker",
+        "cpu": 1.2381075577539638,
+        "memory": 3.5272118568889854,
+        "startCommand": "node start-debitis.js",
+        "storage": 21
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/storage",
+          "value": 21
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"2409b772-123b-4aa8-b7d0-1589d28db606\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"navigate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.2381075577539638,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.5272118568889854,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-debitis.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"2409b772-123b-4aa8-b7d0-1589d28db606\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"navigate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.2381075577539638,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.5272118568889854,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-debitis.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"storage\": 21",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"2409b772-123b-4aa8-b7d0-1589d28db606\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"navigate-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.2381075577539638,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 3.5272118568889854,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-debitis.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"storage\": 21",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 9,
+            "key": "unchanged-8-9"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "9396f389-bad8-42a6-a1ea-44a9a557f302": {
+      "id": "9396f389-bad8-42a6-a1ea-44a9a557f302",
+      "original": {
+        "id": "9396f389-bad8-42a6-a1ea-44a9a557f302",
+        "name": "whirlwind-freight.info",
+        "type": "web",
+        "cpu": 3.6916478364439556,
+        "memory": 2.177295022598765,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/taceo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "20.210.230.150"
+        }
+      },
+      "new": {
+        "id": "9396f389-bad8-42a6-a1ea-44a9a557f302",
+        "name": "whirlwind-freight.info",
+        "type": "web",
+        "cpu": 3.6916478364439556,
+        "memory": 2.177295022598765,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/taceo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "20.210.230.150"
+        },
+        "healthCheckTimeoutSecs": 22
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/healthCheckTimeoutSecs",
+          "value": 22
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"9396f389-bad8-42a6-a1ea-44a9a557f302\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"whirlwind-freight.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.6916478364439556,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.177295022598765,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/taceo\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"20.210.230.150\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"9396f389-bad8-42a6-a1ea-44a9a557f302\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"whirlwind-freight.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.6916478364439556,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.177295022598765,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/taceo\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"20.210.230.150\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"healthCheckTimeoutSecs\": 22",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"9396f389-bad8-42a6-a1ea-44a9a557f302\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"whirlwind-freight.info\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 3.6916478364439556,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.177295022598765,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 1,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/taceo\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"20.210.230.150\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"healthCheckTimeoutSecs\": 22",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 15,
+            "key": "unchanged-14-15"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "1656a400-99d5-4ecb-a0b6-5eb690144a0d": {
+      "id": "1656a400-99d5-4ecb-a0b6-5eb690144a0d",
+      "original": {
+        "id": "1656a400-99d5-4ecb-a0b6-5eb690144a0d",
+        "name": "reboot-worker",
+        "type": "worker",
+        "cpu": 1.541812514206334,
+        "memory": 2.9764142148695707,
+        "startCommand": "node start-strenuus.js"
+      },
+      "new": {
+        "id": "1656a400-99d5-4ecb-a0b6-5eb690144a0d",
+        "name": "reboot-worker",
+        "type": "worker",
+        "cpu": 1.541812514206334,
+        "memory": 2.9764142148695707,
+        "startCommand": "node start-strenuus.js",
+        "stickySessionsEnabled": false
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/stickySessionsEnabled",
+          "value": false
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"1656a400-99d5-4ecb-a0b6-5eb690144a0d\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"reboot-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.541812514206334,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.9764142148695707,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-strenuus.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"1656a400-99d5-4ecb-a0b6-5eb690144a0d\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"reboot-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.541812514206334,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.9764142148695707,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-strenuus.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"stickySessionsEnabled\": false",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"1656a400-99d5-4ecb-a0b6-5eb690144a0d\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"reboot-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.541812514206334,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.9764142148695707,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-strenuus.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"stickySessionsEnabled\": false",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 9,
+            "key": "unchanged-8-9"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "beaa5293-cf92-490f-9b3c-4bfa467169cd": {
+      "id": "beaa5293-cf92-490f-9b3c-4bfa467169cd",
+      "original": {
+        "id": "beaa5293-cf92-490f-9b3c-4bfa467169cd",
+        "name": "database",
+        "type": "rds",
+        "engine": "postgres",
+        "engineVersion": "15",
+        "instanceSize": "db.t3.micro",
+        "storage": 59
+      },
+      "new": {
+        "id": "beaa5293-cf92-490f-9b3c-4bfa467169cd",
+        "name": "database",
+        "type": "rds",
+        "engine": "postgres",
+        "engineVersion": "15",
+        "instanceSize": "db.t3.micro",
+        "storage": 59,
+        "multiAvailabilityZones": false,
+        "encryptionAtRest": false
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/multiAvailabilityZones",
+          "value": false
+        },
+        {
+          "op": "add",
+          "path": "/encryptionAtRest",
+          "value": false
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"beaa5293-cf92-490f-9b3c-4bfa467169cd\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"database\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"rds\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"postgres\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"15\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"storage\": 59",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"beaa5293-cf92-490f-9b3c-4bfa467169cd\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"database\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"rds\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"postgres\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"15\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"storage\": 59,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"multiAvailabilityZones\": false,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"encryptionAtRest\": false",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"beaa5293-cf92-490f-9b3c-4bfa467169cd\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"database\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"rds\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"engine\": \"postgres\",",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"engineVersion\": \"15\",",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"storage\": 59",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "added",
+            "content": "  \"multiAvailabilityZones\": false,",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "  \"encryptionAtRest\": false",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 9,
+            "newLineNumber": 11,
+            "key": "unchanged-9-11"
+          }
+        ]
+      },
+      "addCount": 2,
+      "removeCount": 0
+    },
+    "possimus-tempus-versus": {
+      "id": "possimus-tempus-versus",
+      "original": null,
+      "new": {
+        "id": "possimus-tempus-versus",
+        "name": "override Worker",
+        "type": "worker",
+        "cpu": 0.5,
+        "memory": 0.5,
+        "buildType": "nixpacks",
+        "startCommand": "node quo.js"
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "",
+          "value": {
+            "id": "possimus-tempus-versus",
+            "name": "override Worker",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "buildType": "nixpacks",
+            "startCommand": "node quo.js"
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "null",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "added"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"possimus-tempus-versus\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"override Worker\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.5,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 0.5,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"buildType\": \"nixpacks\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"startCommand\": \"node quo.js\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "added"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "added",
+            "content": "{",
+            "newLineNumber": 1,
+            "key": "added-1"
+          },
+          {
+            "type": "added",
+            "content": "  \"id\": \"possimus-tempus-versus\",",
+            "newLineNumber": 2,
+            "key": "added-2"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"override Worker\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"worker\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"cpu\": 0.5,",
+            "newLineNumber": 5,
+            "key": "added-5"
+          },
+          {
+            "type": "added",
+            "content": "  \"memory\": 0.5,",
+            "newLineNumber": 6,
+            "key": "added-6"
+          },
+          {
+            "type": "added",
+            "content": "  \"buildType\": \"nixpacks\",",
+            "newLineNumber": 7,
+            "key": "added-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"startCommand\": \"node quo.js\"",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "}",
+            "newLineNumber": 9,
+            "key": "added-9"
+          }
+        ]
+      },
+      "addCount": 9,
+      "removeCount": 0
+    }
+  }
+}
