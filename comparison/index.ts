@@ -12,6 +12,7 @@ import { Differ } from "json-diff-kit";
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import mainSchema from "../test/schema.json";
+import { deepStrictEqual } from "assert";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -222,27 +223,23 @@ function isPatchValid(
     const doc1Copy = JSON.parse(JSON.stringify(doc1));
     const patchCopy = JSON.parse(JSON.stringify(patch));
 
-    const { newDocument: patchedDoc } = fastJsonPatch.applyPatch(
+    const isv = fastJsonPatch.validate(patchCopy);
+    if (isv) {
+      console.log(isv);
+    }
+
+    fastJsonPatch.applyPatch(
       doc1Copy,
       patchCopy,
       true
     );
-
-    const sortedPatchedDoc = deepSortArrays(patchedDoc);
-    const sortedDoc2 = deepSortArrays(doc2);
-
-    const valid = deepEqual(sortedPatchedDoc, sortedDoc2);
-
-    if (!valid) {
-      console.error(
-        `Patch from ${library} generated an invalid result for ${modificationIndexs.join(
-          ", "
-        )}. The diff is:`
-      );
-      const delta = diffpatcher.diff(sortedPatchedDoc, sortedDoc2);
-      console.error(JSON.stringify(delta, null, 2));
+    try {
+      deepStrictEqual(doc1Copy, doc2);
+    } catch (e) {
+      // console.error(e);
+      return false;
     }
-    return valid;
+    return true;
   } catch (e) {
     // Errors are expected for invalid patches. We return false and don't log to keep the output clean.
     return false;
