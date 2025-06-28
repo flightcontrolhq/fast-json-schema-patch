@@ -7,7 +7,89 @@
   },
   {
     "op": "add",
-    "path": "/environments/0/services/-",
+    "path": "/environments/0/services/0/ports/0",
+    "value": {
+      "id": "http2-8005",
+      "port": 8005,
+      "protocol": "http2",
+      "healthCheck": {
+        "type": "http",
+        "path": "/echo",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": true
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/1",
+    "value": {
+      "id": "tcp-8001",
+      "port": 8001,
+      "protocol": "tcp",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/2",
+    "value": {
+      "id": "udp-8002",
+      "port": 8007,
+      "protocol": "udp",
+      "healthCheck": {
+        "type": "udp",
+        "tcpPort": 8001,
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      }
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/3",
+    "value": {
+      "id": "grpc-8003",
+      "port": 8003,
+      "protocol": "grpc",
+      "healthCheck": {
+        "type": "tcp",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/0/ports/4",
+    "value": {
+      "id": "http-8004",
+      "port": 8004,
+      "protocol": "http",
+      "healthCheck": {
+        "type": "http",
+        "path": "/new-health",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "move",
+    "from": "/environments/0/services/1",
+    "path": "/environments/0/services/2"
+  },
+  {
+    "op": "add",
+    "path": "/environments/0/services/1",
     "value": {
       "id": "new-worker-service",
       "name": "New Worker Service",
@@ -32,6 +114,43 @@
         "timeoutSecs": 5,
         "intervalSecs": 30
       }
+    }
+  },
+  {
+    "op": "move",
+    "from": "/environments/1/services/0/ports/2",
+    "path": "/environments/1/services/0/ports/1"
+  },
+  {
+    "op": "add",
+    "path": "/environments/1/services/0/ports/2",
+    "value": {
+      "id": "http-8004",
+      "port": 8004,
+      "protocol": "http",
+      "healthCheck": {
+        "type": "http",
+        "path": "/health",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": false
+    }
+  },
+  {
+    "op": "add",
+    "path": "/environments/1/services/0/ports/3",
+    "value": {
+      "id": "http2-8005",
+      "port": 8005,
+      "protocol": "http2",
+      "healthCheck": {
+        "type": "http",
+        "path": "/echo",
+        "timeoutSecs": 5,
+        "intervalSecs": 30
+      },
+      "tls": true
     }
   },
   {

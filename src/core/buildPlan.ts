@@ -1,4 +1,8 @@
 import type { JsonObject } from "../types";
+import {
+  deepEqualSchemaAware,
+  deepEqualPlanned,
+} from "../performance/deepEqual";
 
 interface JSONSchema extends JsonObject {
   $ref?: string;
@@ -24,6 +28,8 @@ export interface ArrayPlan {
   hashFields?: string[];
   // Strategy hint for array comparison
   strategy?: "primaryKey" | "lcs" | "unique";
+  // Pre-compiled equality function for performance
+  isEqual?: (obj1: JsonObject, obj2: JsonObject) => boolean;
 }
 
 export type Plan = Map<string, ArrayPlan>;
@@ -213,6 +219,10 @@ export function _traverseSchema(
         arrayPlan.requiredFields = metadata.requiredFields;
         arrayPlan.hashFields = metadata.hashFields;
         arrayPlan.strategy = "primaryKey";
+
+        // Pre-compile the equality function
+        arrayPlan.isEqual = (obj1: JsonObject, obj2: JsonObject) =>
+          deepEqualPlanned(obj1, obj2, arrayPlan);
       }
     }
 

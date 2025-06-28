@@ -8,6 +8,7 @@ Map {
       "region",
       "id",
     ],
+    "isEqual": [Function],
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -3163,6 +3164,7 @@ Set {
       "memory",
       "type",
     ],
+    "isEqual": [Function],
     "itemSchema": {
       "anyOf": [
         {
@@ -6160,6 +6162,7 @@ Set {
       "name",
       "image",
     ],
+    "isEqual": [Function],
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -6243,6 +6246,7 @@ Set {
       "name",
       "match",
     ],
+    "isEqual": [Function],
     "itemSchema": {
       "additionalProperties": false,
       "properties": {
@@ -6426,6 +6430,7 @@ Set {
       "port",
       "protocol",
     ],
+    "isEqual": [Function],
     "itemSchema": {
       "anyOf": [
         {

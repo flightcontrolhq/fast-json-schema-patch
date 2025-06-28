@@ -29,5 +29,6 @@
     "compare": "bun run comparison/index.ts",
     "test": "bun test"
   },
-  "private": true
+  "private": true,
+  "dependencies": {}
 }

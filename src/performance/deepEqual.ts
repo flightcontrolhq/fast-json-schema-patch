@@ -201,3 +201,28 @@ export function deepEqualSchemaAware(
 
   return result;
 }
+
+export function deepEqualPlanned(
+  obj1: JsonObject,
+  obj2: JsonObject,
+  plan: ArrayPlan
+): boolean {
+  if (!plan.itemSchema?.properties) {
+    // Fallback for safety, though plan should always have this for planned arrays
+    return deepEqualSchemaAware(obj1, obj2, plan);
+  }
+
+  const props = Object.keys(plan.itemSchema.properties);
+  for (const prop of props) {
+    if (!deepEqual(obj1[prop], obj2[prop])) {
+      return false;
+    }
+  }
+
+  // Also ensure no extra properties exist in obj2 that are not in obj1 (schema)
+  if (Object.keys(obj1).length !== Object.keys(obj2).length) {
+    return false;
+  }
+
+  return true;
+}

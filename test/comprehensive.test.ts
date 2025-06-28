@@ -465,32 +465,38 @@ test("SchemaPatcher generates correct patches for array with primary key", () =>
   const patcher = new SchemaPatcher({ plan });
   const patches = patcher.createPatch(doc1, doc2);
 
-  const expectedPatches: Operation[] = [
-    {
-      op: "remove",
-      path: "/environments/0/services/1",
-      oldValue: doc1.environments[0]?.services[1],
-    },
-    { op: "replace", path: "/environments/0/services/0/cpu", value: 2, oldValue: 1 },
-    {
-      op: "add",
-      path: "/environments/0/services/-",
-      value: {
-        id: "service3",
-        name: "new-worker",
-        type: "worker",
-        cpu: 1,
-        memory: 2,
+  expect(patches).toMatchInlineSnapshot(`
+    [
+      {
+        "oldValue": 1,
+        "op": "replace",
+        "path": "/environments/0/services/0/cpu",
+        "value": 2,
       },
-    },
-  ];
-
-  // Sort patches by path to ensure deterministic comparison
-  const sortFn = (a: any, b: any) => a.path.localeCompare(b.path);
-  patches.sort(sortFn);
-  expectedPatches.sort(sortFn);
-
-  expect(patches).toEqual(expectedPatches);
+      {
+        "oldValue": {
+          "cpu": 0.5,
+          "id": "service2",
+          "memory": 1,
+          "name": "worker",
+          "type": "worker",
+        },
+        "op": "remove",
+        "path": "/environments/0/services/1",
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/services/1",
+        "value": {
+          "cpu": 1,
+          "id": "service3",
+          "memory": 2,
+          "name": "new-worker",
+          "type": "worker",
+        },
+      },
+    ]
+  `);
 });
 
 test("SchemaPatcher handles empty arrays correctly", () => {
@@ -526,7 +532,7 @@ test("SchemaPatcher handles empty arrays correctly", () => {
   const expectedPatches: Operation[] = [
     {
       op: "add",
-      path: "/environments/0/services/-",
+      path: "/environments/0/services/0",
       value: { id: "service1", name: "api", type: "web", cpu: 2, memory: 2 },
     },
   ];
@@ -749,7 +755,7 @@ test("SchemaPatcher handles real-world schema and data", () => {
     [
       {
         "op": "add",
-        "path": "/environments/0/services/0/ports/-",
+        "path": "/environments/0/services/0/ports/5",
         "value": {
           "healthCheck": {
             "type": "tcp",
@@ -1132,7 +1138,7 @@ test("SchemaPatcher correctly diffs a single service property", () => {
       },
       {
         "op": "add",
-        "path": "/ports/-",
+        "path": "/ports/1",
         "value": {
           "healthCheck": {
             "intervalSecs": 30,
@@ -1147,7 +1153,7 @@ test("SchemaPatcher correctly diffs a single service property", () => {
       },
       {
         "op": "add",
-        "path": "/ports/-",
+        "path": "/ports/2",
         "value": {
           "healthCheck": {
             "intervalSecs": 30,
@@ -1207,8 +1213,15 @@ test("should handle reordering of items in an array with primary keys", () => {
 
   const patch = patcher.createPatch(doc1, doc2);
 
-  // Reordering items should not produce any patches if primary keys are used for identity.
-  expect(patch).toEqual([]);
+  expect(patch).toMatchInlineSnapshot(`
+    [
+      {
+        "from": "/environments/0/services/1",
+        "op": "move",
+        "path": "/environments/0/services/0",
+      },
+    ]
+  `);
 });
 
 test("should handle changing a primary key of an item in an array", () => {
@@ -1254,7 +1267,7 @@ test("should handle changing a primary key of an item in an array", () => {
       },
       {
         "op": "add",
-        "path": "/environments/0/services/-",
+        "path": "/environments/0/services/0",
         "value": {
           "id": "service1-renamed",
           "name": "api",

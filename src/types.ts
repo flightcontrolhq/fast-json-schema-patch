@@ -4,13 +4,11 @@ export type JsonValue = string | number | boolean | null | JsonObject | JsonArra
 export type JsonObject = { [Key in string]?: JsonValue };
 export type JsonArray = JsonValue[];
 
-export interface Operation {
-  op: "add" | "remove" | "replace" | "move" | "copy" | "test";
-  path: string;
-  value?: JsonValue;
-  from?: string;
-  oldValue?: JsonValue;
-}
+export type Operation =
+  | { op: "add"; path: string; value: JsonValue }
+  | { op: "remove"; path: string; oldValue?: JsonValue }
+  | { op: "replace"; path: string; value: JsonValue; oldValue?: JsonValue }
+  | { op: "move"; from: string; path: string };
 
 export interface DiffLine {
   lineNumber: number;

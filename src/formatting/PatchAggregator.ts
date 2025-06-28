@@ -279,32 +279,39 @@ export class PatchAggregator {
         continue;
       }
 
-      const relativePath = patch.path.substring(pathPrefix.length);
-      const match = relativePath.match(/^\/(\d+|-)$/);
-      const matchIndex = match?.[1];
       let childId: string | undefined;
 
-      if (matchIndex) {
-        if (matchIndex === "-" && patch.op === "add") {
-          // This is an add operation at the end of the array
-          childId = (patch.value as JsonObject)?.[idKey] as string;
-        } else if (matchIndex !== "-") {
-          // This is a specific index operation
-          const index = Number.parseInt(matchIndex, 10);
-
-          if (patch.op === "add") {
-            childId = (patch.value as JsonObject)?.[idKey] as string;
-          } else {
-            childId = originalChildIdsByIndex[index];
-          }
+      if (patch.op === "move") {
+        // For move operations, the 'from' path tells us the original location.
+        const fromRelativePath = patch.from.substring(pathPrefix.length);
+        const fromMatch = fromRelativePath.match(/^\/(\d+)/);
+        const fromIndex = fromMatch?.[1];
+        if (fromIndex) {
+          childId = originalChildIdsByIndex[Number.parseInt(fromIndex, 10)];
         }
       } else {
-        // Check if this is a nested operation within a specific child
-        const nestedMatch = relativePath.match(/^\/(\d+)/);
-        const nestedIndex = nestedMatch?.[1];
-        if (nestedIndex) {
-          const index = Number.parseInt(nestedIndex, 10);
-          childId = originalChildIdsByIndex[index];
+        const relativePath = patch.path.substring(pathPrefix.length);
+        const match = relativePath.match(/^\/(\d+|-)$/);
+        const matchIndex = match?.[1];
+
+        if (matchIndex) {
+          if (matchIndex === "-" && patch.op === "add") {
+            childId = (patch.value as JsonObject)?.[idKey] as string;
+          } else if (matchIndex !== "-") {
+            const index = Number.parseInt(matchIndex, 10);
+            if (patch.op === "add") {
+              childId = (patch.value as JsonObject)?.[idKey] as string;
+            } else {
+              childId = originalChildIdsByIndex[index];
+            }
+          }
+        } else {
+          const nestedMatch = relativePath.match(/^\/(\d+)/);
+          const nestedIndex = nestedMatch?.[1];
+          if (nestedIndex) {
+            const index = Number.parseInt(nestedIndex, 10);
+            childId = originalChildIdsByIndex[index];
+          }
         }
       }
 
@@ -359,8 +366,14 @@ export class PatchAggregator {
       const newChild = newChildrenById.get(childId) || null;
       const patchesForChild = childPatchesById.get(childId) || [];
 
+      // If the only change is a move, we still want to create a diff.
+      const isOnlyMove =
+        patchesForChild.length > 0 &&
+        patchesForChild.every((p) => p.op === "move");
+
       // Enhanced optimization: skip processing if objects are identical
       if (
+        !isOnlyMove &&
         originalChild &&
         newChild &&
         this.compareObjects(originalChild, newChild, arrayPlan)
@@ -369,6 +382,11 @@ export class PatchAggregator {
       }
 
       const transformedPatches = patchesForChild.map((p) => {
+        // Move operations should not have their paths transformed.
+        if (p.op === "move") {
+          return p;
+        }
+
         const originalIndex = originalChildren.findIndex(
           (c) => c[idKey] === childId
         );

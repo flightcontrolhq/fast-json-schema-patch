@@ -4,14 +4,15 @@ import chalk from "chalk";
 import Chartscii from "chartscii";
 import * as cliProgress from "cli-progress";
 import * as fastJsonPatch from "fast-json-patch";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import * as jsondiffpatch from "jsondiffpatch";
 import { performance } from "perf_hooks";
-import * as rfc6902 from "rfc6902";
 import { Differ } from "json-diff-kit";
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import mainSchema from "../test/schema.json";
+import { isDeepStrictEqual } from "node:util";
+import rfc6902 from "rfc6902";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -185,66 +186,76 @@ export function countJsonDiffPatches(diff: any): number {
   return patchCount;
 }
 
-function deepSortArrays(obj: any): any {
-  if (Array.isArray(obj)) {
-    // First, recursively sort items within the array
-    const sortedItems = obj.map(deepSortArrays);
-
-    // Then, sort the array itself using a stable, deterministic method.
-    // Stringifying is a simple way to achieve this for complex objects.
-    return sortedItems.sort((a, b) => {
-      const aStr = JSON.stringify(a);
-      const bStr = JSON.stringify(b);
-      if (aStr < bStr) return -1;
-      if (aStr > bStr) return 1;
-      return 0;
-    });
-  }
-  if (typeof obj === "object" && obj !== null) {
-    // Also sort keys for a canonical object representation
-    const newObj: { [key: string]: any } = {};
-    for (const key of Object.keys(obj).sort()) {
-      newObj[key] = deepSortArrays((obj as any)[key]);
-    }
-    return newObj;
-  }
-  return obj;
-}
-
-function isPatchValid(
+async function isPatchValid(
   doc1: any,
   doc2: any,
   patch: any,
   library: string,
   modificationIndexs: string[]
-) {
+): Promise<boolean> {
   try {
     const doc1Copy = JSON.parse(JSON.stringify(doc1));
     const patchCopy = JSON.parse(JSON.stringify(patch));
 
-    const { newDocument: patchedDoc } = fastJsonPatch.applyPatch(
+    rfc6902.applyPatch(
       doc1Copy,
       patchCopy,
-      true
     );
 
-    const sortedPatchedDoc = deepSortArrays(patchedDoc);
-    const sortedDoc2 = deepSortArrays(doc2);
-
-    const valid = deepEqual(sortedPatchedDoc, sortedDoc2);
+    const valid = isDeepStrictEqual(doc1Copy, doc2);
 
     if (!valid) {
-      console.error(
-        `Patch from ${library} generated an invalid result for ${modificationIndexs.join(
-          ", "
-        )}. The diff is:`
+      // console.error(
+      //   `Patch from ${library} generated an invalid result for ${modificationIndexs.join(
+      //     ", "
+      //   )}. The diff is:`
+      // );
+      const delta = rfc6902.createPatch(doc1Copy, doc2);
+      // console.error(JSON.stringify(delta, null, 2));
+
+      const errorData = {
+        library,
+        modifications: modificationIndexs,
+        originalDocument: doc1,
+        expectedDocument: doc2,
+        generatedPatch: patch,
+        patchedDocument: doc1Copy,
+        diff: delta,
+      };
+
+      const filename = `${library}-${Date.now()}.json`;
+      const errorDir = join(__dirname, "errors");
+      await mkdir(errorDir, { recursive: true });
+      const errorFilePath = join(errorDir, filename);
+
+      await writeFile(errorFilePath, JSON.stringify(errorData, null, 2));
+      console.log(
+        chalk.red(`[ERROR] Invalid patch data saved to ${errorFilePath}`)
       );
-      const delta = diffpatcher.diff(sortedPatchedDoc, sortedDoc2);
-      console.error(JSON.stringify(delta, null, 2));
     }
     return valid;
   } catch (e) {
     // Errors are expected for invalid patches. We return false and don't log to keep the output clean.
+    const errorData = {
+      library,
+      modifications: modificationIndexs,
+      originalDocument: doc1,
+      expectedDocument: doc2,
+      generatedPatch: patch,
+      error: e instanceof Error ? { message: e.message, stack: e.stack } : e,
+    };
+
+    const filename = `${library}-apply-error-${Date.now()}.json`;
+    const errorDir = join(__dirname, "errors");
+    await mkdir(errorDir, { recursive: true });
+    const errorFilePath = join(errorDir, filename);
+
+    await writeFile(errorFilePath, JSON.stringify(errorData, null, 2));
+    console.log(
+      chalk.red(
+        `[ERROR] Patch application error data saved to ${errorFilePath}`
+      )
+    );
     return false;
   }
 }
@@ -1064,10 +1075,10 @@ async function compare() {
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 1250 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 1250 },
-    { label: "High", min: 201, max: 500, targetSamples: 1250 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 1250 },
+    { label: "Low", min: 0, max: 50, targetSamples: 25  },
+    { label: "Medium", min: 51, max: 200, targetSamples: 25 },
+    { label: "High", min: 201, max: 500, targetSamples: 25 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 25 },
   ];
 
   const allMetrics: BenchmarkMetrics[] = [];
@@ -1167,7 +1178,7 @@ async function compare() {
           const isValid =
             library.name === "jsondiffpatch"
               ? true // jsondiffpatch doesn't follow RFC 6902, so we skip validation
-              : isPatchValid(
+              : await isPatchValid(
                   doc1,
                   doc2,
                   patch,

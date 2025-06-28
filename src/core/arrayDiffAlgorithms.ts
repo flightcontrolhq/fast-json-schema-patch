@@ -1,7 +1,7 @@
 import type { JsonValue, JsonObject, JsonArray, Operation } from "../types";
 import {
-  deepEqualMemo,
   deepEqual,
+  deepEqualMemo,
   deepEqualSchemaAware,
 } from "../performance/deepEqual";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
@@ -24,12 +24,6 @@ export function diffArrayByPrimaryKey(
   hashFields?: string[],
   plan?: ArrayPlan
 ) {
-  const effectiveHashFields = getEffectiveHashFields(
-    plan,
-    undefined,
-    undefined,
-    hashFields || []
-  );
   const map1 = new Map<string | number, { item: JsonValue; index: number }>();
   for (let i = 0; i < arr1.length; i++) {
     const item = arr1[i];
@@ -41,87 +35,128 @@ export function diffArrayByPrimaryKey(
     }
   }
 
-  const seenKeys = new Set<string | number>();
-  const modificationPatches: Operation[] = [];
-  const additionPatches: Operation[] = [];
-
+  const map2 = new Map<string | number, { item: JsonValue; index: number }>();
   for (let i = 0; i < arr2.length; i++) {
-    const newItem = arr2[i];
-    if (
-      typeof newItem !== "object" ||
-      newItem === null ||
-      !(primaryKey in newItem)
-    ) {
-      continue;
+    const item = arr2[i];
+    if (typeof item === "object" && item !== null && primaryKey in item) {
+      const key = item[primaryKey as keyof typeof item];
+      if (typeof key === "string" || typeof key === "number") {
+        map2.set(key, { item, index: i });
+      }
     }
-    const key = newItem[primaryKey as keyof typeof newItem];
-    if (typeof key !== "string" && typeof key !== "number") {
-      continue;
-    }
+  }
 
-    seenKeys.add(key);
+  const modificationPatches: Operation[] = [];
+  const additions: { item: JsonValue; index: number }[] = [];
+  const moves: { from: number; to: number; item: JsonValue }[] = [];
+  const removals: { index: number; value: JsonValue }[] = [];
+  const commonItems = new Map<
+    string | number,
+    { oldIndex: number; newIndex: number; item: JsonValue }
+  >();
+
+  const seenInArr2 = new Set<string | number>();
+
+  for (const [key, { item: newItem, index: newIndex }] of map2.entries()) {
+    seenInArr2.add(key);
     const oldEntry = map1.get(key);
 
     if (oldEntry) {
-      const oldItem = oldEntry.item;
-      let needsDiff = false;
+      // Common item
+      const { item: oldItem, index: oldIndex } = oldEntry;
 
-      if (plan) {
-        needsDiff = !deepEqualSchemaAware(
-          oldItem,
-          newItem,
-          plan,
-          effectiveHashFields
-        );
-      } else if (effectiveHashFields.length > 0) {
-        let hashFieldsDiffer = false;
-        for (let j = 0; j < effectiveHashFields.length; j++) {
-          const field = effectiveHashFields[j];
-          if (
-            field &&
-            (oldItem as JsonObject)[field] !== (newItem as JsonObject)[field]
-          ) {
-            hashFieldsDiffer = true;
-            break;
-          }
-        }
-        needsDiff =
-          hashFieldsDiffer ||
-          (oldItem !== newItem && !deepEqual(oldItem, newItem));
-      } else {
-        needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem);
-      }
+      // Check for content change
+      const isEqual = plan?.isEqual
+        ? plan.isEqual(oldItem as JsonObject, newItem as JsonObject)
+        : deepEqual(oldItem, newItem);
 
-      if (needsDiff) {
+      if (!isEqual) {
         onModification(
           oldItem,
           newItem,
-          `${path}/${oldEntry.index}`,
+          `${path}/${oldIndex}`,
           modificationPatches
         );
       }
+
+      commonItems.set(key, { oldIndex, newIndex, item: newItem });
     } else {
-      additionPatches.push({ op: "add", path: `${path}/-`, value: newItem });
+      // New item
+      additions.push({ item: newItem, index: newIndex });
     }
   }
 
-  const removalIndices: { index: number; value: JsonValue }[] = [];
   for (const [key, oldEntry] of map1.entries()) {
-    if (!seenKeys.has(key)) {
-      removalIndices.push({ index: oldEntry.index, value: oldEntry.item });
+    if (!seenInArr2.has(key)) {
+      removals.push({ index: oldEntry.index, value: oldEntry.item });
     }
   }
 
-  removalIndices.sort((a, b) => b.index - a.index);
-  const removalPatches: Operation[] = removalIndices.map(
-    ({ index, value }) => ({
+  // --- Generate patches in a safe order ---
+
+  // 1. Handle modifications first
+  patches.push(...modificationPatches);
+
+  // 2. Handle removals from high index to low to avoid index shifting issues.
+  removals.sort((a, b) => b.index - a.index);
+  for (const removal of removals) {
+    patches.push({
       op: "remove",
-      path: `${path}/${index}`,
-      oldValue: value,
-    })
+      path: `${path}/${removal.index}`,
+      oldValue: removal.value,
+    });
+  }
+
+  // 3. Determine moves vs. add/remove for positional changes.
+  const finalAdditions = [...additions];
+  const movePatches: Operation[] = [];
+
+  // An item can only be "moved" if its original spot isn't taken by another moved item.
+  // Otherwise, it's a "remove" (already handled) and an "add".
+  const moveCandidates = Array.from(commonItems.values()).filter(
+    (c) => c.oldIndex !== c.newIndex
   );
 
-  patches.push(...modificationPatches, ...removalPatches, ...additionPatches);
+  // A map to track where items at old indices are moving to.
+  // This helps resolve "move chains" or "swaps".
+  const oldIndexToNewIndexMap = new Map<number, number>();
+  for (const { oldIndex, newIndex } of moveCandidates) {
+    oldIndexToNewIndexMap.set(oldIndex, newIndex);
+  }
+
+  for (const common of moveCandidates) {
+    // If the item's destination is another item's original position,
+    // and that other item is also moving, it's a swap/chain.
+    // We treat the current item as an "add" and let the other item "move".
+    const isDestinationTakenByAnotherMover = oldIndexToNewIndexMap.has(
+      common.newIndex
+    );
+
+    if (isDestinationTakenByAnotherMover) {
+      // This spot is part of a swap or move chain.
+      // The original item at this position was already removed.
+      // We just need to add this item at its new position.
+      finalAdditions.push({ item: common.item, index: common.newIndex });
+    } else {
+      // It's a clean move.
+      movePatches.push({
+        op: "move",
+        from: `${path}/${common.oldIndex}`,
+        path: `${path}/${common.newIndex}`,
+      });
+    }
+  }
+
+  // 4. Handle moves.
+  // This needs careful ordering, but RFC6902 move 'from' paths are based on original doc,
+  // so we don't need to simulate the moves.
+  patches.push(...movePatches);
+
+  // 5. Handle additions, sorted by index.
+  finalAdditions.sort((a, b) => a.index - b.index);
+  for (const add of finalAdditions) {
+    patches.push({ op: "add", path: `${path}/${add.index}`, value: add.item });
+  }
 }
 
 function collapseReplace(
@@ -290,7 +325,11 @@ export function diffArrayUnique(
     const val1 = arr1[i];
     const val2 = arr2[i];
     if (val1 !== val2) {
-      patches.push({ op: "replace", path: `${path}/${i}`, value: val2 });
+      patches.push({
+        op: "replace",
+        path: `${path}/${i}`,
+        value: val2 as JsonValue,
+      });
       replacedAtIndex.add(i);
       if (val2 !== undefined) replacedValues2.add(val2);
     }
