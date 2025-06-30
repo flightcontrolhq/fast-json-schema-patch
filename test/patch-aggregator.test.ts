@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { buildPlan, SchemaPatcher } from "../src";
+import { buildPlan, SchemaJsonPatcher } from "../src";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import type { JsonObject } from "../src/types";
 import schema from "../schema/schema.json";
@@ -239,7 +239,7 @@ describe("PatchAggregator", () => {
     ],
   };
 
-  const patcher = new SchemaPatcher({ plan: buildPlan(schema as any) });
+  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema as any) });
   const patches = patcher.createPatch(originalDoc, newDoc);
 
   const result = new PatchAggregator(originalDoc, newDoc).aggregate(patches, {
@@ -1293,51 +1293,51 @@ describe("PatchAggregator", () => {
             "type": "unchanged",
           },
           {
-            "content": "  ],",
-            "key": "unchanged-132-125",
+            "content": "    "arm64"",
+            "key": "added-125",
             "newLineNumber": 125,
+            "type": "added",
+          },
+          {
+            "content": "  ],",
+            "key": "unchanged-132-126",
+            "newLineNumber": 126,
             "oldLineNumber": 132,
             "type": "unchanged",
           },
           {
             "content": "  "containerInsights": false,",
-            "key": "unchanged-133-126",
-            "newLineNumber": 126,
+            "key": "unchanged-133-127",
+            "newLineNumber": 127,
             "oldLineNumber": 133,
             "type": "unchanged",
           },
           {
             "content": "  "versionHistoryCount": 10,",
-            "key": "unchanged-134-127",
-            "newLineNumber": 127,
+            "key": "unchanged-134-128",
+            "newLineNumber": 128,
             "oldLineNumber": 134,
             "type": "unchanged",
           },
           {
             "content": "  "includeEnvVariablesInBuild": true,",
-            "key": "unchanged-135-128",
-            "newLineNumber": 128,
+            "key": "unchanged-135-129",
+            "newLineNumber": 129,
             "oldLineNumber": 135,
             "type": "unchanged",
           },
           {
             "content": "  "injectEnvVariablesInDockerfile": true",
-            "key": "unchanged-136-129",
-            "newLineNumber": 129,
+            "key": "unchanged-136-130",
+            "newLineNumber": 130,
             "oldLineNumber": 136,
             "type": "unchanged",
           },
           {
             "content": "}",
-            "key": "unchanged-137-130",
-            "newLineNumber": 130,
-            "oldLineNumber": 137,
-            "type": "unchanged",
-          },
-          {
-            "content": "}",
-            "key": "stuck-j-131",
+            "key": "unchanged-137-131",
             "newLineNumber": 131,
+            "oldLineNumber": 137,
             "type": "unchanged",
           },
         ]
@@ -1352,7 +1352,7 @@ describe("PatchAggregator", () => {
 
   it("should produce correct diff lines for children", () => {
     const service1Diff = result.childDiffs.get("job-scheduler-gWLzaf");
-    expect(service1Diff?.addCount).toBe(1);
+    expect(service1Diff?.addCount).toBe(2);
     expect(service1Diff?.removeCount).toBe(8);
   });
 

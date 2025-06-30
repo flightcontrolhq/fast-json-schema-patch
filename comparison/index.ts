@@ -9,7 +9,7 @@ import * as jsondiffpatch from "jsondiffpatch";
 import { performance } from "perf_hooks";
 import * as rfc6902 from "rfc6902";
 import { Differ } from "json-diff-kit";
-import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
+import { SchemaJsonPatcher, buildPlan, deepEqual } from "../src/index";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import mainSchema from "../schema/schema.json";
 
@@ -1028,7 +1028,7 @@ async function compare() {
     console.log(`\n📋 Analyzing ${name} configuration...`);
 
     const plan = buildPlan(scenarioSchema as any);
-    const newPatcher = new SchemaPatcher({ plan });
+    const newPatcher = new SchemaJsonPatcher({ plan });
 
     const newSchemaPatch = newPatcher.createPatch(doc1, doc2);
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
@@ -1060,7 +1060,7 @@ async function compare() {
   );
 
   const plan = buildPlan(mainSchema as any);
-  const newPatcher = new SchemaPatcher({ plan });
+  const newPatcher = new SchemaJsonPatcher({ plan });
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
@@ -1207,7 +1207,7 @@ async function compare() {
           {
             name: "schema-aggregated",
             fn: () => {
-              const freshPatcher = new SchemaPatcher({ plan });
+              const freshPatcher = new SchemaJsonPatcher({ plan });
               const aggregator = new PatchAggregator(doc1, doc2);
               const rawPatch = freshPatcher.createPatch(doc1, doc2);
               return aggregator.aggregate(rawPatch, {

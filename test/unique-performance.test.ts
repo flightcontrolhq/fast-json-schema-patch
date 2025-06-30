@@ -1,4 +1,4 @@
-import { buildPlan, SchemaPatcher } from '../src/index';
+import { buildPlan, SchemaJsonPatcher } from '../src/index';
 import { describe, test, expect } from "bun:test";
 
 describe('Unique Array Performance', () => {
@@ -14,7 +14,7 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaPatcher({ plan });
+    const patcher = new SchemaJsonPatcher({ plan });
 
     const doc1 = {
       tags: ['javascript', 'typescript', 'react', 'node.js', 'mongodb']
@@ -50,7 +50,7 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaPatcher({ plan });
+    const patcher = new SchemaJsonPatcher({ plan });
 
     // Generate large arrays with unique numbers - but with some overlap for replace optimization
     const arr1 = Array.from({ length: 1000 }, (_, i) => i);
@@ -86,7 +86,7 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaPatcher({ plan });
+    const patcher = new SchemaJsonPatcher({ plan });
 
     // Test case where replace is optimal
     const doc1 = { items: ['a', 'b', 'c', 'd'] };

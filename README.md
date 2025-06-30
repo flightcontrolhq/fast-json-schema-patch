@@ -43,10 +43,10 @@ npm install schema-json-patch
 
 ## 🚀 Quick Start
 
-The core of the library is the `SchemaPatcher`, which is configured with a `plan` to optimize patch generation.
+The core of the library is the `SchemaJsonPatcher`, which is configured with a `plan` to optimize patch generation.
 
 ```typescript
-import { SchemaPatcher, buildPlan } from 'schema-json-patch';
+import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
 
 // 1. Define a plan for your data structure
 const plan = buildPlan({
@@ -57,7 +57,7 @@ const plan = buildPlan({
 });
 
 // 2. Instantiate the patcher with the plan
-const patcher = new SchemaPatcher({ plan });
+const patcher = new SchemaJsonPatcher({ plan });
 
 // Original and modified documents
 const original = {
@@ -130,10 +130,10 @@ It not only provides a structured diff but does so with exceptional performance 
 
 ## 🛠️ API Reference
 
-### `SchemaPatcher`
+### `SchemaJsonPatcher`
 The main class for generating patches.
 
-**`new SchemaPatcher({ plan })`**
+**`new SchemaJsonPatcher({ plan })`**
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
 **`patcher.createPatch(source, target)`**
@@ -146,7 +146,7 @@ The main class for creating human-readable diffs.
 - `originalDoc`, `newDoc`: The two documents to compare.
 
 **`aggregator.aggregate(patches, config)`**
-- `patches`: The patch array from `SchemaPatcher`.
+- `patches`: The patch array from `SchemaJsonPatcher`.
 - `config`: An object specifying the `pathPrefix` of the array to aggregate and an optional `plan`.
 - **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a map of `childDiffs`.
 

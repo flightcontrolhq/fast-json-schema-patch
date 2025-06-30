@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { buildPlan, SchemaPatcher } from "../src/index";
+import { buildPlan, SchemaJsonPatcher } from "../src/index";
 import { DiffFormatter } from "../src/formatting/DiffFormatter";
 import { faker } from "@faker-js/faker";
 
@@ -78,7 +78,7 @@ describe("DiffFormatter E2E Integration", () => {
     });
 
     const plan = buildPlan(userSchema, { primaryKeyMap: { "/posts": "postId" } });
-    const patcher = new SchemaPatcher({ plan });
+    const patcher = new SchemaJsonPatcher({ plan });
     const patch = patcher.createPatch(doc1, doc2);
 
     const formatter = new DiffFormatter(doc1, doc2);
