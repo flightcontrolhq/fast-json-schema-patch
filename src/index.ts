@@ -1,6 +1,6 @@
 import {diffArrayByPrimaryKey, diffArrayLCS, diffArrayUnique} from "./core/arrayDiffAlgorithms"
 import type {ArrayPlan, Plan} from "./core/buildPlan"
-import {deepEqualMemo, deepEqualSchemaAware} from "./performance/deepEqual"
+import {deepEqualMemo} from "./performance/deepEqual"
 import type {JsonArray, JsonObject, JsonValue, Operation} from "./types"
 import {getWildcardPath, normalizePath} from "./utils/pathUtils"
 

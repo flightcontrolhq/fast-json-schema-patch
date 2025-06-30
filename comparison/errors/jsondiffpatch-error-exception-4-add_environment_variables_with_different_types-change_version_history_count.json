@@ -1,0 +1,259 @@
+{
+  "library": "jsondiffpatch",
+  "error": "Patch sequence must be an array\nname: SEQUENCE_NOT_AN_ARRAY",
+  "stack": "SEQUENCE_NOT_AN_ARRAY: Patch sequence must be an array\nname: SEQUENCE_NOT_AN_ARRAY\n    at new PatchError (/Users/siddharthsuresh/Developer/schema-json-patch/node_modules/fast-json-patch/commonjs/helpers.js:170:28)\n    at applyPatch (/Users/siddharthsuresh/Developer/schema-json-patch/node_modules/fast-json-patch/commonjs/core.js:271:31)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:235:55)\n    at isPatchValid (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:225:3)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:778:28)\n    at processTicksAndRejections (native:7:39)",
+  "doc1": {
+    "environments": [
+      {
+        "id": "occaecati-ciminatio-chirographum",
+        "name": "lanky-crest",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "bogisich inc",
+          "repo": "conturbo-suffragium-tamen",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "clamo-dolorem-varietas",
+            "name": "transform compelling content",
+            "type": "web",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 7
+          },
+          {
+            "id": "cibo-spes-officiis",
+            "name": "architect mission-critical deliverables",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 3
+          },
+          {
+            "id": "impedit-termes-cohibeo",
+            "name": "enable granular technologies",
+            "type": "db",
+            "cpu": 2,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 5
+          },
+          {
+            "id": "aliquam-solitudo-labore",
+            "name": "facilitate distributed interfaces",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 9
+          }
+        ]
+      },
+      {
+        "id": "voluptas-ullus-illum",
+        "name": "brisk-juggernaut",
+        "region": "eu-central-1",
+        "source": {
+          "type": "github",
+          "owner": "kuhic, klocko and erdman",
+          "repo": "atrocitas-aer-vapulus",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "strenuus-corrumpo-sordeo",
+            "name": "extend next-generation functionalities",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 1,
+            "minInstances": 2,
+            "maxInstances": 4
+          },
+          {
+            "id": "studio-sol-surculus",
+            "name": "incentivize open-source applications",
+            "type": "web",
+            "cpu": 0.25,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 3
+          },
+          {
+            "id": "ipsum-audeo-viridis",
+            "name": "redefine magnetic partnerships",
+            "type": "web",
+            "cpu": 4,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 6
+          },
+          {
+            "id": "turbo-tamdiu-solutio",
+            "name": "transition plug-and-play infrastructures",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 9
+          }
+        ]
+      }
+    ]
+  },
+  "doc2": {
+    "environments": [
+      {
+        "id": "occaecati-ciminatio-chirographum",
+        "name": "lanky-crest",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "bogisich inc",
+          "repo": "conturbo-suffragium-tamen",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "clamo-dolorem-varietas",
+            "name": "transform compelling content",
+            "type": "web",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 7
+          },
+          {
+            "id": "cibo-spes-officiis",
+            "name": "architect mission-critical deliverables",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 3
+          },
+          {
+            "id": "impedit-termes-cohibeo",
+            "name": "enable granular technologies",
+            "type": "db",
+            "cpu": 2,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 5
+          },
+          {
+            "id": "aliquam-solitudo-labore",
+            "name": "facilitate distributed interfaces",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 9
+          }
+        ]
+      },
+      {
+        "id": "voluptas-ullus-illum",
+        "name": "brisk-juggernaut",
+        "region": "eu-central-1",
+        "source": {
+          "type": "github",
+          "owner": "kuhic, klocko and erdman",
+          "repo": "atrocitas-aer-vapulus",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "strenuus-corrumpo-sordeo",
+            "name": "extend next-generation functionalities",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 1,
+            "minInstances": 2,
+            "maxInstances": 4
+          },
+          {
+            "id": "studio-sol-surculus",
+            "name": "incentivize open-source applications",
+            "type": "web",
+            "cpu": 0.25,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 3,
+            "versionHistoryCount": 12
+          },
+          {
+            "id": "ipsum-audeo-viridis",
+            "name": "redefine magnetic partnerships",
+            "type": "web",
+            "cpu": 4,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 6
+          },
+          {
+            "id": "turbo-tamdiu-solutio",
+            "name": "transition plug-and-play infrastructures",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 9,
+            "envVariables": {
+              "STRING_VAR": "excepturi",
+              "NUMBER_VAR": 24,
+              "BOOLEAN_VAR": true,
+              "PARAM_VAR": {
+                "fromParameterStore": "/app/curvo"
+              },
+              "SECRET_VAR": {
+                "fromSecretsManager": "cuius-secret"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "patch": {
+    "environments": {
+      "1": {
+        "services": {
+          "1": {
+            "versionHistoryCount": [
+              12
+            ]
+          },
+          "3": {
+            "envVariables": [
+              {
+                "STRING_VAR": "excepturi",
+                "NUMBER_VAR": 24,
+                "BOOLEAN_VAR": true,
+                "PARAM_VAR": {
+                  "fromParameterStore": "/app/curvo"
+                },
+                "SECRET_VAR": {
+                  "fromSecretsManager": "cuius-secret"
+                }
+              }
+            ]
+          },
+          "_t": "a"
+        }
+      },
+      "_t": "a"
+    }
+  },
+  "modificationNames": [
+    "Add environment variables with different types",
+    "Change version history count"
+  ]
+}

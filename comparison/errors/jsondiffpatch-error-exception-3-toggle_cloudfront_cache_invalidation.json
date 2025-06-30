@@ -1,0 +1,214 @@
+{
+  "library": "jsondiffpatch",
+  "error": "Patch sequence must be an array\nname: SEQUENCE_NOT_AN_ARRAY",
+  "stack": "SEQUENCE_NOT_AN_ARRAY: Patch sequence must be an array\nname: SEQUENCE_NOT_AN_ARRAY\n    at new PatchError (/Users/siddharthsuresh/Developer/schema-json-patch/node_modules/fast-json-patch/commonjs/helpers.js:170:28)\n    at applyPatch (/Users/siddharthsuresh/Developer/schema-json-patch/node_modules/fast-json-patch/commonjs/core.js:271:31)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:235:55)\n    at isPatchValid (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:225:3)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:778:28)\n    at processTicksAndRejections (native:7:39)",
+  "doc1": {
+    "environments": [
+      {
+        "id": "antiquus-patria-caelum",
+        "name": "cavernous-daughter",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "douglas llc",
+          "repo": "denuncio-despecto-crepusculum",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "inventore-dapifer-curia",
+            "name": "exploit decentralized networks",
+            "type": "web",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 2,
+            "maxInstances": 3
+          },
+          {
+            "id": "doloribus-audacia-territo",
+            "name": "syndicate intuitive supply-chains",
+            "type": "web",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 2
+          }
+        ]
+      },
+      {
+        "id": "taceo-solum-bestia",
+        "name": "infatuated-papa",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "tillman - sanford",
+          "repo": "appello-ustulo-tamquam",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "nisi-ascisco-substantia",
+            "name": "visualize killer synergies",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 2,
+            "minInstances": 1,
+            "maxInstances": 8
+          },
+          {
+            "id": "facilis-viriliter-illum",
+            "name": "collaborate global supply-chains",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 10
+          },
+          {
+            "id": "voluntarius-thesaurus-pauper",
+            "name": "scale cross-platform experiences",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 5
+          },
+          {
+            "id": "desparatus-commodo-caveo",
+            "name": "gamify synergistic platforms",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 7
+          },
+          {
+            "id": "acies-somniculosus-cresco",
+            "name": "incubate immersive infrastructures",
+            "type": "worker",
+            "cpu": 4,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 2
+          }
+        ]
+      }
+    ]
+  },
+  "doc2": {
+    "environments": [
+      {
+        "id": "antiquus-patria-caelum",
+        "name": "cavernous-daughter",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "douglas llc",
+          "repo": "denuncio-despecto-crepusculum",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "inventore-dapifer-curia",
+            "name": "exploit decentralized networks",
+            "type": "web",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 2,
+            "maxInstances": 3
+          },
+          {
+            "id": "doloribus-audacia-territo",
+            "name": "syndicate intuitive supply-chains",
+            "type": "web",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 2
+          }
+        ]
+      },
+      {
+        "id": "taceo-solum-bestia",
+        "name": "infatuated-papa",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "tillman - sanford",
+          "repo": "appello-ustulo-tamquam",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "nisi-ascisco-substantia",
+            "name": "visualize killer synergies",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 2,
+            "minInstances": 1,
+            "maxInstances": 8
+          },
+          {
+            "id": "facilis-viriliter-illum",
+            "name": "collaborate global supply-chains",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 10
+          },
+          {
+            "id": "voluntarius-thesaurus-pauper",
+            "name": "scale cross-platform experiences",
+            "type": "worker",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 5,
+            "cloudfrontAutoCacheInvalidation": false
+          },
+          {
+            "id": "desparatus-commodo-caveo",
+            "name": "gamify synergistic platforms",
+            "type": "worker",
+            "cpu": 0.25,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 7
+          },
+          {
+            "id": "acies-somniculosus-cresco",
+            "name": "incubate immersive infrastructures",
+            "type": "worker",
+            "cpu": 4,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 2
+          }
+        ]
+      }
+    ]
+  },
+  "patch": {
+    "environments": {
+      "1": {
+        "services": {
+          "2": {
+            "cloudfrontAutoCacheInvalidation": [
+              false
+            ]
+          },
+          "_t": "a"
+        }
+      },
+      "_t": "a"
+    }
+  },
+  "modificationNames": [
+    "Toggle CloudFront cache invalidation"
+  ]
+}

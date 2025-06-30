@@ -192,33 +192,37 @@ export function diffArrayLCS(
 
   let ai = 0
   let bi = 0
+  let patchedIndex = 0
   for (const op of ops2) {
     switch (op) {
       case "common":
-        onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${path}/${ai}`, patches)
+        onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${path}/${patchedIndex}`, patches)
         ai++
         bi++
+        patchedIndex++
         break
       case "replace":
         patches.push({
           op: "replace",
-          path: `${path}/${ai}`,
+          path: `${path}/${patchedIndex}`,
           value: arr2[bi] as JsonValue,
         })
         ai++
         bi++
+        patchedIndex++
         break
       case "remove":
-        patches.push({op: "remove", path: `${path}/${ai}`})
+        patches.push({op: "remove", path: `${path}/${patchedIndex}`})
         ai++
         break
       case "add":
         patches.push({
           op: "add",
-          path: `${path}/${ai}`,
+          path: `${path}/${patchedIndex}`,
           value: arr2[bi] as JsonValue,
         })
         bi++
+        patchedIndex++
         break
     }
   }

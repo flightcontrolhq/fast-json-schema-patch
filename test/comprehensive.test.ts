@@ -1783,12 +1783,12 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
         },
         {
           "op": "replace",
-          "path": "/items/2",
+          "path": "/items/1",
           "value": 2,
         },
         {
           "op": "add",
-          "path": "/items/3",
+          "path": "/items/2",
           "value": {
             "a": "c",
           },
@@ -2209,11 +2209,12 @@ describe("Array diffing strategies", () => {
         {
           op: "remove",
           path: "/flags/1",
-        }, {
+        },
+        {
           op: "add",
-          path: "/flags/4",
+          path: "/flags/3",
           value: false,
-        }
+        },
       ]);
     });
   });

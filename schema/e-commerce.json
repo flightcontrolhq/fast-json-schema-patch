@@ -1,0 +1,183 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ECommercePlatformConfig",
+    "type": "object",
+    "required": [
+      "store",
+      "payments",
+      "shipping",
+      "inventory",
+      "categories",
+      "products",
+      "users"
+    ],
+    "properties": {
+      "store": {
+        "type": "object",
+        "required": ["name", "currency", "locale"],
+        "properties": {
+          "name": { "type": "string" },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "locale": { "type": "string", "pattern": "^[a-z]{2}-[A-Z]{2}$" },
+          "logoUrl": { "type": "string", "format": "uri" },
+          "supportEmail": { "type": "string", "format": "email" }
+        },
+        "additionalProperties": false
+      },
+      "payments": {
+        "type": "object",
+        "required": ["supportedMethods"],
+        "properties": {
+          "supportedMethods": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["credit_card", "paypal", "stripe", "upi"] },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "stripe": {
+            "type": "object",
+            "properties": {
+              "apiKey": { "type": "string" },
+              "webhookSecret": { "type": "string" }
+            },
+            "required": ["apiKey", "webhookSecret"],
+            "additionalProperties": false
+          },
+          "paypal": {
+            "type": "object",
+            "properties": {
+              "clientId": { "type": "string" },
+              "clientSecret": { "type": "string" }
+            },
+            "required": ["clientId", "clientSecret"],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "shipping": {
+        "type": "object",
+        "required": ["rates"],
+        "properties": {
+          "rates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["country", "method", "cost"],
+              "properties": {
+                "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+                "method": { "type": "string", "enum": ["standard", "express", "pickup"] },
+                "cost": { "type": "number", "minimum": 0 },
+                "estimatedDays": { "type": "integer", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "freeOver": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": false
+      },
+      "inventory": {
+        "type": "object",
+        "required": ["thresholdAlert"],
+        "properties": {
+          "thresholdAlert": { "type": "integer", "minimum": 1 },
+          "autoRestock": { "type": "boolean" },
+          "restockLevel": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      },
+      "features": {
+        "type": "object",
+        "properties": {
+          "reviewsEnabled": { "type": "boolean" },
+          "relatedProducts": { "type": "boolean" },
+          "guestCheckout": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      },
+      "analytics": {
+        "type": "object",
+        "required": ["googleAnalyticsId"],
+        "properties": {
+          "googleAnalyticsId": { "type": "string", "pattern": "^UA-[0-9]+-[0-9]+$" },
+          "trackUserBehavior": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      },
+      "categories": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "slug"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+            "name": { "type": "string" },
+            "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+            "parentId": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "products": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["id", "name", "sku", "price", "categoryIds"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+            "name": { "type": "string" },
+            "sku": { "type": "string" },
+            "description": { "type": "string" },
+            "price": { "type": "number", "minimum": 0 },
+            "categoryIds": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "inventoryLevel": { "type": "integer", "minimum": 0 },
+            "attributes": {
+              "type": "object",
+              "patternProperties": {
+                "^[A-Za-z0-9_-]+$": { "type": ["string", "number", "boolean"] }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "users": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "required": ["id", "email", "roles"],
+          "properties": {
+            "id": { "type": "string", "format": "uuid" },
+            "email": { "type": "string", "format": "email" },
+            "name": { "type": "string" },
+            "roles": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["admin", "manager", "customer", "guest"] },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": { "type": ["string", "number", "boolean"] }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+  

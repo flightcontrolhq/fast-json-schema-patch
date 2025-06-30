@@ -1,0 +1,2534 @@
+[
+  [
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 1
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"environments\": [",
+      "lineNumber": 2
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 3
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"stipes-catena-itaque\"",
+      "lineNumber": 4,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"possible-teammate\"",
+      "lineNumber": 5,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"us-west-2\"",
+      "lineNumber": 6,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 7
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 8
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 9,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"voluptas-sumo-sublime\"",
+      "lineNumber": 10,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 9",
+      "lineNumber": 11,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 4",
+      "lineNumber": 12,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 13,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"enable visionary AI\"",
+      "lineNumber": 14,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 15
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 16,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 17
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 18,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"vorago-ascit-patria\"",
+      "lineNumber": 19,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 9",
+      "lineNumber": 20,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 8",
+      "lineNumber": 21,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 22,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"aggregate granular ROI\"",
+      "lineNumber": 23,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 24
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 25,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 26
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 4",
+      "lineNumber": 27,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"at-aestas-paulatim\"",
+      "lineNumber": 28,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 29,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 2",
+      "lineNumber": 30,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 31,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"drive robust interfaces\"",
+      "lineNumber": 32,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 33
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 34,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 35
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 2",
+      "lineNumber": 36,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"impedit-error-repellendus\"",
+      "lineNumber": 37,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 6",
+      "lineNumber": 38,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 39,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 40,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"generate proactive interfaces\"",
+      "lineNumber": 41,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 42
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 43
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 44,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 45
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 46,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"dicki inc\"",
+      "lineNumber": 47,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"auctor-versus-custodia\"",
+      "lineNumber": 48,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 49,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 50
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 51
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 52,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 53
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"tempore-thalassinus-cunabula\"",
+      "lineNumber": 54,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"wavy-comparison\"",
+      "lineNumber": 55,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"eu-central-1\"",
+      "lineNumber": 56,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 57
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 58
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 1",
+      "lineNumber": 59,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"cur-ventito-cultellus\"",
+      "lineNumber": 60,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 4",
+      "lineNumber": 61,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 62,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 63,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"exploit next-generation supply-chains\"",
+      "lineNumber": 64,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 65
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 66,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 67
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 2",
+      "lineNumber": 68,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"synagoga-varius-dolorum\"",
+      "lineNumber": 69,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 2",
+      "lineNumber": 70,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 1",
+      "lineNumber": 71,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 72,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"mesh back-end metrics\"",
+      "lineNumber": 73,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 74
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 75,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 76
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 77,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"amo-stella-dolorum\"",
+      "lineNumber": 78,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 79,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 8",
+      "lineNumber": 80,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 81,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"maximize synergistic markets\"",
+      "lineNumber": 82,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 83
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 84,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 85
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 1",
+      "lineNumber": 86,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"copia-uredo-consectetur\"",
+      "lineNumber": 87,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 5",
+      "lineNumber": 88,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 1",
+      "lineNumber": 89,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 90,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"embrace interactive initiatives\"",
+      "lineNumber": 91,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 92
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 93,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 94
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 0.5",
+      "lineNumber": 95,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"veniam-volva-qui\"",
+      "lineNumber": 96,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 97,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 98,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 99,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"collaborate robust paradigms\"",
+      "lineNumber": 100,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 101
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 102
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 103,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 104
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 105,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"ruecker and sons\"",
+      "lineNumber": 106,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"vomica-voluptate-adhaero\"",
+      "lineNumber": 107,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 108,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 109
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 110
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 111,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 112
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"vulariter-aer-appono\"",
+      "lineNumber": 113,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"shrill-soup\"",
+      "lineNumber": 114,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"us-east-1\"",
+      "lineNumber": 115,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 116
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 117
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 4",
+      "lineNumber": 118,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"illo-ademptio-solum\"",
+      "lineNumber": 119,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 2",
+      "lineNumber": 120,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 4",
+      "lineNumber": 121,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 122,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"integrate quantum large language models\"",
+      "lineNumber": 123,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 124
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 125,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 126
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 127,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"ratione-civis-cumque\"",
+      "lineNumber": 128,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 8",
+      "lineNumber": 129,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 130,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 131,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"seize generative technologies\"",
+      "lineNumber": 132,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 133
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 134
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 135,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 136
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 137,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"schaefer, pfeffer and hayes\"",
+      "lineNumber": 138,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"decretum-copiose-tunc\"",
+      "lineNumber": 139,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 140,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 141
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 142
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 143
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 144
+    },
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 145
+    }
+  ],
+  [
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 1
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"environments\": [",
+      "lineNumber": 2
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 3
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"stipes-catena-itaque\"",
+      "lineNumber": 4,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"possible-teammate\"",
+      "lineNumber": 5,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"us-west-2\"",
+      "lineNumber": 6,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 7
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 8
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 9,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"voluptas-sumo-sublime\"",
+      "lineNumber": 10,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 9",
+      "lineNumber": 11,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 4",
+      "lineNumber": 12,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 13,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"enable visionary AI\"",
+      "lineNumber": 14,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 15
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 16,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 17
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 18,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"vorago-ascit-patria\"",
+      "lineNumber": 19,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 9",
+      "lineNumber": 20,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 8",
+      "lineNumber": 21,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 22,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"aggregate granular ROI\"",
+      "lineNumber": 23,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 24,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"watchPaths\": [",
+      "lineNumber": 25
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"src/**\"",
+      "lineNumber": 26
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "]",
+      "lineNumber": 27
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 28,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 29
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 4",
+      "lineNumber": 30,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"at-aestas-paulatim\"",
+      "lineNumber": 31,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 32,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 2",
+      "lineNumber": 33,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 34,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"drive robust interfaces\"",
+      "lineNumber": 35,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 36
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 37,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 38
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 2",
+      "lineNumber": 39,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"impedit-error-repellendus\"",
+      "lineNumber": 40,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 6",
+      "lineNumber": 41,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 42,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 43,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"generate proactive interfaces\"",
+      "lineNumber": 44,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 45
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 46
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 47,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 48
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 49,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"dicki inc\"",
+      "lineNumber": 50,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"auctor-versus-custodia\"",
+      "lineNumber": 51,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 52,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 53
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 54
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 55,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 56
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"tempore-thalassinus-cunabula\"",
+      "lineNumber": 57,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"wavy-comparison\"",
+      "lineNumber": 58,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"eu-central-1\"",
+      "lineNumber": 59,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 60
+    },
+    {
+      "level": 4,
+      "type": "add",
+      "text": "{",
+      "lineNumber": 61
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"id\": \"cur-ventito-cultellus\"",
+      "lineNumber": 62,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"name\": \"exploit next-generation supply-chains\"",
+      "lineNumber": 63,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 64,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"cpu\": 1",
+      "lineNumber": 65,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 66,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 67,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"maxInstances\": 4",
+      "lineNumber": 68
+    },
+    {
+      "level": 4,
+      "type": "add",
+      "text": "}",
+      "lineNumber": 69,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 70
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 2",
+      "lineNumber": 71,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"synagoga-varius-dolorum\"",
+      "lineNumber": 72,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 2",
+      "lineNumber": 73,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 1",
+      "lineNumber": 74,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 75,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"mesh back-end metrics\"",
+      "lineNumber": 76,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 77
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 78,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 79
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 1",
+      "lineNumber": 80,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"amo-stella-dolorum\"",
+      "lineNumber": 81,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 82,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 8",
+      "lineNumber": 83,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 84,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"maximize synergistic markets\"",
+      "lineNumber": 85,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 86
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 87,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 88
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 89,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"copia-uredo-consectetur\"",
+      "lineNumber": 90,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 5",
+      "lineNumber": 91,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 1",
+      "lineNumber": 92,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 93,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"embrace interactive initiatives\"",
+      "lineNumber": 94,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"worker\"",
+      "lineNumber": 95
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 96,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 97
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 0.5",
+      "lineNumber": 98,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"veniam-volva-qui\"",
+      "lineNumber": 99,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 3",
+      "lineNumber": 100,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 101,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 102,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"collaborate robust paradigms\"",
+      "lineNumber": 103,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 104
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 105,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 106
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"autoscaling\": {",
+      "lineNumber": 107
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"cpuThreshold\": 75",
+      "lineNumber": 108,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"memoryThreshold\": 80",
+      "lineNumber": 109,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"requestsPerTarget\": 500",
+      "lineNumber": 110,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"cooldownTimerSecs\": 300",
+      "lineNumber": 111
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "}",
+      "lineNumber": 112,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"basePath\": \".\"",
+      "lineNumber": 113,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"buildType\": \"docker\"",
+      "lineNumber": 114,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"cloudfrontAutoCacheInvalidation\": true",
+      "lineNumber": 115,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"containerInsights\": true",
+      "lineNumber": 116,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"cpu\": 2",
+      "lineNumber": 117,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"dockerContext\": \".\"",
+      "lineNumber": 118,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"dockerfilePath\": \"Dockerfile\"",
+      "lineNumber": 119,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"envVariables\": {",
+      "lineNumber": 120
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"NODE_ENV\": \"production\"",
+      "lineNumber": 121,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"LOG_LEVEL\": \"info\"",
+      "lineNumber": 122
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "}",
+      "lineNumber": 123,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"gpu\": 1",
+      "lineNumber": 124,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"healthCheckGracePeriodSecs\": 60",
+      "lineNumber": 125,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"healthCheckIntervalSecs\": 30",
+      "lineNumber": 126,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"healthCheckPath\": \"/health\"",
+      "lineNumber": 127,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"healthCheckTimeoutSecs\": 10",
+      "lineNumber": 128,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"id\": \"derelinquo-appello-ara\"",
+      "lineNumber": 129,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"includeEnvVariablesInBuild\": true",
+      "lineNumber": 130,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"injectEnvVariablesInDockerfile\": true",
+      "lineNumber": 131,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"integrations\": {",
+      "lineNumber": 132
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"uploadSentrySourceMap\": true",
+      "lineNumber": 133
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "}",
+      "lineNumber": 134,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"logging\": {",
+      "lineNumber": 135
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"cloudwatchLogsEnabled\": true",
+      "lineNumber": 136,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"cloudwatchLogsRetentionDays\": 30",
+      "lineNumber": 137,
+      "comma": true
+    },
+    {
+      "level": 6,
+      "type": "add",
+      "text": "\"ecsLogsMetadataEnabled\": true",
+      "lineNumber": 138
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "}",
+      "lineNumber": 139,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"maxInstances\": 10",
+      "lineNumber": 140,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"memory\": 4",
+      "lineNumber": 141,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 2",
+      "lineNumber": 142,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"name\": \"Full Featured Service\"",
+      "lineNumber": 143,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"originShieldEnabled\": true",
+      "lineNumber": 144,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"port\": 3000",
+      "lineNumber": 145,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"privileged\": false",
+      "lineNumber": 146,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"stickySessionsDurationSecs\": 3600",
+      "lineNumber": 147,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"stickySessionsEnabled\": true",
+      "lineNumber": 148,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"storage\": 50",
+      "lineNumber": 149,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "modify",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 150,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "add",
+      "text": "\"versionHistoryCount\": 15",
+      "lineNumber": 151
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 152
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 153,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 154
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 155,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"ruecker and sons\"",
+      "lineNumber": 156,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"vomica-voluptate-adhaero\"",
+      "lineNumber": 157,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 158,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 159
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 160
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 161,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 162
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"vulariter-aer-appono\"",
+      "lineNumber": 163,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"shrill-soup\"",
+      "lineNumber": 164,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"region\": \"us-east-1\"",
+      "lineNumber": 165,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"services\": [",
+      "lineNumber": 166
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 167
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 4",
+      "lineNumber": 168,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"illo-ademptio-solum\"",
+      "lineNumber": 169,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 2",
+      "lineNumber": 170,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 4",
+      "lineNumber": 171,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 172,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"integrate quantum large language models\"",
+      "lineNumber": 173,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"web\"",
+      "lineNumber": 174
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 175,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 176
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"cpu\": 1",
+      "lineNumber": 177,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"id\": \"ratione-civis-cumque\"",
+      "lineNumber": 178,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"maxInstances\": 8",
+      "lineNumber": 179,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"memory\": 0.5",
+      "lineNumber": 180,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"minInstances\": 1",
+      "lineNumber": 181,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"name\": \"seize generative technologies\"",
+      "lineNumber": 182,
+      "comma": true
+    },
+    {
+      "level": 5,
+      "type": "equal",
+      "text": "\"type\": \"db\"",
+      "lineNumber": 183
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 184
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 185,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"source\": {",
+      "lineNumber": 186
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"branch\": \"main\"",
+      "lineNumber": 187,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"owner\": \"schaefer, pfeffer and hayes\"",
+      "lineNumber": 188,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"repo\": \"decretum-copiose-tunc\"",
+      "lineNumber": 189,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"trigger\": \"push\"",
+      "lineNumber": 190,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"type\": \"github\"",
+      "lineNumber": 191
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 192
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 193
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 194
+    },
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 195
+    }
+  ]
+]

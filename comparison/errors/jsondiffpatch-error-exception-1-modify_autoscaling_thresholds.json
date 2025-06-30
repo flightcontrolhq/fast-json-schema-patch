@@ -1,0 +1,180 @@
+{
+  "library": "jsondiffpatch",
+  "error": "JSON Parse error: Unexpected identifier \"undefined\"",
+  "stack": "SyntaxError: JSON Parse error: Unexpected identifier \"undefined\"\n    at <parse> (:0)\n    at parse (unknown)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:233:28)\n    at isPatchValid (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:225:3)\n    at <anonymous> (/Users/siddharthsuresh/Developer/schema-json-patch/comparison/index.ts:778:28)\n    at processTicksAndRejections (native:7:39)",
+  "doc1": {
+    "environments": [
+      {
+        "id": "bene-aperiam-comedo",
+        "name": "heavy-middle",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "brakus, durgan and crooks",
+          "repo": "solitudo-catena-deleniti",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "pax-impedit-curriculum",
+            "name": "orchestrate innovative synergies",
+            "type": "db",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 2,
+            "maxInstances": 7
+          },
+          {
+            "id": "vespillo-aeneus-alias",
+            "name": "architect synergistic schemas",
+            "type": "db",
+            "cpu": 4,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 9
+          },
+          {
+            "id": "angustus-rerum-arbitro",
+            "name": "unleash leading-edge interfaces",
+            "type": "web",
+            "cpu": 2,
+            "memory": 2,
+            "minInstances": 2,
+            "maxInstances": 2
+          },
+          {
+            "id": "quae-perspiciatis-provident",
+            "name": "unleash real-time infrastructures",
+            "type": "worker",
+            "cpu": 2,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 8
+          }
+        ]
+      },
+      {
+        "id": "advoco-stultus-minima",
+        "name": "favorite-lid",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "ward inc",
+          "repo": "sopor-apostolus-sumptus",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "articulus-amor-sollicito",
+            "name": "deploy cutting-edge initiatives",
+            "type": "db",
+            "cpu": 0.25,
+            "memory": 8,
+            "minInstances": 1,
+            "maxInstances": 10
+          },
+          {
+            "id": "delicate-voluptatibus-pecco",
+            "name": "revolutionize B2B e-commerce",
+            "type": "web",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 5
+          }
+        ]
+      }
+    ]
+  },
+  "doc2": {
+    "environments": [
+      {
+        "id": "bene-aperiam-comedo",
+        "name": "heavy-middle",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "brakus, durgan and crooks",
+          "repo": "solitudo-catena-deleniti",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "pax-impedit-curriculum",
+            "name": "orchestrate innovative synergies",
+            "type": "db",
+            "cpu": 0.5,
+            "memory": 4,
+            "minInstances": 2,
+            "maxInstances": 7
+          },
+          {
+            "id": "vespillo-aeneus-alias",
+            "name": "architect synergistic schemas",
+            "type": "db",
+            "cpu": 4,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 9
+          },
+          {
+            "id": "angustus-rerum-arbitro",
+            "name": "unleash leading-edge interfaces",
+            "type": "web",
+            "cpu": 2,
+            "memory": 2,
+            "minInstances": 2,
+            "maxInstances": 2
+          },
+          {
+            "id": "quae-perspiciatis-provident",
+            "name": "unleash real-time infrastructures",
+            "type": "worker",
+            "cpu": 2,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 8
+          }
+        ]
+      },
+      {
+        "id": "advoco-stultus-minima",
+        "name": "favorite-lid",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "ward inc",
+          "repo": "sopor-apostolus-sumptus",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "articulus-amor-sollicito",
+            "name": "deploy cutting-edge initiatives",
+            "type": "db",
+            "cpu": 0.25,
+            "memory": 8,
+            "minInstances": 1,
+            "maxInstances": 10
+          },
+          {
+            "id": "delicate-voluptatibus-pecco",
+            "name": "revolutionize B2B e-commerce",
+            "type": "web",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 5
+          }
+        ]
+      }
+    ]
+  },
+  "modificationNames": [
+    "Modify autoscaling thresholds"
+  ]
+}

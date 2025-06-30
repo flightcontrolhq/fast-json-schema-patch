@@ -1,0 +1,342 @@
+{
+  "doc1": {
+    "environments": [
+      {
+        "id": "stipes-catena-itaque",
+        "name": "possible-teammate",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "dicki inc",
+          "repo": "auctor-versus-custodia",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "voluptas-sumo-sublime",
+            "name": "enable visionary AI",
+            "type": "web",
+            "cpu": 1,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 9
+          },
+          {
+            "id": "vorago-ascit-patria",
+            "name": "aggregate granular ROI",
+            "type": "db",
+            "cpu": 1,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 9
+          },
+          {
+            "id": "at-aestas-paulatim",
+            "name": "drive robust interfaces",
+            "type": "worker",
+            "cpu": 4,
+            "memory": 2,
+            "minInstances": 1,
+            "maxInstances": 3
+          },
+          {
+            "id": "impedit-error-repellendus",
+            "name": "generate proactive interfaces",
+            "type": "worker",
+            "cpu": 2,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 6
+          }
+        ]
+      },
+      {
+        "id": "tempore-thalassinus-cunabula",
+        "name": "wavy-comparison",
+        "region": "eu-central-1",
+        "source": {
+          "type": "github",
+          "owner": "ruecker and sons",
+          "repo": "vomica-voluptate-adhaero",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "cur-ventito-cultellus",
+            "name": "exploit next-generation supply-chains",
+            "type": "db",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 4
+          },
+          {
+            "id": "synagoga-varius-dolorum",
+            "name": "mesh back-end metrics",
+            "type": "web",
+            "cpu": 2,
+            "memory": 1,
+            "minInstances": 2,
+            "maxInstances": 2
+          },
+          {
+            "id": "amo-stella-dolorum",
+            "name": "maximize synergistic markets",
+            "type": "db",
+            "cpu": 1,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 3
+          },
+          {
+            "id": "copia-uredo-consectetur",
+            "name": "embrace interactive initiatives",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 5
+          },
+          {
+            "id": "veniam-volva-qui",
+            "name": "collaborate robust paradigms",
+            "type": "db",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 3
+          }
+        ]
+      },
+      {
+        "id": "vulariter-aer-appono",
+        "name": "shrill-soup",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "schaefer, pfeffer and hayes",
+          "repo": "decretum-copiose-tunc",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "illo-ademptio-solum",
+            "name": "integrate quantum large language models",
+            "type": "web",
+            "cpu": 4,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 2
+          },
+          {
+            "id": "ratione-civis-cumque",
+            "name": "seize generative technologies",
+            "type": "db",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 8
+          }
+        ]
+      }
+    ]
+  },
+  "doc2": {
+    "environments": [
+      {
+        "id": "stipes-catena-itaque",
+        "name": "possible-teammate",
+        "region": "us-west-2",
+        "source": {
+          "type": "github",
+          "owner": "dicki inc",
+          "repo": "auctor-versus-custodia",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "voluptas-sumo-sublime",
+            "name": "enable visionary AI",
+            "type": "web",
+            "cpu": 1,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 9
+          },
+          {
+            "id": "vorago-ascit-patria",
+            "name": "aggregate granular ROI",
+            "type": "db",
+            "cpu": 1,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 9,
+            "watchPaths": [
+              "src/**"
+            ]
+          },
+          {
+            "id": "at-aestas-paulatim",
+            "name": "drive robust interfaces",
+            "type": "worker",
+            "cpu": 4,
+            "memory": 2,
+            "minInstances": 1,
+            "maxInstances": 3
+          },
+          {
+            "id": "impedit-error-repellendus",
+            "name": "generate proactive interfaces",
+            "type": "worker",
+            "cpu": 2,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 6
+          }
+        ]
+      },
+      {
+        "id": "tempore-thalassinus-cunabula",
+        "name": "wavy-comparison",
+        "region": "eu-central-1",
+        "source": {
+          "type": "github",
+          "owner": "ruecker and sons",
+          "repo": "vomica-voluptate-adhaero",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "cur-ventito-cultellus",
+            "name": "exploit next-generation supply-chains",
+            "type": "db",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 4
+          },
+          {
+            "id": "synagoga-varius-dolorum",
+            "name": "mesh back-end metrics",
+            "type": "web",
+            "cpu": 2,
+            "memory": 1,
+            "minInstances": 2,
+            "maxInstances": 2
+          },
+          {
+            "id": "amo-stella-dolorum",
+            "name": "maximize synergistic markets",
+            "type": "db",
+            "cpu": 1,
+            "memory": 8,
+            "minInstances": 2,
+            "maxInstances": 3
+          },
+          {
+            "id": "copia-uredo-consectetur",
+            "name": "embrace interactive initiatives",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 1,
+            "minInstances": 1,
+            "maxInstances": 5
+          },
+          {
+            "id": "veniam-volva-qui",
+            "name": "collaborate robust paradigms",
+            "type": "db",
+            "cpu": 0.5,
+            "memory": 0.5,
+            "minInstances": 2,
+            "maxInstances": 3
+          },
+          {
+            "id": "derelinquo-appello-ara",
+            "name": "Full Featured Service",
+            "type": "web",
+            "cpu": 2,
+            "memory": 4,
+            "gpu": 1,
+            "buildType": "docker",
+            "dockerfilePath": "Dockerfile",
+            "dockerContext": ".",
+            "privileged": false,
+            "healthCheckPath": "/health",
+            "healthCheckTimeoutSecs": 10,
+            "healthCheckIntervalSecs": 30,
+            "healthCheckGracePeriodSecs": 60,
+            "port": 3000,
+            "minInstances": 2,
+            "maxInstances": 10,
+            "stickySessionsEnabled": true,
+            "stickySessionsDurationSecs": 3600,
+            "originShieldEnabled": true,
+            "cloudfrontAutoCacheInvalidation": true,
+            "containerInsights": true,
+            "storage": 50,
+            "versionHistoryCount": 15,
+            "basePath": ".",
+            "includeEnvVariablesInBuild": true,
+            "injectEnvVariablesInDockerfile": true,
+            "autoscaling": {
+              "cpuThreshold": 75,
+              "memoryThreshold": 80,
+              "requestsPerTarget": 500,
+              "cooldownTimerSecs": 300
+            },
+            "envVariables": {
+              "NODE_ENV": "production",
+              "LOG_LEVEL": "info"
+            },
+            "logging": {
+              "cloudwatchLogsEnabled": true,
+              "cloudwatchLogsRetentionDays": 30,
+              "ecsLogsMetadataEnabled": true
+            },
+            "integrations": {
+              "uploadSentrySourceMap": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "vulariter-aer-appono",
+        "name": "shrill-soup",
+        "region": "us-east-1",
+        "source": {
+          "type": "github",
+          "owner": "schaefer, pfeffer and hayes",
+          "repo": "decretum-copiose-tunc",
+          "branch": "main",
+          "trigger": "push"
+        },
+        "services": [
+          {
+            "id": "illo-ademptio-solum",
+            "name": "integrate quantum large language models",
+            "type": "web",
+            "cpu": 4,
+            "memory": 4,
+            "minInstances": 1,
+            "maxInstances": 2
+          },
+          {
+            "id": "ratione-civis-cumque",
+            "name": "seize generative technologies",
+            "type": "db",
+            "cpu": 1,
+            "memory": 0.5,
+            "minInstances": 1,
+            "maxInstances": 8
+          }
+        ]
+      }
+    ]
+  }
+}

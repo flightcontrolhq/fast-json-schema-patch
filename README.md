@@ -49,12 +49,7 @@ The core of the library is the `SchemaJsonPatcher`, which is configured with a `
 import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
 
 // 1. Define a plan for your data structure
-const plan = buildPlan({
-  '/users': {
-    strategy: 'primaryKey',
-    primaryKey: 'id',
-  },
-});
+const plan = buildPlan(schema);
 
 // 2. Instantiate the patcher with the plan
 const patcher = new SchemaJsonPatcher({ plan });
@@ -155,40 +150,9 @@ The main class for creating human-readable diffs.
 Run benchmarks on your own data:
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/schema-json-patch
-cd schema-json-patch
-
-# Install dependencies
-npm install
-
 # Run the benchmark suite
-npm run compare
+bun run compare
 ```
-
-## 🤝 Contributing
-
-We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-git clone https://github.com/your-org/schema-json-patch
-cd schema-json-patch
-npm install
-npm test
-```
-
-## 📈 Roadmap
-
-- [ ] **WebAssembly optimization** for core diffing algorithms
-- [ ] **Streaming patch generation** for large documents
-- [ ] **Schema evolution support** for backward compatibility
-- [ ] **TypeScript schema inference** from types
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🔗 Related Standards
 

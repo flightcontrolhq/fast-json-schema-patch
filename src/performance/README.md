@@ -9,7 +9,6 @@ This document outlines the different deep equality functions available in this m
 - **Purpose**: A standard, recursive deep equality check for JSON-like objects and arrays.
 - **Time Complexity**: O(N), where N is the total number of properties and elements in the objects being compared.
 - **When to use**: Use this function for simple, one-off comparisons where performance is not critical, or when no additional information (like a schema or frequently changing fields) is available. It serves as the baseline for other optimized functions.
-- **Complexity Note**: Although the function is recursive, it traverses each property and element of the input objects only once. Therefore, its time complexity is linear with respect to the total number of properties and elements (N), not polynomial.
 
 ### `deepEqualMemo`
 
