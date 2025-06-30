@@ -1,0 +1,244 @@
+{
+  "parentDiff": {
+    "original": {
+      "environments": [
+        {
+          "id": "assentator-quae-aer",
+          "name": "env-0",
+          "region": "CI",
+          "source": {
+            "branch": "main"
+          }
+        }
+      ]
+    },
+    "new": {
+      "environments": [
+        {
+          "id": "assentator-quae-aer",
+          "name": "env-0",
+          "region": "CI",
+          "source": {
+            "branch": "main"
+          }
+        }
+      ]
+    },
+    "patches": [],
+    "diffLines": {
+      "originalLines": [
+        {
+          "lineNumber": 1,
+          "content": "{",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 2,
+          "content": "  \"environments\": [",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 3,
+          "content": "    {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 4,
+          "content": "      \"id\": \"assentator-quae-aer\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 5,
+          "content": "      \"name\": \"env-0\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 6,
+          "content": "      \"region\": \"CI\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 7,
+          "content": "      \"source\": {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 8,
+          "content": "        \"branch\": \"main\"",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 9,
+          "content": "      }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 10,
+          "content": "    }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 11,
+          "content": "  ]",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 12,
+          "content": "}",
+          "type": "unchanged"
+        }
+      ],
+      "newLines": [
+        {
+          "lineNumber": 1,
+          "content": "{",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 2,
+          "content": "  \"environments\": [",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 3,
+          "content": "    {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 4,
+          "content": "      \"id\": \"assentator-quae-aer\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 5,
+          "content": "      \"name\": \"env-0\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 6,
+          "content": "      \"region\": \"CI\",",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 7,
+          "content": "      \"source\": {",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 8,
+          "content": "        \"branch\": \"main\"",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 9,
+          "content": "      }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 10,
+          "content": "    }",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 11,
+          "content": "  ]",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 12,
+          "content": "}",
+          "type": "unchanged"
+        }
+      ],
+      "unifiedDiffLines": [
+        {
+          "type": "unchanged",
+          "content": "{",
+          "oldLineNumber": 1,
+          "newLineNumber": 1,
+          "key": "unchanged-1-1"
+        },
+        {
+          "type": "unchanged",
+          "content": "  \"environments\": [",
+          "oldLineNumber": 2,
+          "newLineNumber": 2,
+          "key": "unchanged-2-2"
+        },
+        {
+          "type": "unchanged",
+          "content": "    {",
+          "oldLineNumber": 3,
+          "newLineNumber": 3,
+          "key": "unchanged-3-3"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"id\": \"assentator-quae-aer\",",
+          "oldLineNumber": 4,
+          "newLineNumber": 4,
+          "key": "unchanged-4-4"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"name\": \"env-0\",",
+          "oldLineNumber": 5,
+          "newLineNumber": 5,
+          "key": "unchanged-5-5"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"region\": \"CI\",",
+          "oldLineNumber": 6,
+          "newLineNumber": 6,
+          "key": "unchanged-6-6"
+        },
+        {
+          "type": "unchanged",
+          "content": "      \"source\": {",
+          "oldLineNumber": 7,
+          "newLineNumber": 7,
+          "key": "unchanged-7-7"
+        },
+        {
+          "type": "unchanged",
+          "content": "        \"branch\": \"main\"",
+          "oldLineNumber": 8,
+          "newLineNumber": 8,
+          "key": "unchanged-8-8"
+        },
+        {
+          "type": "unchanged",
+          "content": "      }",
+          "oldLineNumber": 9,
+          "newLineNumber": 9,
+          "key": "unchanged-9-9"
+        },
+        {
+          "type": "unchanged",
+          "content": "    }",
+          "oldLineNumber": 10,
+          "newLineNumber": 10,
+          "key": "unchanged-10-10"
+        },
+        {
+          "type": "unchanged",
+          "content": "  ]",
+          "oldLineNumber": 11,
+          "newLineNumber": 11,
+          "key": "unchanged-11-11"
+        },
+        {
+          "type": "unchanged",
+          "content": "}",
+          "oldLineNumber": 12,
+          "newLineNumber": 12,
+          "key": "unchanged-12-12"
+        }
+      ]
+    },
+    "addCount": 0,
+    "removeCount": 0
+  },
+  "childDiffs": {}
+}

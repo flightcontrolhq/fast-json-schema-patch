@@ -3,7 +3,7 @@
     "op": "replace",
     "path": "/environments/0/services/2/cpu",
     "value": 100,
-    "oldValue": 2.853759157214539
+    "oldValue": 0.026892704540261825
   },
   {
     "op": "remove",
@@ -12,8 +12,8 @@
       "id": "service5",
       "name": "service-name-5",
       "type": "web",
-      "cpu": 2.6047806331974996,
-      "memory": 0.2859305848707505,
+      "cpu": 2.9476707447058095,
+      "memory": 5.424977130819347,
       "dependsOn": [
         "service4"
       ]

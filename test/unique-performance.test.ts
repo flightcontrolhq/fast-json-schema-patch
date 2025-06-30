@@ -1,4 +1,5 @@
 import { buildPlan, SchemaPatcher } from '../src/index';
+import { describe, test, expect } from "bun:test";
 
 describe('Unique Array Performance', () => {
   test('should handle unique primitive arrays efficiently with minimal patches', () => {

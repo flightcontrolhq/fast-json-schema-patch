@@ -8,7 +8,7 @@ import { fastHash } from "../src/performance/fashHash";
 import { _resolveRef } from "../src/core/buildPlan";
 import { _traverseSchema } from "../src/core/buildPlan";
 import type { Operation } from "../src/types";
-import originalSchema from "./schema.json";
+import originalSchema from "../schema/schema.json";
 import { faker } from "@faker-js/faker";
 import { applyPatch, type Operation as FastJsonPatchOperation } from "fast-json-patch";
 

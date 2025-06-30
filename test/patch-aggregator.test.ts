@@ -2,7 +2,7 @@ import { describe, it, expect } from "bun:test";
 import { buildPlan, SchemaPatcher } from "../src";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
 import type { JsonObject } from "../src/types";
-import schema from "./schema.json";
+import schema from "../schema/schema.json";
 
 describe("PatchAggregator", () => {
   const originalDoc = {

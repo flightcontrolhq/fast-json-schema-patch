@@ -11,7 +11,7 @@ import * as rfc6902 from "rfc6902";
 import { Differ } from "json-diff-kit";
 import { SchemaPatcher, buildPlan, deepEqual } from "../src/index";
 import { PatchAggregator } from "../src/formatting/PatchAggregator";
-import mainSchema from "../test/schema.json";
+import mainSchema from "../schema/schema.json";
 
 // Enhanced Types and Interfaces
 enum ModificationComplexity {
@@ -416,7 +416,7 @@ largeDoc2.environments[0].services.push({
 });
 
 // Real-world config
-const realWorldDoc1 = require("../test/test.json");
+const realWorldDoc1 = require("../schema/test.json");
 const realWorldDoc2 = JSON.parse(JSON.stringify(realWorldDoc1));
 
 // More complex, real-world changes to simulate user behavior
