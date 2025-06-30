@@ -3,9 +3,9 @@
     "original": {
       "environments": [
         {
-          "id": "assentator-quae-aer",
+          "id": "substantia-autem-cum",
           "name": "env-0",
-          "region": "CI",
+          "region": "TM",
           "source": {
             "branch": "main"
           }
@@ -15,16 +15,73 @@
     "new": {
       "environments": [
         {
-          "id": "assentator-quae-aer",
+          "id": "substantia-autem-cum",
           "name": "env-0",
-          "region": "CI",
+          "region": "us-west-2",
           "source": {
-            "branch": "main"
+            "pr": true,
+            "trigger": "manual",
+            "filter": {
+              "toBranches": [
+                "main",
+                "develop"
+              ],
+              "labels": [
+                "paulatim"
+              ]
+            }
+          },
+          "envVariables": {
+            "ENV_BUS": "https://overdue-airbus.com",
+            "ENV_ARRAY": "https://substantial-forage.biz/"
           }
         }
       ]
     },
-    "patches": [],
+    "patches": [
+      {
+        "op": "replace",
+        "path": "/environments/0/region",
+        "value": "us-west-2",
+        "oldValue": "TM"
+      },
+      {
+        "op": "remove",
+        "path": "/environments/0/source/branch",
+        "oldValue": "main"
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/pr",
+        "value": true
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/trigger",
+        "value": "manual"
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/source/filter",
+        "value": {
+          "toBranches": [
+            "main",
+            "develop"
+          ],
+          "labels": [
+            "paulatim"
+          ]
+        }
+      },
+      {
+        "op": "add",
+        "path": "/environments/0/envVariables",
+        "value": {
+          "ENV_BUS": "https://overdue-airbus.com",
+          "ENV_ARRAY": "https://substantial-forage.biz/"
+        }
+      }
+    ],
     "diffLines": {
       "originalLines": [
         {
@@ -44,7 +101,7 @@
         },
         {
           "lineNumber": 4,
-          "content": "      \"id\": \"assentator-quae-aer\",",
+          "content": "      \"id\": \"substantia-autem-cum\",",
           "type": "unchanged"
         },
         {
@@ -54,8 +111,8 @@
         },
         {
           "lineNumber": 6,
-          "content": "      \"region\": \"CI\",",
-          "type": "unchanged"
+          "content": "      \"region\": \"TM\",",
+          "type": "removed"
         },
         {
           "lineNumber": 7,
@@ -65,7 +122,7 @@
         {
           "lineNumber": 8,
           "content": "        \"branch\": \"main\"",
-          "type": "unchanged"
+          "type": "removed"
         },
         {
           "lineNumber": 9,
@@ -106,7 +163,7 @@
         },
         {
           "lineNumber": 4,
-          "content": "      \"id\": \"assentator-quae-aer\",",
+          "content": "      \"id\": \"substantia-autem-cum\",",
           "type": "unchanged"
         },
         {
@@ -116,8 +173,8 @@
         },
         {
           "lineNumber": 6,
-          "content": "      \"region\": \"CI\",",
-          "type": "unchanged"
+          "content": "      \"region\": \"us-west-2\",",
+          "type": "added"
         },
         {
           "lineNumber": 7,
@@ -126,26 +183,96 @@
         },
         {
           "lineNumber": 8,
-          "content": "        \"branch\": \"main\"",
-          "type": "unchanged"
+          "content": "        \"pr\": true,",
+          "type": "added"
         },
         {
           "lineNumber": 9,
-          "content": "      }",
-          "type": "unchanged"
+          "content": "        \"trigger\": \"manual\",",
+          "type": "added"
         },
         {
           "lineNumber": 10,
+          "content": "        \"filter\": {",
+          "type": "added"
+        },
+        {
+          "lineNumber": 11,
+          "content": "          \"toBranches\": [",
+          "type": "added"
+        },
+        {
+          "lineNumber": 12,
+          "content": "            \"main\",",
+          "type": "added"
+        },
+        {
+          "lineNumber": 13,
+          "content": "            \"develop\"",
+          "type": "added"
+        },
+        {
+          "lineNumber": 14,
+          "content": "          ],",
+          "type": "added"
+        },
+        {
+          "lineNumber": 15,
+          "content": "          \"labels\": [",
+          "type": "added"
+        },
+        {
+          "lineNumber": 16,
+          "content": "            \"paulatim\"",
+          "type": "added"
+        },
+        {
+          "lineNumber": 17,
+          "content": "          ]",
+          "type": "added"
+        },
+        {
+          "lineNumber": 18,
+          "content": "        }",
+          "type": "added"
+        },
+        {
+          "lineNumber": 19,
+          "content": "      },",
+          "type": "unchanged"
+        },
+        {
+          "lineNumber": 20,
+          "content": "      \"envVariables\": {",
+          "type": "added"
+        },
+        {
+          "lineNumber": 21,
+          "content": "        \"ENV_BUS\": \"https://overdue-airbus.com\",",
+          "type": "added"
+        },
+        {
+          "lineNumber": 22,
+          "content": "        \"ENV_ARRAY\": \"https://substantial-forage.biz/\"",
+          "type": "added"
+        },
+        {
+          "lineNumber": 23,
+          "content": "      }",
+          "type": "added"
+        },
+        {
+          "lineNumber": 24,
           "content": "    }",
           "type": "unchanged"
         },
         {
-          "lineNumber": 11,
+          "lineNumber": 25,
           "content": "  ]",
           "type": "unchanged"
         },
         {
-          "lineNumber": 12,
+          "lineNumber": 26,
           "content": "}",
           "type": "unchanged"
         }
@@ -174,7 +301,7 @@
         },
         {
           "type": "unchanged",
-          "content": "      \"id\": \"assentator-quae-aer\",",
+          "content": "      \"id\": \"substantia-autem-cum\",",
           "oldLineNumber": 4,
           "newLineNumber": 4,
           "key": "unchanged-4-4"
@@ -187,11 +314,16 @@
           "key": "unchanged-5-5"
         },
         {
-          "type": "unchanged",
-          "content": "      \"region\": \"CI\",",
+          "type": "removed",
+          "content": "      \"region\": \"TM\",",
           "oldLineNumber": 6,
+          "key": "removed-6"
+        },
+        {
+          "type": "added",
+          "content": "      \"region\": \"us-west-2\",",
           "newLineNumber": 6,
-          "key": "unchanged-6-6"
+          "key": "added-6"
         },
         {
           "type": "unchanged",
@@ -201,44 +333,4756 @@
           "key": "unchanged-7-7"
         },
         {
-          "type": "unchanged",
+          "type": "removed",
           "content": "        \"branch\": \"main\"",
           "oldLineNumber": 8,
+          "key": "removed-8"
+        },
+        {
+          "type": "added",
+          "content": "        \"pr\": true,",
           "newLineNumber": 8,
-          "key": "unchanged-8-8"
+          "key": "added-8"
+        },
+        {
+          "type": "added",
+          "content": "        \"trigger\": \"manual\",",
+          "newLineNumber": 9,
+          "key": "added-9"
+        },
+        {
+          "type": "added",
+          "content": "        \"filter\": {",
+          "newLineNumber": 10,
+          "key": "added-10"
+        },
+        {
+          "type": "added",
+          "content": "          \"toBranches\": [",
+          "newLineNumber": 11,
+          "key": "added-11"
+        },
+        {
+          "type": "added",
+          "content": "            \"main\",",
+          "newLineNumber": 12,
+          "key": "added-12"
+        },
+        {
+          "type": "added",
+          "content": "            \"develop\"",
+          "newLineNumber": 13,
+          "key": "added-13"
+        },
+        {
+          "type": "added",
+          "content": "          ],",
+          "newLineNumber": 14,
+          "key": "added-14"
+        },
+        {
+          "type": "added",
+          "content": "          \"labels\": [",
+          "newLineNumber": 15,
+          "key": "added-15"
+        },
+        {
+          "type": "added",
+          "content": "            \"paulatim\"",
+          "newLineNumber": 16,
+          "key": "added-16"
+        },
+        {
+          "type": "added",
+          "content": "          ]",
+          "newLineNumber": 17,
+          "key": "added-17"
+        },
+        {
+          "type": "added",
+          "content": "        }",
+          "newLineNumber": 18,
+          "key": "added-18"
         },
         {
           "type": "unchanged",
           "content": "      }",
           "oldLineNumber": 9,
-          "newLineNumber": 9,
-          "key": "unchanged-9-9"
+          "newLineNumber": 19,
+          "key": "unchanged-9-19"
+        },
+        {
+          "type": "added",
+          "content": "      \"envVariables\": {",
+          "newLineNumber": 20,
+          "key": "added-20"
+        },
+        {
+          "type": "added",
+          "content": "        \"ENV_BUS\": \"https://overdue-airbus.com\",",
+          "newLineNumber": 21,
+          "key": "added-21"
+        },
+        {
+          "type": "added",
+          "content": "        \"ENV_ARRAY\": \"https://substantial-forage.biz/\"",
+          "newLineNumber": 22,
+          "key": "added-22"
+        },
+        {
+          "type": "added",
+          "content": "      }",
+          "newLineNumber": 23,
+          "key": "added-23"
         },
         {
           "type": "unchanged",
           "content": "    }",
           "oldLineNumber": 10,
-          "newLineNumber": 10,
-          "key": "unchanged-10-10"
+          "newLineNumber": 24,
+          "key": "unchanged-10-24"
         },
         {
           "type": "unchanged",
           "content": "  ]",
           "oldLineNumber": 11,
-          "newLineNumber": 11,
-          "key": "unchanged-11-11"
+          "newLineNumber": 25,
+          "key": "unchanged-11-25"
         },
         {
           "type": "unchanged",
           "content": "}",
           "oldLineNumber": 12,
-          "newLineNumber": 12,
-          "key": "unchanged-12-12"
+          "newLineNumber": 26,
+          "key": "unchanged-12-26"
         }
       ]
     },
-    "addCount": 0,
-    "removeCount": 0
+    "addCount": 16,
+    "removeCount": 2
   },
-  "childDiffs": {}
+  "childDiffs": {
+    "c7fdc29b-840e-4921-879d-ef2900b9dde8": {
+      "id": "c7fdc29b-840e-4921-879d-ef2900b9dde8",
+      "original": {
+        "id": "c7fdc29b-840e-4921-879d-ef2900b9dde8",
+        "name": "broken-midwife.com",
+        "type": "web",
+        "cpu": 3.674239857123707,
+        "memory": 1.4635579908654044,
+        "minInstances": 1,
+        "maxInstances": 2,
+        "healthCheckPath": "/accommodo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "55.157.58.75"
+        }
+      },
+      "new": {
+        "id": "c7fdc29b-840e-4921-879d-ef2900b9dde8",
+        "name": "broken-midwife.com",
+        "type": "worker",
+        "cpu": 3.674239857123707,
+        "memory": 1.4635579908654044,
+        "minInstances": 1,
+        "maxInstances": 2,
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "55.157.58.75"
+        },
+        "startCommand": "node worker.js"
+      },
+      "patches": [
+        {
+          "op": "replace",
+          "path": "/type",
+          "value": "worker",
+          "oldValue": "web"
+        },
+        {
+          "op": "remove",
+          "path": "/healthCheckPath",
+          "oldValue": "/accommodo"
+        },
+        {
+          "op": "add",
+          "path": "/startCommand",
+          "value": "node worker.js"
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"c7fdc29b-840e-4921-879d-ef2900b9dde8\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"broken-midwife.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "removed"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.674239857123707,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.4635579908654044,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 2,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/accommodo\",",
+            "type": "removed"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"55.157.58.75\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"c7fdc29b-840e-4921-879d-ef2900b9dde8\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"broken-midwife.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.674239857123707,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.4635579908654044,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 2,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"DB_HOST\": \"55.157.58.75\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  \"startCommand\": \"node worker.js\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"c7fdc29b-840e-4921-879d-ef2900b9dde8\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"broken-midwife.com\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "removed",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "key": "removed-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"worker\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 3.674239857123707,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 1.4635579908654044,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 2,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "removed",
+            "content": "  \"healthCheckPath\": \"/accommodo\",",
+            "oldLineNumber": 9,
+            "key": "removed-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 9,
+            "key": "unchanged-10-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 10,
+            "key": "unchanged-11-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"55.157.58.75\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 11,
+            "key": "unchanged-12-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 12,
+            "key": "unchanged-13-12"
+          },
+          {
+            "type": "added",
+            "content": "  \"startCommand\": \"node worker.js\"",
+            "newLineNumber": 13,
+            "key": "added-13"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 14,
+            "key": "unchanged-14-14"
+          }
+        ]
+      },
+      "addCount": 2,
+      "removeCount": 2
+    },
+    "032692cb-0225-42d0-9ac1-8b84e59e6917": {
+      "id": "032692cb-0225-42d0-9ac1-8b84e59e6917",
+      "original": {
+        "id": "032692cb-0225-42d0-9ac1-8b84e59e6917",
+        "name": "tough-sundae.info",
+        "type": "web",
+        "cpu": 0.46670400798643474,
+        "memory": 7.475762741694074,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/benevolentia",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "5cd9:c4b6:60ea:fd7a:c499:3ddf:5aaf:a557"
+        }
+      },
+      "new": {
+        "id": "032692cb-0225-42d0-9ac1-8b84e59e6917",
+        "name": "tough-sundae.info",
+        "type": "web",
+        "cpu": 0.46670400798643474,
+        "memory": 7.475762741694074,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/benevolentia",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "5cd9:c4b6:60ea:fd7a:c499:3ddf:5aaf:a557"
+        },
+        "postBuildCommand": "echo \"Build complete\""
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/postBuildCommand",
+          "value": "echo \"Build complete\""
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"032692cb-0225-42d0-9ac1-8b84e59e6917\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"tough-sundae.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.46670400798643474,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 7.475762741694074,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/benevolentia\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"5cd9:c4b6:60ea:fd7a:c499:3ddf:5aaf:a557\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"032692cb-0225-42d0-9ac1-8b84e59e6917\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"tough-sundae.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.46670400798643474,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 7.475762741694074,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/benevolentia\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"5cd9:c4b6:60ea:fd7a:c499:3ddf:5aaf:a557\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"postBuildCommand\": \"echo \\\"Build complete\\\"\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"032692cb-0225-42d0-9ac1-8b84e59e6917\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"tough-sundae.info\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 0.46670400798643474,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 7.475762741694074,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 5,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/benevolentia\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"5cd9:c4b6:60ea:fd7a:c499:3ddf:5aaf:a557\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"postBuildCommand\": \"echo \\\"Build complete\\\"\"",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 15,
+            "key": "unchanged-14-15"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "aa78ff4d-05cb-4a5b-855f-405d1e10395e": {
+      "id": "aa78ff4d-05cb-4a5b-855f-405d1e10395e",
+      "original": {
+        "id": "aa78ff4d-05cb-4a5b-855f-405d1e10395e",
+        "name": "pretty-transparency.info",
+        "type": "web",
+        "cpu": 3.894004041348061,
+        "memory": 2.637310293686504,
+        "minInstances": 1,
+        "maxInstances": 4,
+        "healthCheckPath": "/repellendus",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "ff6c:9e6f:2b70:0dd7:b9f7:fc53:3c4e:b3ce"
+        }
+      },
+      "new": {
+        "id": "aa78ff4d-05cb-4a5b-855f-405d1e10395e",
+        "name": "pretty-transparency.info",
+        "type": "web",
+        "cpu": 3.894004041348061,
+        "memory": 2.637310293686504,
+        "minInstances": 1,
+        "maxInstances": 4,
+        "healthCheckPath": "/repellendus",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "ff6c:9e6f:2b70:0dd7:b9f7:fc53:3c4e:b3ce"
+        },
+        "preDeployCommand": "echo \"Pre-deploy\"",
+        "postDeployCommand": "echo \"Post-deploy\""
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/preDeployCommand",
+          "value": "echo \"Pre-deploy\""
+        },
+        {
+          "op": "add",
+          "path": "/postDeployCommand",
+          "value": "echo \"Post-deploy\""
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"aa78ff4d-05cb-4a5b-855f-405d1e10395e\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"pretty-transparency.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.894004041348061,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.637310293686504,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 4,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/repellendus\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"ff6c:9e6f:2b70:0dd7:b9f7:fc53:3c4e:b3ce\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"aa78ff4d-05cb-4a5b-855f-405d1e10395e\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"pretty-transparency.info\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.894004041348061,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.637310293686504,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 4,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/repellendus\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"ff6c:9e6f:2b70:0dd7:b9f7:fc53:3c4e:b3ce\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"preDeployCommand\": \"echo \\\"Pre-deploy\\\"\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "  \"postDeployCommand\": \"echo \\\"Post-deploy\\\"\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"aa78ff4d-05cb-4a5b-855f-405d1e10395e\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"pretty-transparency.info\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 3.894004041348061,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.637310293686504,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 4,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/repellendus\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"ff6c:9e6f:2b70:0dd7:b9f7:fc53:3c4e:b3ce\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"preDeployCommand\": \"echo \\\"Pre-deploy\\\"\",",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "  \"postDeployCommand\": \"echo \\\"Post-deploy\\\"\"",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 16,
+            "key": "unchanged-14-16"
+          }
+        ]
+      },
+      "addCount": 2,
+      "removeCount": 0
+    },
+    "f3d65e34-695a-4eb2-bb02-a6be25f0dff1": {
+      "id": "f3d65e34-695a-4eb2-bb02-a6be25f0dff1",
+      "original": {
+        "id": "f3d65e34-695a-4eb2-bb02-a6be25f0dff1",
+        "name": "squeaky-coil.com",
+        "type": "web",
+        "cpu": 3.6219993925228864,
+        "memory": 2.698850026958741,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/capillus",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "59.251.7.231"
+        }
+      },
+      "new": {
+        "id": "f3d65e34-695a-4eb2-bb02-a6be25f0dff1",
+        "name": "squeaky-coil.com",
+        "type": "web",
+        "cpu": 3.6219993925228864,
+        "memory": 2.698850026958741,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/capillus",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "59.251.7.231"
+        },
+        "healthCheckTimeoutSecs": 14
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/healthCheckTimeoutSecs",
+          "value": 14
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f3d65e34-695a-4eb2-bb02-a6be25f0dff1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"squeaky-coil.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.6219993925228864,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.698850026958741,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/capillus\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"59.251.7.231\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f3d65e34-695a-4eb2-bb02-a6be25f0dff1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"squeaky-coil.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.6219993925228864,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.698850026958741,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/capillus\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"59.251.7.231\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"healthCheckTimeoutSecs\": 14",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"f3d65e34-695a-4eb2-bb02-a6be25f0dff1\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"squeaky-coil.com\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 3.6219993925228864,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.698850026958741,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 1,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/capillus\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"59.251.7.231\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"healthCheckTimeoutSecs\": 14",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 15,
+            "key": "unchanged-14-15"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9": {
+      "id": "18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9",
+      "original": {
+        "id": "18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9",
+        "name": "input-worker",
+        "type": "worker",
+        "cpu": 1.2755837523540872,
+        "memory": 3.5089112298123446,
+        "startCommand": "node start-aspicio.js"
+      },
+      "new": {
+        "id": "18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9",
+        "name": "input-worker",
+        "type": "worker",
+        "cpu": 1.2755837523540872,
+        "memory": 3.5089112298123446,
+        "startCommand": "node start-aspicio.js",
+        "experimental": {
+          "datadog": {
+            "enabled": true,
+            "datadogSite": "datadoghq.com",
+            "datadogApiKey": "iGZ229bexZvR0SMRMwB6wQcyIvtXz4L5",
+            "logging": true
+          }
+        }
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/experimental",
+          "value": {
+            "datadog": {
+              "enabled": true,
+              "datadogSite": "datadoghq.com",
+              "datadogApiKey": "iGZ229bexZvR0SMRMwB6wQcyIvtXz4L5",
+              "logging": true
+            }
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"input-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.2755837523540872,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.5089112298123446,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-aspicio.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"input-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.2755837523540872,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.5089112298123446,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-aspicio.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"experimental\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "    \"datadog\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "      \"enabled\": true,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "      \"datadogSite\": \"datadoghq.com\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 12,
+            "content": "      \"datadogApiKey\": \"iGZ229bexZvR0SMRMwB6wQcyIvtXz4L5\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 13,
+            "content": "      \"logging\": true",
+            "type": "added"
+          },
+          {
+            "lineNumber": 14,
+            "content": "    }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "  }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"18d2ef9c-2e3f-4d91-b2e5-f120ef9cd8b9\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"input-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.2755837523540872,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 3.5089112298123446,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-aspicio.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"experimental\": {",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "    \"datadog\": {",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "      \"enabled\": true,",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "added",
+            "content": "      \"datadogSite\": \"datadoghq.com\",",
+            "newLineNumber": 11,
+            "key": "added-11"
+          },
+          {
+            "type": "added",
+            "content": "      \"datadogApiKey\": \"iGZ229bexZvR0SMRMwB6wQcyIvtXz4L5\",",
+            "newLineNumber": 12,
+            "key": "added-12"
+          },
+          {
+            "type": "added",
+            "content": "      \"logging\": true",
+            "newLineNumber": 13,
+            "key": "added-13"
+          },
+          {
+            "type": "added",
+            "content": "    }",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "  }",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 16,
+            "key": "unchanged-8-16"
+          }
+        ]
+      },
+      "addCount": 8,
+      "removeCount": 0
+    },
+    "8abe87a3-9ddb-4273-aa8c-3d13d0b62356": {
+      "id": "8abe87a3-9ddb-4273-aa8c-3d13d0b62356",
+      "original": {
+        "id": "8abe87a3-9ddb-4273-aa8c-3d13d0b62356",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 1.875538035183554,
+        "memory": 2.176827658561055,
+        "startCommand": "node start-vilis.js"
+      },
+      "new": {
+        "id": "8abe87a3-9ddb-4273-aa8c-3d13d0b62356",
+        "name": "generate-worker",
+        "type": "worker",
+        "cpu": 1.875538035183554,
+        "memory": 2.176827658561055,
+        "startCommand": "node start-vilis.js",
+        "dependsOn": [
+          "e46c102a-c9dd-4565-a8b0-59f6622f11c4"
+        ]
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/dependsOn",
+          "value": [
+            "e46c102a-c9dd-4565-a8b0-59f6622f11c4"
+          ]
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"8abe87a3-9ddb-4273-aa8c-3d13d0b62356\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"generate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.875538035183554,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.176827658561055,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-vilis.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"8abe87a3-9ddb-4273-aa8c-3d13d0b62356\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"generate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.875538035183554,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.176827658561055,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-vilis.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"dependsOn\": [",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "    \"e46c102a-c9dd-4565-a8b0-59f6622f11c4\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  ]",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"8abe87a3-9ddb-4273-aa8c-3d13d0b62356\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"generate-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.875538035183554,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.176827658561055,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-vilis.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"dependsOn\": [",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "    \"e46c102a-c9dd-4565-a8b0-59f6622f11c4\"",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "  ]",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 11,
+            "key": "unchanged-8-11"
+          }
+        ]
+      },
+      "addCount": 3,
+      "removeCount": 0
+    },
+    "f03a0905-429c-4622-a4ea-aa2478050176": {
+      "id": "f03a0905-429c-4622-a4ea-aa2478050176",
+      "original": {
+        "id": "f03a0905-429c-4622-a4ea-aa2478050176",
+        "name": "cultivated-opera.org",
+        "type": "web",
+        "cpu": 2.0612512097336615,
+        "memory": 6.105939315241223,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/perferendis",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "144.219.16.218"
+        }
+      },
+      "new": {
+        "id": "f03a0905-429c-4622-a4ea-aa2478050176",
+        "name": "cultivated-opera.org",
+        "type": "web",
+        "cpu": 2.0612512097336615,
+        "memory": 6.105939315241223,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/perferendis",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "144.219.16.218"
+        },
+        "integrations": {
+          "uploadSentrySourceMap": true
+        }
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/integrations",
+          "value": {
+            "uploadSentrySourceMap": true
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f03a0905-429c-4622-a4ea-aa2478050176\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"cultivated-opera.org\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 2.0612512097336615,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 6.105939315241223,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/perferendis\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"144.219.16.218\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f03a0905-429c-4622-a4ea-aa2478050176\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"cultivated-opera.org\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 2.0612512097336615,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 6.105939315241223,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/perferendis\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"144.219.16.218\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"integrations\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "    \"uploadSentrySourceMap\": true",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "  }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 17,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"f03a0905-429c-4622-a4ea-aa2478050176\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"cultivated-opera.org\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 2.0612512097336615,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 6.105939315241223,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 5,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/perferendis\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"144.219.16.218\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"integrations\": {",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "    \"uploadSentrySourceMap\": true",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "added",
+            "content": "  }",
+            "newLineNumber": 16,
+            "key": "added-16"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 17,
+            "key": "unchanged-14-17"
+          }
+        ]
+      },
+      "addCount": 3,
+      "removeCount": 0
+    },
+    "e67711a2-0d52-4a93-abaf-77ccae9454e1": {
+      "id": "e67711a2-0d52-4a93-abaf-77ccae9454e1",
+      "original": {
+        "id": "e67711a2-0d52-4a93-abaf-77ccae9454e1",
+        "name": "wavy-operating.biz",
+        "type": "web",
+        "cpu": 0.8656683135273594,
+        "memory": 2.5131161853208863,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/patior",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "125.219.25.77"
+        }
+      },
+      "new": {
+        "id": "e67711a2-0d52-4a93-abaf-77ccae9454e1",
+        "name": "wavy-operating.biz",
+        "type": "web",
+        "cpu": 0.8656683135273594,
+        "memory": 2.5131161853208863,
+        "minInstances": 1,
+        "maxInstances": 1,
+        "healthCheckPath": "/patior",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "125.219.25.77"
+        },
+        "cloudfrontAutoCacheInvalidation": false
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/cloudfrontAutoCacheInvalidation",
+          "value": false
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"e67711a2-0d52-4a93-abaf-77ccae9454e1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"wavy-operating.biz\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.8656683135273594,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.5131161853208863,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/patior\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"125.219.25.77\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"e67711a2-0d52-4a93-abaf-77ccae9454e1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"wavy-operating.biz\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.8656683135273594,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.5131161853208863,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/patior\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"125.219.25.77\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"cloudfrontAutoCacheInvalidation\": false",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"e67711a2-0d52-4a93-abaf-77ccae9454e1\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"wavy-operating.biz\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 0.8656683135273594,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.5131161853208863,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 1,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/patior\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"125.219.25.77\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"cloudfrontAutoCacheInvalidation\": false",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 15,
+            "key": "unchanged-14-15"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "13ec18f9-acc5-4cf9-9bc4-6a94c750fce1": {
+      "id": "13ec18f9-acc5-4cf9-9bc4-6a94c750fce1",
+      "original": {
+        "id": "13ec18f9-acc5-4cf9-9bc4-6a94c750fce1",
+        "name": "elderly-scratch.com",
+        "type": "web",
+        "cpu": 2.94537919728912,
+        "memory": 3.3118898632064515,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/derelinquo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "234.60.33.208"
+        }
+      },
+      "new": {
+        "id": "13ec18f9-acc5-4cf9-9bc4-6a94c750fce1",
+        "name": "elderly-scratch.com",
+        "type": "web",
+        "cpu": 2.94537919728912,
+        "memory": 3.3118898632064515,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/derelinquo",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "234.60.33.208"
+        },
+        "dependsOn": [
+          "8abe87a3-9ddb-4273-aa8c-3d13d0b62356"
+        ]
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/dependsOn",
+          "value": [
+            "8abe87a3-9ddb-4273-aa8c-3d13d0b62356"
+          ]
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"13ec18f9-acc5-4cf9-9bc4-6a94c750fce1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"elderly-scratch.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 2.94537919728912,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.3118898632064515,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/derelinquo\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"234.60.33.208\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"13ec18f9-acc5-4cf9-9bc4-6a94c750fce1\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"elderly-scratch.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 2.94537919728912,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 3.3118898632064515,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/derelinquo\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"234.60.33.208\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"dependsOn\": [",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "    \"8abe87a3-9ddb-4273-aa8c-3d13d0b62356\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "  ]",
+            "type": "added"
+          },
+          {
+            "lineNumber": 17,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"13ec18f9-acc5-4cf9-9bc4-6a94c750fce1\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"elderly-scratch.com\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 2.94537919728912,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 3.3118898632064515,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 5,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/derelinquo\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"234.60.33.208\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"dependsOn\": [",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "    \"8abe87a3-9ddb-4273-aa8c-3d13d0b62356\"",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "added",
+            "content": "  ]",
+            "newLineNumber": 16,
+            "key": "added-16"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 17,
+            "key": "unchanged-14-17"
+          }
+        ]
+      },
+      "addCount": 3,
+      "removeCount": 0
+    },
+    "c1392222-99ee-44d9-8cc3-b3071613a2ed": {
+      "id": "c1392222-99ee-44d9-8cc3-b3071613a2ed",
+      "original": {
+        "id": "c1392222-99ee-44d9-8cc3-b3071613a2ed",
+        "name": "elegant-window.com",
+        "type": "web",
+        "cpu": 0.5204334252335234,
+        "memory": 0.9893978113266486,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/dolores",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "f736:fb9a:cc71:efaf:2b83:7543:ec2a:f5dc"
+        }
+      },
+      "new": {
+        "id": "c1392222-99ee-44d9-8cc3-b3071613a2ed",
+        "name": "elegant-window.com",
+        "type": "web",
+        "cpu": 0.5204334252335234,
+        "memory": 0.9893978113266486,
+        "minInstances": 1,
+        "maxInstances": 5,
+        "healthCheckPath": "/dolores",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "f736:fb9a:cc71:efaf:2b83:7543:ec2a:f5dc"
+        },
+        "ci": {
+          "type": "codebuild"
+        }
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/ci",
+          "value": {
+            "type": "codebuild"
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"c1392222-99ee-44d9-8cc3-b3071613a2ed\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"elegant-window.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.5204334252335234,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 0.9893978113266486,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/dolores\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"f736:fb9a:cc71:efaf:2b83:7543:ec2a:f5dc\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"c1392222-99ee-44d9-8cc3-b3071613a2ed\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"elegant-window.com\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 0.5204334252335234,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 0.9893978113266486,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 5,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/dolores\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"f736:fb9a:cc71:efaf:2b83:7543:ec2a:f5dc\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"ci\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "    \"type\": \"codebuild\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "  }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 17,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"c1392222-99ee-44d9-8cc3-b3071613a2ed\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"elegant-window.com\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 0.5204334252335234,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 0.9893978113266486,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 5,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/dolores\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"f736:fb9a:cc71:efaf:2b83:7543:ec2a:f5dc\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"ci\": {",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "    \"type\": \"codebuild\"",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "added",
+            "content": "  }",
+            "newLineNumber": 16,
+            "key": "added-16"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 17,
+            "key": "unchanged-14-17"
+          }
+        ]
+      },
+      "addCount": 3,
+      "removeCount": 0
+    },
+    "f768589b-8bfb-4ed9-8c01-19c4fd4aa48a": {
+      "id": "f768589b-8bfb-4ed9-8c01-19c4fd4aa48a",
+      "original": {
+        "id": "f768589b-8bfb-4ed9-8c01-19c4fd4aa48a",
+        "name": "database",
+        "type": "rds",
+        "engine": "postgres",
+        "engineVersion": "15",
+        "instanceSize": "db.t3.micro",
+        "storage": 77
+      },
+      "new": {
+        "id": "f768589b-8bfb-4ed9-8c01-19c4fd4aa48a",
+        "name": "database",
+        "type": "rds",
+        "engine": "postgres",
+        "engineVersion": "15",
+        "instanceSize": "db.t3.micro",
+        "storage": 77,
+        "connectionStringEnvVarName": "DB_CONNECTION_STRING",
+        "performanceInsights": true
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/connectionStringEnvVarName",
+          "value": "DB_CONNECTION_STRING"
+        },
+        {
+          "op": "add",
+          "path": "/performanceInsights",
+          "value": true
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f768589b-8bfb-4ed9-8c01-19c4fd4aa48a\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"database\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"rds\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"postgres\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"15\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"storage\": 77",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"f768589b-8bfb-4ed9-8c01-19c4fd4aa48a\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"database\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"rds\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"postgres\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"15\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"storage\": 77,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"connectionStringEnvVarName\": \"DB_CONNECTION_STRING\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"performanceInsights\": true",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"f768589b-8bfb-4ed9-8c01-19c4fd4aa48a\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"database\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"rds\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"engine\": \"postgres\",",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"engineVersion\": \"15\",",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"instanceSize\": \"db.t3.micro\",",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"storage\": 77",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "added",
+            "content": "  \"connectionStringEnvVarName\": \"DB_CONNECTION_STRING\",",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "  \"performanceInsights\": true",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 9,
+            "newLineNumber": 11,
+            "key": "unchanged-9-11"
+          }
+        ]
+      },
+      "addCount": 2,
+      "removeCount": 0
+    },
+    "fa4c483b-0296-4149-8623-17b2b06557db": {
+      "id": "fa4c483b-0296-4149-8623-17b2b06557db",
+      "original": {
+        "id": "fa4c483b-0296-4149-8623-17b2b06557db",
+        "name": "copy-worker",
+        "type": "worker",
+        "cpu": 1.8834848916195823,
+        "memory": 1.612137586102179,
+        "startCommand": "node start-damnatio.js"
+      },
+      "new": {
+        "id": "fa4c483b-0296-4149-8623-17b2b06557db",
+        "name": "copy-worker",
+        "type": "worker",
+        "cpu": 1.8834848916195823,
+        "memory": 1.612137586102179,
+        "startCommand": "node start-damnatio.js",
+        "versionHistoryCount": 17
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/versionHistoryCount",
+          "value": 17
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"fa4c483b-0296-4149-8623-17b2b06557db\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"copy-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.8834848916195823,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.612137586102179,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-damnatio.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"fa4c483b-0296-4149-8623-17b2b06557db\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"copy-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.8834848916195823,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.612137586102179,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-damnatio.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"versionHistoryCount\": 17",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"fa4c483b-0296-4149-8623-17b2b06557db\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"copy-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.8834848916195823,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 1.612137586102179,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-damnatio.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"versionHistoryCount\": 17",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 9,
+            "key": "unchanged-8-9"
+          }
+        ]
+      },
+      "addCount": 1,
+      "removeCount": 0
+    },
+    "3d11b10e-beb6-42f9-bbc7-e9b0c94d857b": {
+      "id": "3d11b10e-beb6-42f9-bbc7-e9b0c94d857b",
+      "original": {
+        "id": "3d11b10e-beb6-42f9-bbc7-e9b0c94d857b",
+        "name": "navigate-worker",
+        "type": "worker",
+        "cpu": 1.7996827872433248,
+        "memory": 2.18360747694744,
+        "startCommand": "node start-spes.js"
+      },
+      "new": {
+        "id": "3d11b10e-beb6-42f9-bbc7-e9b0c94d857b",
+        "name": "navigate-worker",
+        "type": "worker",
+        "cpu": 1.7996827872433248,
+        "memory": 2.18360747694744,
+        "startCommand": "node start-spes.js",
+        "sidecars": [
+          {
+            "cpuAllotment": 0.1,
+            "memoryAllotment": 0.2,
+            "name": "logging-sidecar",
+            "image": "fluent/fluent-bit:latest"
+          }
+        ]
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/sidecars",
+          "value": [
+            {
+              "cpuAllotment": 0.1,
+              "memoryAllotment": 0.2,
+              "name": "logging-sidecar",
+              "image": "fluent/fluent-bit:latest"
+            }
+          ]
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"3d11b10e-beb6-42f9-bbc7-e9b0c94d857b\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"navigate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.7996827872433248,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.18360747694744,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-spes.js\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"3d11b10e-beb6-42f9-bbc7-e9b0c94d857b\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"navigate-worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"worker\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1.7996827872433248,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2.18360747694744,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"startCommand\": \"node start-spes.js\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"sidecars\": [",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "    {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "      \"cpuAllotment\": 0.1,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "      \"memoryAllotment\": 0.2,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 12,
+            "content": "      \"name\": \"logging-sidecar\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 13,
+            "content": "      \"image\": \"fluent/fluent-bit:latest\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 14,
+            "content": "    }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "  ]",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"3d11b10e-beb6-42f9-bbc7-e9b0c94d857b\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"navigate-worker\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"worker\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 1.7996827872433248,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 2.18360747694744,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"startCommand\": \"node start-spes.js\"",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"sidecars\": [",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "    {",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "      \"cpuAllotment\": 0.1,",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "added",
+            "content": "      \"memoryAllotment\": 0.2,",
+            "newLineNumber": 11,
+            "key": "added-11"
+          },
+          {
+            "type": "added",
+            "content": "      \"name\": \"logging-sidecar\",",
+            "newLineNumber": 12,
+            "key": "added-12"
+          },
+          {
+            "type": "added",
+            "content": "      \"image\": \"fluent/fluent-bit:latest\"",
+            "newLineNumber": 13,
+            "key": "added-13"
+          },
+          {
+            "type": "added",
+            "content": "    }",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "  ]",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 8,
+            "newLineNumber": 16,
+            "key": "unchanged-8-16"
+          }
+        ]
+      },
+      "addCount": 8,
+      "removeCount": 0
+    },
+    "253d50c8-038d-4b13-9ac6-2598c0594a16": {
+      "id": "253d50c8-038d-4b13-9ac6-2598c0594a16",
+      "original": {
+        "id": "253d50c8-038d-4b13-9ac6-2598c0594a16",
+        "name": "cuddly-concentration.net",
+        "type": "web",
+        "cpu": 3.8181612017646565,
+        "memory": 1.7399488159670813,
+        "minInstances": 1,
+        "maxInstances": 4,
+        "healthCheckPath": "/sub",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "bdab:87db:de7a:8eaa:ebdd:fded:74ea:b1ec"
+        }
+      },
+      "new": {
+        "id": "253d50c8-038d-4b13-9ac6-2598c0594a16",
+        "name": "cuddly-concentration.net",
+        "type": "web",
+        "cpu": 3.8181612017646565,
+        "memory": 1.7399488159670813,
+        "minInstances": 1,
+        "maxInstances": 4,
+        "healthCheckPath": "/sub",
+        "envVariables": {
+          "NODE_ENV": "production",
+          "DB_HOST": "bdab:87db:de7a:8eaa:ebdd:fded:74ea:b1ec"
+        },
+        "ci": {
+          "type": "codebuild"
+        }
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "/ci",
+          "value": {
+            "type": "codebuild"
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"253d50c8-038d-4b13-9ac6-2598c0594a16\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"cuddly-concentration.net\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.8181612017646565,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.7399488159670813,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 4,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/sub\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"bdab:87db:de7a:8eaa:ebdd:fded:74ea:b1ec\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  }",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"253d50c8-038d-4b13-9ac6-2598c0594a16\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"cuddly-concentration.net\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 3.8181612017646565,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 1.7399488159670813,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"minInstances\": 1,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"maxInstances\": 4,",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"healthCheckPath\": \"/sub\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"envVariables\": {",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 11,
+            "content": "    \"NODE_ENV\": \"production\",",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 12,
+            "content": "    \"DB_HOST\": \"bdab:87db:de7a:8eaa:ebdd:fded:74ea:b1ec\"",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 13,
+            "content": "  },",
+            "type": "unchanged"
+          },
+          {
+            "lineNumber": 14,
+            "content": "  \"ci\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 15,
+            "content": "    \"type\": \"codebuild\"",
+            "type": "added"
+          },
+          {
+            "lineNumber": 16,
+            "content": "  }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 17,
+            "content": "}",
+            "type": "unchanged"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "unchanged",
+            "content": "{",
+            "oldLineNumber": 1,
+            "newLineNumber": 1,
+            "key": "unchanged-1-1"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"id\": \"253d50c8-038d-4b13-9ac6-2598c0594a16\",",
+            "oldLineNumber": 2,
+            "newLineNumber": 2,
+            "key": "unchanged-2-2"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"name\": \"cuddly-concentration.net\",",
+            "oldLineNumber": 3,
+            "newLineNumber": 3,
+            "key": "unchanged-3-3"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"type\": \"web\",",
+            "oldLineNumber": 4,
+            "newLineNumber": 4,
+            "key": "unchanged-4-4"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"cpu\": 3.8181612017646565,",
+            "oldLineNumber": 5,
+            "newLineNumber": 5,
+            "key": "unchanged-5-5"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"memory\": 1.7399488159670813,",
+            "oldLineNumber": 6,
+            "newLineNumber": 6,
+            "key": "unchanged-6-6"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"minInstances\": 1,",
+            "oldLineNumber": 7,
+            "newLineNumber": 7,
+            "key": "unchanged-7-7"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"maxInstances\": 4,",
+            "oldLineNumber": 8,
+            "newLineNumber": 8,
+            "key": "unchanged-8-8"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"healthCheckPath\": \"/sub\",",
+            "oldLineNumber": 9,
+            "newLineNumber": 9,
+            "key": "unchanged-9-9"
+          },
+          {
+            "type": "unchanged",
+            "content": "  \"envVariables\": {",
+            "oldLineNumber": 10,
+            "newLineNumber": 10,
+            "key": "unchanged-10-10"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"NODE_ENV\": \"production\",",
+            "oldLineNumber": 11,
+            "newLineNumber": 11,
+            "key": "unchanged-11-11"
+          },
+          {
+            "type": "unchanged",
+            "content": "    \"DB_HOST\": \"bdab:87db:de7a:8eaa:ebdd:fded:74ea:b1ec\"",
+            "oldLineNumber": 12,
+            "newLineNumber": 12,
+            "key": "unchanged-12-12"
+          },
+          {
+            "type": "unchanged",
+            "content": "  }",
+            "oldLineNumber": 13,
+            "newLineNumber": 13,
+            "key": "unchanged-13-13"
+          },
+          {
+            "type": "added",
+            "content": "  \"ci\": {",
+            "newLineNumber": 14,
+            "key": "added-14"
+          },
+          {
+            "type": "added",
+            "content": "    \"type\": \"codebuild\"",
+            "newLineNumber": 15,
+            "key": "added-15"
+          },
+          {
+            "type": "added",
+            "content": "  }",
+            "newLineNumber": 16,
+            "key": "added-16"
+          },
+          {
+            "type": "unchanged",
+            "content": "}",
+            "oldLineNumber": 14,
+            "newLineNumber": 17,
+            "key": "unchanged-14-17"
+          }
+        ]
+      },
+      "addCount": 3,
+      "removeCount": 0
+    },
+    "defluo-vis-angustus": {
+      "id": "defluo-vis-angustus",
+      "original": null,
+      "new": {
+        "id": "defluo-vis-angustus",
+        "name": "redis-cache",
+        "type": "elasticache",
+        "engine": "redis",
+        "engineVersion": "7.0",
+        "instanceSize": "cache.t3.micro",
+        "numberOfReplicas": 1
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "",
+          "value": {
+            "id": "defluo-vis-angustus",
+            "name": "redis-cache",
+            "type": "elasticache",
+            "engine": "redis",
+            "engineVersion": "7.0",
+            "instanceSize": "cache.t3.micro",
+            "numberOfReplicas": 1
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "null",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "added"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"defluo-vis-angustus\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"redis-cache\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"elasticache\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"redis\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"7.0\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"cache.t3.micro\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"numberOfReplicas\": 1",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "added"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "added",
+            "content": "{",
+            "newLineNumber": 1,
+            "key": "added-1"
+          },
+          {
+            "type": "added",
+            "content": "  \"id\": \"defluo-vis-angustus\",",
+            "newLineNumber": 2,
+            "key": "added-2"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"redis-cache\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"elasticache\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"engine\": \"redis\",",
+            "newLineNumber": 5,
+            "key": "added-5"
+          },
+          {
+            "type": "added",
+            "content": "  \"engineVersion\": \"7.0\",",
+            "newLineNumber": 6,
+            "key": "added-6"
+          },
+          {
+            "type": "added",
+            "content": "  \"instanceSize\": \"cache.t3.micro\",",
+            "newLineNumber": 7,
+            "key": "added-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"numberOfReplicas\": 1",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "}",
+            "newLineNumber": 9,
+            "key": "added-9"
+          }
+        ]
+      },
+      "addCount": 9,
+      "removeCount": 0
+    },
+    "laudantium-adopto-tergeo": {
+      "id": "laudantium-adopto-tergeo",
+      "original": null,
+      "new": {
+        "id": "laudantium-adopto-tergeo",
+        "name": "Docker Lambda",
+        "type": "lambda-function",
+        "buildType": "docker",
+        "dockerfilePath": "Dockerfile.lambda",
+        "lambda": {
+          "packageType": "image",
+          "memory": 1066,
+          "timeoutSecs": 266
+        }
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "",
+          "value": {
+            "id": "laudantium-adopto-tergeo",
+            "name": "Docker Lambda",
+            "type": "lambda-function",
+            "buildType": "docker",
+            "dockerfilePath": "Dockerfile.lambda",
+            "lambda": {
+              "packageType": "image",
+              "memory": 1066,
+              "timeoutSecs": 266
+            }
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "null",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "added"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"laudantium-adopto-tergeo\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"Docker Lambda\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"lambda-function\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"buildType\": \"docker\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"dockerfilePath\": \"Dockerfile.lambda\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"lambda\": {",
+            "type": "added"
+          },
+          {
+            "lineNumber": 8,
+            "content": "    \"packageType\": \"image\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "    \"memory\": 1066,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "    \"timeoutSecs\": 266",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "  }",
+            "type": "added"
+          },
+          {
+            "lineNumber": 12,
+            "content": "}",
+            "type": "added"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "added",
+            "content": "{",
+            "newLineNumber": 1,
+            "key": "added-1"
+          },
+          {
+            "type": "added",
+            "content": "  \"id\": \"laudantium-adopto-tergeo\",",
+            "newLineNumber": 2,
+            "key": "added-2"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"Docker Lambda\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"lambda-function\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"buildType\": \"docker\",",
+            "newLineNumber": 5,
+            "key": "added-5"
+          },
+          {
+            "type": "added",
+            "content": "  \"dockerfilePath\": \"Dockerfile.lambda\",",
+            "newLineNumber": 6,
+            "key": "added-6"
+          },
+          {
+            "type": "added",
+            "content": "  \"lambda\": {",
+            "newLineNumber": 7,
+            "key": "added-7"
+          },
+          {
+            "type": "added",
+            "content": "    \"packageType\": \"image\",",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "    \"memory\": 1066,",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "    \"timeoutSecs\": 266",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "added",
+            "content": "  }",
+            "newLineNumber": 11,
+            "key": "added-11"
+          },
+          {
+            "type": "added",
+            "content": "}",
+            "newLineNumber": 12,
+            "key": "added-12"
+          }
+        ]
+      },
+      "addCount": 12,
+      "removeCount": 0
+    },
+    "coniecto-deduco-tondeo": {
+      "id": "coniecto-deduco-tondeo",
+      "original": null,
+      "new": {
+        "id": "coniecto-deduco-tondeo",
+        "name": "redis-cache",
+        "type": "elasticache",
+        "engine": "redis",
+        "engineVersion": "7.0",
+        "instanceSize": "cache.t3.micro",
+        "numberOfReplicas": 3
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "",
+          "value": {
+            "id": "coniecto-deduco-tondeo",
+            "name": "redis-cache",
+            "type": "elasticache",
+            "engine": "redis",
+            "engineVersion": "7.0",
+            "instanceSize": "cache.t3.micro",
+            "numberOfReplicas": 3
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "null",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "added"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"coniecto-deduco-tondeo\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"redis-cache\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"elasticache\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"engine\": \"redis\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"engineVersion\": \"7.0\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"instanceSize\": \"cache.t3.micro\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"numberOfReplicas\": 3",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "}",
+            "type": "added"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "added",
+            "content": "{",
+            "newLineNumber": 1,
+            "key": "added-1"
+          },
+          {
+            "type": "added",
+            "content": "  \"id\": \"coniecto-deduco-tondeo\",",
+            "newLineNumber": 2,
+            "key": "added-2"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"redis-cache\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"elasticache\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"engine\": \"redis\",",
+            "newLineNumber": 5,
+            "key": "added-5"
+          },
+          {
+            "type": "added",
+            "content": "  \"engineVersion\": \"7.0\",",
+            "newLineNumber": 6,
+            "key": "added-6"
+          },
+          {
+            "type": "added",
+            "content": "  \"instanceSize\": \"cache.t3.micro\",",
+            "newLineNumber": 7,
+            "key": "added-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"numberOfReplicas\": 3",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "}",
+            "newLineNumber": 9,
+            "key": "added-9"
+          }
+        ]
+      },
+      "addCount": 9,
+      "removeCount": 0
+    },
+    "aiunt-tergiversatio-adulescens": {
+      "id": "aiunt-tergiversatio-adulescens",
+      "original": null,
+      "new": {
+        "id": "aiunt-tergiversatio-adulescens",
+        "name": "brand generative models",
+        "type": "web",
+        "cpu": 1,
+        "memory": 2,
+        "buildType": "nixpacks",
+        "healthCheckPath": "/health",
+        "port": 3000,
+        "minInstances": 1,
+        "maxInstances": 1
+      },
+      "patches": [
+        {
+          "op": "add",
+          "path": "",
+          "value": {
+            "id": "aiunt-tergiversatio-adulescens",
+            "name": "brand generative models",
+            "type": "web",
+            "cpu": 1,
+            "memory": 2,
+            "buildType": "nixpacks",
+            "healthCheckPath": "/health",
+            "port": 3000,
+            "minInstances": 1,
+            "maxInstances": 1
+          }
+        }
+      ],
+      "diffLines": {
+        "originalLines": [
+          {
+            "lineNumber": 1,
+            "content": "null",
+            "type": "unchanged"
+          }
+        ],
+        "newLines": [
+          {
+            "lineNumber": 1,
+            "content": "{",
+            "type": "added"
+          },
+          {
+            "lineNumber": 2,
+            "content": "  \"id\": \"aiunt-tergiversatio-adulescens\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 3,
+            "content": "  \"name\": \"brand generative models\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 4,
+            "content": "  \"type\": \"web\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 5,
+            "content": "  \"cpu\": 1,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 6,
+            "content": "  \"memory\": 2,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 7,
+            "content": "  \"buildType\": \"nixpacks\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 8,
+            "content": "  \"healthCheckPath\": \"/health\",",
+            "type": "added"
+          },
+          {
+            "lineNumber": 9,
+            "content": "  \"port\": 3000,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 10,
+            "content": "  \"minInstances\": 1,",
+            "type": "added"
+          },
+          {
+            "lineNumber": 11,
+            "content": "  \"maxInstances\": 1",
+            "type": "added"
+          },
+          {
+            "lineNumber": 12,
+            "content": "}",
+            "type": "added"
+          }
+        ],
+        "unifiedDiffLines": [
+          {
+            "type": "added",
+            "content": "{",
+            "newLineNumber": 1,
+            "key": "added-1"
+          },
+          {
+            "type": "added",
+            "content": "  \"id\": \"aiunt-tergiversatio-adulescens\",",
+            "newLineNumber": 2,
+            "key": "added-2"
+          },
+          {
+            "type": "added",
+            "content": "  \"name\": \"brand generative models\",",
+            "newLineNumber": 3,
+            "key": "added-3"
+          },
+          {
+            "type": "added",
+            "content": "  \"type\": \"web\",",
+            "newLineNumber": 4,
+            "key": "added-4"
+          },
+          {
+            "type": "added",
+            "content": "  \"cpu\": 1,",
+            "newLineNumber": 5,
+            "key": "added-5"
+          },
+          {
+            "type": "added",
+            "content": "  \"memory\": 2,",
+            "newLineNumber": 6,
+            "key": "added-6"
+          },
+          {
+            "type": "added",
+            "content": "  \"buildType\": \"nixpacks\",",
+            "newLineNumber": 7,
+            "key": "added-7"
+          },
+          {
+            "type": "added",
+            "content": "  \"healthCheckPath\": \"/health\",",
+            "newLineNumber": 8,
+            "key": "added-8"
+          },
+          {
+            "type": "added",
+            "content": "  \"port\": 3000,",
+            "newLineNumber": 9,
+            "key": "added-9"
+          },
+          {
+            "type": "added",
+            "content": "  \"minInstances\": 1,",
+            "newLineNumber": 10,
+            "key": "added-10"
+          },
+          {
+            "type": "added",
+            "content": "  \"maxInstances\": 1",
+            "newLineNumber": 11,
+            "key": "added-11"
+          },
+          {
+            "type": "added",
+            "content": "}",
+            "newLineNumber": 12,
+            "key": "added-12"
+          }
+        ]
+      },
+      "addCount": 12,
+      "removeCount": 0
+    }
+  }
 }
