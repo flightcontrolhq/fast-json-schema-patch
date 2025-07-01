@@ -1,0 +1,73 @@
+{
+  "environments": {
+    "0": {
+      "services": {
+        "0": {
+          "ports": {
+            "4": {
+              "healthCheck": {
+                "path": [
+                  "/health",
+                  "/new-health"
+                ]
+              }
+            },
+            "_t": "a",
+            "_4": [
+              "",
+              0,
+              3
+            ]
+          }
+        },
+        "1": [
+          {
+            "id": "new-worker-service",
+            "name": "New Worker Service",
+            "type": "worker",
+            "cpu": 1,
+            "memory": 2,
+            "dependsOn": [
+              "nlb-server"
+            ]
+          }
+        ],
+        "_t": "a"
+      }
+    },
+    "1": {
+      "services": {
+        "0": {
+          "ports": {
+            "_t": "a",
+            "_1": [
+              {
+                "id": "udp-8002",
+                "port": 8002,
+                "protocol": "udp",
+                "healthCheck": {
+                  "type": "udp",
+                  "tcpPort": 8001,
+                  "timeoutSecs": 5,
+                  "intervalSecs": 30
+                }
+              },
+              0,
+              0
+            ]
+          },
+          "cpu": [
+            1,
+            4
+          ],
+          "memory": [
+            2,
+            8
+          ]
+        },
+        "_t": "a"
+      }
+    },
+    "_t": "a"
+  }
+}

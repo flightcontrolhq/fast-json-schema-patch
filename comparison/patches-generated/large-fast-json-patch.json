@@ -1,0 +1,136 @@
+[
+  {
+    "op": "remove",
+    "path": "/environments/0/services/9/dependsOn"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/memory",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/cpu",
+    "value": 1
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/type",
+    "value": "worker"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/name",
+    "value": "new-service"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/9/id",
+    "value": "service-new"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/dependsOn/0",
+    "value": "service8"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/memory",
+    "value": 7.13640288544376
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/cpu",
+    "value": 2.110197359788906
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/name",
+    "value": "service-name-9"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/8/id",
+    "value": "service9"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/dependsOn/0",
+    "value": "service7"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/memory",
+    "value": 4.030704809012418
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/cpu",
+    "value": 0.9217924870708134
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/name",
+    "value": "service-name-8"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/7/id",
+    "value": "service8"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/dependsOn/0",
+    "value": "service6"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/memory",
+    "value": 2.4177868429170157
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/cpu",
+    "value": 0.33969105832804214
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/name",
+    "value": "service-name-7"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/6/id",
+    "value": "service7"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/dependsOn/0",
+    "value": "service5"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/memory",
+    "value": 2.3786604648662513
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/cpu",
+    "value": 2.594067784285971
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/name",
+    "value": "service-name-6"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/5/id",
+    "value": "service6"
+  },
+  {
+    "op": "replace",
+    "path": "/environments/0/services/2/cpu",
+    "value": 100
+  }
+]

@@ -1,0 +1,128 @@
+{
+  "store": {
+    "currency": [
+      "JLR",
+      "INR"
+    ],
+    "supportEmail": [
+      "VCY-5LG@UySNh.xej",
+      "Melyssa.Bergstrom@yahoo.com"
+    ]
+  },
+  "shipping": {
+    "rates": {
+      "0": [
+        {
+          "country": "UX",
+          "method": "pickup",
+          "cost": 74231603.51043692
+        }
+      ],
+      "1": [
+        {
+          "country": "BX",
+          "method": "express",
+          "cost": 86455076.83523542,
+          "estimatedDays": 36007494
+        }
+      ],
+      "2": [
+        {
+          "country": "AY",
+          "method": "standard",
+          "cost": 15148614.915746229,
+          "estimatedDays": 71713213
+        }
+      ],
+      "3": [
+        {
+          "country": "AD",
+          "method": "pickup",
+          "cost": 75051601.43478787
+        }
+      ],
+      "_t": "a",
+      "_0": [
+        {
+          "country": "UX",
+          "method": "pickup",
+          "cost": 74231603.51043692
+        },
+        0,
+        0
+      ],
+      "_1": [
+        {
+          "country": "BX",
+          "method": "express",
+          "cost": 86455076.83523542,
+          "estimatedDays": 36007494
+        },
+        0,
+        0
+      ],
+      "_2": [
+        {
+          "country": "AY",
+          "method": "standard",
+          "cost": 15148614.915746229,
+          "estimatedDays": 71713213
+        },
+        0,
+        0
+      ],
+      "_3": [
+        {
+          "country": "AD",
+          "method": "pickup",
+          "cost": 75051601.43478787
+        },
+        0,
+        0
+      ]
+    },
+    "freeOver": [
+      50124025.89643403,
+      0,
+      0
+    ]
+  },
+  "inventory": {
+    "thresholdAlert": [
+      35492634,
+      34
+    ]
+  },
+  "categories": {
+    "1": {
+      "name": [
+        "dolor eiusmod elit in fugiat",
+        "Outdoors"
+      ],
+      "slug": [
+        "fu",
+        "outdoors"
+      ]
+    },
+    "_t": "a"
+  },
+  "products": {
+    "14": {
+      "attributes": {
+        "voluptates-anser-conservo": [
+          false
+        ]
+      }
+    },
+    "_t": "a"
+  },
+  "users": {
+    "16": {
+      "email": [
+        "uIS@ugvQUrzUTWQaKPjriLQ.dz",
+        "Vilma_Murazik@hotmail.com"
+      ]
+    },
+    "_t": "a"
+  }
+}

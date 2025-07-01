@@ -1,0 +1,4404 @@
+[
+  [
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 1
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"categories\": [",
+      "lineNumber": 2
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 3
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"O8E0b\"",
+      "lineNumber": 4,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor reprehenderit sunt nostrud\"",
+      "lineNumber": 5,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"elit in et adipisicing\"",
+      "lineNumber": 6,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"5dwnuem2b2g\"",
+      "lineNumber": 7
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 8,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 9
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7lIx\"",
+      "lineNumber": 10,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"nisi enim laborum ad culpa\"",
+      "lineNumber": 11,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": null",
+      "lineNumber": 12,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"ptjzxr-\"",
+      "lineNumber": 13
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 14,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 15
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"vncLw_r2p\"",
+      "lineNumber": 16,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"sed nisi magna amet ullamco\"",
+      "lineNumber": 17,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"aliqua\"",
+      "lineNumber": 18,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"nw\"",
+      "lineNumber": 19
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 20,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 21
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0b3\"",
+      "lineNumber": 22,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laboris consequat officia veniam tempor\"",
+      "lineNumber": 23,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"minim irure eiusmod voluptate\"",
+      "lineNumber": 24,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"sjgt\"",
+      "lineNumber": 25
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 26,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 27
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7YkIZTv2\"",
+      "lineNumber": 28,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"est\"",
+      "lineNumber": 29,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"Excepteur\"",
+      "lineNumber": 30,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"pldbp5sbm\"",
+      "lineNumber": 31
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 32,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 33
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"q1Mk-cD2E\"",
+      "lineNumber": 34,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"officia magna consectetur cupidatat\"",
+      "lineNumber": 35,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"amet\"",
+      "lineNumber": 36,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"f\"",
+      "lineNumber": 37
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 38,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 39
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"OpCmQUaqmp\"",
+      "lineNumber": 40,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"ex\"",
+      "lineNumber": 41,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"Duis in et\"",
+      "lineNumber": 42,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"-2\"",
+      "lineNumber": 43
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 44,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 45
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"k2SyT5H\"",
+      "lineNumber": 46,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"Ut dolore esse Excepteur velit\"",
+      "lineNumber": 47,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"sed laborum\"",
+      "lineNumber": 48,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"r2a6e90\"",
+      "lineNumber": 49
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 50
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 51,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"features\": {",
+      "lineNumber": 52
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"Loremd__\": 71049050",
+      "lineNumber": 53,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"consectetur_54\": -33890784.74997082",
+      "lineNumber": 54,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"esse8_a\": true",
+      "lineNumber": 55,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"in04d\": -82671130",
+      "lineNumber": 56,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"qui_365\": false",
+      "lineNumber": 57,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"veniam_f_c\": false",
+      "lineNumber": 58
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 59,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"inventory\": {",
+      "lineNumber": 60
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"autoRestock\": true",
+      "lineNumber": 61,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"restockLevel\": 78068622",
+      "lineNumber": 62,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "modify",
+      "text": "\"thresholdAlert\": 54302485",
+      "lineNumber": 63
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 64,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"payments\": {",
+      "lineNumber": 65
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"paypal\": {",
+      "lineNumber": 66
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"clientId\": \"ut aute\"",
+      "lineNumber": 67,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"clientSecret\": \"aliquip ullamco in esse\"",
+      "lineNumber": 68
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 69,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"stripe\": {",
+      "lineNumber": 70
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"apiKey\": \"proident consequat\"",
+      "lineNumber": 71,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"webhookSecret\": \"in Duis adipisicing\"",
+      "lineNumber": 72
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 73,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"supportedMethods\": [",
+      "lineNumber": 74
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"credit_card\"",
+      "lineNumber": 75
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 76
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 77,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"products\": [",
+      "lineNumber": 78
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 79
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 80
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"F\": 42702946.80221465",
+      "lineNumber": 81,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"iseGZz5hygD\": -20616135.100772828",
+      "lineNumber": 82,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"jH50\": false",
+      "lineNumber": 83,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"sWr\": true",
+      "lineNumber": 84,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"vqWebHmCG5\": true",
+      "lineNumber": 85,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"vvmME_rw\": true",
+      "lineNumber": 86
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 87,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 88
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"do quis fugiat est\"",
+      "lineNumber": 89,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"commodo labore\"",
+      "lineNumber": 90,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"eu eiusmod\"",
+      "lineNumber": 91,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"dolore\"",
+      "lineNumber": 92,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ullamco sint nulla\"",
+      "lineNumber": 93
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 94,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"incididunt\"",
+      "lineNumber": 95,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"83Y\"",
+      "lineNumber": 96,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 26048471",
+      "lineNumber": 97,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"est quis\"",
+      "lineNumber": 98,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 49679626.69239057",
+      "lineNumber": 99,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"Ut elit dolore sunt exercitation\"",
+      "lineNumber": 100
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 101,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 102
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 103
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"consequat ea deserunt\"",
+      "lineNumber": 104,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"non\"",
+      "lineNumber": 105
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 106,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"Lorem ut\"",
+      "lineNumber": 107,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"te8l5C671H\"",
+      "lineNumber": 108,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"incididunt Lorem dolore irure cupidatat\"",
+      "lineNumber": 109,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 14794808.103689993",
+      "lineNumber": 110,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"ipsum sunt labore culpa\"",
+      "lineNumber": 111
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 112,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 113
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 114
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Cl\": -52677045.66026486",
+      "lineNumber": 115,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"h96D\": true",
+      "lineNumber": 116,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"lht1Ljxryy\": true",
+      "lineNumber": 117
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 118,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 119
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"deserunt nostrud esse\"",
+      "lineNumber": 120,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"irure tempor sit sint in\"",
+      "lineNumber": 121,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ex\"",
+      "lineNumber": 122,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"voluptate enim\"",
+      "lineNumber": 123
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 124,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"sed tempor sit ut do\"",
+      "lineNumber": 125,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0U6Ma-Xsr2\"",
+      "lineNumber": 126,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 90819672",
+      "lineNumber": 127,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor aute proident\"",
+      "lineNumber": 128,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 39306935.64560692",
+      "lineNumber": 129,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"adipisicing\"",
+      "lineNumber": 130
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 131,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 132
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 133
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"0c8MY\": -14963372.26639624",
+      "lineNumber": 134,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"XWxjGLR\": true",
+      "lineNumber": 135,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"oYhrGa\": 17703671.068326265",
+      "lineNumber": 136,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"oxeH3z\": \"reprehenderit in ad\"",
+      "lineNumber": 137,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"rpns\": true",
+      "lineNumber": 138,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"uLduTpAbbe\": false",
+      "lineNumber": 139
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": ""
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 140,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 141
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"adipisicing cillum deserunt reprehenderit\"",
+      "lineNumber": 142
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 143,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"et voluptate nostrud eu nisi\"",
+      "lineNumber": 144,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"Yf-0VrniK\"",
+      "lineNumber": 145,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 85626485",
+      "lineNumber": 146,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"occaecat do deserunt\"",
+      "lineNumber": 147,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 74574387.42506786",
+      "lineNumber": 148,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"Ut\"",
+      "lineNumber": 149
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 150,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 151
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 152
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"0\": \"culpa adipisicing\"",
+      "lineNumber": 153,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"25R8zxTKYRo\": \"veniam\"",
+      "lineNumber": 154,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"8H4O\": true",
+      "lineNumber": 155,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"I8A6_5EkvG\": \"et elit\"",
+      "lineNumber": 156,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"w4kOTfu9_\": true",
+      "lineNumber": 157
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 158,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 159
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"veniam\"",
+      "lineNumber": 160
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 161,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"in\"",
+      "lineNumber": 162,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"49FJ8qJ26x\"",
+      "lineNumber": 163,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 34297499",
+      "lineNumber": 164,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"eiusmod dolor non\"",
+      "lineNumber": 165,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 59083365.32996986",
+      "lineNumber": 166,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"culpa quis ipsum tempor\"",
+      "lineNumber": 167
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 168
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 169,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"shipping\": {",
+      "lineNumber": 170
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"rates\": [",
+      "lineNumber": 171
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 172
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"cost\": 77700162.56835449",
+      "lineNumber": 173,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"country\": \"CX\"",
+      "lineNumber": 174,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"estimatedDays\": 81047697",
+      "lineNumber": 175,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"method\": \"express\"",
+      "lineNumber": 176
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 177,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 178
+    },
+    {
+      "level": 4,
+      "type": "modify",
+      "text": "\"cost\": 72494961.87478814",
+      "lineNumber": 179,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"country\": \"CO\"",
+      "lineNumber": 180,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"method\": \"standard\"",
+      "lineNumber": 181
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 182
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 183
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 184,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"store\": {",
+      "lineNumber": 185
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"currency\": \"TTG\"",
+      "lineNumber": 186,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"locale\": \"av-OT\"",
+      "lineNumber": 187,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"logoUrl\": \"http://dcByFGNXcQAmQfAQbarEqHCjCECVmREQA.nyuU0gG8lNASNxUgpNTAS4.fB1tvtrLXTu9mHE3BDG3owz\"",
+      "lineNumber": 188,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "modify",
+      "text": "\"name\": \"officia ea\"",
+      "lineNumber": 189,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"supportEmail\": \"tSAjGKMY7L@eICWLXPXFqMX.klvs\"",
+      "lineNumber": 190
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 191,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"users\": [",
+      "lineNumber": 192
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 193
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"eXMGcV@MeoVHOluCpuVds.mn\"",
+      "lineNumber": 194,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"5dc7c37d-81bb-bc4a-286f-731e6ba0ceea\"",
+      "lineNumber": 195,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 196
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 197,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 198,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 199,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 200
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 201
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 202,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 203
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"uN2SMxDSB@OuqtQIWqMYnVwdAY.jh\"",
+      "lineNumber": 204,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"965f1158-dc5d-3199-7ffa-96365c9a516d\"",
+      "lineNumber": 205,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 206
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"irure_1\": \"reprehenderit incididunt non officia\"",
+      "lineNumber": 207,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"sit6\": 70209321.66619426",
+      "lineNumber": 208
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 209,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"veniam cupidatat consequat\"",
+      "lineNumber": 210,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 211
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 212,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 213,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"manager\"",
+      "lineNumber": 214,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 215,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 216
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 217
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 218,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 219
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"gEUA2eqcl62eN@fsxnhmtFWHGTpBAIP.zmwj\"",
+      "lineNumber": 220,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"9828d0a7-f342-5004-f599-60f7effe1ac5\"",
+      "lineNumber": 221,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 222
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"aliquip8\": \"quis nostrud cillum eu\"",
+      "lineNumber": 223,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"veniam_4\": \"amet labore laborum aute\"",
+      "lineNumber": 224
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 225,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolore aliqua\"",
+      "lineNumber": 226,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 227
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 228,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 229,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 230
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 231
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 232,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 233
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"ASnplgNIVpSON@mOEqoT.pj\"",
+      "lineNumber": 234,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"5aa852e2-1c26-3bee-b2e0-6672b2f1009a\"",
+      "lineNumber": 235,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 236
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"proident_ec\": \"aliqua et eu\"",
+      "lineNumber": 237
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 238,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "modify",
+      "text": "\"name\": \"ipsum et\"",
+      "lineNumber": 239,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 240
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 241,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 242
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 243
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 244,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 245
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"tmhJoczrd9eUQCy@SVKXvBJbZvMIgIShDvXxeWHVVahJlhw.kfjm\"",
+      "lineNumber": 246,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"4b44c64a-a565-ebce-9061-eadf7d279ca8\"",
+      "lineNumber": 247,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 248
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Duis_7\": true",
+      "lineNumber": 249,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"laborum03a\": \"Excepteur cillum minim enim\"",
+      "lineNumber": 250,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"qui_9\": \"culpa officia\"",
+      "lineNumber": 251
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 252,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor consequat\"",
+      "lineNumber": 253,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 254
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"manager\"",
+      "lineNumber": 255,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 256,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 257,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 258
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 259
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 260,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 261
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"0ig7m5VCyc9@CCaVsyqSorz.hw\"",
+      "lineNumber": 262,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"1460be8a-5051-52ee-cf24-6ab1a5bd4f3b\"",
+      "lineNumber": 263,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 264
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Lorem9\": \"aliqua laboris exercitation amet adipisicing\"",
+      "lineNumber": 265
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 266,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"elit quis proident tempor\"",
+      "lineNumber": 267,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 268
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 269
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 270
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 271,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 272
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"2C-c28cK0@DNJSjCEFc.zj\"",
+      "lineNumber": 273,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"316306ae-17ed-f8b1-a1ac-f3cded470648\"",
+      "lineNumber": 274,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 275
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"reprehenderit2\": \"voluptate elit exercitation velit\"",
+      "lineNumber": 276
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 277,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laborum cillum\"",
+      "lineNumber": 278,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 279
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 280,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 281,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 282
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 283
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 284,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 285
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"WzE9J3m3FDoz@qGOeyRKgz.pjg\"",
+      "lineNumber": 286,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7b65721a-464c-fb11-963f-57144f885274\"",
+      "lineNumber": 287,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 288
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"aliquip_02\": 30396730.950911894",
+      "lineNumber": 289
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 290,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"consequat\"",
+      "lineNumber": 291,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 292
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 293,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 294
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 295
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 296,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 297
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"Q0fq76@UYFqkTaTReaooQrWPbEntywpfNgd.rp\"",
+      "lineNumber": 298,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"e99f335e-ac0b-6e29-8837-b37c2c7d29ce\"",
+      "lineNumber": 299,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 300
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ad_ae6\": false",
+      "lineNumber": 301,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"eiusmod9c_\": \"ex ut velit\"",
+      "lineNumber": 302
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 303,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"adipisicing laborum nulla amet id\"",
+      "lineNumber": 304,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 305
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 306,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 307
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 308
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 309,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 310
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"rw47mCz@QHHzJ.sdo\"",
+      "lineNumber": 311,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7a0449da-80b8-f8ac-804a-be5d5d7585e6\"",
+      "lineNumber": 312,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 313
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"cillum_9\": 57355058.162428826",
+      "lineNumber": 314
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 315,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 316
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 317
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 318
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 319,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 320
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"YzL2Dey5iNFX@dLjq.nn\"",
+      "lineNumber": 321,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0d35d6f7-6a94-e5d1-3d1f-59436e22f805\"",
+      "lineNumber": 322,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laborum voluptate\"",
+      "lineNumber": 323,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 324
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 325,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 326,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 327,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 328
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 329
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 330
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 331
+    },
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 332
+    }
+  ],
+  [
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 1
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"categories\": [",
+      "lineNumber": 2
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 3
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"O8E0b\"",
+      "lineNumber": 4,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor reprehenderit sunt nostrud\"",
+      "lineNumber": 5,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"elit in et adipisicing\"",
+      "lineNumber": 6,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"5dwnuem2b2g\"",
+      "lineNumber": 7
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 8,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 9
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7lIx\"",
+      "lineNumber": 10,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"nisi enim laborum ad culpa\"",
+      "lineNumber": 11,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": null",
+      "lineNumber": 12,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"ptjzxr-\"",
+      "lineNumber": 13
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 14,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 15
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"vncLw_r2p\"",
+      "lineNumber": 16,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"sed nisi magna amet ullamco\"",
+      "lineNumber": 17,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"aliqua\"",
+      "lineNumber": 18,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"nw\"",
+      "lineNumber": 19
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 20,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 21
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0b3\"",
+      "lineNumber": 22,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laboris consequat officia veniam tempor\"",
+      "lineNumber": 23,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"minim irure eiusmod voluptate\"",
+      "lineNumber": 24,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"sjgt\"",
+      "lineNumber": 25
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 26,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 27
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7YkIZTv2\"",
+      "lineNumber": 28,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"est\"",
+      "lineNumber": 29,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"Excepteur\"",
+      "lineNumber": 30,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"pldbp5sbm\"",
+      "lineNumber": 31
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 32,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 33
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"q1Mk-cD2E\"",
+      "lineNumber": 34,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"officia magna consectetur cupidatat\"",
+      "lineNumber": 35,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"amet\"",
+      "lineNumber": 36,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"f\"",
+      "lineNumber": 37
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 38,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 39
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"OpCmQUaqmp\"",
+      "lineNumber": 40,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"ex\"",
+      "lineNumber": 41,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"Duis in et\"",
+      "lineNumber": 42,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"-2\"",
+      "lineNumber": 43
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 44,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 45
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"k2SyT5H\"",
+      "lineNumber": 46,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"Ut dolore esse Excepteur velit\"",
+      "lineNumber": 47,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"parentId\": \"sed laborum\"",
+      "lineNumber": 48,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"slug\": \"r2a6e90\"",
+      "lineNumber": 49
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 50
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 51,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"features\": {",
+      "lineNumber": 52
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"Loremd__\": 71049050",
+      "lineNumber": 53,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"consectetur_54\": -33890784.74997082",
+      "lineNumber": 54,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"esse8_a\": true",
+      "lineNumber": 55,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"in04d\": -82671130",
+      "lineNumber": 56,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"qui_365\": false",
+      "lineNumber": 57,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"veniam_f_c\": false",
+      "lineNumber": 58
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 59,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"inventory\": {",
+      "lineNumber": 60
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"autoRestock\": true",
+      "lineNumber": 61,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"restockLevel\": 78068622",
+      "lineNumber": 62,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "modify",
+      "text": "\"thresholdAlert\": 91",
+      "lineNumber": 63
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 64,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"payments\": {",
+      "lineNumber": 65
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"paypal\": {",
+      "lineNumber": 66
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"clientId\": \"ut aute\"",
+      "lineNumber": 67,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"clientSecret\": \"aliquip ullamco in esse\"",
+      "lineNumber": 68
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 69,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"stripe\": {",
+      "lineNumber": 70
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"apiKey\": \"proident consequat\"",
+      "lineNumber": 71,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"webhookSecret\": \"in Duis adipisicing\"",
+      "lineNumber": 72
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 73,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"supportedMethods\": [",
+      "lineNumber": 74
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"credit_card\"",
+      "lineNumber": 75
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 76
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 77,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"products\": [",
+      "lineNumber": 78
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 79
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 80
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"F\": 42702946.80221465",
+      "lineNumber": 81,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"iseGZz5hygD\": -20616135.100772828",
+      "lineNumber": 82,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"jH50\": false",
+      "lineNumber": 83,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"sWr\": true",
+      "lineNumber": 84,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"vqWebHmCG5\": true",
+      "lineNumber": 85,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"vvmME_rw\": true",
+      "lineNumber": 86
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 87,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 88
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"do quis fugiat est\"",
+      "lineNumber": 89,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"commodo labore\"",
+      "lineNumber": 90,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"eu eiusmod\"",
+      "lineNumber": 91,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"dolore\"",
+      "lineNumber": 92,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ullamco sint nulla\"",
+      "lineNumber": 93
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 94,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"incididunt\"",
+      "lineNumber": 95,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"83Y\"",
+      "lineNumber": 96,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 26048471",
+      "lineNumber": 97,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"est quis\"",
+      "lineNumber": 98,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 49679626.69239057",
+      "lineNumber": 99,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"Ut elit dolore sunt exercitation\"",
+      "lineNumber": 100
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 101,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 102
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 103
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"consequat ea deserunt\"",
+      "lineNumber": 104,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"non\"",
+      "lineNumber": 105
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 106,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"Lorem ut\"",
+      "lineNumber": 107,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"te8l5C671H\"",
+      "lineNumber": 108,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "add",
+      "text": "\"inventoryLevel\": 143",
+      "lineNumber": 109,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"incididunt Lorem dolore irure cupidatat\"",
+      "lineNumber": 110,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 14794808.103689993",
+      "lineNumber": 111,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"ipsum sunt labore culpa\"",
+      "lineNumber": 112
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 113,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 114
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 115
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Cl\": -52677045.66026486",
+      "lineNumber": 116,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"h96D\": true",
+      "lineNumber": 117,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"lht1Ljxryy\": true",
+      "lineNumber": 118
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 119,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 120
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"deserunt nostrud esse\"",
+      "lineNumber": 121,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"irure tempor sit sint in\"",
+      "lineNumber": 122,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ex\"",
+      "lineNumber": 123,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"voluptate enim\"",
+      "lineNumber": 124
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 125,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"sed tempor sit ut do\"",
+      "lineNumber": 126,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0U6Ma-Xsr2\"",
+      "lineNumber": 127,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 90819672",
+      "lineNumber": 128,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor aute proident\"",
+      "lineNumber": 129,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 39306935.64560692",
+      "lineNumber": 130,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"adipisicing\"",
+      "lineNumber": 131
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 132,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 133
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 134
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"0c8MY\": -14963372.26639624",
+      "lineNumber": 135,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"XWxjGLR\": true",
+      "lineNumber": 136,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"oYhrGa\": 17703671.068326265",
+      "lineNumber": 137,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"oxeH3z\": \"reprehenderit in ad\"",
+      "lineNumber": 138,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"rpns\": true",
+      "lineNumber": 139,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"uLduTpAbbe\": false",
+      "lineNumber": 140,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "add",
+      "text": "\"vetus-cursus-ascisco\": 24.260967764356224",
+      "lineNumber": 141
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 142,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 143
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"adipisicing cillum deserunt reprehenderit\"",
+      "lineNumber": 144
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 145,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"et voluptate nostrud eu nisi\"",
+      "lineNumber": 146,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"Yf-0VrniK\"",
+      "lineNumber": 147,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 85626485",
+      "lineNumber": 148,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"occaecat do deserunt\"",
+      "lineNumber": 149,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 74574387.42506786",
+      "lineNumber": 150,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"Ut\"",
+      "lineNumber": 151
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 152,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 153
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"attributes\": {",
+      "lineNumber": 154
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"0\": \"culpa adipisicing\"",
+      "lineNumber": 155,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"25R8zxTKYRo\": \"veniam\"",
+      "lineNumber": 156,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"8H4O\": true",
+      "lineNumber": 157,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"I8A6_5EkvG\": \"et elit\"",
+      "lineNumber": 158,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"w4kOTfu9_\": true",
+      "lineNumber": 159
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 160,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"categoryIds\": [",
+      "lineNumber": 161
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"veniam\"",
+      "lineNumber": 162
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 163,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"description\": \"in\"",
+      "lineNumber": 164,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"49FJ8qJ26x\"",
+      "lineNumber": 165,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"inventoryLevel\": 34297499",
+      "lineNumber": 166,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"eiusmod dolor non\"",
+      "lineNumber": 167,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"price\": 59083365.32996986",
+      "lineNumber": 168,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"sku\": \"culpa quis ipsum tempor\"",
+      "lineNumber": 169
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 170
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 171,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"shipping\": {",
+      "lineNumber": 172
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"rates\": [",
+      "lineNumber": 173
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 174
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"cost\": 77700162.56835449",
+      "lineNumber": 175,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"country\": \"CX\"",
+      "lineNumber": 176,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"estimatedDays\": 81047697",
+      "lineNumber": 177,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"method\": \"express\"",
+      "lineNumber": 178
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 179,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 180
+    },
+    {
+      "level": 4,
+      "type": "modify",
+      "text": "\"cost\": 24.99523208461147",
+      "lineNumber": 181,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"country\": \"CO\"",
+      "lineNumber": 182,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"method\": \"standard\"",
+      "lineNumber": 183
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 184
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 185
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 186,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"store\": {",
+      "lineNumber": 187
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"currency\": \"TTG\"",
+      "lineNumber": 188,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"locale\": \"av-OT\"",
+      "lineNumber": 189,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"logoUrl\": \"http://dcByFGNXcQAmQfAQbarEqHCjCECVmREQA.nyuU0gG8lNASNxUgpNTAS4.fB1tvtrLXTu9mHE3BDG3owz\"",
+      "lineNumber": 190,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "modify",
+      "text": "\"name\": \"Kessler Group\"",
+      "lineNumber": 191,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "\"supportEmail\": \"tSAjGKMY7L@eICWLXPXFqMX.klvs\"",
+      "lineNumber": 192
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 193,
+      "comma": true
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "\"users\": [",
+      "lineNumber": 194
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 195
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"eXMGcV@MeoVHOluCpuVds.mn\"",
+      "lineNumber": 196,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"5dc7c37d-81bb-bc4a-286f-731e6ba0ceea\"",
+      "lineNumber": 197,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 198
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 199,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 200,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 201,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 202
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 203
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 204,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 205
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"uN2SMxDSB@OuqtQIWqMYnVwdAY.jh\"",
+      "lineNumber": 206,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"965f1158-dc5d-3199-7ffa-96365c9a516d\"",
+      "lineNumber": 207,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 208
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"irure_1\": \"reprehenderit incididunt non officia\"",
+      "lineNumber": 209,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"sit6\": 70209321.66619426",
+      "lineNumber": 210
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 211,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"veniam cupidatat consequat\"",
+      "lineNumber": 212,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 213
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 214,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 215,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"manager\"",
+      "lineNumber": 216,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 217,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 218
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 219
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 220,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 221
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"gEUA2eqcl62eN@fsxnhmtFWHGTpBAIP.zmwj\"",
+      "lineNumber": 222,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"9828d0a7-f342-5004-f599-60f7effe1ac5\"",
+      "lineNumber": 223,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 224
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"aliquip8\": \"quis nostrud cillum eu\"",
+      "lineNumber": 225,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"veniam_4\": \"amet labore laborum aute\"",
+      "lineNumber": 226
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 227,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolore aliqua\"",
+      "lineNumber": 228,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 229
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 230,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 231,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 232
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 233
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 234,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 235
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"ASnplgNIVpSON@mOEqoT.pj\"",
+      "lineNumber": 236,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"5aa852e2-1c26-3bee-b2e0-6672b2f1009a\"",
+      "lineNumber": 237,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 238
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"proident_ec\": \"aliqua et eu\"",
+      "lineNumber": 239
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 240,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "modify",
+      "text": "\"name\": \"Dallas Gerhold\"",
+      "lineNumber": 241,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 242
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 243,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 244
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 245
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 246,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 247
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"tmhJoczrd9eUQCy@SVKXvBJbZvMIgIShDvXxeWHVVahJlhw.kfjm\"",
+      "lineNumber": 248,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"4b44c64a-a565-ebce-9061-eadf7d279ca8\"",
+      "lineNumber": 249,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 250
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Duis_7\": true",
+      "lineNumber": 251,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"laborum03a\": \"Excepteur cillum minim enim\"",
+      "lineNumber": 252,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"qui_9\": \"culpa officia\"",
+      "lineNumber": 253
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 254,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"dolor consequat\"",
+      "lineNumber": 255,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 256
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"manager\"",
+      "lineNumber": 257,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 258,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 259,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 260
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 261
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 262,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 263
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"0ig7m5VCyc9@CCaVsyqSorz.hw\"",
+      "lineNumber": 264,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"1460be8a-5051-52ee-cf24-6ab1a5bd4f3b\"",
+      "lineNumber": 265,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 266
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"Lorem9\": \"aliqua laboris exercitation amet adipisicing\"",
+      "lineNumber": 267
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 268,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"elit quis proident tempor\"",
+      "lineNumber": 269,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 270
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 271
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 272
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 273,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 274
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"2C-c28cK0@DNJSjCEFc.zj\"",
+      "lineNumber": 275,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"316306ae-17ed-f8b1-a1ac-f3cded470648\"",
+      "lineNumber": 276,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 277
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"reprehenderit2\": \"voluptate elit exercitation velit\"",
+      "lineNumber": 278
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 279,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laborum cillum\"",
+      "lineNumber": 280,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 281
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 282,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 283,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 284
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 285
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 286,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 287
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"WzE9J3m3FDoz@qGOeyRKgz.pjg\"",
+      "lineNumber": 288,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7b65721a-464c-fb11-963f-57144f885274\"",
+      "lineNumber": 289,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 290
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"aliquip_02\": 30396730.950911894",
+      "lineNumber": 291
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 292,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"consequat\"",
+      "lineNumber": 293,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 294
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 295,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 296
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 297
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 298,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 299
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"Q0fq76@UYFqkTaTReaooQrWPbEntywpfNgd.rp\"",
+      "lineNumber": 300,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"e99f335e-ac0b-6e29-8837-b37c2c7d29ce\"",
+      "lineNumber": 301,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 302
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"ad_ae6\": false",
+      "lineNumber": 303,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"eiusmod9c_\": \"ex ut velit\"",
+      "lineNumber": 304
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 305,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"adipisicing laborum nulla amet id\"",
+      "lineNumber": 306,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 307
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 308,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 309
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 310
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 311,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 312
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"rw47mCz@QHHzJ.sdo\"",
+      "lineNumber": 313,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"7a0449da-80b8-f8ac-804a-be5d5d7585e6\"",
+      "lineNumber": 314,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"metadata\": {",
+      "lineNumber": 315
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"cillum_9\": 57355058.162428826",
+      "lineNumber": 316
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 317,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 318
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"super-admin\"",
+      "lineNumber": 319
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 320
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 321,
+      "comma": true
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "{",
+      "lineNumber": 322
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"email\": \"YzL2Dey5iNFX@dLjq.nn\"",
+      "lineNumber": 323,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"id\": \"0d35d6f7-6a94-e5d1-3d1f-59436e22f805\"",
+      "lineNumber": 324,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"name\": \"laborum voluptate\"",
+      "lineNumber": 325,
+      "comma": true
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "\"roles\": [",
+      "lineNumber": 326
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"guest\"",
+      "lineNumber": 327,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"staff\"",
+      "lineNumber": 328,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"admin\"",
+      "lineNumber": 329,
+      "comma": true
+    },
+    {
+      "level": 4,
+      "type": "equal",
+      "text": "\"customer\"",
+      "lineNumber": 330
+    },
+    {
+      "level": 3,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 331
+    },
+    {
+      "level": 2,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 332
+    },
+    {
+      "level": 1,
+      "type": "equal",
+      "text": "]",
+      "lineNumber": 333
+    },
+    {
+      "level": 0,
+      "type": "equal",
+      "text": "}",
+      "lineNumber": 334
+    }
+  ]
+]

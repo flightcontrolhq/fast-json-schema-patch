@@ -5,9 +5,9 @@ import type {
   Category,
   EcommerceConfig,
   Product,
-  ShippingRate,
   User,
-} from "../src/types/ecommerce";
+} from "./types";
+import { getMinMax } from "./data-generators";
 
 // Make faker available to json-schema-faker for better random values
 // @ts-ignore – the old 0.x json-schema-faker typings don't expose extend()
@@ -23,24 +23,25 @@ export interface EcommerceModificationDescriptor {
  * Generate a completely random e-commerce configuration that satisfies the JSON-Schema in
  * `schema/e-commerce.json`.
  */
-export function generateRandomECommerceConfig(): EcommerceConfig {
+export function generateRandomECommerceConfig({complexity}: {complexity: "Low" | "Medium" | "High" | "Very High"}): EcommerceConfig {
   // Deep copy schema to avoid modifying the original import
   const localSchema = JSON.parse(JSON.stringify(ecommerceSchema));
+  const { min, max } = getMinMax(complexity);
 
   // Randomize the number of items in major arrays to stress test
-  const numProducts = faker.number.int({ min: 10, max: 500 });
+  const numProducts = faker.number.int({ min, max });
   if (localSchema.properties?.products) {
     localSchema.properties.products.minItems = numProducts;
     localSchema.properties.products.maxItems = numProducts;
   }
 
-  const numCategories = faker.number.int({ min: 5, max: 50 });
+  const numCategories = faker.number.int({ min, max });
   if (localSchema.properties?.categories) {
     localSchema.properties.categories.minItems = numCategories;
     localSchema.properties.categories.maxItems = numCategories;
   }
 
-  const numUsers = faker.number.int({ min: 20, max: 1000 });
+  const numUsers = faker.number.int({ min, max });
   if (localSchema.properties?.users) {
     localSchema.properties.users.minItems = numUsers;
     localSchema.properties.users.maxItems = numUsers;
@@ -1052,25 +1053,315 @@ modifications.push(
   },
 );
 
-// We currently have fewer than 100 explicit modifications. Fill the remainder with
-// automatically-generated product-price tweaks (unique names) so that we hit exactly 100.
-while (modifications.length < 100) {
-  const idx = modifications.length + 1;
-  modifications.push({
-    name: `Minor price tweak #${idx}`,
-    complexity: faker.number.int({ min: 5, max: 25 }),
+/*********************************************************************************************
+ * 🔴 VERY HIGH MODIFICATIONS (complexity 71+) – complex, multi-system changes             *
+ *********************************************************************************************/
+modifications.push(
+  {
+    name: "Re-brand store",
+    complexity: 75,
     modify: (doc) => {
-      const prod = getRandomProduct(doc);
-      if (prod) {
-        const factor = faker.number.float({
-          min: 0.95,
-          max: 1.05,
-        });
-        prod.price = Number((prod.price * factor).toFixed(2));
+      if (doc.store) {
+        doc.store.name = faker.company.name();
+        doc.store.currency = pickRandom(["USD", "EUR", "GBP", "INR"]);
+        doc.store.locale = pickRandom(["en-US", "en-GB", "fr-FR", "de-DE"]);
       }
     },
-  });
-}
+  },
+  {
+    name: "Add 'tags' to all products",
+    complexity: 72,
+    modify: (doc) => {
+      if (doc.products) {
+        doc.products.forEach((p: any) => {
+          if (!p.tags) p.tags = [];
+          const count = faker.number.int({ min: 1, max: 3 });
+          for (let i = 0; i < count; i++) {
+            p.tags.push(faker.commerce.productAdjective());
+          }
+        });
+      }
+    },
+  },
+  {
+    name: "Add 'isFeatured' flag and feature 5 products",
+    complexity: 74,
+    modify: (doc) => {
+      if (doc.products) {
+        doc.products.forEach((p: any) => {
+          p.isFeatured = false;
+        });
+        faker.helpers.shuffle(doc.products).slice(0, 5).forEach((p: any) => {
+          p.isFeatured = true;
+        });
+      }
+    },
+  },
+  {
+    name: "Archive products with zero inventory",
+    complexity: 88,
+    modify: (doc: any) => {
+      if (doc.products) {
+        if (!doc.archivedProducts) doc.archivedProducts = [];
+        const toArchive = doc.products.filter((p: any) => p.inventoryLevel === 0);
+        doc.archivedProducts.push(...toArchive);
+        doc.products = doc.products.filter((p: any) => p.inventoryLevel > 0);
+      }
+    },
+  },
+  {
+    name: "Add review summaries to all products",
+    complexity: 85,
+    modify: (doc) => {
+      if (doc.products) {
+        doc.products.forEach((p: any) => {
+          p.reviewSummary = {
+            reviewCount: faker.number.int({ min: 0, max: 1000 }),
+            averageRating: faker.number.float({ min: 1, max: 5, multipleOf: 0.1 }),
+          }
+        });
+      }
+    },
+  },
+  {
+    name: "Duplicate all products",
+    complexity: 92,
+    modify: (doc) => {
+      if (doc.products) {
+        const existingIds = new Set(doc.products.map((p) => p.id));
+        const duplicated = JSON.parse(JSON.stringify(doc.products));
+        duplicated.forEach((p: any) => {
+          const newId = generateUniqueId(existingIds);
+          existingIds.add(newId);
+          p.id = newId;
+          p.name = `${p.name} (Copy)`;
+          p.sku = `${p.sku}-COPY`;
+        });
+        doc.products.push(...duplicated);
+      }
+    },
+  },
+  {
+    name: "Standardize all user names to title case",
+    complexity: 71,
+    modify: (doc) => {
+      if (doc.users) {
+        doc.users.forEach((u) => {
+          u.name = faker.person.fullName();
+        });
+      }
+    }
+  },
+  {
+    name: "Add new payment provider (Klarna)",
+    complexity: 76,
+    modify: (doc: any) => {
+      if (doc.payments) {
+        doc.payments.klarna = {
+          merchantId: faker.string.uuid(),
+          apiSecret: faker.string.alphanumeric(40)
+        };
+        if(!doc.payments.supportedMethods.includes('klarna')) {
+          doc.payments.supportedMethods.push('klarna');
+        }
+      }
+    }
+  },
+  {
+    name: "Add social media links to store",
+    complexity: 80,
+    modify: (doc: any) => {
+      if(doc.store) {
+        doc.store.socialLinks = {
+          twitter: `https://twitter.com/${faker.company.name().replace(/\s/g, '')}`,
+          facebook: `https://facebook.com/${faker.company.name().replace(/\s/g, '')}`
+        }
+      }
+    }
+  },
+  {
+    name: "Change product descriptions to include attributes",
+    complexity: 95,
+    modify: (doc) => {
+      if (doc.products) {
+        doc.products.forEach((p: any) => {
+          let attrString = '';
+          if (p.attributes) {
+            attrString = Object.entries(p.attributes).map(([k, v]) => `${k}: ${v}`).join(', ');
+          }
+          p.description = `${p.description}. Features: ${attrString || 'Standard'}.`;
+        });
+      }
+    }
+  },
+  {
+    name: "Assign a primary category to all products",
+    complexity: 82,
+    modify: (doc) => {
+      if(doc.products && doc.categories?.length) {
+        doc.products.forEach((p: any) => {
+          if (p.categoryIds && p.categoryIds.length > 0) {
+            p.primaryCategoryId = p.categoryIds[0];
+          } else {
+            p.primaryCategoryId = pickRandom(doc.categories).id;
+          }
+        });
+      }
+    }
+  },
+  {
+    name: "Consolidate 'manager' and 'admin' roles to 'super-admin'",
+    complexity: 85,
+    modify: (doc) => {
+      if (doc.users) {
+        doc.users.forEach((u) => {
+          const hasAdmin = u.roles.includes('admin');
+          const hasManager = u.roles.includes('manager');
+          if (hasAdmin || hasManager) {
+            u.roles = u.roles.filter(r => r !== 'admin' && r !== 'manager');
+            if(!u.roles.includes('super-admin')) {
+              u.roles.push('super-admin');
+            }
+          }
+        });
+      }
+    }
+  },
+  {
+    name: "Add 15 new categories",
+    complexity: 98,
+    modify: (doc) => {
+      if (!doc.categories) doc.categories = [];
+      const existingIds = new Set(doc.categories.map(c => c.id));
+      for (let i = 0; i < 15; i++) {
+        const newId = generateUniqueId(existingIds);
+        existingIds.add(newId);
+        const name = faker.commerce.department();
+        doc.categories.push({
+          id: newId,
+          name: name,
+          slug: faker.helpers.slugify(name.toLowerCase()),
+          parentId: doc.categories.length > 0 ? pickRandom(doc.categories).id : null,
+        });
+      }
+    }
+  },
+  {
+    name: "Add 'relatedProducts' to top 10 products",
+    complexity: 90,
+    modify: (doc: any) => {
+      if (doc.products && doc.products.length > 10) {
+        const allProductIds = doc.products.map((p: any) => p.id);
+        const topProducts = faker.helpers.shuffle(doc.products).slice(0, 10);
+        topProducts.forEach((p: any) => {
+          p.relatedProductIds = faker.helpers.shuffle(allProductIds.filter((id: string) => id !== p.id)).slice(0, 5);
+        });
+      }
+    }
+  },
+  {
+    name: "Anonymize all user data",
+    complexity: 85,
+    modify: (doc) => {
+      if(doc.users) {
+        doc.users.forEach((u) => {
+          u.name = faker.person.fullName();
+          u.email = faker.internet.email();
+        });
+      }
+    }
+  },
+  {
+    name: "Restock all out-of-stock products",
+    complexity: 78,
+    modify: (doc) => {
+      if (doc.products) {
+        doc.products.forEach((p) => {
+          if (p.inventoryLevel === 0) {
+            p.inventoryLevel = faker.number.int({ min: 50, max: 200 });
+          }
+        });
+      }
+    }
+  },
+  {
+    name: "Add 'staff' role to all admins and managers",
+    complexity: 80,
+    modify: (doc) => {
+      if (doc.users) {
+        doc.users.forEach((u) => {
+          if(u.roles.includes('admin') || u.roles.includes('manager')) {
+            if(!u.roles.includes('staff')) {
+              u.roles.push('staff');
+            }
+          }
+        });
+      }
+    }
+  },
+  {
+    name: "Remove all user metadata",
+    complexity: 80,
+    modify: (doc) => {
+      if (doc.users) {
+        doc.users.forEach((u) => {
+          if (u.metadata) {
+            u.metadata = {};
+          }
+        });
+      }
+    }
+  },
+  {
+    name: "Add discount code system",
+    complexity: 90,
+    modify: (doc: any) => {
+      if (doc.payments) {
+        doc.payments.discounts = [
+          { code: 'SAVE10', percentage: 10 },
+          { code: 'SAVE20', percentage: 20 },
+          { code: 'FREESHIP', flat: 0 }
+        ];
+      }
+    }
+  },
+  {
+    name: "Clear all product category assignments",
+    complexity: 84,
+    modify: (doc) => {
+      if(doc.products) {
+        doc.products.forEach((p) => {
+          p.categoryIds = [];
+        });
+      }
+    }
+  },
+  {
+    name: "Add a theme object to the store",
+    complexity: 86,
+    modify: (doc: any) => {
+      if (doc.store) {
+        doc.store.theme = {
+          primaryColor: faker.color.rgb(),
+          secondaryColor: faker.color.rgb(),
+          font: pickRandom(['Arial', 'Helvetica', 'Georgia', 'Times New Roman'])
+        }
+      }
+    }
+  },
+  {
+    name: "Remove PayPal credentials",
+    complexity: 73,
+    modify: (doc) => {
+      if (doc.payments) {
+        delete doc.payments.paypal;
+        if (doc.payments.supportedMethods) {
+          doc.payments.supportedMethods = doc.payments.supportedMethods.filter(m => m !== 'paypal');
+        }
+      }
+    },
+  },
+);
 
 /*********************************************************************************************
  * Intelligent selection & application helpers – copied from cloud-config logic              *

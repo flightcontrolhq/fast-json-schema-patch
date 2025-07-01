@@ -1,0 +1,48 @@
+[
+  {
+    "op": "replace",
+    "path": "/store/currency",
+    "value": "INR",
+    "oldValue": "JLR"
+  },
+  {
+    "op": "replace",
+    "path": "/store/supportEmail",
+    "value": "Melyssa.Bergstrom@yahoo.com",
+    "oldValue": "VCY-5LG@UySNh.xej"
+  },
+  {
+    "op": "remove",
+    "path": "/shipping/freeOver",
+    "oldValue": 50124025.89643403
+  },
+  {
+    "op": "replace",
+    "path": "/inventory/thresholdAlert",
+    "value": 34,
+    "oldValue": 35492634
+  },
+  {
+    "op": "replace",
+    "path": "/categories/1/name",
+    "value": "Outdoors",
+    "oldValue": "dolor eiusmod elit in fugiat"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/1/slug",
+    "value": "outdoors",
+    "oldValue": "fu"
+  },
+  {
+    "op": "add",
+    "path": "/products/14/attributes/voluptates-anser-conservo",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/users/16/email",
+    "value": "Vilma_Murazik@hotmail.com",
+    "oldValue": "uIS@ugvQUrzUTWQaKPjriLQ.dz"
+  }
+]

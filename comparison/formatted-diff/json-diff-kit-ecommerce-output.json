@@ -1,0 +1,334 @@
+{
+  "store": {
+    "name": "Kessler Group",
+    "currency": "TTG",
+    "locale": "av-OT",
+    "logoUrl": "http://dcByFGNXcQAmQfAQbarEqHCjCECVmREQA.nyuU0gG8lNASNxUgpNTAS4.fB1tvtrLXTu9mHE3BDG3owz",
+    "supportEmail": "tSAjGKMY7L@eICWLXPXFqMX.klvs"
+  },
+  "payments": {
+    "supportedMethods": [
+      "credit_card"
+    ],
+    "stripe": {
+      "apiKey": "proident consequat",
+      "webhookSecret": "in Duis adipisicing"
+    },
+    "paypal": {
+      "clientId": "ut aute",
+      "clientSecret": "aliquip ullamco in esse"
+    }
+  },
+  "shipping": {
+    "rates": [
+      {
+        "country": "CX",
+        "method": "express",
+        "cost": 77700162.56835449,
+        "estimatedDays": 81047697
+      },
+      {
+        "country": "CO",
+        "method": "standard",
+        "cost": 24.99523208461147
+      }
+    ]
+  },
+  "inventory": {
+    "thresholdAlert": 91,
+    "autoRestock": true,
+    "restockLevel": 78068622
+  },
+  "features": {
+    "in04d": -82671130,
+    "consectetur_54": -33890784.74997082,
+    "veniam_f_c": false,
+    "Loremd__": 71049050,
+    "esse8_a": true,
+    "qui_365": false
+  },
+  "categories": [
+    {
+      "id": "O8E0b",
+      "name": "dolor reprehenderit sunt nostrud",
+      "slug": "5dwnuem2b2g",
+      "parentId": "elit in et adipisicing"
+    },
+    {
+      "id": "7lIx",
+      "name": "nisi enim laborum ad culpa",
+      "slug": "ptjzxr-",
+      "parentId": null
+    },
+    {
+      "id": "vncLw_r2p",
+      "name": "sed nisi magna amet ullamco",
+      "slug": "nw",
+      "parentId": "aliqua"
+    },
+    {
+      "id": "0b3",
+      "name": "laboris consequat officia veniam tempor",
+      "slug": "sjgt",
+      "parentId": "minim irure eiusmod voluptate"
+    },
+    {
+      "id": "7YkIZTv2",
+      "name": "est",
+      "slug": "pldbp5sbm",
+      "parentId": "Excepteur"
+    },
+    {
+      "id": "q1Mk-cD2E",
+      "name": "officia magna consectetur cupidatat",
+      "slug": "f",
+      "parentId": "amet"
+    },
+    {
+      "id": "OpCmQUaqmp",
+      "name": "ex",
+      "slug": "-2",
+      "parentId": "Duis in et"
+    },
+    {
+      "id": "k2SyT5H",
+      "name": "Ut dolore esse Excepteur velit",
+      "slug": "r2a6e90",
+      "parentId": "sed laborum"
+    }
+  ],
+  "products": [
+    {
+      "id": "83Y",
+      "name": "est quis",
+      "sku": "Ut elit dolore sunt exercitation",
+      "description": "incididunt",
+      "price": 49679626.69239057,
+      "categoryIds": [
+        "do quis fugiat est",
+        "commodo labore",
+        "eu eiusmod",
+        "dolore",
+        "ullamco sint nulla"
+      ],
+      "inventoryLevel": 26048471,
+      "attributes": {
+        "vqWebHmCG5": true,
+        "iseGZz5hygD": -20616135.100772828,
+        "vvmME_rw": true,
+        "sWr": true,
+        "F": 42702946.80221465,
+        "jH50": false
+      }
+    },
+    {
+      "id": "te8l5C671H",
+      "name": "incididunt Lorem dolore irure cupidatat",
+      "sku": "ipsum sunt labore culpa",
+      "description": "Lorem ut",
+      "price": 14794808.103689993,
+      "categoryIds": [
+        "consequat ea deserunt",
+        "non"
+      ],
+      "inventoryLevel": 143
+    },
+    {
+      "id": "0U6Ma-Xsr2",
+      "name": "dolor aute proident",
+      "sku": "adipisicing",
+      "description": "sed tempor sit ut do",
+      "price": 39306935.64560692,
+      "categoryIds": [
+        "deserunt nostrud esse",
+        "irure tempor sit sint in",
+        "ex",
+        "voluptate enim"
+      ],
+      "inventoryLevel": 90819672,
+      "attributes": {
+        "h96D": true,
+        "lht1Ljxryy": true,
+        "Cl": -52677045.66026486
+      }
+    },
+    {
+      "id": "Yf-0VrniK",
+      "name": "occaecat do deserunt",
+      "sku": "Ut",
+      "description": "et voluptate nostrud eu nisi",
+      "price": 74574387.42506786,
+      "categoryIds": [
+        "adipisicing cillum deserunt reprehenderit"
+      ],
+      "inventoryLevel": 85626485,
+      "attributes": {
+        "uLduTpAbbe": false,
+        "rpns": true,
+        "0c8MY": -14963372.26639624,
+        "oxeH3z": "reprehenderit in ad",
+        "XWxjGLR": true,
+        "oYhrGa": 17703671.068326265,
+        "vetus-cursus-ascisco": 24.260967764356224
+      }
+    },
+    {
+      "id": "49FJ8qJ26x",
+      "name": "eiusmod dolor non",
+      "sku": "culpa quis ipsum tempor",
+      "description": "in",
+      "price": 59083365.32996986,
+      "categoryIds": [
+        "veniam"
+      ],
+      "inventoryLevel": 34297499,
+      "attributes": {
+        "0": "culpa adipisicing",
+        "25R8zxTKYRo": "veniam",
+        "w4kOTfu9_": true,
+        "8H4O": true,
+        "I8A6_5EkvG": "et elit"
+      }
+    }
+  ],
+  "users": [
+    {
+      "id": "5dc7c37d-81bb-bc4a-286f-731e6ba0ceea",
+      "email": "eXMGcV@MeoVHOluCpuVds.mn",
+      "roles": [
+        "staff",
+        "customer",
+        "admin",
+        "guest"
+      ]
+    },
+    {
+      "id": "965f1158-dc5d-3199-7ffa-96365c9a516d",
+      "email": "uN2SMxDSB@OuqtQIWqMYnVwdAY.jh",
+      "name": "veniam cupidatat consequat",
+      "roles": [
+        "admin",
+        "super-admin",
+        "manager",
+        "customer",
+        "staff"
+      ],
+      "metadata": {
+        "sit6": 70209321.66619426,
+        "irure_1": "reprehenderit incididunt non officia"
+      }
+    },
+    {
+      "id": "9828d0a7-f342-5004-f599-60f7effe1ac5",
+      "email": "gEUA2eqcl62eN@fsxnhmtFWHGTpBAIP.zmwj",
+      "name": "dolore aliqua",
+      "roles": [
+        "super-admin",
+        "guest",
+        "customer"
+      ],
+      "metadata": {
+        "veniam_4": "amet labore laborum aute",
+        "aliquip8": "quis nostrud cillum eu"
+      }
+    },
+    {
+      "id": "5aa852e2-1c26-3bee-b2e0-6672b2f1009a",
+      "email": "ASnplgNIVpSON@mOEqoT.pj",
+      "name": "Dallas Gerhold",
+      "roles": [
+        "staff",
+        "super-admin"
+      ],
+      "metadata": {
+        "proident_ec": "aliqua et eu"
+      }
+    },
+    {
+      "id": "4b44c64a-a565-ebce-9061-eadf7d279ca8",
+      "email": "tmhJoczrd9eUQCy@SVKXvBJbZvMIgIShDvXxeWHVVahJlhw.kfjm",
+      "name": "dolor consequat",
+      "roles": [
+        "manager",
+        "guest",
+        "super-admin",
+        "customer"
+      ],
+      "metadata": {
+        "qui_9": "culpa officia",
+        "Duis_7": true,
+        "laborum03a": "Excepteur cillum minim enim"
+      }
+    },
+    {
+      "id": "1460be8a-5051-52ee-cf24-6ab1a5bd4f3b",
+      "email": "0ig7m5VCyc9@CCaVsyqSorz.hw",
+      "name": "elit quis proident tempor",
+      "roles": [
+        "staff"
+      ],
+      "metadata": {
+        "Lorem9": "aliqua laboris exercitation amet adipisicing"
+      }
+    },
+    {
+      "id": "316306ae-17ed-f8b1-a1ac-f3cded470648",
+      "email": "2C-c28cK0@DNJSjCEFc.zj",
+      "name": "laborum cillum",
+      "roles": [
+        "guest",
+        "customer",
+        "admin"
+      ],
+      "metadata": {
+        "reprehenderit2": "voluptate elit exercitation velit"
+      }
+    },
+    {
+      "id": "7b65721a-464c-fb11-963f-57144f885274",
+      "email": "WzE9J3m3FDoz@qGOeyRKgz.pjg",
+      "name": "consequat",
+      "roles": [
+        "super-admin",
+        "staff"
+      ],
+      "metadata": {
+        "aliquip_02": 30396730.950911894
+      }
+    },
+    {
+      "id": "e99f335e-ac0b-6e29-8837-b37c2c7d29ce",
+      "email": "Q0fq76@UYFqkTaTReaooQrWPbEntywpfNgd.rp",
+      "name": "adipisicing laborum nulla amet id",
+      "roles": [
+        "staff",
+        "guest"
+      ],
+      "metadata": {
+        "ad_ae6": false,
+        "eiusmod9c_": "ex ut velit"
+      }
+    },
+    {
+      "id": "7a0449da-80b8-f8ac-804a-be5d5d7585e6",
+      "email": "rw47mCz@QHHzJ.sdo",
+      "roles": [
+        "super-admin"
+      ],
+      "metadata": {
+        "cillum_9": 57355058.162428826
+      }
+    },
+    {
+      "id": "0d35d6f7-6a94-e5d1-3d1f-59436e22f805",
+      "email": "YzL2Dey5iNFX@dLjq.nn",
+      "name": "laborum voluptate",
+      "roles": [
+        "guest",
+        "staff",
+        "admin",
+        "customer"
+      ]
+    }
+  ]
+}
