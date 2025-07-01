@@ -3,8 +3,23 @@
   "license": "MIT",
   "type": "module",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "Ultra-fast, schema-aware JSON patch generation and human-readable diffing. A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches with tools for creating human-readable diffs suitable for frontend applications.",
+  "keywords": [
+    "json-patch",
+    "json-diff",
+    "schema",
+    "rfc6902",
+    "diffing",
+    "performance",
+    "typescript",
+    "json-schema",
+    "zod",
+    "frontend",
+    "patch",
+    "diff",
+    "semantic",
+    "high-performance"
+  ],
   "homepage": "https://github.com/flightcontrolhq/schema-json-patch",
   "bugs": {
     "url": "https://github.com/flightcontrolhq/schema-json-patch/issues"
