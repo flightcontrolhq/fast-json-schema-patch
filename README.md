@@ -91,6 +91,7 @@ const patcher = new SchemaJsonPatcher({ plan });
 ```
 
 This integration makes it seamless to leverage your existing Zod schemas for optimized JSON patching. For more details on Zod's JSON Schema conversion, see the [official documentation](https://zod.dev/json-schema).
+
 ---
 
 ## 🎨 Human-Readable Diffs with `PatchAggregator`
@@ -118,8 +119,6 @@ console.log(aggregatedResult.parentDiff); // Shows changes outside the /users ar
 console.log(aggregatedResult.childDiffs['user2']); // Shows user2 was removed
 console.log(aggregatedResult.childDiffs['user3']); // Shows user3 was added
 ```
-
-🏆 **Summary**: `PatchAggregator` is **2.2x faster** and uses **93% less memory**, making it ideal for performance-sensitive applications.
 
 ## 🛠️ API Reference
 
