@@ -1,4 +1,5 @@
 import type {JsonObject} from "../types"
+import { cachedJsonStringify } from "./cache"
 
 /**
  * A simple, non-cryptographic FNV-1a hash function.
@@ -28,7 +29,7 @@ export function fastHash(obj: JsonObject, fields: string[]): string {
     const value = obj[key]
     if (value !== undefined) {
       // Create a string representation with field position to avoid collision from reordering
-      const str = typeof value === "string" ? value : JSON.stringify(value)
+      const str = typeof value === "string" ? value : cachedJsonStringify(value)
       combined += `${i}:${key}=${str}|`
     }
   }

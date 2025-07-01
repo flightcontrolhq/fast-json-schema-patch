@@ -115,8 +115,8 @@ const aggregatedResult = aggregator.aggregate(patch, {
 
 // 3. Use the result to render a UI
 console.log(aggregatedResult.parentDiff); // Shows changes outside the /users array
-console.log(aggregatedResult.childDiffs.get('user2')); // Shows user2 was removed
-console.log(aggregatedResult.childDiffs.get('user3')); // Shows user3 was added
+console.log(aggregatedResult.childDiffs['user2']); // Shows user2 was removed
+console.log(aggregatedResult.childDiffs['user3']); // Shows user3 was added
 ```
 
 🏆 **Summary**: `PatchAggregator` is **2.2x faster** and uses **93% less memory**, making it ideal for performance-sensitive applications.

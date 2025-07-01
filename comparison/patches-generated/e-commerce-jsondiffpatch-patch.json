@@ -1,105 +1,200 @@
 {
-  "store": {
-    "currency": [
-      "NIX",
-      "GBP"
-    ]
-  },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "FB",
+          "country": "JN",
           "method": "express",
-          "cost": 62077771.79064009,
-          "estimatedDays": 25763484
-        }
-      ],
-      "1": [
-        {
-          "country": "PU",
-          "method": "pickup",
-          "cost": 3202982.938269827,
-          "estimatedDays": 66322190
-        }
-      ],
-      "2": [
-        {
-          "country": "BS",
-          "method": "express",
-          "cost": 36590589.841450475,
-          "estimatedDays": 35035892
-        }
-      ],
-      "3": [
-        {
-          "country": "US",
-          "method": "standard",
-          "cost": 3.0558691525318626,
-          "estimatedDays": 14
+          "cost": 75969270.86468607,
+          "estimatedDays": 13
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "FB",
+          "country": "CE",
           "method": "express",
-          "cost": 62077771.79064009,
-          "estimatedDays": 25763484
+          "cost": 71275926.39251924,
+          "estimatedDays": 83679956
         },
         0,
         0
       ],
       "_1": [
         {
-          "country": "PU",
-          "method": "pickup",
-          "cost": 3202982.938269827,
-          "estimatedDays": 66322190
-        },
-        0,
-        0
-      ],
-      "_2": [
-        {
-          "country": "BS",
+          "country": "JN",
           "method": "express",
-          "cost": 36590589.841450475,
-          "estimatedDays": 35035892
+          "cost": 75969270.86468607,
+          "estimatedDays": 31563717
         },
         0,
         0
       ]
     }
   },
-  "inventory": {
-    "autoRestock": [
-      true
+  "analytics": {
+    "googleAnalyticsId": [
+      "UA-9205616495-7",
+      "UA-033068-7"
     ]
   },
-  "products": {
-    "2": {
-      "sku": [
-        "aute sunt proident nulla do",
-        "Wmg5jTlj7xaF"
+  "categories": {
+    "41": {
+      "name": [
+        "do sed Excepteur proident cillum",
+        "Games"
+      ],
+      "slug": [
+        "68ngnz-8",
+        "games"
       ]
     },
-    "25": {
-      "attributes": {
-        "delibero-quidem-laboriosam": [
-          "purple"
+    "_t": "a"
+  },
+  "products": {
+    "28": {
+      "categoryIds": {
+        "_t": "a",
+        "_2": [
+          "",
+          1,
+          3
         ]
       }
     },
     "_t": "a"
   },
   "users": {
-    "27": {
-      "name": [
-        "ullamco eiusmod",
-        "Ms. Erma Satterfield"
-      ]
-    },
-    "_t": "a"
+    "_t": "a",
+    "_0": [
+      "",
+      25,
+      3
+    ],
+    "_1": [
+      "",
+      26,
+      3
+    ],
+    "_2": [
+      "",
+      29,
+      3
+    ],
+    "_3": [
+      "",
+      14,
+      3
+    ],
+    "_4": [
+      "",
+      31,
+      3
+    ],
+    "_5": [
+      "",
+      33,
+      3
+    ],
+    "_7": [
+      "",
+      28,
+      3
+    ],
+    "_10": [
+      "",
+      2,
+      3
+    ],
+    "_11": [
+      "",
+      30,
+      3
+    ],
+    "_12": [
+      "",
+      4,
+      3
+    ],
+    "_16": [
+      "",
+      18,
+      3
+    ],
+    "_17": [
+      "",
+      19,
+      3
+    ],
+    "_19": [
+      "",
+      6,
+      3
+    ],
+    "_21": [
+      "",
+      5,
+      3
+    ],
+    "_22": [
+      "",
+      24,
+      3
+    ],
+    "_23": [
+      "",
+      7,
+      3
+    ],
+    "_24": [
+      "",
+      0,
+      3
+    ],
+    "_25": [
+      "",
+      1,
+      3
+    ],
+    "_26": [
+      "",
+      16,
+      3
+    ],
+    "_27": [
+      "",
+      12,
+      3
+    ],
+    "_28": [
+      "",
+      11,
+      3
+    ],
+    "_29": [
+      "",
+      17,
+      3
+    ],
+    "_30": [
+      "",
+      21,
+      3
+    ],
+    "_31": [
+      "",
+      8,
+      3
+    ],
+    "_32": [
+      "",
+      20,
+      3
+    ],
+    "_33": [
+      "",
+      15,
+      3
+    ]
   }
 }

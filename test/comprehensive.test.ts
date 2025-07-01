@@ -2,8 +2,8 @@ import { describe, test, expect, spyOn, it } from "bun:test";
 import {
   buildPlan,
   SchemaJsonPatcher,
-  deepEqual,
 } from "../src/index";
+import { deepEqual } from "../src/performance/deepEqual";
 import { fastHash } from "../src/performance/fashHash";
 import { _resolveRef } from "../src/core/buildPlan";
 import { _traverseSchema } from "../src/core/buildPlan";

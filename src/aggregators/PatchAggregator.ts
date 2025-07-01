@@ -1,5 +1,5 @@
 import type {ArrayPlan, Plan} from "../core/buildPlan"
-import {getCachedFormatter} from "../performance/cache"
+import {cachedJsonStringify, getCachedFormatter} from "../performance/cache"
 import {deepEqualSchemaAware} from "../performance/deepEqual"
 import {fastHash} from "../performance/fashHash"
 import {getEffectiveHashFields} from "../performance/getEffectiveHashFields"
@@ -163,7 +163,7 @@ export class PatchAggregator {
     }
 
     // Final deep comparison (will use memoization)
-    return JSON.stringify(obj1) === JSON.stringify(obj2)
+    return cachedJsonStringify(obj1) === cachedJsonStringify(obj2)
   }
 
   aggregate(patches: Operation[], config: AggregationConfig): AggregatedDiffResult {
@@ -182,7 +182,7 @@ export class PatchAggregator {
     const idKey = this.getIdKeyForPath(pathPrefix, config)
     const arrayPlan = config.plan ? this.getArrayPlanForPath(pathPrefix, config.plan) : undefined
     const parentPatches: Operation[] = []
-    const childPatchesById = new Map<string, Operation[]>()
+    const childPatchesById: Record<string, Operation[]> = {}
 
     const originalChildren = getValueByPath<JsonObject[]>(this.originalDoc, pathPrefix) || []
     const originalChildIdsByIndex = originalChildren.map((child) => child[idKey] as string)
@@ -224,10 +224,10 @@ export class PatchAggregator {
       }
 
       if (childId) {
-        if (!childPatchesById.has(childId)) {
-          childPatchesById.set(childId, [])
+        if (!(childId in childPatchesById)) {
+          childPatchesById[childId] = []
         }
-        childPatchesById.get(childId)?.push(patch)
+        childPatchesById[childId]?.push(patch)
       } else {
         parentPatches.push(patch)
       }
@@ -256,7 +256,7 @@ export class PatchAggregator {
     for (const childId of allChildIds) {
       const originalChild = originalChildrenById.get(childId) || null
       const newChild = newChildrenById.get(childId) || null
-      const patchesForChild = childPatchesById.get(childId) || []
+      const patchesForChild = childPatchesById[childId] || []
 
       // Enhanced optimization: skip processing if objects are identical
       if (originalChild && newChild && this.compareObjects(originalChild, newChild, arrayPlan)) {
@@ -301,7 +301,7 @@ export class PatchAggregator {
       let lineCounts: {addCount: number; removeCount: number}
       if (originalChild && !newChild) {
         // Entire object was removed - create manual diff
-        const originalFormatted = JSON.stringify(originalChild, null, 2)
+        const originalFormatted = cachedJsonStringify(originalChild)
         const originalLines = originalFormatted.split("\n")
 
         diffLines = {
@@ -330,7 +330,7 @@ export class PatchAggregator {
         }
       } else if (!originalChild && newChild) {
         // Entire object was added - create manual diff
-        const newFormatted = JSON.stringify(newChild, null, 2)
+        const newFormatted = cachedJsonStringify(newChild, null, 2)
         const newLines = newFormatted.split("\n")
 
         diffLines = {
@@ -387,16 +387,74 @@ export class PatchAggregator {
 
   private stripChildArray(doc: JsonValue, parentPathParts: string[], childKey?: string): JsonValue {
     if (!childKey) return doc
-    const newDoc = JSON.parse(JSON.stringify(doc))
-    let current = newDoc
+    
+    // More efficient approach: create shallow copies only where needed
+    // instead of deep cloning the entire document
+    if (parentPathParts.length === 0) {
+      // Direct child - create shallow copy and delete property
+      if (doc && typeof doc === "object" && !Array.isArray(doc)) {
+        const result = { ...doc } as JsonObject
+        delete result[childKey]
+        return result
+      }
+      return doc
+    }
+
+    // Ensure doc is an object we can work with
+    if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+      return doc
+    }
+
+    // Navigate to parent and create shallow copies along the path
+    const result = { ...(doc as JsonObject) }
+    let current: JsonValue = result
+    
+    // Navigate to the exact parent location
     for (const part of parentPathParts) {
-      const value = current?.[part]
-      if (!value) break
-      current = value
+      if (!current || typeof current !== "object" || Array.isArray(current)) {
+        return doc // Can't navigate path, return original
+      }
+      
+      const currentObj = current as JsonObject
+      const value = currentObj[part]
+      if (value === undefined) {
+        return doc // Path doesn't exist, return original
+      }
+      
+      // If it's an array, we need to handle array indexing
+      if (Array.isArray(value)) {
+        // Create a shallow copy of the array
+        currentObj[part] = [...value]
+        current = currentObj[part] as JsonValue
+        break // Arrays are handled differently
+      }
+      
+      if (typeof value !== "object" || value === null) {
+        return doc // Can't navigate further, return original
+      }
+      
+      // Create shallow copy for this level
+      currentObj[part] = { ...(value as JsonObject) }
+      current = currentObj[part] as JsonValue
     }
-    if (current && typeof current === "object" && !Array.isArray(current)) {
-      delete current[childKey]
+    
+    // If we ended up with an array, find the right element and strip the child
+    if (Array.isArray(current)) {
+      // For arrays, we need to process each element
+      for (let i = 0; i < current.length; i++) {
+        const item = current[i]
+        if (item && typeof item === "object" && !Array.isArray(item) && childKey in item) {
+          const itemCopy = { ...(item as JsonObject) }
+          delete itemCopy[childKey]
+          current[i] = itemCopy
+        }
+      }
+    } else if (current && typeof current === "object" && !Array.isArray(current) && childKey in current) {
+      // Direct object - delete the property
+      const currentObj = current as JsonObject
+      delete currentObj[childKey]
     }
-    return newDoc
+    
+    return result
   }
 }

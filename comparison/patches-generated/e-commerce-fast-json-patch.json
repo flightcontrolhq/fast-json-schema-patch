@@ -1,37 +1,1331 @@
 [
   {
-    "op": "replace",
-    "path": "/users/27/name",
-    "value": "Ms. Erma Satterfield"
+    "op": "remove",
+    "path": "/users/33/roles/3"
   },
   {
-    "op": "add",
-    "path": "/products/25/attributes/delibero-quidem-laboriosam",
-    "value": "purple"
+    "op": "remove",
+    "path": "/users/33/roles/2"
   },
   {
     "op": "replace",
-    "path": "/products/2/sku",
-    "value": "Wmg5jTlj7xaF"
+    "path": "/users/33/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/33/email",
+    "value": "cGt@OFFPPRpQAaEplMllnSseaXC.oq"
+  },
+  {
+    "op": "replace",
+    "path": "/users/33/id",
+    "value": "b88dba22-3299-caf6-c1a4-8036081a7886"
+  },
+  {
+    "op": "remove",
+    "path": "/users/32/metadata/dolore1b"
+  },
+  {
+    "op": "remove",
+    "path": "/users/32/metadata/laboreb_"
   },
   {
     "op": "add",
-    "path": "/inventory/autoRestock",
+    "path": "/users/32/metadata/laboris_1",
+    "value": -99052730.01718414
+  },
+  {
+    "op": "replace",
+    "path": "/users/32/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/32/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "add",
+    "path": "/users/32/roles/2",
+    "value": "guest"
+  },
+  {
+    "op": "add",
+    "path": "/users/32/roles/3",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/32/name",
+    "value": "cupidatat"
+  },
+  {
+    "op": "replace",
+    "path": "/users/32/email",
+    "value": "XnNQbJ@WcoEJg.jfoy"
+  },
+  {
+    "op": "replace",
+    "path": "/users/32/id",
+    "value": "217afe11-422a-9bd4-dc99-11e190636dbd"
+  },
+  {
+    "op": "remove",
+    "path": "/users/31/metadata/ex0"
+  },
+  {
+    "op": "add",
+    "path": "/users/31/metadata/in_b4",
+    "value": 2409535.740058571
+  },
+  {
+    "op": "replace",
+    "path": "/users/31/roles/1",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/31/roles/0",
+    "value": "manager"
+  },
+  {
+    "op": "add",
+    "path": "/users/31/roles/2",
+    "value": "guest"
+  },
+  {
+    "op": "add",
+    "path": "/users/31/roles/3",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/31/name",
+    "value": "aliqua sint"
+  },
+  {
+    "op": "replace",
+    "path": "/users/31/email",
+    "value": "aipOiZMSlVL@j.ht"
+  },
+  {
+    "op": "replace",
+    "path": "/users/31/id",
+    "value": "ef5c5a2e-6feb-7bfa-86fb-986a1a55335f"
+  },
+  {
+    "op": "remove",
+    "path": "/users/30/metadata/nond69"
+  },
+  {
+    "op": "remove",
+    "path": "/users/30/metadata/sed9f"
+  },
+  {
+    "op": "remove",
+    "path": "/users/30/metadata/veniam_014"
+  },
+  {
+    "op": "remove",
+    "path": "/users/30/metadata/proidenta6"
+  },
+  {
+    "op": "add",
+    "path": "/users/30/metadata/ut_02",
+    "value": "ut minim fugiat magna"
+  },
+  {
+    "op": "replace",
+    "path": "/users/30/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/30/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/30/email",
+    "value": "SIfv3@Tc.trh"
+  },
+  {
+    "op": "replace",
+    "path": "/users/30/id",
+    "value": "01acedf9-0102-0881-cd17-a3882ec98613"
+  },
+  {
+    "op": "add",
+    "path": "/users/30/name",
+    "value": "consequat culpa"
+  },
+  {
+    "op": "remove",
+    "path": "/users/29/metadata/aute_40"
+  },
+  {
+    "op": "add",
+    "path": "/users/29/metadata/consequat_3a",
+    "value": 86217468.63170177
+  },
+  {
+    "op": "add",
+    "path": "/users/29/metadata/magna32_",
+    "value": -59694194.25433136
+  },
+  {
+    "op": "add",
+    "path": "/users/29/metadata/ullamco40",
     "value": true
   },
   {
+    "op": "remove",
+    "path": "/users/29/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/29/roles/2"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/name",
+    "value": "esse enim"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/email",
+    "value": "OHxxd1xiTIlz99@cKaDvCDoWDuMTuPzjK.ycfe"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/id",
+    "value": "8ddcb67a-a07f-d56c-303b-47522b091b4c"
+  },
+  {
+    "op": "remove",
+    "path": "/users/28/metadata"
+  },
+  {
+    "op": "remove",
+    "path": "/users/28/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/28/roles/2"
+  },
+  {
+    "op": "replace",
+    "path": "/users/28/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "remove",
+    "path": "/users/28/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/28/email",
+    "value": "CCI@iDmVsRkzWJdvsQbEsORhJ.raw"
+  },
+  {
+    "op": "replace",
+    "path": "/users/28/id",
+    "value": "c42e70f7-5c04-996e-f90e-aea0203e3fda"
+  },
+  {
+    "op": "replace",
+    "path": "/users/27/roles/0",
+    "value": "manager"
+  },
+  {
     "op": "add",
-    "path": "/shipping/rates/3",
+    "path": "/users/27/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "add",
+    "path": "/users/27/roles/2",
+    "value": "admin"
+  },
+  {
+    "op": "add",
+    "path": "/users/27/roles/3",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/27/email",
+    "value": "DGk@EXJiaoKNtVQzxauOjtQHJ.ddtf"
+  },
+  {
+    "op": "replace",
+    "path": "/users/27/id",
+    "value": "9067a9ea-f981-5545-6229-d2bb8082a1c5"
+  },
+  {
+    "op": "add",
+    "path": "/users/27/name",
+    "value": "eiusmod ut cupidatat in"
+  },
+  {
+    "op": "add",
+    "path": "/users/27/metadata",
     "value": {
-      "country": "US",
-      "method": "standard",
-      "cost": 3.0558691525318626,
-      "estimatedDays": 14
+      "fugiat_f": 78382191.12021202
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/users/26/metadata"
+  },
+  {
+    "op": "remove",
+    "path": "/users/26/roles/1"
+  },
+  {
+    "op": "replace",
+    "path": "/users/26/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "remove",
+    "path": "/users/26/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/26/email",
+    "value": "25uKxGkouLDE@WVcnaCjpcE.qffu"
+  },
+  {
+    "op": "replace",
+    "path": "/users/26/id",
+    "value": "fb983e69-5266-893f-ccd2-b6cfe8043e6b"
+  },
+  {
+    "op": "replace",
+    "path": "/users/25/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "add",
+    "path": "/users/25/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/25/name",
+    "value": "Lorem"
+  },
+  {
+    "op": "replace",
+    "path": "/users/25/email",
+    "value": "U-Keg@YJhFdczdhBonEUyArocHLKfjyc.ng"
+  },
+  {
+    "op": "replace",
+    "path": "/users/25/id",
+    "value": "f3dc0995-add3-f4f1-b43a-09270f835337"
+  },
+  {
+    "op": "add",
+    "path": "/users/25/metadata",
+    "value": {
+      "ut_3": true,
+      "in3": false
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/users/24/metadata"
+  },
+  {
+    "op": "replace",
+    "path": "/users/24/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/24/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "add",
+    "path": "/users/24/roles/2",
+    "value": "manager"
+  },
+  {
+    "op": "add",
+    "path": "/users/24/roles/3",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/24/email",
+    "value": "txGsr4ofZT-Z@rasrxGKnCpIAEW.tjlo"
+  },
+  {
+    "op": "replace",
+    "path": "/users/24/id",
+    "value": "da73cab9-ffef-e351-cd8b-796e453e4406"
+  },
+  {
+    "op": "remove",
+    "path": "/users/23/metadata/labore_a8c"
+  },
+  {
+    "op": "remove",
+    "path": "/users/23/metadata/non0"
+  },
+  {
+    "op": "remove",
+    "path": "/users/23/metadata/dolor_9f8"
+  },
+  {
+    "op": "remove",
+    "path": "/users/23/metadata/in_d6"
+  },
+  {
+    "op": "add",
+    "path": "/users/23/metadata/enim2b8",
+    "value": false
+  },
+  {
+    "op": "add",
+    "path": "/users/23/metadata/cillum_a64",
+    "value": "dolore reprehenderit amet sed nulla"
+  },
+  {
+    "op": "add",
+    "path": "/users/23/metadata/laboreed",
+    "value": "voluptate sed"
+  },
+  {
+    "op": "replace",
+    "path": "/users/23/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "add",
+    "path": "/users/23/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "add",
+    "path": "/users/23/roles/2",
+    "value": "customer"
+  },
+  {
+    "op": "add",
+    "path": "/users/23/roles/3",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/23/name",
+    "value": "in"
+  },
+  {
+    "op": "replace",
+    "path": "/users/23/email",
+    "value": "kCpEOvi@WPKHjY.mi"
+  },
+  {
+    "op": "replace",
+    "path": "/users/23/id",
+    "value": "f97e4b96-ebbc-30b6-f798-beb5a1af59d4"
+  },
+  {
+    "op": "remove",
+    "path": "/users/22/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/22/roles/2"
+  },
+  {
+    "op": "replace",
+    "path": "/users/22/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/22/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/22/email",
+    "value": "p-PVChEXR@UeKbFBkLZecjlglkqqONScWCUMMsgYw.as"
+  },
+  {
+    "op": "replace",
+    "path": "/users/22/id",
+    "value": "d596880a-f299-e31a-34f8-61a2ecf7f1b1"
+  },
+  {
+    "op": "add",
+    "path": "/users/22/name",
+    "value": "sit Ut adipisicing exercitation cupidatat"
+  },
+  {
+    "op": "add",
+    "path": "/users/22/metadata",
+    "value": {
+      "enimd": 80016763.08355427,
+      "adipisicing_6ac": -46464232.40075466,
+      "dolore43f": -29504062.460187107,
+      "non_b": false
     }
   },
   {
     "op": "replace",
-    "path": "/store/currency",
-    "value": "GBP"
+    "path": "/users/21/roles/0",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/21/email",
+    "value": "qYFSAu@ocOMbMUIjOnpLd.jkc"
+  },
+  {
+    "op": "replace",
+    "path": "/users/21/id",
+    "value": "85cf6d87-aa5b-b74b-5b7b-0ae31ef44591"
+  },
+  {
+    "op": "add",
+    "path": "/users/21/metadata",
+    "value": {
+      "proidenta6": -84132366.4802178,
+      "veniam_014": "id in",
+      "sed9f": 3977434.972148329,
+      "nond69": true
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/users/20/metadata/laboris_1"
+  },
+  {
+    "op": "add",
+    "path": "/users/20/metadata/laboreb_",
+    "value": "occaecat incididunt sint"
+  },
+  {
+    "op": "add",
+    "path": "/users/20/metadata/dolore1b",
+    "value": -34588018.88870297
+  },
+  {
+    "op": "remove",
+    "path": "/users/20/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/20/roles/2"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/name",
+    "value": "proident enim"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/email",
+    "value": "TovQfDexANvPY@woKunFJbsqmpCyJVFLMSbtxyuGEAbidJm.rk"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/id",
+    "value": "d5c407d3-9ab7-b071-9910-93580890815c"
+  },
+  {
+    "op": "remove",
+    "path": "/users/19/metadata/est_31_"
+  },
+  {
+    "op": "add",
+    "path": "/users/19/metadata/tempor_c",
+    "value": 73468270.03994682
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/roles/3",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/roles/2",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/roles/1",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/name",
+    "value": "et eu officia adipisicing"
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/email",
+    "value": "xwQX@pBCDnPDzMaBgNqjVYhJLbLfbqtwnhx.up"
+  },
+  {
+    "op": "replace",
+    "path": "/users/19/id",
+    "value": "e08dc1fe-8920-69fb-7644-9b0bda451829"
+  },
+  {
+    "op": "remove",
+    "path": "/users/18/metadata"
+  },
+  {
+    "op": "remove",
+    "path": "/users/18/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/18/roles/2"
+  },
+  {
+    "op": "remove",
+    "path": "/users/18/roles/1"
+  },
+  {
+    "op": "replace",
+    "path": "/users/18/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "remove",
+    "path": "/users/18/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/18/email",
+    "value": "RNY@yuaOAbURAhKXkZWzpweDQKMMUcrbhP.hlhe"
+  },
+  {
+    "op": "replace",
+    "path": "/users/18/id",
+    "value": "c04256db-f5d8-d5ea-69fe-13ac46435ea0"
+  },
+  {
+    "op": "remove",
+    "path": "/users/17/metadata/tempor_c"
+  },
+  {
+    "op": "add",
+    "path": "/users/17/metadata/aute_40",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/roles/3",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/name",
+    "value": "dolor officia mollit aliquip"
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/email",
+    "value": "h-btPr2naTjfgy@sfRDtreQaWEceqcgPbeNv.cd"
+  },
+  {
+    "op": "replace",
+    "path": "/users/17/id",
+    "value": "37f5261f-3aa1-435f-8dea-a5dd7415ee68"
+  },
+  {
+    "op": "add",
+    "path": "/users/16/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/16/email",
+    "value": "m6MbuPfDCWfT@rUmJSbCLZFkhmXRnLlVTXohqDRmi.rl"
+  },
+  {
+    "op": "replace",
+    "path": "/users/16/id",
+    "value": "e9a8c451-8031-3c58-48c8-ae87e647b73d"
+  },
+  {
+    "op": "add",
+    "path": "/users/16/name",
+    "value": "ea aliqua"
+  },
+  {
+    "op": "add",
+    "path": "/users/16/metadata",
+    "value": {
+      "et_6a": "anim cillum velit elit dolor",
+      "pariatur_93": false,
+      "inb2": true
+    }
+  },
+  {
+    "op": "remove",
+    "path": "/users/15/metadata"
+  },
+  {
+    "op": "replace",
+    "path": "/users/15/roles/3",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/15/roles/1",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/15/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "remove",
+    "path": "/users/15/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/15/email",
+    "value": "XK-UPb1kehjQQXu@tLMiFvTavZDYjx.wh"
+  },
+  {
+    "op": "replace",
+    "path": "/users/15/id",
+    "value": "e0290922-1eb5-979f-c20a-1318eab1e17c"
+  },
+  {
+    "op": "remove",
+    "path": "/users/14/metadata/non_b"
+  },
+  {
+    "op": "remove",
+    "path": "/users/14/metadata/dolore43f"
+  },
+  {
+    "op": "remove",
+    "path": "/users/14/metadata/adipisicing_6ac"
+  },
+  {
+    "op": "remove",
+    "path": "/users/14/metadata/enimd"
+  },
+  {
+    "op": "add",
+    "path": "/users/14/metadata/Ut4eb",
+    "value": false
+  },
+  {
+    "op": "add",
+    "path": "/users/14/metadata/pariatur_911",
+    "value": "dolor"
+  },
+  {
+    "op": "remove",
+    "path": "/users/14/roles/1"
+  },
+  {
+    "op": "replace",
+    "path": "/users/14/name",
+    "value": "qui eiusmod nulla proident"
+  },
+  {
+    "op": "replace",
+    "path": "/users/14/email",
+    "value": "vWjB@PlAdMhQqrKlDtEotnijQORdeS.gxhm"
+  },
+  {
+    "op": "replace",
+    "path": "/users/14/id",
+    "value": "80da3cdc-2c1f-3af5-fbb1-b9198639d7d4"
+  },
+  {
+    "op": "remove",
+    "path": "/users/12/metadata"
+  },
+  {
+    "op": "remove",
+    "path": "/users/12/roles/3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/12/roles/2"
+  },
+  {
+    "op": "remove",
+    "path": "/users/12/roles/1"
+  },
+  {
+    "op": "replace",
+    "path": "/users/12/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "remove",
+    "path": "/users/12/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/12/email",
+    "value": "fqZHEKu8V@GZ.occs"
+  },
+  {
+    "op": "replace",
+    "path": "/users/12/id",
+    "value": "9e123283-dfd8-3e76-62a2-ba5f04c3235f"
+  },
+  {
+    "op": "remove",
+    "path": "/users/11/metadata/ut_02"
+  },
+  {
+    "op": "add",
+    "path": "/users/11/metadata/eiusmod_e0",
+    "value": 45835774.691346556
+  },
+  {
+    "op": "add",
+    "path": "/users/11/metadata/sint_d9",
+    "value": -82996312.31990005
+  },
+  {
+    "op": "add",
+    "path": "/users/11/metadata/aliquip_3",
+    "value": "consectetur mollit dolor in"
+  },
+  {
+    "op": "add",
+    "path": "/users/11/metadata/ex_6",
+    "value": 16545193.794995412
+  },
+  {
+    "op": "replace",
+    "path": "/users/11/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/11/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "add",
+    "path": "/users/11/roles/2",
+    "value": "manager"
+  },
+  {
+    "op": "add",
+    "path": "/users/11/roles/3",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/11/name",
+    "value": "in occaecat"
+  },
+  {
+    "op": "replace",
+    "path": "/users/11/email",
+    "value": "56zHR@gllLvGahENoaHmEvTwsZpgvQqVIypwUu.cows"
+  },
+  {
+    "op": "replace",
+    "path": "/users/11/id",
+    "value": "650dc8e9-8e1d-aae4-b1f5-f5e193e3425a"
+  },
+  {
+    "op": "remove",
+    "path": "/users/10/metadata/sit_49"
+  },
+  {
+    "op": "add",
+    "path": "/users/10/metadata/sunt_9",
+    "value": "voluptate fugiat incididunt esse"
+  },
+  {
+    "op": "add",
+    "path": "/users/10/metadata/elitf",
+    "value": -70938720.01843187
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/roles/2",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/name",
+    "value": "officia in"
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/email",
+    "value": "GVFk@qgRgNIpd.tds"
+  },
+  {
+    "op": "replace",
+    "path": "/users/10/id",
+    "value": "27d28aa3-20df-28c7-478d-8923accbf7c6"
+  },
+  {
+    "op": "remove",
+    "path": "/users/9/metadata/elitf"
+  },
+  {
+    "op": "remove",
+    "path": "/users/9/metadata/sunt_9"
+  },
+  {
+    "op": "add",
+    "path": "/users/9/metadata/in7e",
+    "value": true
+  },
+  {
+    "op": "add",
+    "path": "/users/9/metadata/proident_",
+    "value": "veniam ad"
+  },
+  {
+    "op": "add",
+    "path": "/users/9/metadata/commodo16",
+    "value": 92620268.59823379
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/roles/2",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/name",
+    "value": "amet dolor ad"
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/email",
+    "value": "tC2XEyN5wlL@DiBDqEiSHKvgYfzFWVvI.qp"
+  },
+  {
+    "op": "replace",
+    "path": "/users/9/id",
+    "value": "5c8a5817-fede-436e-a042-62e33cb2639e"
+  },
+  {
+    "op": "remove",
+    "path": "/users/8/metadata/commodo16"
+  },
+  {
+    "op": "remove",
+    "path": "/users/8/metadata/proident_"
+  },
+  {
+    "op": "remove",
+    "path": "/users/8/metadata/in7e"
+  },
+  {
+    "op": "add",
+    "path": "/users/8/metadata/ex0",
+    "value": false
+  },
+  {
+    "op": "remove",
+    "path": "/users/8/roles/2"
+  },
+  {
+    "op": "replace",
+    "path": "/users/8/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/8/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/8/name",
+    "value": "et magna aliquip ullamco voluptate"
+  },
+  {
+    "op": "replace",
+    "path": "/users/8/email",
+    "value": "UUWIP@oRxcocrZiOTEjPIOXIZj.ue"
+  },
+  {
+    "op": "replace",
+    "path": "/users/8/id",
+    "value": "1d69545e-2089-07b7-fb22-4e595ead4318"
+  },
+  {
+    "op": "remove",
+    "path": "/users/7/roles/1"
+  },
+  {
+    "op": "replace",
+    "path": "/users/7/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/7/email",
+    "value": "hEIcWF3g0IvNse@NLLhqJzJePEltbeosWHWWmFiPmyHjHJ.ffy"
+  },
+  {
+    "op": "replace",
+    "path": "/users/7/id",
+    "value": "683a8079-b0af-3793-6ec0-77f7e8b7a0cd"
+  },
+  {
+    "op": "add",
+    "path": "/users/7/name",
+    "value": "ad labore exercitation reprehenderit"
+  },
+  {
+    "op": "add",
+    "path": "/users/7/metadata",
+    "value": {
+      "in_d6": 82836288.06831548,
+      "dolor_9f8": true,
+      "non0": 4444668.69953306,
+      "labore_a8c": "consequat veniam dolor Excepteur laborum"
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/users/6/roles/1",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/6/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "add",
+    "path": "/users/6/roles/2",
+    "value": "manager"
+  },
+  {
+    "op": "add",
+    "path": "/users/6/roles/3",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/6/email",
+    "value": "kB6f3JrF96aZc@bMjNuplHLRtqanqLeFpPvL.boh"
+  },
+  {
+    "op": "replace",
+    "path": "/users/6/id",
+    "value": "aa69e88c-ff6a-273b-4b38-c5fd14f430cf"
+  },
+  {
+    "op": "add",
+    "path": "/users/6/name",
+    "value": "non elit"
+  },
+  {
+    "op": "add",
+    "path": "/users/6/metadata",
+    "value": {
+      "est_31_": 44971838.062554955
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/users/5/roles/1",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/5/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/5/email",
+    "value": "FR7JHpcdZiPs-3c@quHZSFThajVvBHjDFaMMYao.hcny"
+  },
+  {
+    "op": "replace",
+    "path": "/users/5/id",
+    "value": "bd80beab-aa78-1390-77e9-b5ec70a087d5"
+  },
+  {
+    "op": "remove",
+    "path": "/users/4/metadata/in_b4"
+  },
+  {
+    "op": "add",
+    "path": "/users/4/metadata/voluptate1_2",
+    "value": 80930425.77055824
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/roles/3",
+    "value": "guest"
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/roles/2",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/name",
+    "value": "esse"
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/email",
+    "value": "2rcazZcL@FUPEeW.cj"
+  },
+  {
+    "op": "replace",
+    "path": "/users/4/id",
+    "value": "8179e29a-6c8f-dd47-9b94-ce1f58e9a364"
+  },
+  {
+    "op": "remove",
+    "path": "/users/3/metadata"
+  },
+  {
+    "op": "replace",
+    "path": "/users/3/roles/0",
+    "value": "customer"
+  },
+  {
+    "op": "add",
+    "path": "/users/3/roles/1",
+    "value": "admin"
+  },
+  {
+    "op": "remove",
+    "path": "/users/3/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/3/email",
+    "value": "Mwh@zSQcupqQIHiZcBiEtzgwFYt.uzy"
+  },
+  {
+    "op": "replace",
+    "path": "/users/3/id",
+    "value": "9a867816-b2ad-d164-7938-82be960b57b1"
+  },
+  {
+    "op": "remove",
+    "path": "/users/2/metadata/ullamco40"
+  },
+  {
+    "op": "remove",
+    "path": "/users/2/metadata/magna32_"
+  },
+  {
+    "op": "remove",
+    "path": "/users/2/metadata/consequat_3a"
+  },
+  {
+    "op": "add",
+    "path": "/users/2/metadata/sit_49",
+    "value": -71435176.1413042
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/roles/0",
+    "value": "guest"
+  },
+  {
+    "op": "add",
+    "path": "/users/2/roles/2",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/name",
+    "value": "culpa Duis officia Ut"
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/email",
+    "value": "Jlw0VL8l9xkyb@GxodiU.hexh"
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/id",
+    "value": "108fb309-92c2-c5eb-44c3-f6f78ea42105"
+  },
+  {
+    "op": "replace",
+    "path": "/users/1/roles/0",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/1/email",
+    "value": "Ryr@gQGrBcKtF.zbad"
+  },
+  {
+    "op": "replace",
+    "path": "/users/1/id",
+    "value": "71d13e3a-a5da-1e17-94fc-20f2f58a65b6"
+  },
+  {
+    "op": "add",
+    "path": "/users/1/name",
+    "value": "dolore sit in qui magna"
+  },
+  {
+    "op": "remove",
+    "path": "/users/0/metadata/in3"
+  },
+  {
+    "op": "remove",
+    "path": "/users/0/metadata/ut_3"
+  },
+  {
+    "op": "add",
+    "path": "/users/0/metadata/proidentc0b",
+    "value": -400335.5267576277
+  },
+  {
+    "op": "add",
+    "path": "/users/0/metadata/ea9e",
+    "value": 39613455.79807204
+  },
+  {
+    "op": "add",
+    "path": "/users/0/metadata/consequat82",
+    "value": false
+  },
+  {
+    "op": "add",
+    "path": "/users/0/metadata/incididunt__f7",
+    "value": -77097480.5587878
+  },
+  {
+    "op": "remove",
+    "path": "/users/0/name"
+  },
+  {
+    "op": "replace",
+    "path": "/users/0/email",
+    "value": "jNKdCCYtwU3MwL9@s.cdie"
+  },
+  {
+    "op": "replace",
+    "path": "/users/0/id",
+    "value": "85ce3c51-df1a-a574-9cae-0628baa1982c"
+  },
+  {
+    "op": "replace",
+    "path": "/products/28/categoryIds/2",
+    "value": "culpa occaecat id dolor"
+  },
+  {
+    "op": "replace",
+    "path": "/products/28/categoryIds/1",
+    "value": "cillum et do eu"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/41/slug",
+    "value": "games"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/41/name",
+    "value": "Games"
+  },
+  {
+    "op": "replace",
+    "path": "/analytics/googleAnalyticsId",
+    "value": "UA-033068-7"
+  },
+  {
+    "op": "remove",
+    "path": "/shipping/rates/1"
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/estimatedDays",
+    "value": 13
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/cost",
+    "value": 75969270.86468607
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/country",
+    "value": "JN"
   }
 ]

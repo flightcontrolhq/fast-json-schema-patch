@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { buildPlan, SchemaJsonPatcher } from "../src";
-import { PatchAggregator } from "../src/formatting/PatchAggregator";
+import { PatchAggregator } from "../src/aggregators/PatchAggregator";
 import type { JsonObject } from "../src/types";
 import schema from "../schema/schema.json";
 

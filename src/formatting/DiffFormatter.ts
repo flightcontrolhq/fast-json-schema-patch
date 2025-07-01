@@ -63,7 +63,7 @@ export class DiffFormatter {
   }
 
   private getSampleContent(json: JsonValue): string {
-    const str = JSON.stringify(json)
+    const str = cachedJsonStringify(json)
     if (str.length <= 300) return str
     return (
       str.substring(0, 100) +
@@ -78,8 +78,8 @@ export class DiffFormatter {
     const planKey = this.plan ? getPlanFingerprint(this.plan) : "default"
     const contentHash = fastHash(
       {
-        originalSize: JSON.stringify(this.originalJson).length,
-        newSize: JSON.stringify(this.newJson).length,
+        originalSize: cachedJsonStringify(this.originalJson).length,
+        newSize: cachedJsonStringify(this.newJson).length,
         originalSample: this.getSampleContent(this.originalJson),
         newSample: this.getSampleContent(this.newJson),
       },

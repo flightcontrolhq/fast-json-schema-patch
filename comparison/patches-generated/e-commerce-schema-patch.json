@@ -1,40 +1,44 @@
 [
   {
-    "op": "replace",
-    "path": "/store/currency",
-    "value": "GBP",
-    "oldValue": "NIX"
+    "op": "remove",
+    "path": "/shipping/rates/0"
   },
   {
-    "op": "add",
-    "path": "/shipping/rates/3",
+    "op": "replace",
+    "path": "/shipping/rates/0",
     "value": {
-      "country": "US",
-      "method": "standard",
-      "cost": 3.0558691525318626,
-      "estimatedDays": 14
+      "country": "JN",
+      "method": "express",
+      "cost": 75969270.86468607,
+      "estimatedDays": 13
     }
   },
   {
-    "op": "add",
-    "path": "/inventory/autoRestock",
-    "value": true
+    "op": "replace",
+    "path": "/analytics/googleAnalyticsId",
+    "value": "UA-033068-7",
+    "oldValue": "UA-9205616495-7"
   },
   {
     "op": "replace",
-    "path": "/products/2/sku",
-    "value": "Wmg5jTlj7xaF",
-    "oldValue": "aute sunt proident nulla do"
-  },
-  {
-    "op": "add",
-    "path": "/products/25/attributes/delibero-quidem-laboriosam",
-    "value": "purple"
+    "path": "/categories/41/name",
+    "value": "Games",
+    "oldValue": "do sed Excepteur proident cillum"
   },
   {
     "op": "replace",
-    "path": "/users/27/name",
-    "value": "Ms. Erma Satterfield",
-    "oldValue": "ullamco eiusmod"
+    "path": "/categories/41/slug",
+    "value": "games",
+    "oldValue": "68ngnz-8"
+  },
+  {
+    "op": "replace",
+    "path": "/products/28/categoryIds/1",
+    "value": "cillum et do eu"
+  },
+  {
+    "op": "replace",
+    "path": "/products/28/categoryIds/2",
+    "value": "culpa occaecat id dolor"
   }
 ]

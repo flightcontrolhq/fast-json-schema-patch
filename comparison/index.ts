@@ -5,18 +5,13 @@ import * as cliProgress from "cli-progress";
 import * as fastJsonPatch from "fast-json-patch";
 import { writeFile } from "fs/promises";
 import * as jsondiffpatch from "jsondiffpatch";
-import { performance } from "perf_hooks";
 import { Differ } from "json-diff-kit";
 import { SchemaJsonPatcher, buildPlan } from "../src/index";
-import { PatchAggregator } from "../src/formatting/PatchAggregator";
+import { PatchAggregator } from "../src/aggregators/PatchAggregator";
 import mainSchema from "../schema/schema.json";
 import ecommerceSchema from "../schema/e-commerce.json";
-
 import type { BenchmarkMetrics, FormattedDiffMetrics } from "./types";
 import {
-  calculatePerformanceStats,
-  formatBytes,
-  groupBy,
   measureMemoryUsage,
 } from "./utils";
 import { countJsonDiffPatches, isPatchValid, calculateSemanticAccuracy } from "./patch-utils";

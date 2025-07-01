@@ -1,6 +1,6 @@
 import * as fastJsonPatch from "fast-json-patch";
 import * as jsondiffpatch from "jsondiffpatch";
-import { deepEqual } from "../src/index";
+import { deepEqual } from "../src/performance/deepEqual";
 import { deepSortArrays } from "./utils";
 
 const diffpatcher = jsondiffpatch.create({
