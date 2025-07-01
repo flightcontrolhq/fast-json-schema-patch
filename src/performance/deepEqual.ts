@@ -72,7 +72,10 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   // Enhanced hash-based pre-filtering - skip when object is very small
   if (hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
     const keyCount = Object.keys(a).length + Object.keys(b).length
-    if (keyCount > hotFields.length * 2) {
+    // Estimate object size: ~16 bytes per key + average 8 bytes per value
+    const estimatedSize = keyCount * 24
+    // Skip hashing if object is tiny (< 64 bytes) OR has few keys relative to hot fields
+    if (estimatedSize >= 64 && keyCount > hotFields.length * 2) {
       const h1 = fastHash(a, hotFields)
       const h2 = fastHash(b, hotFields)
       if (h1 !== h2) return false
@@ -124,9 +127,14 @@ export function deepEqualSchemaAware(
 
   // Enhanced hash-based pre-filtering with plan information
   if (effectiveHashFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
-    const h1 = fastHash(a, effectiveHashFields)
-    const h2 = fastHash(b, effectiveHashFields)
-    if (h1 !== h2) return false
+    const keyCount = Object.keys(a).length + Object.keys(b).length
+    const estimatedSize = keyCount * 24
+    // Skip hashing for tiny objects (< 64 bytes estimated)
+    if (estimatedSize >= 64) {
+      const h1 = fastHash(a, effectiveHashFields)
+      const h2 = fastHash(b, effectiveHashFields)
+      if (h1 !== h2) return false
+    }
   }
 
   // Schema-aware memoization cache with plan fingerprint

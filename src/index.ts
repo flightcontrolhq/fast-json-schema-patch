@@ -1,4 +1,4 @@
-import {diffArrayByPrimaryKey, diffArrayLCS, diffArrayUnique} from "./core/arrayDiffAlgorithms"
+import {diffArrayByPrimaryKey, diffArrayLCS, diffArrayUnique, type ModificationCallback} from "./core/arrayDiffAlgorithms"
 import type {ArrayPlan, Plan} from "./core/buildPlan"
 import {deepEqualMemo} from "./performance/deepEqual"
 import type {JsonArray, JsonObject, JsonValue, Operation} from "./types"
@@ -11,6 +11,7 @@ export class SchemaJsonPatcher {
   // Path lookup optimizations
   private planLookupCache = new Map<string, ArrayPlan | undefined>()
   private wildcardPathCache = new Map<string, string | null>()
+  private negativePlanCache = new Set<string>() // Cache paths that definitely have no plan
   private readonly planIsEmpty: boolean
 
   constructor(options: {plan: Plan}) {
@@ -95,6 +96,12 @@ export class SchemaJsonPatcher {
     const plan = this.getPlanForPath(path)
     const strategy = plan?.strategy || "lcs"
 
+    const createModificationCallback = (hashFields: string[]): ModificationCallback => {
+      return (oldVal: JsonValue, newVal: JsonValue, path: string, patches: Operation[], skipEqualityCheck?: boolean) => {
+        this.refine(oldVal, newVal, path, patches, hashFields, skipEqualityCheck || false)
+      }
+    }
+
     if (strategy === "primaryKey" && plan?.primaryKey) {
       diffArrayByPrimaryKey(
         arr1,
@@ -102,7 +109,7 @@ export class SchemaJsonPatcher {
         plan.primaryKey,
         path,
         patches,
-        this.refine.bind(this),
+        createModificationCallback(plan.hashFields || []),
         plan.hashFields,
       )
       return
@@ -122,7 +129,7 @@ export class SchemaJsonPatcher {
       arr2,
       path,
       patches,
-      this.refine.bind(this),
+      createModificationCallback(plan?.hashFields || []),
       plan?.hashFields,
       plan,
     )
@@ -130,7 +137,13 @@ export class SchemaJsonPatcher {
 
   private getPlanForPath(path: string): ArrayPlan | undefined {
     if (this.planIsEmpty) return undefined
-    // Check cache first
+    
+    // Check negative cache first - fastest check
+    if (this.negativePlanCache.has(path)) {
+      return undefined
+    }
+    
+    // Check positive cache
     if (this.planLookupCache.has(path)) {
       return this.planLookupCache.get(path)
     }
@@ -146,21 +159,27 @@ export class SchemaJsonPatcher {
 
     // Try normalized path (remove array indices)
     const normalizedPath = normalizePath(path)
-    plan = this.plan.get(normalizedPath)
-    if (plan) {
-      this.planLookupCache.set(path, plan)
-      return plan
+    if (normalizedPath !== path) {
+      plan = this.plan.get(normalizedPath)
+      if (plan) {
+        this.planLookupCache.set(path, plan)
+        return plan
+      }
     }
 
     // Try parent wildcard path
     const wildcardPath = this.getWildcardPathCached(path)
     if (wildcardPath) {
       plan = this.plan.get(wildcardPath)
+      if (plan) {
+        this.planLookupCache.set(path, plan)
+        return plan
+      }
     }
 
-    // Cache the result (even if undefined)
-    this.planLookupCache.set(path, plan)
-    return plan
+    // No plan found - cache the negative result
+    this.negativePlanCache.add(path)
+    return undefined
   }
 
   private refine(
@@ -169,8 +188,9 @@ export class SchemaJsonPatcher {
     path: string,
     patches: Operation[],
     hashFields: string[] = [],
+    skipEqualityCheck: boolean = false,
   ) {
-    if (!deepEqualMemo(oldVal, newVal, hashFields)) {
+    if (skipEqualityCheck || !deepEqualMemo(oldVal, newVal, hashFields)) {
       this.diff(oldVal, newVal, path, patches);
     }
   }

@@ -3,11 +3,12 @@ import {deepEqual, deepEqualMemo, deepEqualSchemaAware} from "../performance/dee
 import {getEffectiveHashFields} from "../performance/getEffectiveHashFields"
 import type {JsonArray, JsonObject, JsonValue, Operation} from "../types"
 
-type ModificationCallback = (
+export type ModificationCallback = (
   item1: JsonValue,
   item2: JsonValue,
   path: string,
   patches: Operation[],
+  skipEqualityCheck?: boolean,
 ) => void
 
 export function diffArrayByPrimaryKey(
@@ -70,7 +71,8 @@ export function diffArrayByPrimaryKey(
       }
 
       if (needsDiff) {
-        onModification(oldItem, newItem, `${path}/${oldEntry.index}`, modificationPatches)
+        // We already determined needsDiff=true, so skip the equality check in refine()
+        onModification(oldItem, newItem, `${path}/${oldEntry.index}`, modificationPatches, true)
       }
     } else {
       additionPatches.push({op: "add", path: `${path}/-`, value: newItem})
@@ -232,14 +234,16 @@ export function diffArrayLCS(
   let ai = 0
   let bi = 0
   let patchedIndex = 0
-  for (const op of ops2) {
-    switch (op) {
-      case "common":
-        onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${prefixPath}${patchedIndex}`, patches)
-        ai++
-        bi++
-        patchedIndex++
-        break
+     for (const op of ops2) {
+     switch (op) {
+       case "common":
+         // Items are known to be equal by equalAt(), but may have nested differences
+         // Skip top-level equality check since equalAt() already verified they're "equal"
+         onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${prefixPath}${patchedIndex}`, patches, true)
+         ai++
+         bi++
+         patchedIndex++
+         break
       case "replace":
         patches.push({op: "replace", path: `${prefixPath}${patchedIndex}`, value: arr2[bi] as JsonValue})
         ai++
