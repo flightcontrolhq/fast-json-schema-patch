@@ -77,19 +77,23 @@ export function diffArrayByPrimaryKey(
     }
   }
 
-  const removalIndices: {index: number; value: JsonValue}[] = []
+  // Emit removals in descending index order without an intermediate array
+  const removalPatches: Operation[] = []
   for (const [key, oldEntry] of map1.entries()) {
     if (!seenKeys.has(key)) {
-      removalIndices.push({index: oldEntry.index, value: oldEntry.item})
+      removalPatches.push({
+        op: "remove",
+        path: `${path}/${oldEntry.index}`,
+        oldValue: oldEntry.item,
+      })
     }
   }
-
-  removalIndices.sort((a, b) => b.index - a.index)
-  const removalPatches: Operation[] = removalIndices.map(({index, value}) => ({
-    op: "remove",
-    path: `${path}/${index}`,
-    oldValue: value,
-  }))
+  // Sort patches by index to maintain correct ordering for array removals
+  removalPatches.sort((a, b) => {
+    const ia = parseInt(a.path.substring(a.path.lastIndexOf("/") + 1))
+    const ib = parseInt(b.path.substring(b.path.lastIndexOf("/") + 1))
+    return ib - ia
+  })
 
   patches.push(...modificationPatches, ...removalPatches, ...additionPatches)
 }
@@ -122,58 +126,92 @@ export function diffArrayLCS(
 
   const n = arr1.length
   const m = arr2.length
-  const max = n + m
-  const v: Record<number, number> = {1: 0}
-  const trace: Record<number, number>[] = []
-  let endD = 0
 
-  for (let d = 0; d <= max; d++) {
-    const vPrev = {...v}
+  const max = n + m
+  const offset = max
+
+  const createBuffer = () => {
+    const buf = new Int32Array(2 * max + 1)
+    buf.fill(-1) // sentinel for unreachable
+    return buf
+  }
+
+  let vPrev = createBuffer()
+  let vCurr = createBuffer()
+  vPrev[offset + 1] = 0 // k=1 diagonal starts at x=0
+
+  const trace: Int32Array[] = []
+  let endD = -1
+
+  const equalAt = (x: number, y: number): boolean => {
+    if (plan) {
+      return deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
+    }
+    return deepEqualMemo(arr1[x], arr2[y], effectiveHashFields)
+  }
+
+  const get = (buf: Int32Array, idx: number): number => {
+    return idx >= 0 && idx < buf.length && buf[idx] !== undefined ? buf[idx] : -1
+  }
+
+  const prefixPath = path === "" ? "/" : `${path}/`
+
+  // Forward pass ----------------------------------
+  outer: for (let d = 0; d <= max; d++) {
+    trace.push(vPrev.slice())
+
     for (let k = -d; k <= d; k += 2) {
-      const down =
-        k === -d || (k !== d && (vPrev[k - 1] ?? -Infinity) < (vPrev[k + 1] ?? -Infinity))
-      let x = down ? (vPrev[k + 1] as number) : (vPrev[k - 1] as number) + 1
+      const kOffset = k + offset
+
+      const down = k === -d || (k !== d && get(vPrev, kOffset - 1) < get(vPrev, kOffset + 1))
+      let x = down ? get(vPrev, kOffset + 1) : get(vPrev, kOffset - 1) + 1
       let y = x - k
-      while (x < n && y < m) {
-        let itemsEqual = false
-        if (plan) {
-          itemsEqual = deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
-        } else {
-          itemsEqual = deepEqualMemo(arr1[x], arr2[y], effectiveHashFields)
-        }
-        if (!itemsEqual) break
+
+      // snake
+      while (x < n && y < m && equalAt(x, y)) {
         x++
         y++
       }
-      v[k] = x
+
+      vCurr[kOffset] = x
+
       if (x >= n && y >= m) {
+        trace.push(vCurr.slice())
         endD = d
-        trace.push({...v})
-        d = max + 1
-        break
+        break outer
       }
     }
-    if (endD) break
-    trace.push({...v})
-  }
-  if (!endD) return
 
+    // swap buffers & reset vCurr
+    const tmp = vPrev
+    vPrev = vCurr
+    vCurr = tmp
+    vCurr.fill(-1)
+  }
+
+  if (endD === -1) return // no diff (shouldn't happen)
+
+  // Back-tracking ----------------------------------
   let x = n
   let y = m
   const rawOps: ("common" | "add" | "remove")[] = []
+
   for (let d = endD; d > 0; d--) {
-    const vPrev = trace[d - 1]
+    const vRow = trace[d] as Int32Array
     const k = x - y
-    const down =
-      k === -d || (k !== d && (vPrev?.[k - 1] ?? -Infinity) < (vPrev?.[k + 1] ?? -Infinity))
+    const kOffset = k + offset
+
+    const down = k === -d || (k !== d && get(vRow, kOffset - 1) < get(vRow, kOffset + 1))
     const prevK = down ? k + 1 : k - 1
-    const prevX = vPrev?.[prevK] as number
+    const prevX = get(vRow, prevK + offset)
     const prevY = prevX - prevK
+
     while (x > prevX && y > prevY) {
       rawOps.unshift("common")
       x--
       y--
     }
+
     if (down) {
       rawOps.unshift("add")
       y--
@@ -182,6 +220,7 @@ export function diffArrayLCS(
       x--
     }
   }
+
   while (x > 0 && y > 0) {
     rawOps.unshift("common")
     x--
@@ -196,31 +235,23 @@ export function diffArrayLCS(
   for (const op of ops2) {
     switch (op) {
       case "common":
-        onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${path}/${patchedIndex}`, patches)
+        onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${prefixPath}${patchedIndex}`, patches)
         ai++
         bi++
         patchedIndex++
         break
       case "replace":
-        patches.push({
-          op: "replace",
-          path: `${path}/${patchedIndex}`,
-          value: arr2[bi] as JsonValue,
-        })
+        patches.push({op: "replace", path: `${prefixPath}${patchedIndex}`, value: arr2[bi] as JsonValue})
         ai++
         bi++
         patchedIndex++
         break
       case "remove":
-        patches.push({op: "remove", path: `${path}/${patchedIndex}`})
+        patches.push({op: "remove", path: `${prefixPath}${patchedIndex}`})
         ai++
         break
       case "add":
-        patches.push({
-          op: "add",
-          path: `${path}/${patchedIndex}`,
-          value: arr2[bi] as JsonValue,
-        })
+        patches.push({op: "add", path: `${prefixPath}${patchedIndex}`, value: arr2[bi] as JsonValue})
         bi++
         patchedIndex++
         break

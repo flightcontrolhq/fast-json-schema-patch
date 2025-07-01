@@ -2,31 +2,71 @@
   {
     "op": "replace",
     "path": "/store/name",
-    "value": "Terry, Fritsch and Torphy",
-    "oldValue": "nostrud dolore id nisi"
+    "value": "Lemke LLC",
+    "oldValue": "minim reprehenderit"
+  },
+  {
+    "op": "replace",
+    "path": "/store/locale",
+    "value": "en-US",
+    "oldValue": "lk-GM"
   },
   {
     "op": "remove",
-    "path": "/categories/22",
-    "oldValue": {
-      "id": "k2lqH86Xho_",
-      "name": "ipsum esse eu non dolore",
-      "slug": "286m",
-      "parentId": "sint ut"
+    "path": "/shipping/rates/0"
+  },
+  {
+    "op": "remove",
+    "path": "/shipping/rates/0"
+  },
+  {
+    "op": "add",
+    "path": "/shipping/rates/2",
+    "value": {
+      "country": "CK",
+      "method": "standard",
+      "cost": 16414472.12285162
+    }
+  },
+  {
+    "op": "add",
+    "path": "/shipping/rates/3",
+    "value": {
+      "country": "CP",
+      "method": "express",
+      "cost": 40960348.430790395,
+      "estimatedDays": 56577282
     }
   },
   {
     "op": "replace",
-    "path": "/users/11/name",
-    "value": "Ramon Schinner",
-    "oldValue": "eu dolore"
+    "path": "/inventory/autoRestock",
+    "value": false,
+    "oldValue": true
   },
   {
     "op": "add",
-    "path": "/analytics",
-    "value": {
-      "googleAnalyticsId": "UA-12345-1",
-      "trackUserBehavior": true
-    }
+    "path": "/features/guestCheckout",
+    "value": true
+  },
+  {
+    "op": "add",
+    "path": "/products/13/categoryIds/1",
+    "value": "w"
+  },
+  {
+    "op": "add",
+    "path": "/products/29/attributes",
+    "value": {}
+  },
+  {
+    "op": "add",
+    "path": "/users/8/metadata/supplanto",
+    "value": "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
+  },
+  {
+    "op": "add",
+    "path": "/users/41/metadata/commodi",
+    "value": "Tui totus terror pariatur adversus."
   }
 ]

@@ -1,290 +1,116 @@
 [
   {
-    "op": "replace",
-    "path": "/users/11/name",
-    "value": "Ramon Schinner"
-  },
-  {
-    "op": "remove",
-    "path": "/categories/36"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/35/slug",
-    "value": "d15"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/35/name",
-    "value": "voluptate Ut Excepteur"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/35/id",
-    "value": "IwTP7o_"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/34/slug",
-    "value": "2h9rh1-57"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/34/name",
-    "value": "minim exercitation"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/34/id",
-    "value": "GXei"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/parentId",
-    "value": null
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/slug",
-    "value": "8-8a-a"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/name",
-    "value": "voluptate aliquip ea in pariatur"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/id",
-    "value": "u3JzTs4lw"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/32/parentId",
-    "value": "laboris dolore labore"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/32/slug",
-    "value": "z"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/32/name",
-    "value": "culpa Lorem"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/32/id",
-    "value": "G"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/31/slug",
-    "value": "7"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/31/name",
-    "value": "occaecat in reprehenderit tempor"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/31/id",
-    "value": "bntpCe9"
+    "op": "add",
+    "path": "/users/41/metadata/commodi",
+    "value": "Tui totus terror pariatur adversus."
   },
   {
     "op": "add",
-    "path": "/categories/31/parentId",
-    "value": null
-  },
-  {
-    "op": "remove",
-    "path": "/categories/30/parentId"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/30/slug",
-    "value": "-525ycgj5"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/30/name",
-    "value": "elit occaecat"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/30/id",
-    "value": "pFm_2QbIBD"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/29/parentId",
-    "value": "dolor elit"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/29/slug",
-    "value": "7ms"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/29/name",
-    "value": "eiusmod deserunt commodo consequat exercitation"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/29/id",
-    "value": "WFy"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/28/slug",
-    "value": "oh7pycd"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/28/name",
-    "value": "quis occaecat sed consectetur"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/28/id",
-    "value": "cXfjhZIGOgu"
+    "path": "/users/8/metadata/supplanto",
+    "value": "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
   },
   {
     "op": "add",
-    "path": "/categories/28/parentId",
-    "value": "cillum dolor"
-  },
-  {
-    "op": "remove",
-    "path": "/categories/27/parentId"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/27/slug",
-    "value": "c-45"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/27/name",
-    "value": "sint et"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/27/id",
-    "value": "U09j_a7RNqn"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/26/parentId",
-    "value": "aliqua dolore ad"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/26/slug",
-    "value": "d99"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/26/name",
-    "value": "veniam sed exercitation est"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/26/id",
-    "value": "Xd"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/25/slug",
-    "value": "ijbgcomq2"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/25/name",
-    "value": "non nulla eu in culpa"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/25/id",
-    "value": "lyoaFt"
+    "path": "/products/29/attributes",
+    "value": {}
   },
   {
     "op": "add",
-    "path": "/categories/25/parentId",
-    "value": "eu"
-  },
-  {
-    "op": "remove",
-    "path": "/categories/24/parentId"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/24/slug",
-    "value": "6d0"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/24/name",
-    "value": "commodo non consectetur"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/24/id",
-    "value": "L5"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/23/slug",
-    "value": "iv4mg02"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/23/name",
-    "value": "mollit"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/23/id",
-    "value": "wyH4UI"
+    "path": "/products/13/categoryIds/1",
+    "value": "w"
   },
   {
     "op": "add",
-    "path": "/categories/23/parentId",
-    "value": "exercitation incididunt"
+    "path": "/features/guestCheckout",
+    "value": true
+  },
+  {
+    "op": "replace",
+    "path": "/inventory/autoRestock",
+    "value": false
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/3/estimatedDays",
+    "value": 56577282
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/3/cost",
+    "value": 40960348.430790395
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/3/method",
+    "value": "express"
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/3/country",
+    "value": "CP"
   },
   {
     "op": "remove",
-    "path": "/categories/22/parentId"
+    "path": "/shipping/rates/2/estimatedDays"
   },
   {
     "op": "replace",
-    "path": "/categories/22/slug",
-    "value": "x7"
+    "path": "/shipping/rates/2/cost",
+    "value": 16414472.12285162
   },
   {
     "op": "replace",
-    "path": "/categories/22/name",
-    "value": "occaecat Duis"
+    "path": "/shipping/rates/2/country",
+    "value": "CK"
   },
   {
     "op": "replace",
-    "path": "/categories/22/id",
-    "value": "f"
+    "path": "/shipping/rates/1/cost",
+    "value": 96167188.35468732
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/1/method",
+    "value": "pickup"
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/1/country",
+    "value": "CE"
+  },
+  {
+    "op": "add",
+    "path": "/shipping/rates/1/estimatedDays",
+    "value": 84956973
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/estimatedDays",
+    "value": 62179298
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/cost",
+    "value": 73340683.48184031
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/method",
+    "value": "standard"
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/rates/0/country",
+    "value": "CZ"
+  },
+  {
+    "op": "replace",
+    "path": "/store/locale",
+    "value": "en-US"
   },
   {
     "op": "replace",
     "path": "/store/name",
-    "value": "Terry, Fritsch and Torphy"
-  },
-  {
-    "op": "add",
-    "path": "/analytics",
-    "value": {
-      "googleAnalyticsId": "UA-12345-1",
-      "trackUserBehavior": true
-    }
+    "value": "Lemke LLC"
   }
 ]

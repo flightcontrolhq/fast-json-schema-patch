@@ -1,57 +1,131 @@
 {
   "store": {
     "name": [
-      "nostrud dolore id nisi",
-      "Terry, Fritsch and Torphy"
+      "minim reprehenderit",
+      "Lemke LLC"
+    ],
+    "locale": [
+      "lk-GM",
+      "en-US"
     ]
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "TX",
+          "country": "CZ",
+          "method": "standard",
+          "cost": 73340683.48184031,
+          "estimatedDays": 62179298
+        }
+      ],
+      "1": [
+        {
+          "country": "CE",
           "method": "pickup",
-          "cost": 82158453.99709731
+          "cost": 96167188.35468732,
+          "estimatedDays": 84956973
+        }
+      ],
+      "2": [
+        {
+          "country": "CK",
+          "method": "standard",
+          "cost": 16414472.12285162
+        }
+      ],
+      "3": [
+        {
+          "country": "CP",
+          "method": "express",
+          "cost": 40960348.430790395,
+          "estimatedDays": 56577282
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "TX",
+          "country": "CP",
+          "method": "express",
+          "cost": 40960348.430790395,
+          "estimatedDays": 56577282
+        },
+        0,
+        0
+      ],
+      "_1": [
+        {
+          "country": "CK",
+          "method": "standard",
+          "cost": 16414472.12285162
+        },
+        0,
+        0
+      ],
+      "_2": [
+        {
+          "country": "CZ",
+          "method": "standard",
+          "cost": 73340683.48184031,
+          "estimatedDays": 62179298
+        },
+        0,
+        0
+      ],
+      "_3": [
+        {
+          "country": "CE",
           "method": "pickup",
-          "cost": 82158453.99709731
+          "cost": 96167188.35468732,
+          "estimatedDays": 84956973
         },
         0,
         0
       ]
     }
   },
-  "categories": {
-    "_t": "a",
-    "_22": [
-      {
-        "id": "k2lqH86Xho_",
-        "name": "ipsum esse eu non dolore",
-        "slug": "286m",
-        "parentId": "sint ut"
-      },
-      0,
-      0
+  "inventory": {
+    "autoRestock": [
+      true,
+      false
     ]
   },
-  "users": {
-    "11": {
-      "name": [
-        "eu dolore",
-        "Ramon Schinner"
+  "features": {
+    "guestCheckout": [
+      true
+    ]
+  },
+  "products": {
+    "13": {
+      "categoryIds": {
+        "1": [
+          "w"
+        ],
+        "_t": "a"
+      }
+    },
+    "29": {
+      "attributes": [
+        {}
       ]
     },
     "_t": "a"
   },
-  "analytics": [
-    {
-      "googleAnalyticsId": "UA-12345-1",
-      "trackUserBehavior": true
-    }
-  ]
+  "users": {
+    "8": {
+      "metadata": {
+        "supplanto": [
+          "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
+        ]
+      }
+    },
+    "41": {
+      "metadata": {
+        "commodi": [
+          "Tui totus terror pariatur adversus."
+        ]
+      }
+    },
+    "_t": "a"
+  }
 }

@@ -11,9 +11,11 @@ export class SchemaJsonPatcher {
   // Path lookup optimizations
   private planLookupCache = new Map<string, ArrayPlan | undefined>()
   private wildcardPathCache = new Map<string, string | null>()
+  private readonly planIsEmpty: boolean
 
   constructor(options: {plan: Plan}) {
     this.plan = options.plan
+    this.planIsEmpty = this.plan.size === 0
   }
 
   private getWildcardPathCached(path: string): string | null {
@@ -106,7 +108,7 @@ export class SchemaJsonPatcher {
       return
     }
 
-    if (strategy === "unique" && arr1.length === arr2.length) {
+    if (strategy === "unique" && arr1.length === arr2.length && arr1.length <= 10000) {
       const isArr1Unique = new Set(arr1).size === arr1.length
       const isArr2Unique = new Set(arr2).size === arr2.length
       if (isArr1Unique && isArr2Unique) {
@@ -121,11 +123,13 @@ export class SchemaJsonPatcher {
       path,
       patches,
       this.refine.bind(this),
-      this.getPlanForPath(path)?.hashFields,
+      plan?.hashFields,
+      plan,
     )
   }
 
   private getPlanForPath(path: string): ArrayPlan | undefined {
+    if (this.planIsEmpty) return undefined
     // Check cache first
     if (this.planLookupCache.has(path)) {
       return this.planLookupCache.get(path)

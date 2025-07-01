@@ -69,11 +69,14 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   const a = obj1 as JsonObject
   const b = obj2 as JsonObject
 
-  // Enhanced hash-based pre-filtering - use for all object comparisons
+  // Enhanced hash-based pre-filtering - skip when object is very small
   if (hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
-    const h1 = fastHash(a, hotFields)
-    const h2 = fastHash(b, hotFields)
-    if (h1 !== h2) return false
+    const keyCount = Object.keys(a).length + Object.keys(b).length
+    if (keyCount > hotFields.length * 2) {
+      const h1 = fastHash(a, hotFields)
+      const h2 = fastHash(b, hotFields)
+      if (h1 !== h2) return false
+    }
   }
 
   // memoization cache
