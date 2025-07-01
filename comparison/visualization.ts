@@ -274,7 +274,7 @@ export function generateFormattedDiffReport(formattedMetrics: FormattedDiffMetri
   console.log("\n🎨 FORMATTED DIFF COMPARISON REPORT");
   console.log("=".repeat(80));
 
-  console.log("\n📋 SchemaPatch + PatchAggregator vs json-diff-kit:");
+  console.log("\n📋 SchemaPatch + StructuredDiffAggregator vs json-diff-kit:");
   console.log(
     "  This compares formatted, human-readable diff generation capabilities"
   );

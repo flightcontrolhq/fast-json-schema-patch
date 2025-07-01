@@ -62,7 +62,7 @@ console.log(patch);
 
 ### A Note on RFC 6902 Compliance
 
-This library extends the standard JSON Patch format by adding an oldValue field to remove and replace operations.
+This library extends the standard JSON Patch format by adding an `oldValue` field to `remove` and `replace` operations.
 This addition makes UI rendering and state reconciliation easier but is not part of the strict RFC 6902 specification.
 
 ---
@@ -96,10 +96,10 @@ This integration makes it seamless to leverage your existing Zod schemas for opt
 
 ---
 
-## 🎨 Human-Readable Diffs with `PatchAggregator`
+## 🎨 Human-Readable Diffs with `StructuredDiffAggregator`
 
 When you need to present diffs to users, raw JSON patches can be hard to work with.
-PatchAggregator helps you transform those patches into structured, human-readable diffs that are fast, memory-efficient, and frontend-friendly.
+StructuredDiffAggregator helps you transform those patches into structured, human-readable diffs that are fast, memory-efficient, and frontend-friendly.
 
 It organizes changes into:
 
@@ -110,12 +110,12 @@ Child diffs: Changes within a target array, keyed by unique identifiers.
 This makes it easy to build side-by-side diff views or activity feeds.
 
 ```typescript
-import { PatchAggregator } from 'schema-json-patch/aggregators';
+import { StructuredDiffAggregator } from 'schema-json-patch/aggregators';
 
 // Assuming `original`, `modified`, `patch`, and `plan` from the previous example
 
 // 1. Instantiate the aggregator with the original and new documents
-const aggregator = new PatchAggregator(original, modified);
+const aggregator = new StructuredDiffAggregator(original, modified);
 
 // 2. Aggregate the patch
 const aggregatedResult = aggregator.aggregate(patch, {
@@ -140,10 +140,10 @@ The main class for generating patches.
 **`patcher.createPatch(source, target)`**
 - Generates an array of JSON Patch operations.
 
-### `PatchAggregator`
+### `StructuredDiffAggregator`
 The main class for creating human-readable diffs.
 
-**`new PatchAggregator(originalDoc, newDoc)`**
+**`new StructuredDiffAggregator(originalDoc, newDoc)`**
 - `originalDoc`, `newDoc`: The two documents to compare.
 
 **`aggregator.aggregate(patches, config)`**

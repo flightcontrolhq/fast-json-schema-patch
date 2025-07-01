@@ -19,7 +19,7 @@ The benchmark compares the following libraries:
 -   `schema-json-patch`: The library developed in this repository, which leverages a schema to create more efficient and semantically meaningful patches.
 -   `fast-json-patch`: A popular and fast library that implements RFC 6902.
 -   `jsondiffpatch`: A library that focuses on generating human-readable diffs and can detect object moves within arrays.
--   `json-diff-kit`: A library for generating formatted, human-readable diffs, used for comparison against `schema-json-patch`'s `PatchAggregator`.
+-   `json-diff-kit`: A library for generating formatted, human-readable diffs, used for comparison against `schema-json-patch`'s `StructuredDiffAggregator`.
 
 ## Benchmark Scenarios
 

@@ -23,7 +23,7 @@ export interface AggregationConfig {
 
 export interface AggregatedDiffResult {
   parentDiff: AggregatedParentDiff
-  childDiffs: Map<string, AggregatedChildDiff>
+  childDiffs: Record<string, AggregatedChildDiff>
 }
 
 export interface AggregatedParentDiff {
@@ -45,7 +45,7 @@ export interface AggregatedChildDiff {
   removeCount: number
 }
 
-export class PatchAggregator {
+export class StructuredDiffAggregator {
   private originalDoc: JsonValue
   private newDoc: JsonValue
 
@@ -136,7 +136,7 @@ export class PatchAggregator {
         diffLines: parentDiffLines,
         ...parentLineCounts,
       },
-      childDiffs: new Map(), // Empty - no child separation for non-primaryKey strategies
+      childDiffs: {}, // Empty - no child separation for non-primaryKey strategies
     }
   }
 
@@ -247,7 +247,7 @@ export class PatchAggregator {
     const parentDiffLines = parentFormatter.format(parentPatches)
     const parentLineCounts = countChangedLines(parentDiffLines)
 
-    const childDiffs = new Map<string, AggregatedChildDiff>()
+    const childDiffs: Record<string, AggregatedChildDiff> = {}
     const newChildren = getValueByPath<JsonObject[]>(this.newDoc, pathPrefix) || []
     const originalChildrenById = new Map(originalChildren.map((c) => [c[idKey] as string, c]))
     const newChildrenById = new Map(newChildren.map((c) => [c[idKey] as string, c]))
@@ -363,14 +363,14 @@ export class PatchAggregator {
         lineCounts = countChangedLines(diffLines)
       }
 
-      childDiffs.set(childId, {
+      childDiffs[childId] = {
         id: childId,
         original: originalChild || {},
         new: newChild || {},
         patches: transformedPatches,
         diffLines,
         ...lineCounts,
-      })
+      }
     }
 
     return {

@@ -7,7 +7,7 @@ import { writeFile } from "fs/promises";
 import * as jsondiffpatch from "jsondiffpatch";
 import { Differ } from "json-diff-kit";
 import { SchemaJsonPatcher, buildPlan } from "../src/index";
-import { PatchAggregator } from "../src/aggregators/PatchAggregator";
+import { StructuredDiffAggregator } from "../src/aggregators/StructuredDiffAggregator";
 import mainSchema from "../schema/schema.json";
 import ecommerceSchema from "../schema/e-commerce.json";
 import type { BenchmarkMetrics, FormattedDiffMetrics } from "./types";
@@ -265,7 +265,7 @@ async function compare() {
             name: "schema-aggregated",
             fn: () => {
               const freshPatcher = new SchemaJsonPatcher({ plan });
-              const aggregator = new PatchAggregator(doc1, doc2);
+              const aggregator = new StructuredDiffAggregator(doc1, doc2);
               const rawPatch = freshPatcher.createPatch(doc1, doc2);
               return aggregator.aggregate(rawPatch, {
                 pathPrefix: "/environments/0/services",
@@ -483,7 +483,7 @@ async function compare() {
              name: "schema-aggregated",
              fn: () => {
                const freshPatcher = new SchemaJsonPatcher({ plan: ecommercePlan });
-               const aggregator = new PatchAggregator(doc1 as any, doc2 as any);
+               const aggregator = new StructuredDiffAggregator(doc1 as any, doc2 as any);
                const rawPatch = freshPatcher.createPatch(doc1 as any, doc2 as any);
                return aggregator.aggregate(rawPatch, {
                  pathPrefix: "/products",

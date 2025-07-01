@@ -1,1 +1,1 @@
-export {PatchAggregator} from "./PatchAggregator"
+export {StructuredDiffAggregator} from "./StructuredDiffAggregator"
