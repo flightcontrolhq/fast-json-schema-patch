@@ -1,18 +1,19 @@
 # schema-json-patch
 
-🚀 **Ultra-fast, schema-aware JSON patch generation and human-readable diffing**
+🚀 Ultra-fast, Schema-Aware JSON Patch Generation with Human-Readable Diffing
 
-A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches. It also includes powerful tools to create human-readable diffs suitable for frontend applications, outperforming similar libraries in speed and memory efficiency.
+schema-json-patch is a high-performance JSON patching library designed to create efficient, schema-driven patches. It intelligently understands your data structure, enabling optimized, semantic diffs, and also provides fast, human-friendly diffing tools for frontend applications. It outperforms many popular alternatives in both speed and memory usage.
 
-## 🧠 Schema-Driven Intelligence
+🧠 Schema-Driven Diffing
+Unlike generic JSON diff libraries, schema-json-patch leverages schema-based diff plans to:
 
-Unlike generic JSON diff libraries, `schema-json-patch` uses a **diff plan** derived from your JSON Schema to:
+- ⚡ Optimize array diffing using the best strategy for each case (LCS, primary key matching, etc.).
 
-- **Apply optimal array diffing strategies** (LCS, Primary Key, etc.).
-- **Generate semantic patches** that understand your data's structure.
-- **Perform intelligent object comparisons** by focusing on relevant fields.
+- 🧩 Generate semantic patches that align with your data’s meaning, not just its shape.
 
-> 💡 **Best suited for applications where JSON structure is known and performance is critical.**
+- 🎯 Compare objects intelligently by focusing only on relevant fields.
+
+> 💡 Ideal for applications where the JSON structure is known and schema-driven diffs are important.
 
 ## 📦 Installation
 
@@ -22,7 +23,7 @@ bun add schema-json-patch
 
 ## 🚀 Quick Start
 
-The core of the library is the `SchemaJsonPatcher`, which is configured with a `plan` to optimize patch generation.
+The core of the library is the `SchemaJsonPatcher`, which uses a diff plan to optimize patch generation.
 
 ```typescript
 import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
@@ -61,7 +62,8 @@ console.log(patch);
 
 ### A Note on RFC 6902 Compliance
 
-To facilitate richer diffing and state reconstruction, this library adds an `oldValue` property to `remove` and `replace` operations. While incredibly useful, this is a deviation from the strict RFC 6902 standard.
+This library extends the standard JSON Patch format by adding an oldValue field to remove and replace operations.
+This addition makes UI rendering and state reconciliation easier but is not part of the strict RFC 6902 specification.
 
 ---
 
@@ -96,9 +98,16 @@ This integration makes it seamless to leverage your existing Zod schemas for opt
 
 ## 🎨 Human-Readable Diffs with `PatchAggregator`
 
-Tired of trying to render raw JSON patches in your UI? The `PatchAggregator` transforms a patch into a structured, human-readable format, similar to `json-diff-kit`, but significantly faster and more memory-efficient.
+When you need to present diffs to users, raw JSON patches can be hard to work with.
+PatchAggregator helps you transform those patches into structured, human-readable diffs that are fast, memory-efficient, and frontend-friendly.
 
-It separates changes into **parent diffs** (changes to the root object) and **child diffs** (changes within a nested array), making it trivial to build side-by-side diff viewers in a frontend application.
+It organizes changes into:
+
+Parent diffs: Changes outside of specific arrays.
+
+Child diffs: Changes within a target array, keyed by unique identifiers.
+
+This makes it easy to build side-by-side diff views or activity feeds.
 
 ```typescript
 import { PatchAggregator } from 'schema-json-patch/aggregators';
@@ -140,7 +149,7 @@ The main class for creating human-readable diffs.
 **`aggregator.aggregate(patches, config)`**
 - `patches`: The patch array from `SchemaJsonPatcher`.
 - `config`: An object specifying the `pathPrefix` of the array to aggregate and an optional `plan`.
-- **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a map of `childDiffs`.
+- **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a record of `childDiffs`.
 
 ## 🔬 Benchmarking Your Use Case
 
