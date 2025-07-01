@@ -65,6 +65,34 @@ To facilitate richer diffing and state reconstruction, this library adds an `old
 
 ---
 
+## 📋 Generating JSON Schema from Zod
+
+If you're using [Zod](https://zod.dev/) for runtime validation, you can easily generate JSON schemas for use with `schema-json-patch`. Zod 4 introduced native JSON Schema conversion:
+
+```typescript
+import * as z from "zod/v4";
+import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
+
+// Define your Zod schema
+const userSchema = z.object({
+  users: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    status: z.enum(['active', 'inactive', 'online'])
+  }))
+});
+
+// Convert Zod schema to JSON Schema
+const jsonSchema = z.toJSONSchema(userSchema);
+
+// Use the JSON schema to build a plan
+const plan = buildPlan(jsonSchema);
+const patcher = new SchemaJsonPatcher({ plan });
+```
+
+This integration makes it seamless to leverage your existing Zod schemas for optimized JSON patching. For more details on Zod's JSON Schema conversion, see the [official documentation](https://zod.dev/json-schema).
+---
+
 ## 🎨 Human-Readable Diffs with `PatchAggregator`
 
 Tired of trying to render raw JSON patches in your UI? The `PatchAggregator` transforms a patch into a structured, human-readable format, similar to `json-diff-kit`, but significantly faster and more memory-efficient.
