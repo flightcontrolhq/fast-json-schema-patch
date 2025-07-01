@@ -91,6 +91,7 @@ const patcher = new SchemaJsonPatcher({ plan });
 ```
 
 This integration makes it seamless to leverage your existing Zod schemas for optimized JSON patching. For more details on Zod's JSON Schema conversion, see the [official documentation](https://zod.dev/json-schema).
+
 ---
 
 ## 🎨 Human-Readable Diffs with `PatchAggregator`
