@@ -1,40 +1,40 @@
 [
   {
     "op": "replace",
-    "path": "/store/name",
-    "value": "Gleichner - Cruickshank",
-    "oldValue": "magna est qui"
-  },
-  {
-    "op": "replace",
-    "path": "/store/locale",
-    "value": "de-DE",
-    "oldValue": "mp-VL"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/45/parentId",
-    "value": null,
-    "oldValue": "cupidatat sed ipsum officia dolor"
+    "path": "/store/currency",
+    "value": "GBP",
+    "oldValue": "NIX"
   },
   {
     "op": "add",
-    "path": "/products/38/attributes/spes-causa-exercitationem",
-    "value": 79.23175757346789
+    "path": "/shipping/rates/3",
+    "value": {
+      "country": "US",
+      "method": "standard",
+      "cost": 3.0558691525318626,
+      "estimatedDays": 14
+    }
+  },
+  {
+    "op": "add",
+    "path": "/inventory/autoRestock",
+    "value": true
   },
   {
     "op": "replace",
-    "path": "/users/29/roles/0",
-    "value": "admin"
+    "path": "/products/2/sku",
+    "value": "Wmg5jTlj7xaF",
+    "oldValue": "aute sunt proident nulla do"
+  },
+  {
+    "op": "add",
+    "path": "/products/25/attributes/delibero-quidem-laboriosam",
+    "value": "purple"
   },
   {
     "op": "replace",
-    "path": "/users/29/roles/1",
-    "value": "manager"
-  },
-  {
-    "op": "replace",
-    "path": "/users/29/roles/2",
-    "value": "customer"
+    "path": "/users/27/name",
+    "value": "Ms. Erma Satterfield",
+    "oldValue": "ullamco eiusmod"
   }
 ]

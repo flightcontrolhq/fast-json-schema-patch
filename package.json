@@ -1,6 +1,5 @@
 {
   "name": "schema-json-patch",
-  "module": "src/index.ts",
   "license": "MIT",
   "type": "module",
   "version": "1.0.0",
@@ -15,16 +14,36 @@
     "type": "git",
     "url": "git+https://github.com/flightcontrolhq/schema-json-patch.git"
   },
+  "main": "dist/index.js",
   "files": [
     "dist"
   ],
+  "scripts": {
+    "compare": "bun run comparison/index.ts",
+    "test": "bun test",
+    "check-exports": "attw --pack .",
+    "build": "tsdown src/index.ts src/aggregators/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap "
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    },
+    "./aggregators": {
+      "import": "./dist/aggregators/index.js",
+      "default": "./dist/aggregators/index.cjs"
+    }
+  },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^2.0.4",
     "@faker-js/faker": "^9.8.0",
     "@types/asciichart": "^1.5.1",
     "@types/bun": "latest",
     "@types/cli-progress": "^3.11.6",
     "@types/json-source-map": "^0.6.0",
+    "@types/node": "^24.0.8",
     "asciichart": "^1.5.25",
     "chalk": "^5.4.1",
     "chartscii": "^3.2.0",
@@ -38,13 +57,9 @@
     "react": "^19.1.0",
     "rfc6902": "^5.1.2",
     "tinybench": "^4.0.1",
-    "@types/node": "^24.0.8"
+    "tsdown": "^0.12.9"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "scripts": {
-    "compare": "bun run comparison/index.ts",
-    "test": "bun test"
   }
 }

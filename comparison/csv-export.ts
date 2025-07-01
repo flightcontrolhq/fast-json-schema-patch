@@ -1,5 +1,5 @@
 import { writeFile } from "fs/promises";
-import { BenchmarkMetrics, FormattedDiffMetrics } from "./types";
+import type { BenchmarkMetrics, FormattedDiffMetrics } from "./types";
 
 // CSV Export Functions
 export function exportFormattedDiffMetricsToCSV(
@@ -86,7 +86,7 @@ export function exportMetricsToCSV(
     "complexityRange",
     "throughput",
     "memoryKB",
-    "patchEfficiency",
+    "patchDensity",
   ];
 
   const csvRows = [headers.join(",")];
@@ -106,7 +106,8 @@ export function exportMetricsToCSV(
     const throughput =
       metric.executionTime > 0 ? 1000 / metric.executionTime : 0;
     const memoryKB = metric.memoryUsage / 1024;
-    const patchEfficiency =
+    // Patch density: patches per 1000 bytes of document (lower = more efficient)
+    const patchDensity =
       metric.documentSize > 0
         ? (metric.patchCount / metric.documentSize) * 1000
         : 0;
@@ -128,7 +129,7 @@ export function exportMetricsToCSV(
       `"${complexityRange}"`,
       throughput.toFixed(2),
       memoryKB.toFixed(2),
-      patchEfficiency.toFixed(4),
+      patchDensity.toFixed(4), // patches per 1000 bytes (lower = better)
     ];
 
     csvRows.push(row.join(","));

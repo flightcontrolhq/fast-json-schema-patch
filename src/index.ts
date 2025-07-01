@@ -5,7 +5,6 @@ import type {JsonArray, JsonObject, JsonValue, Operation} from "./types"
 import {getWildcardPath, normalizePath} from "./utils/pathUtils"
 
 export {buildPlan} from "./core/buildPlan"
-export {deepEqual} from "./performance/deepEqual"
 
 export class SchemaJsonPatcher {
   private plan: Plan
@@ -33,7 +32,7 @@ export class SchemaJsonPatcher {
     return patches
   }
 
-  diff(
+  private diff(
     obj1: JsonValue | undefined,
     obj2: JsonValue | undefined,
     path: string,

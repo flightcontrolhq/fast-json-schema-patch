@@ -1,100 +1,104 @@
 {
   "store": {
-    "name": [
-      "magna est qui",
-      "Gleichner - Cruickshank"
-    ],
-    "locale": [
-      "mp-VL",
-      "de-DE"
+    "currency": [
+      "NIX",
+      "GBP"
     ]
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "EN",
+          "country": "FB",
           "method": "express",
-          "cost": 31132131.63280063
+          "cost": 62077771.79064009,
+          "estimatedDays": 25763484
         }
       ],
       "1": [
         {
-          "country": "FE",
-          "method": "express",
-          "cost": 89160793.12480164,
-          "estimatedDays": 72507450
+          "country": "PU",
+          "method": "pickup",
+          "cost": 3202982.938269827,
+          "estimatedDays": 66322190
         }
       ],
       "2": [
         {
-          "country": "DE",
+          "country": "BS",
+          "method": "express",
+          "cost": 36590589.841450475,
+          "estimatedDays": 35035892
+        }
+      ],
+      "3": [
+        {
+          "country": "US",
           "method": "standard",
-          "cost": 48774932.755066834,
-          "estimatedDays": 85596219
+          "cost": 3.0558691525318626,
+          "estimatedDays": 14
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "EN",
+          "country": "FB",
           "method": "express",
-          "cost": 31132131.63280063
+          "cost": 62077771.79064009,
+          "estimatedDays": 25763484
         },
         0,
         0
       ],
       "_1": [
         {
-          "country": "FE",
-          "method": "express",
-          "cost": 89160793.12480164,
-          "estimatedDays": 72507450
+          "country": "PU",
+          "method": "pickup",
+          "cost": 3202982.938269827,
+          "estimatedDays": 66322190
         },
         0,
         0
       ],
       "_2": [
         {
-          "country": "DE",
-          "method": "standard",
-          "cost": 48774932.755066834,
-          "estimatedDays": 85596219
+          "country": "BS",
+          "method": "express",
+          "cost": 36590589.841450475,
+          "estimatedDays": 35035892
         },
         0,
         0
       ]
     }
   },
-  "categories": {
-    "45": {
-      "parentId": [
-        "cupidatat sed ipsum officia dolor",
-        null
-      ]
-    },
-    "_t": "a"
+  "inventory": {
+    "autoRestock": [
+      true
+    ]
   },
   "products": {
-    "38": {
+    "2": {
+      "sku": [
+        "aute sunt proident nulla do",
+        "Wmg5jTlj7xaF"
+      ]
+    },
+    "25": {
       "attributes": {
-        "spes-causa-exercitationem": [
-          79.23175757346789
+        "delibero-quidem-laboriosam": [
+          "purple"
         ]
       }
     },
     "_t": "a"
   },
   "users": {
-    "29": {
-      "roles": {
-        "_t": "a",
-        "_0": [
-          "",
-          2,
-          3
-        ]
-      }
+    "27": {
+      "name": [
+        "ullamco eiusmod",
+        "Ms. Erma Satterfield"
+      ]
     },
     "_t": "a"
   }

@@ -36,12 +36,12 @@
   {
     "op": "replace",
     "path": "/environments/0/services/8/memory",
-    "value": 7.661473370782907
+    "value": 5.580510850705513
   },
   {
     "op": "replace",
     "path": "/environments/0/services/8/cpu",
-    "value": 0.3807894761984363
+    "value": 0.16937905086264848
   },
   {
     "op": "replace",
@@ -61,12 +61,12 @@
   {
     "op": "replace",
     "path": "/environments/0/services/7/memory",
-    "value": 2.803795547438736
+    "value": 1.4173489835486324
   },
   {
     "op": "replace",
     "path": "/environments/0/services/7/cpu",
-    "value": 3.395189957325668
+    "value": 1.3838813148830815
   },
   {
     "op": "replace",
@@ -86,12 +86,12 @@
   {
     "op": "replace",
     "path": "/environments/0/services/6/memory",
-    "value": 7.200063160611009
+    "value": 3.0616619341393685
   },
   {
     "op": "replace",
     "path": "/environments/0/services/6/cpu",
-    "value": 1.3981225744031573
+    "value": 0.7997895195400764
   },
   {
     "op": "replace",
@@ -111,12 +111,12 @@
   {
     "op": "replace",
     "path": "/environments/0/services/5/memory",
-    "value": 3.4803104676941796
+    "value": 7.303815810665101
   },
   {
     "op": "replace",
     "path": "/environments/0/services/5/cpu",
-    "value": 0.3101053213032303
+    "value": 3.6507256972709192
   },
   {
     "op": "replace",

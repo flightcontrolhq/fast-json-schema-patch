@@ -42,7 +42,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.log(timeChart.create());
 
   // 2. Patch Count Efficiency Chart
-  console.log("\n📏 Average Patch Count by Library:");
+  console.log("\n📏 Patch Count Efficiency (Lower is Better):");
   const patchData = libraryNames.map((library, index) => {
     const items = libraryGroups[library] || [];
     const avgPatches =
@@ -54,7 +54,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
       label: library,
       color: colors[index % colors.length],
     };
-  });
+  }).sort((a, b) => a.value - b.value); // Sort by value ascending (fewer patches = better = appears first)
 
   const patchChart = new Chartscii(patchData, {
     width: 60,
@@ -62,9 +62,9 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     theme: "pastel",
     colorLabels: true,
     valueLabels: true,
-    title: "Average Patches Generated",
+    title: "Average Patches Generated (Fewer = Better)",
     orientation: "horizontal",
-    sort: true,
+    sort: false, // Don't sort automatically, data is ordered by efficiency
   });
   console.log(patchChart.create());
 
@@ -199,10 +199,15 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.log("🟢 Schema = schema-json-patch");
   console.log("🟡 FastJSON = fast-json-patch");
   console.log("🟠 JSONDiff = jsondiffpatch");
+  console.log("\n💡 Efficiency Interpretation:");
+  console.log("  • Execution Time: Lower values = Faster (Better)");
+  console.log("  • Patch Count: Lower values = More Efficient (Better)");
+  console.log("  • Compression Ratio: Lower values = Smaller patches relative to document size (Better)");
+  console.log("  • Memory Usage: Lower values = More Memory Efficient (Better)");
   console.log("-".repeat(80));
 
   // 5. Compression Efficiency Chart
-  console.log("\n💾 Patch Size Efficiency:");
+  console.log("\n💾 Patch Size Efficiency (Lower is Better):");
   const compressionData = libraryNames.map((library, index) => {
     const items = libraryGroups[library] || [];
     const avgCompression =
@@ -215,7 +220,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
       label: library,
       color: colors[index % colors.length],
     };
-  });
+  }).sort((a, b) => a.value - b.value); // Sort by value ascending (lower ratio = better = appears first)
 
   const compressionChart = new Chartscii(compressionData, {
     width: 60,
@@ -224,9 +229,9 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     colorLabels: true,
     valueLabels: true,
     valueLabelsPrefix: "",
-    title: "Compression Ratio (% of document size)",
+    title: "Compression Ratio - % of Document Size (Lower = Better)",
     orientation: "horizontal",
-    sort: true,
+    sort: false, // Don't sort automatically, data is pre-sorted by efficiency
   });
   console.log(compressionChart.create());
 
