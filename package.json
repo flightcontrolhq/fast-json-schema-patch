@@ -37,6 +37,8 @@
     "compare": "bun run comparison/index.ts",
     "test": "bun test",
     "check-exports": "attw --pack .",
+    "release": "changeset version && changeset publish",
+    "prepublishOnly": "bun test",
     "build": "tsdown src/index.ts src/aggregators/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap "
   },
   "exports": {
@@ -53,6 +55,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^2.0.4",
+    "@changesets/cli": "^2.29.5",
     "@faker-js/faker": "^9.8.0",
     "@types/asciichart": "^1.5.1",
     "@types/bun": "latest",
