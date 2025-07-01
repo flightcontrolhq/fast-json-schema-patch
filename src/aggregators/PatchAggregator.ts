@@ -330,7 +330,7 @@ export class PatchAggregator {
         }
       } else if (!originalChild && newChild) {
         // Entire object was added - create manual diff
-        const newFormatted = cachedJsonStringify(newChild, null, 2)
+        const newFormatted = cachedJsonStringify(newChild)
         const newLines = newFormatted.split("\n")
 
         diffLines = {
