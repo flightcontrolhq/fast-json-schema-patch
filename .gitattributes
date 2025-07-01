@@ -3,4 +3,5 @@
 
 # ignore the analysis folder
 analysis/* linguist-vendored
+*.ipynb linguist-vendored
 
