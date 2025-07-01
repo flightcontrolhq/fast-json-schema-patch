@@ -3129,10 +3129,10 @@ Set {
   },
   "/environments/source/filter/toBranches" => {
     "itemSchema": {
-      "type": "null",
+      "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "unique",
   },
   "/environments/source/filter/toBranch" => {
     "itemSchema": {
@@ -3143,10 +3143,10 @@ Set {
   },
   "/environments/source/filter/fromBranches" => {
     "itemSchema": {
-      "type": "null",
+      "type": "string",
     },
     "primaryKey": null,
-    "strategy": "lcs",
+    "strategy": "unique",
   },
   "/environments/source/filter/watchPaths" => {
     "itemSchema": {

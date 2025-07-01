@@ -79,7 +79,11 @@ export function _traverseSchema(
   for (const keyword of ["anyOf", "oneOf", "allOf"] as const) {
     const schemas = subSchema[keyword]
     if (schemas && Array.isArray(schemas)) {
+      const seenFingerprints = new Set<string>()
       for (const s of schemas) {
+        const fp = stableStringify(s)
+        if (seenFingerprints.has(fp)) continue // skip duplicate branch
+        seenFingerprints.add(fp)
         _traverseSchema(s, docPath, plan, schema, visited, options)
       }
     }
@@ -203,12 +207,25 @@ export function _traverseSchema(
       }
     }
 
-    if (options?.basePath) {
-      if (docPath.startsWith(options.basePath)) {
-        plan.set(docPath.replace(options.basePath, ""), arrayPlan)
-      }
+    if (options?.basePath && !docPath.startsWith(options.basePath)) {
+      // Skip paths outside the requested basePath
+      // Note: we still continue traversal into child schemas so nested arrays under
+      // a non-matching prefix aren't processed either.
     } else {
-      plan.set(docPath, arrayPlan)
+      const targetPath = options?.basePath
+        ? docPath.replace(options.basePath as string, "")
+        : docPath
+
+      const existingPlan = plan.get(targetPath)
+      if (!existingPlan) {
+        plan.set(targetPath, arrayPlan)
+      } else if (isBetterPlan(arrayPlan, existingPlan)) {
+        mergePlanMetadata(arrayPlan, existingPlan)
+        plan.set(targetPath, arrayPlan)
+      } else {
+        // Keep existing but merge any useful metadata from the candidate.
+        mergePlanMetadata(existingPlan, arrayPlan)
+      }
     }
 
     // We continue traversal into array items. The path does not change here
@@ -222,4 +239,57 @@ export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
   const plan: Plan = new Map()
   _traverseSchema(schema, "", plan, schema, new Set(), options)
   return plan
+}
+
+// Utility: produce a canonical JSON string with sorted keys so we can deduplicate
+// semantically identical schema fragments during traversal.
+function stableStringify(obj: unknown): string {
+  const seen = new WeakSet<object>()
+  const stringify = (value: unknown): unknown => {
+    if (value && typeof value === "object") {
+      if (seen.has(value as object)) return undefined
+      seen.add(value as object)
+      const keys = Object.keys(value as Record<string, unknown>).sort()
+      const result: Record<string, unknown> = {}
+      for (const k of keys) {
+        result[k] = stringify((value as Record<string, unknown>)[k])
+      }
+      return result
+    }
+    return value
+  }
+  return JSON.stringify(stringify(obj))
+}
+
+// Rank diffing strategies so we can decide which ArrayPlan is "better".
+const STRATEGY_RANK: Record<NonNullable<ArrayPlan["strategy"]>, number> = {
+  primaryKey: 3,
+  unique: 2,
+  lcs: 1,
+}
+
+function isBetterPlan(candidate: ArrayPlan, current: ArrayPlan): boolean {
+  const rankA = STRATEGY_RANK[candidate.strategy ?? "lcs"]
+  const rankB = STRATEGY_RANK[current.strategy ?? "lcs"]
+
+  if (rankA !== rankB) return rankA > rankB
+
+  // If strategies tie, prefer presence of primaryKey.
+  if (candidate.primaryKey && !current.primaryKey) return true
+  if (!candidate.primaryKey && current.primaryKey) return false
+
+  // Otherwise, prefer the plan with more hashFields (better cheap-equality hints).
+  const lenA = candidate.hashFields?.length ?? 0
+  const lenB = current.hashFields?.length ?? 0
+  return lenA > lenB
+}
+
+// Merge supplemental metadata from src into dst (in-place).
+function mergePlanMetadata(dst: ArrayPlan, src: ArrayPlan) {
+  if (!dst.hashFields && src.hashFields) dst.hashFields = [...src.hashFields]
+  if (dst.hashFields && src.hashFields) {
+    const merged = new Set([...dst.hashFields, ...src.hashFields])
+    dst.hashFields = Array.from(merged)
+  }
+  if (!dst.requiredFields && src.requiredFields) dst.requiredFields = new Set(src.requiredFields)
 }
