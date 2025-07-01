@@ -1,127 +1,100 @@
 {
   "store": {
-    "currency": [
-      "JLR",
-      "INR"
+    "name": [
+      "magna est qui",
+      "Gleichner - Cruickshank"
     ],
-    "supportEmail": [
-      "VCY-5LG@UySNh.xej",
-      "Melyssa.Bergstrom@yahoo.com"
+    "locale": [
+      "mp-VL",
+      "de-DE"
     ]
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "UX",
-          "method": "pickup",
-          "cost": 74231603.51043692
+          "country": "EN",
+          "method": "express",
+          "cost": 31132131.63280063
         }
       ],
       "1": [
         {
-          "country": "BX",
+          "country": "FE",
           "method": "express",
-          "cost": 86455076.83523542,
-          "estimatedDays": 36007494
+          "cost": 89160793.12480164,
+          "estimatedDays": 72507450
         }
       ],
       "2": [
         {
-          "country": "AY",
+          "country": "DE",
           "method": "standard",
-          "cost": 15148614.915746229,
-          "estimatedDays": 71713213
-        }
-      ],
-      "3": [
-        {
-          "country": "AD",
-          "method": "pickup",
-          "cost": 75051601.43478787
+          "cost": 48774932.755066834,
+          "estimatedDays": 85596219
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "UX",
-          "method": "pickup",
-          "cost": 74231603.51043692
+          "country": "EN",
+          "method": "express",
+          "cost": 31132131.63280063
         },
         0,
         0
       ],
       "_1": [
         {
-          "country": "BX",
+          "country": "FE",
           "method": "express",
-          "cost": 86455076.83523542,
-          "estimatedDays": 36007494
+          "cost": 89160793.12480164,
+          "estimatedDays": 72507450
         },
         0,
         0
       ],
       "_2": [
         {
-          "country": "AY",
+          "country": "DE",
           "method": "standard",
-          "cost": 15148614.915746229,
-          "estimatedDays": 71713213
-        },
-        0,
-        0
-      ],
-      "_3": [
-        {
-          "country": "AD",
-          "method": "pickup",
-          "cost": 75051601.43478787
+          "cost": 48774932.755066834,
+          "estimatedDays": 85596219
         },
         0,
         0
       ]
-    },
-    "freeOver": [
-      50124025.89643403,
-      0,
-      0
-    ]
-  },
-  "inventory": {
-    "thresholdAlert": [
-      35492634,
-      34
-    ]
+    }
   },
   "categories": {
-    "1": {
-      "name": [
-        "dolor eiusmod elit in fugiat",
-        "Outdoors"
-      ],
-      "slug": [
-        "fu",
-        "outdoors"
+    "45": {
+      "parentId": [
+        "cupidatat sed ipsum officia dolor",
+        null
       ]
     },
     "_t": "a"
   },
   "products": {
-    "14": {
+    "38": {
       "attributes": {
-        "voluptates-anser-conservo": [
-          false
+        "spes-causa-exercitationem": [
+          79.23175757346789
         ]
       }
     },
     "_t": "a"
   },
   "users": {
-    "16": {
-      "email": [
-        "uIS@ugvQUrzUTWQaKPjriLQ.dz",
-        "Vilma_Murazik@hotmail.com"
-      ]
+    "29": {
+      "roles": {
+        "_t": "a",
+        "_0": [
+          "",
+          2,
+          3
+        ]
+      }
     },
     "_t": "a"
   }

@@ -1,48 +1,40 @@
 [
   {
     "op": "replace",
-    "path": "/store/currency",
-    "value": "INR",
-    "oldValue": "JLR"
+    "path": "/store/name",
+    "value": "Gleichner - Cruickshank",
+    "oldValue": "magna est qui"
   },
   {
     "op": "replace",
-    "path": "/store/supportEmail",
-    "value": "Melyssa.Bergstrom@yahoo.com",
-    "oldValue": "VCY-5LG@UySNh.xej"
-  },
-  {
-    "op": "remove",
-    "path": "/shipping/freeOver",
-    "oldValue": 50124025.89643403
+    "path": "/store/locale",
+    "value": "de-DE",
+    "oldValue": "mp-VL"
   },
   {
     "op": "replace",
-    "path": "/inventory/thresholdAlert",
-    "value": 34,
-    "oldValue": 35492634
-  },
-  {
-    "op": "replace",
-    "path": "/categories/1/name",
-    "value": "Outdoors",
-    "oldValue": "dolor eiusmod elit in fugiat"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/1/slug",
-    "value": "outdoors",
-    "oldValue": "fu"
+    "path": "/categories/45/parentId",
+    "value": null,
+    "oldValue": "cupidatat sed ipsum officia dolor"
   },
   {
     "op": "add",
-    "path": "/products/14/attributes/voluptates-anser-conservo",
-    "value": false
+    "path": "/products/38/attributes/spes-causa-exercitationem",
+    "value": 79.23175757346789
   },
   {
     "op": "replace",
-    "path": "/users/16/email",
-    "value": "Vilma_Murazik@hotmail.com",
-    "oldValue": "uIS@ugvQUrzUTWQaKPjriLQ.dz"
+    "path": "/users/29/roles/0",
+    "value": "admin"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/roles/2",
+    "value": "customer"
   }
 ]

@@ -2,6 +2,21 @@
   "name": "schema-json-patch",
   "module": "src/index.ts",
   "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/flightcontrolhq/schema-json-patch",
+  "bugs": {
+    "url": "https://github.com/flightcontrolhq/schema-json-patch/issues"
+  },
+  "author": "Siddharth Suresh <siddharth@flightcontrol.dev> (https://flightcontrol.dev)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flightcontrolhq/schema-json-patch.git"
+  },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@biomejs/biome": "^2.0.4",
     "@faker-js/faker": "^9.8.0",
@@ -21,18 +36,14 @@
     "jsondiffpatch": "^0.7.3",
     "react": "^19.1.0",
     "rfc6902": "^5.1.2",
-    "tinybench": "^4.0.1"
+    "tinybench": "^4.0.1",
+    "@types/node": "^24.0.8"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
-    "bench": "bun run bench/index.bench.ts",
     "compare": "bun run comparison/index.ts",
     "test": "bun test"
-  },
-  "private": true,
-  "dependencies": {
-    "@types/node": "^24.0.8"
   }
 }

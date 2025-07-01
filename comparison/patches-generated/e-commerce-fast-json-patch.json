@@ -1,41 +1,37 @@
 [
   {
     "op": "replace",
-    "path": "/users/16/email",
-    "value": "Vilma_Murazik@hotmail.com"
+    "path": "/users/29/roles/2",
+    "value": "customer"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/roles/1",
+    "value": "manager"
+  },
+  {
+    "op": "replace",
+    "path": "/users/29/roles/0",
+    "value": "admin"
   },
   {
     "op": "add",
-    "path": "/products/14/attributes/voluptates-anser-conservo",
-    "value": false
+    "path": "/products/38/attributes/spes-causa-exercitationem",
+    "value": 79.23175757346789
   },
   {
     "op": "replace",
-    "path": "/categories/1/slug",
-    "value": "outdoors"
+    "path": "/categories/45/parentId",
+    "value": null
   },
   {
     "op": "replace",
-    "path": "/categories/1/name",
-    "value": "Outdoors"
+    "path": "/store/locale",
+    "value": "de-DE"
   },
   {
     "op": "replace",
-    "path": "/inventory/thresholdAlert",
-    "value": 34
-  },
-  {
-    "op": "remove",
-    "path": "/shipping/freeOver"
-  },
-  {
-    "op": "replace",
-    "path": "/store/supportEmail",
-    "value": "Melyssa.Bergstrom@yahoo.com"
-  },
-  {
-    "op": "replace",
-    "path": "/store/currency",
-    "value": "INR"
+    "path": "/store/name",
+    "value": "Gleichner - Cruickshank"
   }
 ]
