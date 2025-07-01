@@ -4,27 +4,6 @@
 
 A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches. It also includes powerful tools to create human-readable diffs suitable for frontend applications, outperforming similar libraries in speed and memory efficiency.
 
-## 🏆 Performance Benchmarks
-
-Based on a comprehensive benchmark of **5,000** stratified samples against popular libraries using simulated real-world JSON documents generated with Faker.js.
-
-### 📊 Detailed Performance Summary
-
-| Library | Avg Time (ms) | Throughput (ops/s) | Avg Patches | Patch Reduction |
-|---|---|---|---|---|
-| **schema-json-patch** | **0.32ms** ⚡️ | **3,129** 🚀 | **396** 📏 | - |
-| fast-json-patch | 0.36ms | 2,793 | 905 | **56.2%** |
-| jsondiffpatch | 1.22ms | 823 | 430 | **7.9%** |
-
-### 🎯 Key Performance Advantages
-
-- **12% higher throughput** than `fast-json-patch`.
-- **74% faster** execution time than `jsondiffpatch`.
-- Generates **56% fewer patches** than `fast-json-patch`, resulting in smaller payloads and more semantic operations.
-- Consistently fast performance, especially with highly complex and nested documents.
-
-*Benchmarks run on simulated real-world JSON documents (1KB-200KB) with varying complexity levels, generated via Faker.js. Full benchmark data and analysis scripts are available in the `/comparison` directory.*
-
 ## 🧠 Schema-Driven Intelligence
 
 Unlike generic JSON diff libraries, `schema-json-patch` uses a **diff plan** derived from your JSON Schema to:
@@ -38,7 +17,7 @@ Unlike generic JSON diff libraries, `schema-json-patch` uses a **diff plan** der
 ## 📦 Installation
 
 ```bash
-npm install schema-json-patch
+bun add schema-json-patch
 ```
 
 ## 🚀 Quick Start
@@ -93,7 +72,7 @@ Tired of trying to render raw JSON patches in your UI? The `PatchAggregator` tra
 It separates changes into **parent diffs** (changes to the root object) and **child diffs** (changes within a nested array), making it trivial to build side-by-side diff viewers in a frontend application.
 
 ```typescript
-import { PatchAggregator } from 'schema-json-patch';
+import { PatchAggregator } from 'schema-json-patch/aggregators';
 
 // Assuming `original`, `modified`, `patch`, and `plan` from the previous example
 
