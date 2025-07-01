@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# ignore the analysis folder
+analysis/* linguist-vendored
+
