@@ -1,116 +1,51 @@
 [
   {
-    "op": "add",
-    "path": "/users/41/metadata/commodi",
-    "value": "Tui totus terror pariatur adversus."
+    "op": "replace",
+    "path": "/users/40/email",
+    "value": "Selena_Hauck@gmail.com"
   },
   {
     "op": "add",
-    "path": "/users/8/metadata/supplanto",
-    "value": "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
+    "path": "/users/28/metadata/vulticulus",
+    "value": "Textilis sustineo balbus."
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/email",
+    "value": "Hans37@gmail.com"
+  },
+  {
+    "op": "remove",
+    "path": "/products/14/attributes/40wsN"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/9/slug",
+    "value": "music"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/9/name",
+    "value": "Music"
+  },
+  {
+    "op": "replace",
+    "path": "/analytics/googleAnalyticsId",
+    "value": "UA-293794-7"
   },
   {
     "op": "add",
-    "path": "/products/29/attributes",
-    "value": {}
-  },
-  {
-    "op": "add",
-    "path": "/products/13/categoryIds/1",
-    "value": "w"
-  },
-  {
-    "op": "add",
-    "path": "/features/guestCheckout",
+    "path": "/inventory/autoRestock",
     "value": true
   },
   {
     "op": "replace",
-    "path": "/inventory/autoRestock",
-    "value": false
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/3/estimatedDays",
-    "value": 56577282
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/3/cost",
-    "value": 40960348.430790395
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/3/method",
-    "value": "express"
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/3/country",
-    "value": "CP"
-  },
-  {
-    "op": "remove",
-    "path": "/shipping/rates/2/estimatedDays"
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/2/cost",
-    "value": 16414472.12285162
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/2/country",
-    "value": "CK"
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/1/cost",
-    "value": 96167188.35468732
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/1/method",
-    "value": "pickup"
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/1/country",
-    "value": "CE"
-  },
-  {
-    "op": "add",
-    "path": "/shipping/rates/1/estimatedDays",
-    "value": 84956973
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/0/estimatedDays",
-    "value": 62179298
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/0/cost",
-    "value": 73340683.48184031
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/0/method",
-    "value": "standard"
-  },
-  {
-    "op": "replace",
-    "path": "/shipping/rates/0/country",
-    "value": "CZ"
-  },
-  {
-    "op": "replace",
     "path": "/store/locale",
-    "value": "en-US"
+    "value": "en-GB"
   },
   {
     "op": "replace",
     "path": "/store/name",
-    "value": "Lemke LLC"
+    "value": "Cole, Zieme and Jacobi"
   }
 ]

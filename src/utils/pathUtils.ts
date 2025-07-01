@@ -98,12 +98,20 @@ export function resolvePatchPath(
 
 /**
  * Normalizes a path by removing array indices (e.g., /items/0/name -> /items/name)
+ * Optimized to avoid regex for simple cases
  */
 export function normalizePath(path: string): string {
   if (normalizedPathCache.has(path)) {
     return normalizedPathCache.get(path) as string
   }
 
+  // Fast path: if no digits, no normalization needed
+  if (!/\d/.test(path)) {
+    normalizedPathCache.set(path, path)
+    return path
+  }
+
+  // For paths with digits, use optimized replacement
   const normalized = path.replace(/\/\d+/g, "")
   normalizedPathCache.set(path, normalized)
   return normalized

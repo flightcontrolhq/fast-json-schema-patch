@@ -1,83 +1,99 @@
 {
   "store": {
     "name": [
-      "minim reprehenderit",
-      "Lemke LLC"
+      "aliquip in officia",
+      "Cole, Zieme and Jacobi"
     ],
     "locale": [
-      "lk-GM",
-      "en-US"
+      "pc-NS",
+      "en-GB"
     ]
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "CZ",
-          "method": "standard",
-          "cost": 73340683.48184031,
-          "estimatedDays": 62179298
+          "country": "GO",
+          "method": "express",
+          "cost": 18893182.068722446
         }
       ],
       "1": [
         {
-          "country": "CE",
-          "method": "pickup",
-          "cost": 96167188.35468732,
-          "estimatedDays": 84956973
+          "country": "LM",
+          "method": "standard",
+          "cost": 10425957.879791846,
+          "estimatedDays": 46400719
         }
       ],
       "2": [
         {
-          "country": "CK",
-          "method": "standard",
-          "cost": 16414472.12285162
+          "country": "TP",
+          "method": "pickup",
+          "cost": 56639013.43891396,
+          "estimatedDays": 84009216
         }
       ],
       "3": [
         {
-          "country": "CP",
+          "country": "IB",
+          "method": "pickup",
+          "cost": 79838182.19792567,
+          "estimatedDays": 81209920
+        }
+      ],
+      "4": [
+        {
+          "country": "QE",
           "method": "express",
-          "cost": 40960348.430790395,
-          "estimatedDays": 56577282
+          "cost": 61212327.63044795
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "CP",
+          "country": "GO",
           "method": "express",
-          "cost": 40960348.430790395,
-          "estimatedDays": 56577282
+          "cost": 18893182.068722446
         },
         0,
         0
       ],
       "_1": [
         {
-          "country": "CK",
+          "country": "LM",
           "method": "standard",
-          "cost": 16414472.12285162
+          "cost": 10425957.879791846,
+          "estimatedDays": 46400719
         },
         0,
         0
       ],
       "_2": [
         {
-          "country": "CZ",
-          "method": "standard",
-          "cost": 73340683.48184031,
-          "estimatedDays": 62179298
+          "country": "TP",
+          "method": "pickup",
+          "cost": 56639013.43891396,
+          "estimatedDays": 84009216
         },
         0,
         0
       ],
       "_3": [
         {
-          "country": "CE",
+          "country": "IB",
           "method": "pickup",
-          "cost": 96167188.35468732,
-          "estimatedDays": 84956973
+          "cost": 79838182.19792567,
+          "estimatedDays": 81209920
+        },
+        0,
+        0
+      ],
+      "_4": [
+        {
+          "country": "QE",
+          "method": "express",
+          "cost": 61212327.63044795
         },
         0,
         0
@@ -86,45 +102,59 @@
   },
   "inventory": {
     "autoRestock": [
-      true,
-      false
-    ]
-  },
-  "features": {
-    "guestCheckout": [
       true
     ]
   },
-  "products": {
-    "13": {
-      "categoryIds": {
-        "1": [
-          "w"
-        ],
-        "_t": "a"
-      }
-    },
-    "29": {
-      "attributes": [
-        {}
+  "analytics": {
+    "googleAnalyticsId": [
+      "UA-37158141623-5604783530",
+      "UA-293794-7"
+    ]
+  },
+  "categories": {
+    "9": {
+      "name": [
+        "amet",
+        "Music"
+      ],
+      "slug": [
+        "65",
+        "music"
       ]
     },
     "_t": "a"
   },
-  "users": {
-    "8": {
-      "metadata": {
-        "supplanto": [
-          "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
+  "products": {
+    "14": {
+      "attributes": {
+        "40wsN": [
+          -67322840.37378782,
+          0,
+          0
         ]
       }
     },
-    "41": {
+    "_t": "a"
+  },
+  "users": {
+    "2": {
+      "email": [
+        "2kFLX95xPZEIZ@kd.bau",
+        "Hans37@gmail.com"
+      ]
+    },
+    "28": {
       "metadata": {
-        "commodi": [
-          "Tui totus terror pariatur adversus."
+        "vulticulus": [
+          "Textilis sustineo balbus."
         ]
       }
+    },
+    "40": {
+      "email": [
+        "vrsXREgcM6SUN@jzlPvhCDqrZbKWbT.ojpr",
+        "Selena_Hauck@gmail.com"
+      ]
     },
     "_t": "a"
   }

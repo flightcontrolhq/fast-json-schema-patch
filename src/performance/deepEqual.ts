@@ -54,6 +54,7 @@ const eqCache = new WeakMap<object, WeakMap<object, boolean>>()
 const schemaEqCache = new WeakMap<object, WeakMap<object, Map<string, boolean>>>()
 
 export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] = []): boolean {
+  // Fast reference equality check first
   if (obj1 === obj2) return true
   if (obj1 == null || obj2 == null) return obj1 === obj2
 
@@ -69,12 +70,19 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   const a = obj1 as JsonObject
   const b = obj2 as JsonObject
 
-  // Enhanced hash-based pre-filtering - skip when object is very small
-  if (hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
-    const keyCount = Object.keys(a).length + Object.keys(b).length
-    // Estimate object size: ~16 bytes per key + average 8 bytes per value
+  // Fast path for empty objects
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+  if (keysA.length === 0 && keysB.length === 0) return true
+  if (keysA.length !== keysB.length) return false
+
+  // Skip expensive hashing for very simple objects (≤ 3 keys)
+  const shouldHash = hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b) && keysA.length > 3
+  
+  if (shouldHash) {
+    // Only hash if object is complex enough to benefit
+    const keyCount = keysA.length + keysB.length
     const estimatedSize = keyCount * 24
-    // Skip hashing if object is tiny (< 64 bytes) OR has few keys relative to hot fields
     if (estimatedSize >= 64 && keyCount > hotFields.length * 2) {
       const h1 = fastHash(a, hotFields)
       const h2 = fastHash(b, hotFields)

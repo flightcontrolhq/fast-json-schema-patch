@@ -8,11 +8,11 @@ export {buildPlan} from "./core/buildPlan"
 
 export class SchemaJsonPatcher {
   private plan: Plan
-  // Path lookup optimizations
   private planLookupCache = new Map<string, ArrayPlan | undefined>()
   private wildcardPathCache = new Map<string, string | null>()
-  private negativePlanCache = new Set<string>() // Cache paths that definitely have no plan
+  private negativePlanCache = new Set<string>()
   private readonly planIsEmpty: boolean
+  private simplePathCache = new Set<string>()
 
   constructor(options: {plan: Plan}) {
     this.plan = options.plan
@@ -93,7 +93,21 @@ export class SchemaJsonPatcher {
   }
 
   private diffArray(arr1: JsonArray, arr2: JsonArray, path: string, patches: Operation[]) {
+    // Fast path for very simple cases - avoid all plan lookups
+    if (this.planIsEmpty || this.simplePathCache.has(path)) {
+      this.simpleArrayDiff(arr1, arr2, path, patches)
+      return
+    }
+
     const plan = this.getPlanForPath(path)
+    
+    // Cache simple paths for future calls
+    if (!plan && arr1.length < 10 && arr2.length < 10) {
+      this.simplePathCache.add(path)
+      this.simpleArrayDiff(arr1, arr2, path, patches)
+      return
+    }
+
     const strategy = plan?.strategy || "lcs"
 
     const createModificationCallback = (hashFields: string[]): ModificationCallback => {
@@ -135,6 +149,23 @@ export class SchemaJsonPatcher {
     )
   }
 
+  // Fast, simple array diffing for cases without plans
+  private simpleArrayDiff(arr1: JsonArray, arr2: JsonArray, path: string, patches: Operation[]) {
+    diffArrayLCS(
+      arr1,
+      arr2,
+      path,
+      patches,
+      (oldVal: JsonValue, newVal: JsonValue, path: string, patches: Operation[], skipEqualityCheck?: boolean) => {
+        // Use simple equality check for fast path
+        if (skipEqualityCheck || oldVal !== newVal) {
+          this.diff(oldVal, newVal, path, patches)
+        }
+      },
+      [],
+    )
+  }
+
   private getPlanForPath(path: string): ArrayPlan | undefined {
     if (this.planIsEmpty) return undefined
     
@@ -157,23 +188,28 @@ export class SchemaJsonPatcher {
       return plan
     }
 
-    // Try normalized path (remove array indices)
-    const normalizedPath = normalizePath(path)
-    if (normalizedPath !== path) {
-      plan = this.plan.get(normalizedPath)
-      if (plan) {
-        this.planLookupCache.set(path, plan)
-        return plan
+    // Lazy path operations - only do expensive operations if exact match fails
+    // Try normalized path (remove array indices) - only if path contains digits
+    if (path.includes('/') && /\/\d+/.test(path)) {
+      const normalizedPath = normalizePath(path)
+      if (normalizedPath !== path) {
+        plan = this.plan.get(normalizedPath)
+        if (plan) {
+          this.planLookupCache.set(path, plan)
+          return plan
+        }
       }
     }
 
-    // Try parent wildcard path
-    const wildcardPath = this.getWildcardPathCached(path)
-    if (wildcardPath) {
-      plan = this.plan.get(wildcardPath)
-      if (plan) {
-        this.planLookupCache.set(path, plan)
-        return plan
+    // Try parent wildcard path - only if no plan found yet and path has parent
+    if (path.lastIndexOf('/') > 0) {
+      const wildcardPath = this.getWildcardPathCached(path)
+      if (wildcardPath) {
+        plan = this.plan.get(wildcardPath)
+        if (plan) {
+          this.planLookupCache.set(path, plan)
+          return plan
+        }
       }
     }
 
@@ -190,7 +226,24 @@ export class SchemaJsonPatcher {
     hashFields: string[] = [],
     skipEqualityCheck: boolean = false,
   ) {
-    if (skipEqualityCheck || !deepEqualMemo(oldVal, newVal, hashFields)) {
+    if (skipEqualityCheck) {
+      this.diff(oldVal, newVal, path, patches);
+      return;
+    }
+    
+    // Fast reference equality check first
+    if (oldVal === newVal) return;
+    
+    // Check for simple type differences
+    if (typeof oldVal !== typeof newVal || 
+        oldVal === null || newVal === null ||
+        (typeof oldVal !== "object" && oldVal !== newVal)) {
+      this.diff(oldVal, newVal, path, patches);
+      return;
+    }
+    
+    // Only use expensive deep equality for complex objects
+    if (!deepEqualMemo(oldVal, newVal, hashFields)) {
       this.diff(oldVal, newVal, path, patches);
     }
   }

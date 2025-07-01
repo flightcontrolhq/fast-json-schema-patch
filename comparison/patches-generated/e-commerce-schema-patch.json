@@ -2,71 +2,58 @@
   {
     "op": "replace",
     "path": "/store/name",
-    "value": "Lemke LLC",
-    "oldValue": "minim reprehenderit"
+    "value": "Cole, Zieme and Jacobi",
+    "oldValue": "aliquip in officia"
   },
   {
     "op": "replace",
     "path": "/store/locale",
-    "value": "en-US",
-    "oldValue": "lk-GM"
-  },
-  {
-    "op": "remove",
-    "path": "/shipping/rates/0"
-  },
-  {
-    "op": "remove",
-    "path": "/shipping/rates/0"
+    "value": "en-GB",
+    "oldValue": "pc-NS"
   },
   {
     "op": "add",
-    "path": "/shipping/rates/2",
-    "value": {
-      "country": "CK",
-      "method": "standard",
-      "cost": 16414472.12285162
-    }
-  },
-  {
-    "op": "add",
-    "path": "/shipping/rates/3",
-    "value": {
-      "country": "CP",
-      "method": "express",
-      "cost": 40960348.430790395,
-      "estimatedDays": 56577282
-    }
-  },
-  {
-    "op": "replace",
     "path": "/inventory/autoRestock",
-    "value": false,
-    "oldValue": true
-  },
-  {
-    "op": "add",
-    "path": "/features/guestCheckout",
     "value": true
   },
   {
-    "op": "add",
-    "path": "/products/13/categoryIds/1",
-    "value": "w"
+    "op": "replace",
+    "path": "/analytics/googleAnalyticsId",
+    "value": "UA-293794-7",
+    "oldValue": "UA-37158141623-5604783530"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/9/name",
+    "value": "Music",
+    "oldValue": "amet"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/9/slug",
+    "value": "music",
+    "oldValue": "65"
+  },
+  {
+    "op": "remove",
+    "path": "/products/14/attributes/40wsN",
+    "oldValue": -67322840.37378782
+  },
+  {
+    "op": "replace",
+    "path": "/users/2/email",
+    "value": "Hans37@gmail.com",
+    "oldValue": "2kFLX95xPZEIZ@kd.bau"
   },
   {
     "op": "add",
-    "path": "/products/29/attributes",
-    "value": {}
+    "path": "/users/28/metadata/vulticulus",
+    "value": "Textilis sustineo balbus."
   },
   {
-    "op": "add",
-    "path": "/users/8/metadata/supplanto",
-    "value": "Cohibeo ager sortitus sperno audax cubicularis sortitus viscus artificiose cubitum."
-  },
-  {
-    "op": "add",
-    "path": "/users/41/metadata/commodi",
-    "value": "Tui totus terror pariatur adversus."
+    "op": "replace",
+    "path": "/users/40/email",
+    "value": "Selena_Hauck@gmail.com",
+    "oldValue": "vrsXREgcM6SUN@jzlPvhCDqrZbKWbT.ojpr"
   }
 ]
