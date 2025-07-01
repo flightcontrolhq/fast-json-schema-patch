@@ -1,6 +1,7 @@
 {
   "name": "schema-json-patch",
   "module": "src/index.ts",
+  "license": "MIT",
   "type": "module",
   "version": "1.0.0",
   "description": "",
