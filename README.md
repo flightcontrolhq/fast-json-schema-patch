@@ -27,7 +27,7 @@ The core of the library is the `SchemaJsonPatcher`, which is configured with a `
 ```typescript
 import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
 
-// 1. Define a plan for your data structure
+// 1. Define a plan for your data structure, this needs to be done only once for a given schema
 const plan = buildPlan(schema);
 
 // 2. Instantiate the patcher with the plan
