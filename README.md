@@ -120,8 +120,6 @@ console.log(aggregatedResult.childDiffs.get('user2')); // Shows user2 was remove
 console.log(aggregatedResult.childDiffs.get('user3')); // Shows user3 was added
 ```
 
-🏆 **Summary**: `PatchAggregator` is **2.2x faster** and uses **93% less memory**, making it ideal for performance-sensitive applications.
-
 ## 🛠️ API Reference
 
 ### `SchemaJsonPatcher`
