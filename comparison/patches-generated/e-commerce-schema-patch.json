@@ -1,44 +1,32 @@
 [
   {
-    "op": "remove",
-    "path": "/shipping/rates/0"
+    "op": "replace",
+    "path": "/store/name",
+    "value": "Terry, Fritsch and Torphy",
+    "oldValue": "nostrud dolore id nisi"
   },
   {
-    "op": "replace",
-    "path": "/shipping/rates/0",
-    "value": {
-      "country": "JN",
-      "method": "express",
-      "cost": 75969270.86468607,
-      "estimatedDays": 13
+    "op": "remove",
+    "path": "/categories/22",
+    "oldValue": {
+      "id": "k2lqH86Xho_",
+      "name": "ipsum esse eu non dolore",
+      "slug": "286m",
+      "parentId": "sint ut"
     }
   },
   {
     "op": "replace",
-    "path": "/analytics/googleAnalyticsId",
-    "value": "UA-033068-7",
-    "oldValue": "UA-9205616495-7"
+    "path": "/users/11/name",
+    "value": "Ramon Schinner",
+    "oldValue": "eu dolore"
   },
   {
-    "op": "replace",
-    "path": "/categories/41/name",
-    "value": "Games",
-    "oldValue": "do sed Excepteur proident cillum"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/41/slug",
-    "value": "games",
-    "oldValue": "68ngnz-8"
-  },
-  {
-    "op": "replace",
-    "path": "/products/28/categoryIds/1",
-    "value": "cillum et do eu"
-  },
-  {
-    "op": "replace",
-    "path": "/products/28/categoryIds/2",
-    "value": "culpa occaecat id dolor"
+    "op": "add",
+    "path": "/analytics",
+    "value": {
+      "googleAnalyticsId": "UA-12345-1",
+      "trackUserBehavior": true
+    }
   }
 ]

@@ -1,200 +1,57 @@
 {
+  "store": {
+    "name": [
+      "nostrud dolore id nisi",
+      "Terry, Fritsch and Torphy"
+    ]
+  },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "JN",
-          "method": "express",
-          "cost": 75969270.86468607,
-          "estimatedDays": 13
+          "country": "TX",
+          "method": "pickup",
+          "cost": 82158453.99709731
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "CE",
-          "method": "express",
-          "cost": 71275926.39251924,
-          "estimatedDays": 83679956
-        },
-        0,
-        0
-      ],
-      "_1": [
-        {
-          "country": "JN",
-          "method": "express",
-          "cost": 75969270.86468607,
-          "estimatedDays": 31563717
+          "country": "TX",
+          "method": "pickup",
+          "cost": 82158453.99709731
         },
         0,
         0
       ]
     }
   },
-  "analytics": {
-    "googleAnalyticsId": [
-      "UA-9205616495-7",
-      "UA-033068-7"
+  "categories": {
+    "_t": "a",
+    "_22": [
+      {
+        "id": "k2lqH86Xho_",
+        "name": "ipsum esse eu non dolore",
+        "slug": "286m",
+        "parentId": "sint ut"
+      },
+      0,
+      0
     ]
   },
-  "categories": {
-    "41": {
+  "users": {
+    "11": {
       "name": [
-        "do sed Excepteur proident cillum",
-        "Games"
-      ],
-      "slug": [
-        "68ngnz-8",
-        "games"
+        "eu dolore",
+        "Ramon Schinner"
       ]
     },
     "_t": "a"
   },
-  "products": {
-    "28": {
-      "categoryIds": {
-        "_t": "a",
-        "_2": [
-          "",
-          1,
-          3
-        ]
-      }
-    },
-    "_t": "a"
-  },
-  "users": {
-    "_t": "a",
-    "_0": [
-      "",
-      25,
-      3
-    ],
-    "_1": [
-      "",
-      26,
-      3
-    ],
-    "_2": [
-      "",
-      29,
-      3
-    ],
-    "_3": [
-      "",
-      14,
-      3
-    ],
-    "_4": [
-      "",
-      31,
-      3
-    ],
-    "_5": [
-      "",
-      33,
-      3
-    ],
-    "_7": [
-      "",
-      28,
-      3
-    ],
-    "_10": [
-      "",
-      2,
-      3
-    ],
-    "_11": [
-      "",
-      30,
-      3
-    ],
-    "_12": [
-      "",
-      4,
-      3
-    ],
-    "_16": [
-      "",
-      18,
-      3
-    ],
-    "_17": [
-      "",
-      19,
-      3
-    ],
-    "_19": [
-      "",
-      6,
-      3
-    ],
-    "_21": [
-      "",
-      5,
-      3
-    ],
-    "_22": [
-      "",
-      24,
-      3
-    ],
-    "_23": [
-      "",
-      7,
-      3
-    ],
-    "_24": [
-      "",
-      0,
-      3
-    ],
-    "_25": [
-      "",
-      1,
-      3
-    ],
-    "_26": [
-      "",
-      16,
-      3
-    ],
-    "_27": [
-      "",
-      12,
-      3
-    ],
-    "_28": [
-      "",
-      11,
-      3
-    ],
-    "_29": [
-      "",
-      17,
-      3
-    ],
-    "_30": [
-      "",
-      21,
-      3
-    ],
-    "_31": [
-      "",
-      8,
-      3
-    ],
-    "_32": [
-      "",
-      20,
-      3
-    ],
-    "_33": [
-      "",
-      15,
-      3
-    ]
-  }
+  "analytics": [
+    {
+      "googleAnalyticsId": "UA-12345-1",
+      "trackUserBehavior": true
+    }
+  ]
 }
