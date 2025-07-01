@@ -91,15 +91,6 @@ console.log(aggregatedResult.childDiffs.get('user2')); // Shows user2 was remove
 console.log(aggregatedResult.childDiffs.get('user3')); // Shows user3 was added
 ```
 
-### `PatchAggregator` Performance
-
-It not only provides a structured diff but does so with exceptional performance compared to alternatives.
-
-| Library | Avg Time (ms) | Throughput (ops/s) | Memory Usage (KB) |
-|---|---|---|---|
-| **SchemaPatch + Aggregator** | **7.59ms** | **132** | **426 KB** |
-| json-diff-kit | 16.79ms | 60 | 6,307 KB |
-
 🏆 **Summary**: `PatchAggregator` is **2.2x faster** and uses **93% less memory**, making it ideal for performance-sensitive applications.
 
 ## 🛠️ API Reference
