@@ -1,160 +1,94 @@
 {
   "store": {
-    "name": [
-      "aliquip in officia",
-      "Cole, Zieme and Jacobi"
-    ],
     "locale": [
-      "pc-NS",
-      "en-GB"
+      "yr-PL",
+      "de-DE"
+    ],
+    "supportEmail": [
+      "FKc4-RP18bw@NGPKf.qji",
+      "Antonina.Hermann48@gmail.com"
     ]
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "GO",
-          "method": "express",
-          "cost": 18893182.068722446
+          "country": "TI",
+          "method": "standard",
+          "cost": 63640808.80225931,
+          "estimatedDays": 66419994
         }
       ],
       "1": [
         {
-          "country": "LM",
+          "country": "TB",
           "method": "standard",
-          "cost": 10425957.879791846,
-          "estimatedDays": 46400719
+          "cost": 37299444.81492473,
+          "estimatedDays": 22020442
         }
       ],
       "2": [
         {
-          "country": "TP",
-          "method": "pickup",
-          "cost": 56639013.43891396,
-          "estimatedDays": 84009216
-        }
-      ],
-      "3": [
-        {
-          "country": "IB",
-          "method": "pickup",
-          "cost": 79838182.19792567,
-          "estimatedDays": 81209920
-        }
-      ],
-      "4": [
-        {
-          "country": "QE",
-          "method": "express",
-          "cost": 61212327.63044795
+          "country": "MU",
+          "method": "standard",
+          "cost": 77225162.98710537
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "GO",
-          "method": "express",
-          "cost": 18893182.068722446
+          "country": "TI",
+          "method": "standard",
+          "cost": 63640808.80225931,
+          "estimatedDays": 66419994
         },
         0,
         0
       ],
       "_1": [
         {
-          "country": "LM",
+          "country": "TB",
           "method": "standard",
-          "cost": 10425957.879791846,
-          "estimatedDays": 46400719
+          "cost": 37299444.81492473,
+          "estimatedDays": 22020442
         },
         0,
         0
       ],
       "_2": [
         {
-          "country": "TP",
-          "method": "pickup",
-          "cost": 56639013.43891396,
-          "estimatedDays": 84009216
-        },
-        0,
-        0
-      ],
-      "_3": [
-        {
-          "country": "IB",
-          "method": "pickup",
-          "cost": 79838182.19792567,
-          "estimatedDays": 81209920
-        },
-        0,
-        0
-      ],
-      "_4": [
-        {
-          "country": "QE",
-          "method": "express",
-          "cost": 61212327.63044795
+          "country": "MU",
+          "method": "standard",
+          "cost": 77225162.98710537
         },
         0,
         0
       ]
     }
   },
-  "inventory": {
-    "autoRestock": [
-      true
-    ]
-  },
   "analytics": {
-    "googleAnalyticsId": [
-      "UA-37158141623-5604783530",
-      "UA-293794-7"
+    "trackUserBehavior": [
+      true,
+      false
     ]
-  },
-  "categories": {
-    "9": {
-      "name": [
-        "amet",
-        "Music"
-      ],
-      "slug": [
-        "65",
-        "music"
-      ]
-    },
-    "_t": "a"
   },
   "products": {
-    "14": {
-      "attributes": {
-        "40wsN": [
-          -67322840.37378782,
-          0,
-          0
-        ]
-      }
+    "37": {
+      "description": [
+        "cupidatat fugiat dolor Ut laboris",
+        "Innovative Shirt featuring hopeful technology and Plastic construction"
+      ]
     },
     "_t": "a"
   },
   "users": {
-    "2": {
-      "email": [
-        "2kFLX95xPZEIZ@kd.bau",
-        "Hans37@gmail.com"
-      ]
-    },
-    "28": {
-      "metadata": {
-        "vulticulus": [
-          "Textilis sustineo balbus."
-        ]
+    "15": {
+      "roles": {
+        "1": [
+          "guest"
+        ],
+        "_t": "a"
       }
-    },
-    "40": {
-      "email": [
-        "vrsXREgcM6SUN@jzlPvhCDqrZbKWbT.ojpr",
-        "Selena_Hauck@gmail.com"
-      ]
     },
     "_t": "a"
   }

@@ -1,59 +1,31 @@
 [
   {
     "op": "replace",
-    "path": "/store/name",
-    "value": "Cole, Zieme and Jacobi",
-    "oldValue": "aliquip in officia"
-  },
-  {
-    "op": "replace",
     "path": "/store/locale",
-    "value": "en-GB",
-    "oldValue": "pc-NS"
+    "value": "de-DE",
+    "oldValue": "yr-PL"
+  },
+  {
+    "op": "replace",
+    "path": "/store/supportEmail",
+    "value": "Antonina.Hermann48@gmail.com",
+    "oldValue": "FKc4-RP18bw@NGPKf.qji"
+  },
+  {
+    "op": "replace",
+    "path": "/analytics/trackUserBehavior",
+    "value": false,
+    "oldValue": true
+  },
+  {
+    "op": "replace",
+    "path": "/products/37/description",
+    "value": "Innovative Shirt featuring hopeful technology and Plastic construction",
+    "oldValue": "cupidatat fugiat dolor Ut laboris"
   },
   {
     "op": "add",
-    "path": "/inventory/autoRestock",
-    "value": true
-  },
-  {
-    "op": "replace",
-    "path": "/analytics/googleAnalyticsId",
-    "value": "UA-293794-7",
-    "oldValue": "UA-37158141623-5604783530"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/9/name",
-    "value": "Music",
-    "oldValue": "amet"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/9/slug",
-    "value": "music",
-    "oldValue": "65"
-  },
-  {
-    "op": "remove",
-    "path": "/products/14/attributes/40wsN",
-    "oldValue": -67322840.37378782
-  },
-  {
-    "op": "replace",
-    "path": "/users/2/email",
-    "value": "Hans37@gmail.com",
-    "oldValue": "2kFLX95xPZEIZ@kd.bau"
-  },
-  {
-    "op": "add",
-    "path": "/users/28/metadata/vulticulus",
-    "value": "Textilis sustineo balbus."
-  },
-  {
-    "op": "replace",
-    "path": "/users/40/email",
-    "value": "Selena_Hauck@gmail.com",
-    "oldValue": "vrsXREgcM6SUN@jzlPvhCDqrZbKWbT.ojpr"
+    "path": "/users/15/roles/1",
+    "value": "guest"
   }
 ]

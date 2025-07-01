@@ -1,51 +1,27 @@
 [
   {
-    "op": "replace",
-    "path": "/users/40/email",
-    "value": "Selena_Hauck@gmail.com"
-  },
-  {
     "op": "add",
-    "path": "/users/28/metadata/vulticulus",
-    "value": "Textilis sustineo balbus."
+    "path": "/users/15/roles/1",
+    "value": "guest"
   },
   {
     "op": "replace",
-    "path": "/users/2/email",
-    "value": "Hans37@gmail.com"
-  },
-  {
-    "op": "remove",
-    "path": "/products/14/attributes/40wsN"
+    "path": "/products/37/description",
+    "value": "Innovative Shirt featuring hopeful technology and Plastic construction"
   },
   {
     "op": "replace",
-    "path": "/categories/9/slug",
-    "value": "music"
+    "path": "/analytics/trackUserBehavior",
+    "value": false
   },
   {
     "op": "replace",
-    "path": "/categories/9/name",
-    "value": "Music"
-  },
-  {
-    "op": "replace",
-    "path": "/analytics/googleAnalyticsId",
-    "value": "UA-293794-7"
-  },
-  {
-    "op": "add",
-    "path": "/inventory/autoRestock",
-    "value": true
+    "path": "/store/supportEmail",
+    "value": "Antonina.Hermann48@gmail.com"
   },
   {
     "op": "replace",
     "path": "/store/locale",
-    "value": "en-GB"
-  },
-  {
-    "op": "replace",
-    "path": "/store/name",
-    "value": "Cole, Zieme and Jacobi"
+    "value": "de-DE"
   }
 ]
