@@ -39,7 +39,7 @@
     "check-exports": "attw --pack .",
     "release": "changeset version && changeset publish",
     "prepublishOnly": "bun test",
-    "build": "tsdown src/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap"
+    "build": "tsc && tsdown src/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap"
   },
   "exports": {
     "./package.json": "./package.json",

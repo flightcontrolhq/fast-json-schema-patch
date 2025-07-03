@@ -8,7 +8,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   console.log("\n📊 PERFORMANCE ANALYSIS");
   console.log("=".repeat(80));
 
-  const libraryGroups = groupBy(metrics, "library");
+  const libraryGroups: Record<string, BenchmarkMetrics[]> = groupBy(metrics, "library");
   const libraryNames = Object.keys(libraryGroups);
   const colors = ["green", "blue", "purple", "yellow"];
 
@@ -78,7 +78,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     `\n🔍 DEBUG: Complexity score range: ${minComplexity} to ${maxComplexity}`
   );
 
-  const byLibraryDebug = groupBy(metrics, "library");
+  const byLibraryDebug: Record<string, BenchmarkMetrics[]> = groupBy(metrics, "library");
   Object.entries(byLibraryDebug).forEach(([library, items]) => {
     const avgTime =
       items.reduce((sum, m) => sum + m.executionTime, 0) / items.length;
@@ -279,8 +279,8 @@ export function generateFormattedDiffReport(formattedMetrics: FormattedDiffMetri
     "  This compares formatted, human-readable diff generation capabilities"
   );
 
-  const schemaMetrics = byLibrary["schema-aggregated"] || [];
-  const jsonDiffKitMetrics = byLibrary["json-diff-kit"] || [];
+  const schemaMetrics: FormattedDiffMetrics[] = byLibrary["schema-aggregated"] || [];
+  const jsonDiffKitMetrics: FormattedDiffMetrics[] = byLibrary["json-diff-kit"] || [];
 
   if (schemaMetrics.length > 0 && jsonDiffKitMetrics.length > 0) {
     const avgSchemaTime =
@@ -351,7 +351,7 @@ export function generateFormattedDiffReport(formattedMetrics: FormattedDiffMetri
 }
 
 export function generateComprehensiveReport(allMetrics: BenchmarkMetrics[], title?: string) {
-  const byLibrary = groupBy(allMetrics, "library");
+  const byLibrary: Record<string, BenchmarkMetrics[]> = groupBy(allMetrics, "library");
 
   if (title) {
     console.log(chalk.bold.cyan(`\n\n--- ${title} Benchmark Report ---`));
@@ -409,8 +409,8 @@ export function generateComprehensiveReport(allMetrics: BenchmarkMetrics[], titl
   }
 
   console.log("\n🏆 Schema-Based Advantages Analysis:");
-  const newSchemaMetrics = byLibrary["fast-json-schema-patch"] || [];
-  const fastJsonMetrics = byLibrary["fast-json-patch"] || [];
+  const newSchemaMetrics: BenchmarkMetrics[] = byLibrary["fast-json-schema-patch"] || [];
+  const fastJsonMetrics: BenchmarkMetrics[] = byLibrary["fast-json-patch"] || [];
 
   if (newSchemaMetrics.length > 0 && fastJsonMetrics.length > 0) {
     const avgSchemaPatches =
