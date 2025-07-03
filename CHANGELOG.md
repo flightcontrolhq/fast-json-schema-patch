@@ -1,5 +1,11 @@
 # fast-json-schema-patch
 
+## 0.2.2
+
+### Patch Changes
+
+- 1b04ab4: export `Plan` and `BuildPlanOptions` types
+
 ## 0.2.1
 
 ### Patch Changes
