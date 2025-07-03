@@ -2,7 +2,7 @@
   "name": "fast-json-schema-patch",
   "license": "MIT",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Ultra-fast, schema-aware JSON patch generation and human-readable diffing. A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches with tools for creating human-readable diffs suitable for frontend applications.",
   "keywords": [
     "json-patch",
