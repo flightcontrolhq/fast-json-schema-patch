@@ -15,6 +15,10 @@ export type {
   StructuredDiffLine,
   Operation,
 } from "./types"
+export type {
+  Plan,
+  BuildPlanOptions
+} from "./core/buildPlan"
 
 export class JsonSchemaPatcher {
   private plan: Plan

@@ -279,15 +279,6 @@ export class StructuredDiff {
       const newChild = newChildrenById.get(childId) || null;
       const patchesForChild = childPatchesById[childId] || [];
 
-      // Enhanced optimization: skip processing if objects are identical
-      if (
-        originalChild &&
-        newChild &&
-        this.compareObjects(originalChild, newChild, arrayPlan)
-      ) {
-        continue;
-      }
-
       const transformedPatches = patchesForChild.map((p) => {
         const originalIndex = originalChildren.findIndex(
           (c) => c[idKey] === childId
