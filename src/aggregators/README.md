@@ -53,8 +53,8 @@ graph TD
     end
 
     subgraph "Outputs"
-        ParentDiff["AggregatedParentDiff"]
-        ChildDiffs["Map <br/> [childPrimaryKey]: AggregatedChildDiff"]
+        ParentDiff["FormattedParentDiff"]
+        ChildDiffs["Map <br/> [childPrimaryKey]: FormattedChildDiff"]
     end
 
     A & B --> PA_Entry

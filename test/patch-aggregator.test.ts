@@ -247,7 +247,7 @@ describe("StructuredDiff", () => {
   });
 
   it("should produce correct diffLines", () => {
-    expect(result.parentDiff.diffLines.unifiedDiffLines).toMatchInlineSnapshot(`
+    expect(result.parentDiff.diffLines).toMatchInlineSnapshot(`
       [
         {
           "content": "{",
@@ -374,7 +374,7 @@ describe("StructuredDiff", () => {
       ]
     `);
     expect(
-      result.childDiffs["job-scheduler-gWLzaf"]?.diffLines.unifiedDiffLines
+      result.childDiffs["job-scheduler-gWLzaf"]?.diffLines
     ).toMatchInlineSnapshot(`
         [
           {

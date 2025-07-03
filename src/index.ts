@@ -8,14 +8,12 @@ export {buildPlan} from "./core/buildPlan"
 export {StructuredDiff} from "./aggregators/StructuredDiff"
 
 export type {
-  AggregationConfig,
-  AggregatedDiffResult,
-  AggregatedParentDiff,
-  AggregatedChildDiff,
+  StructuredDiffConfig,
+  StructuredDiffResult,
+  FormattedParentDiff,
+  FormattedChildDiff,
+  StructuredDiffLine,
   Operation,
-  UnifiedDiffLine,
-  DiffLine,
-  FormattedDiff,
 } from "./types"
 
 export class JsonSchemaPatcher {

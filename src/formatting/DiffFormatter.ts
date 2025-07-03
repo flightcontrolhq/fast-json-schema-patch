@@ -4,17 +4,17 @@ import {getPlanFingerprint} from "../performance/deepEqual"
 import {fastHash} from "../performance/fashHash"
 import type {
   DiffLine,
+  FormattedDiffLines,
   JsonObject,
   JsonValue,
   Operation,
   PathMap,
-  FormattedDiff,
-  UnifiedDiffLine,
+  StructuredDiffLine,
 } from "../types"
 import {resolvePatchPath} from "../utils/pathUtils"
 
 // Enhanced caching for diff formatters with content-based keys
-const diffFormatterCache = new Map<string, FormattedDiff>()
+const diffFormatterCache = new Map<string, FormattedDiffLines>()
 
 function getPathLineRange(
   pathMap: PathMap,
@@ -72,7 +72,7 @@ export class DiffFormatter {
     )
   }
 
-  format(patches: Operation[]): FormattedDiff {
+  format(patches: Operation[]): FormattedDiffLines {
     // Enhanced caching: create a cache key based on patches and plan
     const patchesKey = this.createPatchesKey(patches)
     const planKey = this.plan ? getPlanFingerprint(this.plan) : "default"
@@ -127,7 +127,7 @@ export class DiffFormatter {
     return fastHash(patchData as JsonObject, ["count", "operations", "sample"])
   }
 
-  private generateDiff(patches: Operation[]): FormattedDiff {
+  private generateDiff(patches: Operation[]): FormattedDiffLines {
     const originalAffectedLines = new Set<number>()
     const newAffectedLines = new Set<number>()
 
@@ -173,7 +173,6 @@ export class DiffFormatter {
 
     // Enhanced unified diff generation
     const unified = this.generateUnifiedDiff(originalDiffLines, newDiffLines)
-
     return {
       originalLines: originalDiffLines,
       newLines: newDiffLines,
@@ -184,8 +183,8 @@ export class DiffFormatter {
   private generateUnifiedDiff(
     originalDiffLines: DiffLine[],
     newDiffLines: DiffLine[],
-  ): UnifiedDiffLine[] {
-    const unified: UnifiedDiffLine[] = []
+  ): StructuredDiffLine[] {
+    const unified: StructuredDiffLine[] = []
     let i = 0
     let j = 0
 

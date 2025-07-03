@@ -1,20 +1,13 @@
 [
   {
     "op": "replace",
-    "path": "/store/name",
-    "value": "Labadie - Kihn",
-    "oldValue": "cupidatat"
+    "path": "/store/logoUrl",
+    "value": "https://loremflickr.com/2288/1980?lock=5730920209308270",
+    "oldValue": "https://jFZUtQwblhXetNdizhiWVhM.hdmnl+3o7Yiy9W4kCAx9tAJCi3IpimnE7doAB8hTQpeBfXdnLT0p7.rCUCK"
   },
   {
-    "op": "replace",
-    "path": "/categories/5/name",
-    "value": "Computers",
-    "oldValue": "id"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/5/slug",
-    "value": "computers",
-    "oldValue": "ar2pz0g7w"
+    "op": "add",
+    "path": "/categories/24/parentId",
+    "value": null
   }
 ]

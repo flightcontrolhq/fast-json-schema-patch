@@ -4,35 +4,41 @@ export type JsonValue = string | number | boolean | null | JsonObject | JsonArra
 export type JsonObject = { [Key in string]?: JsonValue };
 export type JsonArray = JsonValue[];
 
-export interface AggregationConfig {
+export interface StructuredDiffConfig {
   pathPrefix: string
   original: JsonValue
   modified: JsonValue
   patches?: Operation[]
 }
 
-export interface AggregatedDiffResult {
-  parentDiff: AggregatedParentDiff
-  childDiffs: Record<string, AggregatedChildDiff>
+export interface StructuredDiffResult {
+  parentDiff: FormattedParentDiff
+  childDiffs: Record<string, FormattedChildDiff>
 }
 
-export interface AggregatedParentDiff {
+export interface FormattedParentDiff {
   original: JsonValue
   new: JsonValue
   patches: Operation[]
-  diffLines: FormattedDiff
+  diffLines: StructuredDiffLine[]
   addCount: number
   removeCount: number
 }
 
-export interface AggregatedChildDiff {
+export interface FormattedChildDiff {
   id: string
   original: JsonObject
   new: JsonObject
   patches: Operation[]
-  diffLines: FormattedDiff
+  diffLines: StructuredDiffLine[]
   addCount: number
   removeCount: number
+}
+
+export interface FormattedDiffLines {
+  originalLines: DiffLine[]
+  newLines: DiffLine[]
+  unifiedDiffLines: StructuredDiffLine[]
 }
 
 export interface Operation {
@@ -49,14 +55,8 @@ export interface DiffLine {
   type: "added" | "removed" | "unchanged";
 }
 
-export interface FormattedDiff {
-  originalLines: DiffLine[];
-  newLines: DiffLine[];
-  unifiedDiffLines: UnifiedDiffLine[];
-}
-
-export interface UnifiedDiffLine {
-  type: "added" | "removed" | "unchanged" | string;
+export interface StructuredDiffLine {
+  type: "added" | "removed" | "unchanged";
   content: string;
   oldLineNumber?: number;
   newLineNumber?: number;

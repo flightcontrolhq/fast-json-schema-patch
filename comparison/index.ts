@@ -121,10 +121,10 @@ async function compare() {
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 2500 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 2500 },
-    { label: "High", min: 201, max: 500, targetSamples: 2500 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 2500 },
+    { label: "Low", min: 0, max: 50, targetSamples: 250 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 250 },
+    { label: "High", min: 201, max: 500, targetSamples: 250 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 250 },
   ];
 
   const allMetrics: BenchmarkMetrics[] = [];
@@ -343,10 +343,10 @@ async function compare() {
   const ecommercePatcher = new JsonSchemaPatcher({ plan: ecommercePlan });
 
   const ecommerceComplexityRanges = [
-    { label: "Low", min: 0, max: 50, targetSamples: 2500 },
-    { label: "Medium", min: 51, max: 200, targetSamples: 2500 },
-    { label: "High", min: 201, max: 500, targetSamples: 2500 },
-    { label: "Very High", min: 501, max: 3000, targetSamples: 2500 },
+    { label: "Low", min: 0, max: 50, targetSamples: 250 },
+    { label: "Medium", min: 51, max: 200, targetSamples: 250 },
+    { label: "High", min: 201, max: 500, targetSamples: 250 },
+    { label: "Very High", min: 501, max: 3000, targetSamples: 250 },
   ];
 
   const ecommerceTotalTargetSamples = ecommerceComplexityRanges.reduce(

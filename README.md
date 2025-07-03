@@ -160,12 +160,12 @@ The main class for creating human-readable diffs.
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
 **`structuredDiff.execute(config)`**
-- `config`: An `AggregationConfig` object with the following properties:
+- `config`: An `StructuredDiffConfig` object with the following properties:
   - `pathPrefix`: The path prefix of the array to aggregate (e.g., `/users`).
   - `original`: The original document.
   - `modified`: The modified document.
   - `patches` (optional): Pre-computed patch array from `JsonSchemaPatcher`. If not provided, patches will be generated automatically.
-- **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a record of `childDiffs`.
+- **Returns**: An `StructuredDiffResult` object containing `parentDiff` and a record of `childDiffs`.
 
 ## 🔬 Benchmarking Your Use Case
 

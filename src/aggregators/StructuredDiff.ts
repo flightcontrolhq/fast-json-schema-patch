@@ -4,19 +4,19 @@ import { deepEqualSchemaAware } from "../performance/deepEqual";
 import { fastHash } from "../performance/fashHash";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type {
-  AggregatedChildDiff,
-  AggregatedDiffResult,
-  AggregationConfig,
+  FormattedChildDiff,
+  StructuredDiffResult,
+  StructuredDiffConfig,
   JsonObject,
   JsonValue,
   Operation,
-  FormattedDiff,
+  FormattedDiffLines,
 } from "../types";
 import { getValueByPath } from "../utils/pathUtils";
 import { DiffFormatter } from "../formatting/DiffFormatter";
 import { JsonSchemaPatcher } from "..";
 
-function countChangedLines(diff: FormattedDiff): {
+function countChangedLines(diff: FormattedDiffLines): {
   addCount: number;
   removeCount: number;
 } {
@@ -51,7 +51,7 @@ export class StructuredDiff {
     return Boolean(hasSchemaKey);
   }
 
-  private isArrayPath(pathPrefix: string, config: AggregationConfig): boolean {
+  private isArrayPath(pathPrefix: string, config: StructuredDiffConfig): boolean {
     // First check if we have plan information
     if (this.plan) {
       const arrayPlan = this.getArrayPlanForPath(pathPrefix, this.plan);
@@ -92,8 +92,8 @@ export class StructuredDiff {
 
   private aggregateWithoutChildSeparation(
     patches: Operation[],
-    config: AggregationConfig
-  ): AggregatedDiffResult {
+    config: StructuredDiffConfig
+  ): StructuredDiffResult {
     const { pathPrefix } = config;
     // For non-primaryKey strategies, we can't meaningfully separate child patches
     // So we treat all patches as "parent" patches and don't generate child diffs
@@ -124,7 +124,7 @@ export class StructuredDiff {
         original: originalParent,
         new: newParent,
         patches: patches,
-        diffLines: parentDiffLines,
+        diffLines: parentDiffLines.unifiedDiffLines,
         ...parentLineCounts,
       },
       childDiffs: {}, // Empty - no child separation for non-primaryKey strategies
@@ -157,7 +157,7 @@ export class StructuredDiff {
     return cachedJsonStringify(obj1) === cachedJsonStringify(obj2);
   }
 
-  execute(config: AggregationConfig): AggregatedDiffResult {
+  execute(config: StructuredDiffConfig): StructuredDiffResult {
     const { pathPrefix } = config;
 
     // Validate that the path actually represents an array
@@ -260,7 +260,7 @@ export class StructuredDiff {
     const parentDiffLines = parentFormatter.format(parentPatches);
     const parentLineCounts = countChangedLines(parentDiffLines);
 
-    const childDiffs: Record<string, AggregatedChildDiff> = {};
+    const childDiffs: Record<string, FormattedChildDiff> = {};
     const newChildren =
       getValueByPath<JsonObject[]>(config.modified, pathPrefix) || [];
     const originalChildrenById = new Map(
@@ -326,7 +326,7 @@ export class StructuredDiff {
         newChild,
         (orig, newVal) => new DiffFormatter(orig, newVal)
       );
-      let diffLines: FormattedDiff;
+      let diffLines: FormattedDiffLines;
       let lineCounts: { addCount: number; removeCount: number };
       if (originalChild && !newChild) {
         // Entire object was removed - create manual diff
@@ -397,7 +397,7 @@ export class StructuredDiff {
         original: originalChild || {},
         new: newChild || {},
         patches: transformedPatches,
-        diffLines,
+        diffLines: diffLines.unifiedDiffLines,
         ...lineCounts,
       };
     }
@@ -407,7 +407,7 @@ export class StructuredDiff {
         original: originalParent,
         new: newParent,
         patches: parentPatches,
-        diffLines: parentDiffLines,
+        diffLines: parentDiffLines.unifiedDiffLines,
         ...parentLineCounts,
       },
       childDiffs,
