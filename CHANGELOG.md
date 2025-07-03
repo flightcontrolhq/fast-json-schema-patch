@@ -1,5 +1,11 @@
 # fast-json-schema-patch
 
+## 0.2.3
+
+### Patch Changes
+
+- c212ef2: fix incorrect logic while creating the structured diff
+
 ## 0.2.2
 
 ### Patch Changes
