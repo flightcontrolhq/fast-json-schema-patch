@@ -1,11 +1,11 @@
-# schema-json-patch
+# fast-json-schema-patch
 
 🚀 Ultra-fast, Schema-Aware JSON Patch Generation with Human-Readable Diffing
 
-schema-json-patch is a high-performance JSON patching library designed to create efficient, schema-driven patches. It intelligently understands your data structure, enabling optimized, semantic diffs, and also provides fast, human-friendly diffing tools for frontend applications. It outperforms many popular alternatives in both speed and memory usage.
+fast-json-schema-patch is a high-performance JSON patching library designed to create efficient, schema-driven patches. It intelligently understands your data structure, enabling optimized, semantic diffs, and also provides fast, human-friendly diffing tools for frontend applications. It outperforms many popular alternatives in both speed and memory usage.
 
 🧠 Schema-Driven Diffing
-Unlike generic JSON diff libraries, schema-json-patch leverages schema-based diff plans to:
+Unlike generic JSON diff libraries, fast-json-schema-patch leverages schema-based diff plans to:
 
 - ⚡ Optimize array diffing using the best strategy for each case (LCS, primary key matching, etc.).
 
@@ -18,21 +18,21 @@ Unlike generic JSON diff libraries, schema-json-patch leverages schema-based dif
 ## 📦 Installation
 
 ```bash
-bun add schema-json-patch
+bun add fast-json-schema-patch
 ```
 
 ## 🚀 Quick Start
 
-The core of the library is the `SchemaJsonPatcher`, which uses a diff plan to optimize patch generation.
+The core of the library is the `JsonSchemaPatcher`, which uses a diff plan to optimize patch generation.
 
 ```typescript
-import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
+import { JsonSchemaPatcher, buildPlan } from 'fast-json-schema-patch';
 
 // 1. Define a plan for your data structure, this needs to be done only once for a given schema
-const plan = buildPlan(schema);
+const plan = buildPlan({schema});
 
 // 2. Instantiate the patcher with the plan
-const patcher = new SchemaJsonPatcher({ plan });
+const patcher = new JsonSchemaPatcher({ plan });
 
 // Original and modified documents
 const original = {
@@ -51,7 +51,7 @@ const modified = {
 };
 
 // 3. Generate the optimized patch
-const patch = patcher.createPatch(original, modified);
+const patch = patcher.execute({original, modified});
 console.log(patch);
 // Output: [
 //   { op: "remove", path: "/users/1", oldValue: { id: 'user2', ... } },
@@ -69,11 +69,11 @@ This addition makes UI rendering and state reconciliation easier but is not part
 
 ## 📋 Generating JSON Schema from Zod
 
-If you're using [Zod](https://zod.dev/) for runtime validation, you can easily generate JSON schemas for use with `schema-json-patch`. Zod 4 introduced native JSON Schema conversion:
+If you're using [Zod](https://zod.dev/) for runtime validation, you can easily generate JSON schemas for use with `fast-json-schema-patch`. Zod 4 introduced native JSON Schema conversion:
 
 ```typescript
 import * as z from "zod/v4";
-import { SchemaJsonPatcher, buildPlan } from 'schema-json-patch';
+import { JsonSchemaPatcher, buildPlan } from 'fast-json-schema-patch';
 
 // Define your Zod schema
 const userSchema = z.object({
@@ -89,17 +89,17 @@ const jsonSchema = z.toJSONSchema(userSchema);
 
 // Use the JSON schema to build a plan
 const plan = buildPlan(jsonSchema);
-const patcher = new SchemaJsonPatcher({ plan });
+const patcher = new JsonSchemaPatcher({ plan });
 ```
 
 This integration makes it seamless to leverage your existing Zod schemas for optimized JSON patching. For more details on Zod's JSON Schema conversion, see the [official documentation](https://zod.dev/json-schema).
 
 ---
 
-## 🎨 Human-Readable Diffs with `StructuredDiffAggregator`
+## 🎨 Human-Readable Diffs with `StructuredDiff`
 
 When you need to present diffs to users, raw JSON patches can be hard to work with.
-StructuredDiffAggregator helps you transform those patches into structured, human-readable diffs that are fast, memory-efficient, and frontend-friendly.
+StructuredDiff helps you transform those patches into structured, human-readable diffs that are fast, memory-efficient, and frontend-friendly.
 
 It organizes changes into:
 
@@ -110,18 +110,16 @@ Child diffs: Changes within a target array, keyed by unique identifiers.
 This makes it easy to build side-by-side diff views or activity feeds.
 
 ```typescript
-import { StructuredDiffAggregator } from 'schema-json-patch/aggregators';
+import { StructuredDiff } from 'fast-json-schema-patch';
 
 // Assuming `original`, `modified`, `patch`, and `plan` from the previous example
 
 // 1. Instantiate the aggregator with the original and new documents
-const aggregator = new StructuredDiffAggregator(original, modified);
-
-// 2. Aggregate the patch
-const aggregatedResult = aggregator.aggregate(patch, {
-  pathPrefix: '/users', // The path to the array we want to analyze
-  plan: plan,
-});
+const aggregatedResult = new StructuredDiff({plan}).execute({
+  original,
+  modified,
+  pathPrefix: '/users',
+})
 
 // 3. Use the result to render a UI
 console.log(aggregatedResult.parentDiff); // Shows changes outside the /users array
@@ -131,23 +129,23 @@ console.log(aggregatedResult.childDiffs['user3']); // Shows user3 was added
 
 ## 🛠️ API Reference
 
-### `SchemaJsonPatcher`
+### `JsonSchemaPatcher`
 The main class for generating patches.
 
-**`new SchemaJsonPatcher({ plan })`**
+**`new JsonSchemaPatcher({ plan })`**
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
 **`patcher.createPatch(source, target)`**
 - Generates an array of JSON Patch operations.
 
-### `StructuredDiffAggregator`
+### `StructuredDiff`
 The main class for creating human-readable diffs.
 
-**`new StructuredDiffAggregator(originalDoc, newDoc)`**
-- `originalDoc`, `newDoc`: The two documents to compare.
+**`new StructuredDiff(original, modified)`**
+- `original`, `modified`: The two documents to compare.
 
 **`aggregator.aggregate(patches, config)`**
-- `patches`: The patch array from `SchemaJsonPatcher`.
+- `patches`: The patch array from `JsonSchemaPatcher`.
 - `config`: An object specifying the `pathPrefix` of the array to aggregate and an optional `plan`.
 - **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a record of `childDiffs`.
 

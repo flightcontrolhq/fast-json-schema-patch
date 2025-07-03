@@ -1,7 +1,7 @@
 import { describe, test, expect, spyOn, it } from "bun:test";
 import {
   buildPlan,
-  SchemaJsonPatcher,
+  JsonSchemaPatcher,
 } from "../src/index";
 import { deepEqual } from "../src/performance/deepEqual";
 import { fastHash } from "../src/performance/fashHash";
@@ -119,9 +119,9 @@ describe("Faker-based tests", () => {
     });
 
     const plan = buildPlan(userSchema, { primaryKeyMap: { "/posts": "postId" } });
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
-    const patch = patcher.createPatch(doc1, doc2);
+    const patch = patcher.execute({original: doc1, modified: doc2});
 
     const { newDocument } = applyPatch(doc1, patch as FastJsonPatchOperation[]);
 
@@ -410,7 +410,7 @@ describe("buildPlan > ArrayPlan metadata", () => {
   });
 }); 
 
-describe("SchemaJsonPatcher", () => {
+describe("JsonSchemaPatcher", () => {
   it("should match snapshot for schema.json", () => {
     const schema = require("../schema/schema.json");
     const plan = buildPlan(schema);
@@ -418,7 +418,7 @@ describe("SchemaJsonPatcher", () => {
   });
 });
 
-test("SchemaJsonPatcher generates correct patches for array with primary key", () => {
+test("JsonSchemaPatcher generates correct patches for array with primary key", () => {
   const doc1 = {
     environments: [
       {
@@ -462,8 +462,8 @@ test("SchemaJsonPatcher generates correct patches for array with primary key", (
   };
 
   const plan = buildPlan(schema);
-  const patcher = new SchemaJsonPatcher({ plan });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   const expectedPatches: Operation[] = [
     {
@@ -493,7 +493,7 @@ test("SchemaJsonPatcher generates correct patches for array with primary key", (
   expect(patches).toEqual(expectedPatches);
 });
 
-test("SchemaJsonPatcher handles empty arrays correctly", () => {
+test("JsonSchemaPatcher handles empty arrays correctly", () => {
   const doc1 = {
     environments: [
       {
@@ -520,8 +520,8 @@ test("SchemaJsonPatcher handles empty arrays correctly", () => {
     ],
   };
 
-  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema) });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan: buildPlan(schema) });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   const expectedPatches: Operation[] = [
     {
@@ -534,7 +534,7 @@ test("SchemaJsonPatcher handles empty arrays correctly", () => {
   expect(patches).toEqual(expectedPatches);
 });
 
-test("SchemaJsonPatcher handles array with all items removed", () => {
+test("JsonSchemaPatcher handles array with all items removed", () => {
   const doc1 = {
     environments: [
       {
@@ -568,8 +568,8 @@ test("SchemaJsonPatcher handles array with all items removed", () => {
     ],
   };
 
-  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema) });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan: buildPlan(schema) });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   const expectedPatches: Operation[] = [
     {
@@ -587,7 +587,7 @@ test("SchemaJsonPatcher handles array with all items removed", () => {
   expect(patches).toEqual(expectedPatches);
 });
 
-test("SchemaJsonPatcher handles no changes", () => {
+test("JsonSchemaPatcher handles no changes", () => {
   const doc1 = {
     environments: [
       {
@@ -602,12 +602,12 @@ test("SchemaJsonPatcher handles no changes", () => {
     ],
   };
 
-  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema) });
-  const patches = patcher.createPatch(doc1, doc1);
+  const patcher = new JsonSchemaPatcher({ plan: buildPlan(schema) });
+  const patches = patcher.execute({original: doc1, modified: doc1});
   expect(patches).toEqual([]);
 });
 
-test("SchemaJsonPatcher handles array without primary key (fallback)", () => {
+test("JsonSchemaPatcher handles array without primary key (fallback)", () => {
   // We'll test this on a property that is an array of strings
   const doc1 = {
     environments: [
@@ -651,8 +651,8 @@ test("SchemaJsonPatcher handles array without primary key (fallback)", () => {
     ],
   };
 
-  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema) });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan: buildPlan(schema) });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   const expectedPatches: Operation[] = [
     {
@@ -682,7 +682,7 @@ test("SchemaJsonPatcher handles array without primary key (fallback)", () => {
   `);
 });
 
-test("SchemaJsonPatcher works with a pre-built plan", () => {
+test("JsonSchemaPatcher works with a pre-built plan", () => {
   const doc1 = {
     environments: [
       {
@@ -712,8 +712,8 @@ test("SchemaJsonPatcher works with a pre-built plan", () => {
   };
 
   const plan = buildPlan(schema);
-  const patcher = new SchemaJsonPatcher({ plan });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   const expectedPatches: Operation[] = [
     { op: "replace", path: "/environments/0/services/0/cpu", value: 2, oldValue: 1 },
@@ -722,7 +722,7 @@ test("SchemaJsonPatcher works with a pre-built plan", () => {
   expect(patches).toEqual(expectedPatches);
 });
 
-test("SchemaJsonPatcher handles real-world schema and data", () => {
+test("JsonSchemaPatcher handles real-world schema and data", () => {
   // Use the actual schema and a test data file
   const doc1 = JSON.parse(JSON.stringify(require("../schema/test.json")));
   const doc2 = JSON.parse(JSON.stringify(require("../schema/test.json")));
@@ -742,8 +742,8 @@ test("SchemaJsonPatcher handles real-world schema and data", () => {
   doc2.environments[1].services[0].cpu = 5;
 
   const plan = buildPlan(schema);
-  const patcher = new SchemaJsonPatcher({ plan });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   expect(patches).toMatchInlineSnapshot(`
     [
@@ -807,7 +807,7 @@ test("SchemaJsonPatcher handles real-world schema and data", () => {
   `);
 });
 
-test("SchemaJsonPatcher handles multiple removals from array with primary key", () => {
+test("JsonSchemaPatcher handles multiple removals from array with primary key", () => {
   const doc1 = {
     $schema: "https://app.flightcontrol.dev/schema.json",
     environments: [
@@ -958,8 +958,8 @@ test("SchemaJsonPatcher handles multiple removals from array with primary key", 
   };
 
   const plan = buildPlan(schema);
-  const patcher = new SchemaJsonPatcher({ plan });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   expect(patches).toMatchInlineSnapshot(`
     [
@@ -1018,7 +1018,7 @@ test("SchemaJsonPatcher handles multiple removals from array with primary key", 
   `);
 });
 
-test("SchemaJsonPatcher correctly diffs a single service property", () => {
+test("JsonSchemaPatcher correctly diffs a single service property", () => {
   const doc1 = {
     id: "nlb-server",
     name: "NLB Server",
@@ -1104,8 +1104,8 @@ test("SchemaJsonPatcher correctly diffs a single service property", () => {
   };
 
   const plan = buildPlan(schema, { basePath: "/environments/services" });
-  const patcher = new SchemaJsonPatcher({ plan });
-  const patches = patcher.createPatch(doc1, doc2);
+  const patcher = new JsonSchemaPatcher({ plan });
+  const patches = patcher.execute({original: doc1, modified: doc2});
 
   expect(patches).toMatchInlineSnapshot(`
     [
@@ -1179,7 +1179,7 @@ test("SchemaJsonPatcher correctly diffs a single service property", () => {
 
 test("should handle reordering of items in an array with primary keys", () => {
   const plan = buildPlan(schema as any);
-  const patcher = new SchemaJsonPatcher({ plan });
+  const patcher = new JsonSchemaPatcher({ plan });
 
   const doc1 = {
     environments: [
@@ -1205,7 +1205,7 @@ test("should handle reordering of items in an array with primary keys", () => {
     ],
   };
 
-  const patch = patcher.createPatch(doc1, doc2);
+  const patch = patcher.execute({original: doc1, modified: doc2});
 
   // Reordering items should not produce any patches if primary keys are used for identity.
   expect(patch).toEqual([]);
@@ -1213,7 +1213,7 @@ test("should handle reordering of items in an array with primary keys", () => {
 
 test("should handle changing a primary key of an item in an array", () => {
   const plan = buildPlan(schema as any);
-  const patcher = new SchemaJsonPatcher({ plan });
+  const patcher = new JsonSchemaPatcher({ plan });
 
   const doc1 = {
     environments: [
@@ -1239,7 +1239,7 @@ test("should handle changing a primary key of an item in an array", () => {
     ],
   };
 
-  const patch = patcher.createPatch(doc1, doc2);
+  const patch = patcher.execute({original: doc1, modified: doc2});
 
   // Changing a primary key should be treated as a remove and an add.
   expect(patch).toMatchInlineSnapshot(`
@@ -1685,9 +1685,9 @@ describe("_traverseSchema function", () => {
   });
 });
 
-describe("SchemaJsonPatcher comprehensive tests", () => {
+describe("JsonSchemaPatcher comprehensive tests", () => {
   test("should handle all diff operations", () => {
-    const patcher = new SchemaJsonPatcher({ plan: new Map() });
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
 
     // Add operation (using the internal diff method since createPatch expects JsonValue)
     const patches1: Operation[] = [];
@@ -1721,12 +1721,12 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
         },
       },
     });
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     const doc1 = { items: [{ id: "1", name: "first" }] };
     const doc2 = { items: [{ id: "1", name: "updated" }] };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches).toEqual([
       {
         op: "replace",
@@ -1750,10 +1750,10 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
         },
       },
     });
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
     const doc1 = { items: [{ name: "A" }, { name: "B" }] };
     const doc2 = { items: [{ name: "A" }, { name: "C" }, { name: "B" }] };
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches).toEqual([{ op: "add", path: "/items/1", value: { name: "C" } }]);
   });
 
@@ -1771,10 +1771,10 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
         },
       },
     });
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
     const doc1 = { items: ["a", 1, { a: "b" }] };
     const doc2 = { items: ["a", 2, { a: "c" }] };
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches).toMatchInlineSnapshot(`
       [
         {
@@ -1798,22 +1798,16 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
   });
 
   test("should handle empty arrays", () => {
-    const patcher = new SchemaJsonPatcher({ plan: new Map() });
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
 
     // Empty to filled
-    const patches1 = patcher.createPatch(
-      { items: [] },
-      { items: [{ id: "1" }] }
-    );
+    const patches1 = patcher.execute({original: { items: [] }, modified: { items: [{ id: "1" }] }});
     expect(patches1).toEqual([
       { op: "add", path: "/items/0", value: { id: "1" } },
     ]);
 
     // Filled to empty
-    const patches2 = patcher.createPatch(
-      { items: [{ id: "1" }] },
-      { items: [] }
-    );
+    const patches2 = patcher.execute({original: { items: [{ id: "1" }] }, modified: { items: [] }});
     expect(patches2).toMatchInlineSnapshot(`
       [
         {
@@ -1825,7 +1819,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
   });
 
   test("should handle complex nested changes", () => {
-    const patcher = new SchemaJsonPatcher({ plan: new Map() });
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
 
     const doc1 = {
       user: {
@@ -1841,7 +1835,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
       },
     };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(
       patches.some((p) => p.path.includes("name") && p.value === "Jane")
     ).toBe(true);
@@ -1854,13 +1848,13 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
   });
 
   test("should handle diffObject with undefined keys", () => {
-    const patcher = new SchemaJsonPatcher({ plan: new Map() });
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
 
     // Simulate array with sparse elements
     const obj1 = { items: ["a", null, "c"] };
     const obj2 = { items: ["a", "b", "c"] };
 
-    const patches = patcher.createPatch(obj1, obj2);
+    const patches = patcher.execute({original: obj1, modified: obj2});
     expect(patches.some((p) => p.value === "b")).toBe(true);
   });
 
@@ -1869,12 +1863,12 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
       ["/*", { primaryKey: null, strategy: "lcs" as const }],
     ]);
 
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     const doc1 = { nested: { deep: { items: [1, 2, 3] } } };
     const doc2 = { nested: { deep: { items: [1, 3, 4] } } };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches.length).toBeGreaterThan(0);
   });
 
@@ -1883,7 +1877,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
       ["/items", { primaryKey: "id", strategy: "primaryKey" as const }],
     ]);
 
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     const doc1 = {
       items: [
@@ -1901,7 +1895,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
       ],
     };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches.length).toBeGreaterThan(0);
   });
 
@@ -1917,7 +1911,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
       ],
     ]);
 
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     // Items with same hash but different deep content
     const item1 = { id: "1", category: "A", nested: { value: "old" } };
@@ -1926,7 +1920,7 @@ describe("SchemaJsonPatcher comprehensive tests", () => {
     const doc1 = { items: [item1] };
     const doc2 = { items: [item2] };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     expect(patches.some((p) => p.path.includes("nested"))).toBe(true);
   });
 });
@@ -2000,12 +1994,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "lcs" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: ["a", "b", "c", "d"] };
       const doc2 = { items: ["a", "x", "c", "e"] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // Should generate replace operations for changed elements
       expect(patches).toEqual([
@@ -2018,12 +2012,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "lcs" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: ["a", "b", "c"] };
       const doc2 = { items: ["a", "x", "b", "c", "d"] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // Should handle insertions efficiently
       expect(patches.some((p) => p.op === "add" && p.value === "x")).toBe(true);
@@ -2034,7 +2028,7 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "lcs" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = {
         items: [
@@ -2051,7 +2045,7 @@ describe("Array diffing strategies", () => {
         ],
       };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // The LCS algorithm may generate different operations than expected
       // Check that some modification occurred and new item was added
@@ -2080,12 +2074,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "lcs" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: [] };
       const doc2 = { items: ["a", "b", "c"] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       expect(patches.every((p) => p.op === "add")).toBe(true);
       expect(patches).toHaveLength(3);
@@ -2123,12 +2117,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "unique" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: [1, 2, 3, 4, 5] };
       const doc2 = { items: [1, 3, 2, 4, 6] }; // reordered + changed
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // Should generate efficient patches for reordering
       expect(patches.some((p) => p.value === 6)).toBe(true);
@@ -2139,12 +2133,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "unique" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: ["a", "b", "b", "c", "d"] };
       const doc2 = { items: ["a", "b", "c", "e"] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       expect(patches.some((p) => p.op === "remove")).toBe(true);
       expect(patches.some((p) => p.value === "e")).toBe(true);
@@ -2154,12 +2148,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "unique" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: [1, 2, 3, 4] };
       const doc2 = { items: [1, 5, 3, 6] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // Should use replace operations efficiently
       expect(patches.some((p) => p.op === "replace" && p.value === 5)).toBe(
@@ -2174,14 +2168,14 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/items", { primaryKey: null, strategy: "unique" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { items: Array.from({ length: 1000 }, (_, i) => i) };
       const doc2 = {
         items: Array.from({ length: 1000 }, (_, i) => (i === 500 ? 9999 : i)),
       };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // Should generate minimal patches
       expect(patches).toHaveLength(1);
@@ -2196,12 +2190,12 @@ describe("Array diffing strategies", () => {
       const plan = new Map([
         ["/flags", { primaryKey: null, strategy: "unique" as const }],
       ]);
-      const patcher = new SchemaJsonPatcher({ plan });
+      const patcher = new JsonSchemaPatcher({ plan });
 
       const doc1 = { flags: [true, false, true, false] };
       const doc2 = { flags: [true, true, false, false] };
 
-      const patches = patcher.createPatch(doc1, doc2);
+      const patches = patcher.execute({original: doc1, modified: doc2});
 
       // The unique algorithm generates replace operations for minimal patch size
       expect(patches).toHaveLength(2);
@@ -2356,14 +2350,14 @@ describe("Array diffing strategies", () => {
         ["/items", { primaryKey: null, strategy: "lcs" as const }],
       ]);
 
-      const uniquePatcher = new SchemaJsonPatcher({ plan: uniqueplan as any });
-      const lcsPatcher = new SchemaJsonPatcher({ plan: lcsplan as any });
+      const uniquePatcher = new JsonSchemaPatcher({ plan: uniqueplan as any });
+      const lcsPatcher = new JsonSchemaPatcher({ plan: lcsplan as any });
 
       const doc1 = { items: largeArray };
       const doc2 = { items: modifiedArray };
 
-      const uniquePatches = uniquePatcher.createPatch(doc1, doc2);
-      const lcsPatches = lcsPatcher.createPatch(doc1, doc2);
+      const uniquePatches = uniquePatcher.execute({original: doc1, modified: doc2});
+      const lcsPatches = lcsPatcher.execute({original: doc1, modified: doc2});
 
       // Both should produce the same result
       expect(uniquePatches).toEqual(lcsPatches);

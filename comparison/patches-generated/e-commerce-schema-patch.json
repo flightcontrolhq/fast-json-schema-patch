@@ -1,31 +1,20 @@
 [
   {
     "op": "replace",
-    "path": "/store/locale",
-    "value": "de-DE",
-    "oldValue": "yr-PL"
+    "path": "/store/name",
+    "value": "Labadie - Kihn",
+    "oldValue": "cupidatat"
   },
   {
     "op": "replace",
-    "path": "/store/supportEmail",
-    "value": "Antonina.Hermann48@gmail.com",
-    "oldValue": "FKc4-RP18bw@NGPKf.qji"
+    "path": "/categories/5/name",
+    "value": "Computers",
+    "oldValue": "id"
   },
   {
     "op": "replace",
-    "path": "/analytics/trackUserBehavior",
-    "value": false,
-    "oldValue": true
-  },
-  {
-    "op": "replace",
-    "path": "/products/37/description",
-    "value": "Innovative Shirt featuring hopeful technology and Plastic construction",
-    "oldValue": "cupidatat fugiat dolor Ut laboris"
-  },
-  {
-    "op": "add",
-    "path": "/users/15/roles/1",
-    "value": "guest"
+    "path": "/categories/5/slug",
+    "value": "computers",
+    "oldValue": "ar2pz0g7w"
   }
 ]

@@ -1,8 +1,8 @@
 {
-  "name": "schema-json-patch",
+  "name": "fast-json-schema-patch",
   "license": "MIT",
   "type": "module",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Ultra-fast, schema-aware JSON patch generation and human-readable diffing. A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches with tools for creating human-readable diffs suitable for frontend applications.",
   "keywords": [
     "json-patch",
@@ -20,14 +20,14 @@
     "semantic",
     "high-performance"
   ],
-  "homepage": "https://github.com/flightcontrolhq/schema-json-patch",
+  "homepage": "https://github.com/flightcontrolhq/fast-json-schema-patch",
   "bugs": {
-    "url": "https://github.com/flightcontrolhq/schema-json-patch/issues"
+    "url": "https://github.com/flightcontrolhq/fast-json-schema-patch/issues"
   },
   "author": "Siddharth Suresh <siddharth@flightcontrol.dev> (https://flightcontrol.dev)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/flightcontrolhq/schema-json-patch.git"
+    "url": "git+https://github.com/flightcontrolhq/fast-json-schema-patch.git"
   },
   "main": "dist/index.js",
   "files": [
@@ -39,7 +39,7 @@
     "check-exports": "attw --pack .",
     "release": "changeset version && changeset publish",
     "prepublishOnly": "bun test",
-    "build": "tsdown src/index.ts src/aggregators/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap "
+    "build": "tsdown src/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap "
   },
   "exports": {
     "./package.json": "./package.json",

@@ -1,4 +1,4 @@
-import { buildPlan, SchemaJsonPatcher } from '../src/index';
+import { buildPlan, JsonSchemaPatcher } from '../src/index';
 import { describe, test, expect } from "bun:test";
 
 describe('Unique Array Performance', () => {
@@ -14,7 +14,7 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     const doc1 = {
       tags: ['javascript', 'typescript', 'react', 'node.js', 'mongodb']
@@ -24,7 +24,7 @@ describe('Unique Array Performance', () => {
       tags: ['javascript', 'python', 'react', 'postgresql', 'docker']
     };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     
     // Should generate minimal patches - prioritizing replace operations
     // Original: ['javascript', 'typescript', 'react', 'node.js', 'mongodb']
@@ -50,7 +50,7 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     // Generate large arrays with unique numbers - but with some overlap for replace optimization
     const arr1 = Array.from({ length: 1000 }, (_, i) => i);
@@ -60,7 +60,7 @@ describe('Unique Array Performance', () => {
     const doc2 = { ids: arr2 };
 
     const start = performance.now();
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     const duration = performance.now() - start;
 
     // Should complete quickly - under 10ms for 1000 elements
@@ -86,13 +86,13 @@ describe('Unique Array Performance', () => {
     };
 
     const plan = buildPlan(schema);
-    const patcher = new SchemaJsonPatcher({ plan });
+    const patcher = new JsonSchemaPatcher({ plan });
 
     // Test case where replace is optimal
     const doc1 = { items: ['a', 'b', 'c', 'd'] };
     const doc2 = { items: ['x', 'y', 'z', 'w'] };
 
-    const patches = patcher.createPatch(doc1, doc2);
+    const patches = patcher.execute({original: doc1, modified: doc2});
     
     // Should use 4 replace operations instead of 4 removes + 4 adds
     expect(patches).toHaveLength(4);

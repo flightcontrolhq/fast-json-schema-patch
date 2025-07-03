@@ -2,13 +2,13 @@
 
 This directory contains the logic for formatting and aggregating JSON patches into human-readable diffs. This is especially useful for visualizing changes in complex, nested JSON structures, such as configuration files or API responses.
 
-The system is composed of two main components: `StructuredDiffAggregator` and `DiffFormatter`.
+The system is composed of two main components: `StructuredDiff` and `DiffFormatter`.
 
 ## Core Components
 
-### `StructuredDiffAggregator.ts`
+### `StructuredDiff.ts`
 
-When comparing two JSON documents, especially those with arrays of objects, changes can be scattered across many individual patches. For example, modifying three different items in an array will produce patches for each of those items. `StructuredDiffAggregator` is designed to make sense of these changes by grouping them logically.
+When comparing two JSON documents, especially those with arrays of objects, changes can be scattered across many individual patches. For example, modifying three different items in an array will produce patches for each of those items. `StructuredDiff` is designed to make sense of these changes by grouping them logically.
 
 - It operates on a specific array within the JSON document, identified by a `pathPrefix`.
 - It uses a primary key from the schema (`plan`) to identify unique objects within the array.
@@ -20,7 +20,7 @@ The result is a structured view that presents a high-level summary of what chang
 
 ### `DiffFormatter.ts`
 
-Once patches are grouped by `StructuredDiffAggregator`, `DiffFormatter` is responsible for creating a visual representation of the changes.
+Once patches are grouped by `StructuredDiff`, `DiffFormatter` is responsible for creating a visual representation of the changes.
 
 - It takes a JSON object (or a pair: original and new) and the patches that apply to it.
 - It generates a pretty-printed, line-by-line, side-by-side diff.
@@ -30,7 +30,7 @@ Once patches are grouped by `StructuredDiffAggregator`, `DiffFormatter` is respo
 
 ## Processing Flow
 
-The following diagram illustrates how raw JSON patches are processed to produce aggregated and formatted diffs. The process starts with the original and new JSON documents and a list of patches. `StructuredDiffAggregator` orchestrates the process, using `DiffFormatter` to generate the final output.
+The following diagram illustrates how raw JSON patches are processed to produce aggregated and formatted diffs. The process starts with the original and new JSON documents and a list of patches. `StructuredDiff` orchestrates the process, using `DiffFormatter` to generate the final output.
 
 ```mermaid
 graph TD
@@ -41,7 +41,7 @@ graph TD
         P[Schema Plan]
     end
 
-    subgraph "StructuredDiffAggregator"
+    subgraph "StructuredDiff"
         PA_Entry("aggregate(patches, config)")
         PA_Group["1.Separate Parent vs. Child Patches <br/> based on 'pathPrefix' in config"]
         PA_ChildGroup["2.Group Child Patches <br/> by item primary key using 'plan'"]

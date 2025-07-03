@@ -5,8 +5,9 @@ import type {JsonArray, JsonObject, JsonValue, Operation} from "./types"
 import {getWildcardPath, normalizePath} from "./utils/pathUtils"
 
 export {buildPlan} from "./core/buildPlan"
+export {StructuredDiff} from "./aggregators/StructuredDiff"
 
-export class SchemaJsonPatcher {
+export class JsonSchemaPatcher {
   private plan: Plan
   private planLookupCache = new Map<string, ArrayPlan | undefined>()
   private wildcardPathCache = new Map<string, string | null>()
@@ -29,9 +30,9 @@ export class SchemaJsonPatcher {
     return wildcardPath
   }
 
-  createPatch(doc1: JsonValue, doc2: JsonValue): Operation[] {
+  execute({original, modified}: {original: JsonValue, modified: JsonValue}): Operation[] {
     const patches: Operation[] = []
-    this.diff(doc1, doc2, "", patches)
+    this.diff(original, modified, "", patches)
     return patches
   }
 

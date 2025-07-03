@@ -1,6 +1,6 @@
 # JSON Patch Library Comparison Benchmark
 
-This directory contains a comprehensive benchmark suite for evaluating the performance and effectiveness of various JSON patch libraries. The primary script, `index.ts`, is designed to compare `schema-json-patch` against several other popular libraries.
+This directory contains a comprehensive benchmark suite for evaluating the performance and effectiveness of various JSON patch libraries. The primary script, `index.ts`, is designed to compare `fast-json-schema-patch` against several other popular libraries.
 
 ## Purpose
 
@@ -16,10 +16,10 @@ The main goal of this benchmark is to provide a detailed, data-driven comparison
 
 The benchmark compares the following libraries:
 
--   `schema-json-patch`: The library developed in this repository, which leverages a schema to create more efficient and semantically meaningful patches.
+-   `fast-json-schema-patch`: The library developed in this repository, which leverages a schema to create more efficient and semantically meaningful patches.
 -   `fast-json-patch`: A popular and fast library that implements RFC 6902.
 -   `jsondiffpatch`: A library that focuses on generating human-readable diffs and can detect object moves within arrays.
--   `json-diff-kit`: A library for generating formatted, human-readable diffs, used for comparison against `schema-json-patch`'s `StructuredDiffAggregator`.
+-   `json-diff-kit`: A library for generating formatted, human-readable diffs, used for comparison against `fast-json-schema-patch`'s `StructuredDiff`.
 
 ## Benchmark Scenarios
 
@@ -51,7 +51,7 @@ The benchmark produces two forms of output:
     -   Summary statistics for each library.
     -   ASCII bar charts visualizing average execution time, patch count, and compression efficiency.
     -   A comparative analysis of performance across different complexity ranges.
-    -   A specific comparison for formatted diff generation between `schema-json-patch`'s aggregator and `json-diff-kit`.
+    -   A specific comparison for formatted diff generation between `fast-json-schema-patch`'s aggregator and `json-diff-kit`.
 
 2.  **CSV Files**: Two CSV files are generated in this directory with a timestamp in the filename (e.g., `benchmark-results-YYYY-MM-DD.csv`):
     -   `benchmark-results-....csv`: Contains the raw metrics for every run of the main patch generation benchmark.

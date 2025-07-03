@@ -6,6 +6,7 @@ import {getEffectiveHashFields} from "../performance/getEffectiveHashFields"
 import type {JsonObject, JsonValue, Operation, SideBySideDiff} from "../types"
 import {getValueByPath} from "../utils/pathUtils"
 import {DiffFormatter} from "../formatting/DiffFormatter"
+import { JsonSchemaPatcher } from ".."
 
 function countChangedLines(diff: SideBySideDiff): {
   addCount: number
@@ -18,7 +19,9 @@ function countChangedLines(diff: SideBySideDiff): {
 
 export interface AggregationConfig {
   pathPrefix: string
-  plan: Plan
+  original: JsonValue
+  modified: JsonValue
+  patches?: Operation[]
 }
 
 export interface AggregatedDiffResult {
@@ -45,41 +48,39 @@ export interface AggregatedChildDiff {
   removeCount: number
 }
 
-export class StructuredDiffAggregator {
-  private originalDoc: JsonValue
-  private newDoc: JsonValue
+export class StructuredDiff {
+  private plan: Plan
 
-  constructor(originalDoc: JsonValue, newDoc: JsonValue) {
-    this.originalDoc = originalDoc || {}
-    this.newDoc = newDoc || {}
+  constructor(options: {plan: Plan}) {
+    this.plan = options.plan
   }
 
-  private getIdKeyForPath(pathPrefix: string, config: AggregationConfig): string {
-    const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan)
+  private getIdKeyForPath(pathPrefix: string): string {
+    const arrayPlan = this.getArrayPlanForPath(pathPrefix, this.plan)
     if (arrayPlan?.primaryKey) {
       return arrayPlan.primaryKey
     }
     return "id"
   }
 
-  private supportsAggregation(pathPrefix: string, config: AggregationConfig): boolean {
+  private supportsAggregation(pathPrefix: string): boolean {
     // Support aggregation if we have any way to identify array items
-    const hasSchemaKey = this.getArrayPlanForPath(pathPrefix, config.plan)?.primaryKey
+    const hasSchemaKey = this.getArrayPlanForPath(pathPrefix, this.plan)?.primaryKey
     return Boolean(hasSchemaKey)
   }
 
   private isArrayPath(pathPrefix: string, config: AggregationConfig): boolean {
     // First check if we have plan information
-    if (config.plan) {
-      const arrayPlan = this.getArrayPlanForPath(pathPrefix, config.plan)
+    if (this.plan) {
+      const arrayPlan = this.getArrayPlanForPath(pathPrefix, this.plan)
       if (arrayPlan) {
         return true // Found in plan, definitely an array
       }
     }
 
     // Fallback: check if the path actually points to an array in the data
-    const originalValue = getValueByPath(this.originalDoc, pathPrefix)
-    const newValue = getValueByPath(this.newDoc, pathPrefix)
+    const originalValue = getValueByPath(config.original, pathPrefix)
+    const newValue = getValueByPath(config.modified, pathPrefix)
 
     return Array.isArray(originalValue) || Array.isArray(newValue)
   }
@@ -117,8 +118,8 @@ export class StructuredDiffAggregator {
     const pathParts = pathPrefix.split("/").filter(Boolean)
     const childArrayKey = pathParts.pop()
 
-    const originalParent = this.stripChildArray(this.originalDoc, pathParts, childArrayKey)
-    const newParent = this.stripChildArray(this.newDoc, pathParts, childArrayKey)
+    const originalParent = this.stripChildArray(config.original, pathParts, childArrayKey)
+    const newParent = this.stripChildArray(config.modified, pathParts, childArrayKey)
 
     const parentFormatter = getCachedFormatter(
       originalParent,
@@ -166,7 +167,7 @@ export class StructuredDiffAggregator {
     return cachedJsonStringify(obj1) === cachedJsonStringify(obj2)
   }
 
-  aggregate(patches: Operation[], config: AggregationConfig): AggregatedDiffResult {
+  execute(config: AggregationConfig): AggregatedDiffResult {
     const {pathPrefix} = config
 
     // Validate that the path actually represents an array
@@ -174,17 +175,19 @@ export class StructuredDiffAggregator {
       throw new Error(`Path ${pathPrefix} does not represent an array in the schema or data`)
     }
 
+    const patches = config.patches || new JsonSchemaPatcher({plan: this.plan}).execute({original: config.original, modified: config.modified})
+
     // Check if this array configuration supports proper aggregation
-    if (!this.supportsAggregation(pathPrefix, config)) {
+    if (!this.supportsAggregation(pathPrefix)) {
       return this.aggregateWithoutChildSeparation(patches, config)
     }
 
-    const idKey = this.getIdKeyForPath(pathPrefix, config)
-    const arrayPlan = config.plan ? this.getArrayPlanForPath(pathPrefix, config.plan) : undefined
+    const idKey = this.getIdKeyForPath(pathPrefix)
+    const arrayPlan = this.plan ? this.getArrayPlanForPath(pathPrefix, this.plan) : undefined
     const parentPatches: Operation[] = []
     const childPatchesById: Record<string, Operation[]> = {}
 
-    const originalChildren = getValueByPath<JsonObject[]>(this.originalDoc, pathPrefix) || []
+    const originalChildren = getValueByPath<JsonObject[]>(config.original, pathPrefix) || []
     const originalChildIdsByIndex = originalChildren.map((child) => child[idKey] as string)
 
     // Enhanced child identification using schema information
@@ -236,8 +239,8 @@ export class StructuredDiffAggregator {
     const pathParts = pathPrefix.split("/").filter(Boolean)
     const childArrayKey = pathParts.pop()
 
-    const originalParent = this.stripChildArray(this.originalDoc, pathParts, childArrayKey)
-    const newParent = this.stripChildArray(this.newDoc, pathParts, childArrayKey)
+    const originalParent = this.stripChildArray(config.original, pathParts, childArrayKey)
+    const newParent = this.stripChildArray(config.modified, pathParts, childArrayKey)
 
     const parentFormatter = getCachedFormatter(
       originalParent,
@@ -248,7 +251,7 @@ export class StructuredDiffAggregator {
     const parentLineCounts = countChangedLines(parentDiffLines)
 
     const childDiffs: Record<string, AggregatedChildDiff> = {}
-    const newChildren = getValueByPath<JsonObject[]>(this.newDoc, pathPrefix) || []
+    const newChildren = getValueByPath<JsonObject[]>(config.modified, pathPrefix) || []
     const originalChildrenById = new Map(originalChildren.map((c) => [c[idKey] as string, c]))
     const newChildrenById = new Map(newChildren.map((c) => [c[idKey] as string, c]))
     const allChildIds = new Set([...originalChildrenById.keys(), ...newChildrenById.keys()])

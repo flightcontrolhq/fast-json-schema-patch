@@ -1,11 +1,11 @@
 import { describe, it, expect } from "bun:test";
-import { buildPlan, SchemaJsonPatcher } from "../src";
-import { StructuredDiffAggregator } from "../src/aggregators/StructuredDiffAggregator";
+import { buildPlan, JsonSchemaPatcher } from "../src";
+import { StructuredDiff } from "../src/aggregators/StructuredDiff";
 import type { JsonObject } from "../src/types";
 import schema from "../schema/schema.json";
 
-describe("StructuredDiffAggregator", () => {
-  const originalDoc = {
+describe("StructuredDiff", () => {
+  const original = {
     envVariables: {},
     environments: [
       {
@@ -125,7 +125,7 @@ describe("StructuredDiffAggregator", () => {
     ],
   };
 
-  const newDoc = {
+  const modified = {
     envVariables: {},
     environments: [
       {
@@ -239,12 +239,12 @@ describe("StructuredDiffAggregator", () => {
     ],
   };
 
-  const patcher = new SchemaJsonPatcher({ plan: buildPlan(schema as any) });
-  const patches = patcher.createPatch(originalDoc, newDoc);
+  const plan = buildPlan(schema as any)
 
-  const result = new StructuredDiffAggregator(originalDoc, newDoc).aggregate(patches, {
+  const result = new StructuredDiff({plan}).execute({
     pathPrefix: "/environments/0/services",
-    plan: buildPlan(schema as any),
+    original,
+    modified,
   });
 
   it("should produce correct diffLines", () => {

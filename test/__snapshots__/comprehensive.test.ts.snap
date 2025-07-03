@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SchemaJsonPatcher should match snapshot for schema.json 1`] = `
+exports[`JsonSchemaPatcher should match snapshot for schema.json 1`] = `
 Map {
   "/environments" => {
     "hashFields": [

@@ -94,7 +94,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
     { label: "Very High", min: 501, max: 3000 }, // Adjusted to capture all samples
   ];
 
-  const libraries = ["schema-json-patch", "fast-json-patch", "jsondiffpatch"];
+  const libraries = ["fast-json-schema-patch", "fast-json-patch", "jsondiffpatch"];
   const libraryColors = ["green", "blue", "purple", "yellow"];
 
   console.log("\n📏 Average Time by Complexity Range - All Algorithms:");
@@ -196,7 +196,7 @@ export function generatePerformanceCharts(metrics: BenchmarkMetrics[]) {
   }
 
   console.log("\n📊 Chart Legend:");
-  console.log("🟢 Schema = schema-json-patch");
+  console.log("🟢 Schema = fast-json-schema-patch");
   console.log("🟡 FastJSON = fast-json-patch");
   console.log("🟠 JSONDiff = jsondiffpatch");
   console.log("\n💡 Efficiency Interpretation:");
@@ -274,7 +274,7 @@ export function generateFormattedDiffReport(formattedMetrics: FormattedDiffMetri
   console.log("\n🎨 FORMATTED DIFF COMPARISON REPORT");
   console.log("=".repeat(80));
 
-  console.log("\n📋 SchemaPatch + StructuredDiffAggregator vs json-diff-kit:");
+  console.log("\n📋 SchemaPatch + StructuredDiff vs json-diff-kit:");
   console.log(
     "  This compares formatted, human-readable diff generation capabilities"
   );
@@ -409,7 +409,7 @@ export function generateComprehensiveReport(allMetrics: BenchmarkMetrics[], titl
   }
 
   console.log("\n🏆 Schema-Based Advantages Analysis:");
-  const newSchemaMetrics = byLibrary["schema-json-patch"] || [];
+  const newSchemaMetrics = byLibrary["fast-json-schema-patch"] || [];
   const fastJsonMetrics = byLibrary["fast-json-patch"] || [];
 
   if (newSchemaMetrics.length > 0 && fastJsonMetrics.length > 0) {
@@ -478,7 +478,7 @@ export function generateComprehensiveReport(allMetrics: BenchmarkMetrics[], titl
       newSchemaMetrics.reduce((sum: number, m: any) => sum + m.patchCount, 0) /
       newSchemaMetrics.length;
     console.log(
-      `• schema-json-patch (new) generates ${avgSchemaPatches.toFixed(
+      `• fast-json-schema-patch (new) generates ${avgSchemaPatches.toFixed(
         1
       )} patches on average`
     );

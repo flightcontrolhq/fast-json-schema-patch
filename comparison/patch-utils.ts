@@ -110,7 +110,7 @@ export function isPatchValid(
 
 // Enhanced Semantic Accuracy Functions
 export function calculateSemanticAccuracy(
-  originalDoc: any,
+  original: any,
   modifiedDoc: any,
   patch: any,
   library: string,

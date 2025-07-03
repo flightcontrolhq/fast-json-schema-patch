@@ -6,8 +6,8 @@ import * as fastJsonPatch from "fast-json-patch";
 import { writeFile } from "fs/promises";
 import * as jsondiffpatch from "jsondiffpatch";
 import { Differ } from "json-diff-kit";
-import { SchemaJsonPatcher, buildPlan } from "../src/index";
-import { StructuredDiffAggregator } from "../src/aggregators/StructuredDiffAggregator";
+import { JsonSchemaPatcher, buildPlan } from "../src/index";
+import { StructuredDiff } from "../src/aggregators/StructuredDiff";
 import mainSchema from "../schema/schema.json";
 import ecommerceSchema from "../schema/e-commerce.json";
 import type { BenchmarkMetrics, FormattedDiffMetrics } from "./types";
@@ -80,9 +80,9 @@ async function compare() {
     console.log(`\n📋 Analyzing ${name} configuration...`);
 
     const plan = buildPlan(scenarioSchema as any);
-    const newPatcher = new SchemaJsonPatcher({ plan });
+    const newPatcher = new JsonSchemaPatcher({ plan });
 
-    const newSchemaPatch = newPatcher.createPatch(doc1, doc2);
+    const newSchemaPatch = newPatcher.execute({original: doc1, modified: doc2});
     const fastPatch = fastJsonPatch.compare(doc1, doc2);
     const jsonDiffPatch = diffpatcher.diff(doc1, doc2);
 
@@ -99,7 +99,7 @@ async function compare() {
       JSON.stringify(jsonDiffPatch, null, 2)
     );
 
-    console.log(`  • schema-json-patch: ${newSchemaPatch.length} operations`);
+    console.log(`  • fast-json-schema-patch: ${newSchemaPatch.length} operations`);
     console.log(`  • fast-json-patch: ${fastPatch.length} operations`);
     console.log(
       `  • jsondiffpatch: ${countJsonDiffPatches(jsonDiffPatch)} operations`
@@ -117,7 +117,7 @@ async function compare() {
   );
 
   const plan = buildPlan(mainSchema as any);
-  const newPatcher = new SchemaJsonPatcher({ plan });
+  const newPatcher = new JsonSchemaPatcher({ plan });
 
   // Define complexity ranges and target sample counts
   const complexityRanges = [
@@ -196,8 +196,8 @@ async function compare() {
       ) {
         const libraries = [
           {
-            name: "schema-json-patch",
-            fn: () => newPatcher.createPatch(doc1, doc2),
+            name: "fast-json-schema-patch",
+            fn: () => newPatcher.execute({original: doc1, modified: doc2}),
           },
           {
             name: "fast-json-patch",
@@ -211,7 +211,7 @@ async function compare() {
           const patchCount =
             library.name === "jsondiffpatch"
               ? countJsonDiffPatches(patch)
-              : library.name === "schema-json-patch (new)"
+              : library.name === "fast-json-schema-patch (new)"
               ? patch.operations.length
               : Array.isArray(patch)
               ? patch.length
@@ -264,12 +264,11 @@ async function compare() {
           {
             name: "schema-aggregated",
             fn: () => {
-              const freshPatcher = new SchemaJsonPatcher({ plan });
-              const aggregator = new StructuredDiffAggregator(doc1, doc2);
-              const rawPatch = freshPatcher.createPatch(doc1, doc2);
-              return aggregator.aggregate(rawPatch, {
+              const aggregator = new StructuredDiff({plan});
+              return aggregator.execute({
                 pathPrefix: "/environments/0/services",
-                plan: plan,
+                original: doc1,
+                modified: doc2,
               });
             },
           },
@@ -341,7 +340,7 @@ async function compare() {
   );
 
   const ecommercePlan = buildPlan(ecommerceSchema as any);
-  const ecommercePatcher = new SchemaJsonPatcher({ plan: ecommercePlan });
+  const ecommercePatcher = new JsonSchemaPatcher({ plan: ecommercePlan });
 
   const ecommerceComplexityRanges = [
     { label: "Low", min: 0, max: 50, targetSamples: 2500 },
@@ -414,8 +413,8 @@ async function compare() {
       ) {
                  const libraries = [
            {
-             name: "schema-json-patch",
-             fn: () => ecommercePatcher.createPatch(doc1 as any, doc2 as any),
+             name: "fast-json-schema-patch",
+             fn: () => ecommercePatcher.execute({original: doc1 as any, modified: doc2 as any}),
            },
            {
              name: "fast-json-patch",
@@ -429,7 +428,7 @@ async function compare() {
           const patchCount =
             library.name === "jsondiffpatch"
               ? countJsonDiffPatches(patch)
-              : library.name === "schema-json-patch (new)"
+              : library.name === "fast-json-schema-patch (new)"
               ? patch.operations.length
               : Array.isArray(patch)
               ? patch.length
@@ -482,12 +481,11 @@ async function compare() {
            {
              name: "schema-aggregated",
              fn: () => {
-               const freshPatcher = new SchemaJsonPatcher({ plan: ecommercePlan });
-               const aggregator = new StructuredDiffAggregator(doc1 as any, doc2 as any);
-               const rawPatch = freshPatcher.createPatch(doc1 as any, doc2 as any);
-               return aggregator.aggregate(rawPatch, {
+               const aggregator = new StructuredDiff({plan: ecommercePlan});
+               return aggregator.execute({
                  pathPrefix: "/products",
-                 plan: ecommercePlan,
+                 original: doc1 as any,
+                 modified: doc2 as any,
                });
              },
            },
