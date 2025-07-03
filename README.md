@@ -88,7 +88,7 @@ const userSchema = z.object({
 const jsonSchema = z.toJSONSchema(userSchema);
 
 // Use the JSON schema to build a plan
-const plan = buildPlan(jsonSchema);
+const plan = buildPlan({ schema: jsonSchema });
 const patcher = new JsonSchemaPatcher({ plan });
 ```
 
@@ -114,12 +114,15 @@ import { StructuredDiff } from 'fast-json-schema-patch';
 
 // Assuming `original`, `modified`, `patch`, and `plan` from the previous example
 
-// 1. Instantiate the aggregator with the original and new documents
-const aggregatedResult = new StructuredDiff({plan}).execute({
+// 1. Instantiate the aggregator with the plan
+const structuredDiff = new StructuredDiff({plan});
+
+// 2. Execute the aggregation
+const aggregatedResult = structuredDiff.execute({
   original,
   modified,
   pathPrefix: '/users',
-})
+});
 
 // 3. Use the result to render a UI
 console.log(aggregatedResult.parentDiff); // Shows changes outside the /users array
@@ -129,24 +132,39 @@ console.log(aggregatedResult.childDiffs['user3']); // Shows user3 was added
 
 ## 🛠️ API Reference
 
+### `buildPlan`
+Creates a plan for optimizing JSON patch generation based on a JSON schema.
+
+**`buildPlan(options)`**
+- `options`: An object with the following properties:
+  - `schema`: A JSON Schema object that describes your data structure.
+  - `primaryKeyMap` (optional): A record mapping path prefixes to primary key field names.
+  - `basePath` (optional): The base path for the schema traversal.
+- **Returns**: A `Plan` object that can be used with `JsonSchemaPatcher` and `StructuredDiff`.
+
 ### `JsonSchemaPatcher`
 The main class for generating patches.
 
 **`new JsonSchemaPatcher({ plan })`**
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
-**`patcher.createPatch(source, target)`**
-- Generates an array of JSON Patch operations.
+**`patcher.execute({original, modified})`**
+- `original`: The original document to compare from.
+- `modified`: The modified document to compare to.
+- **Returns**: An array of JSON Patch operations.
 
 ### `StructuredDiff`
 The main class for creating human-readable diffs.
 
-**`new StructuredDiff(original, modified)`**
-- `original`, `modified`: The two documents to compare.
+**`new StructuredDiff({plan})`**
+- `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
-**`aggregator.aggregate(patches, config)`**
-- `patches`: The patch array from `JsonSchemaPatcher`.
-- `config`: An object specifying the `pathPrefix` of the array to aggregate and an optional `plan`.
+**`structuredDiff.execute(config)`**
+- `config`: An `AggregationConfig` object with the following properties:
+  - `pathPrefix`: The path prefix of the array to aggregate (e.g., `/users`).
+  - `original`: The original document.
+  - `modified`: The modified document.
+  - `patches` (optional): Pre-computed patch array from `JsonSchemaPatcher`. If not provided, patches will be generated automatically.
 - **Returns**: An `AggregatedDiffResult` object containing `parentDiff` and a record of `childDiffs`.
 
 ## 🔬 Benchmarking Your Use Case

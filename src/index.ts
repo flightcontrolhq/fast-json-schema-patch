@@ -7,6 +7,17 @@ import {getWildcardPath, normalizePath} from "./utils/pathUtils"
 export {buildPlan} from "./core/buildPlan"
 export {StructuredDiff} from "./aggregators/StructuredDiff"
 
+export type {
+  AggregationConfig,
+  AggregatedDiffResult,
+  AggregatedParentDiff,
+  AggregatedChildDiff,
+  Operation,
+  UnifiedDiffLine,
+  DiffLine,
+  FormattedDiff,
+} from "./types"
+
 export class JsonSchemaPatcher {
   private plan: Plan
   private planLookupCache = new Map<string, ArrayPlan | undefined>()

@@ -8,13 +8,13 @@ import type {
   JsonValue,
   Operation,
   PathMap,
-  SideBySideDiff,
+  FormattedDiff,
   UnifiedDiffLine,
 } from "../types"
 import {resolvePatchPath} from "../utils/pathUtils"
 
 // Enhanced caching for diff formatters with content-based keys
-const diffFormatterCache = new Map<string, SideBySideDiff>()
+const diffFormatterCache = new Map<string, FormattedDiff>()
 
 function getPathLineRange(
   pathMap: PathMap,
@@ -72,7 +72,7 @@ export class DiffFormatter {
     )
   }
 
-  format(patches: Operation[]): SideBySideDiff {
+  format(patches: Operation[]): FormattedDiff {
     // Enhanced caching: create a cache key based on patches and plan
     const patchesKey = this.createPatchesKey(patches)
     const planKey = this.plan ? getPlanFingerprint(this.plan) : "default"
@@ -127,7 +127,7 @@ export class DiffFormatter {
     return fastHash(patchData as JsonObject, ["count", "operations", "sample"])
   }
 
-  private generateDiff(patches: Operation[]): SideBySideDiff {
+  private generateDiff(patches: Operation[]): FormattedDiff {
     const originalAffectedLines = new Set<number>()
     const newAffectedLines = new Set<number>()
 

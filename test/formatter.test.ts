@@ -77,7 +77,7 @@ describe("DiffFormatter E2E Integration", () => {
       tags: ["new", "exciting"],
     });
 
-    const plan = buildPlan(userSchema, { primaryKeyMap: { "/posts": "postId" } });
+    const plan = buildPlan({ schema: userSchema, primaryKeyMap: { "/posts": "postId" } });
     const patcher = new JsonSchemaPatcher({ plan });
     const patch = patcher.execute({original: doc1, modified: doc2});
 

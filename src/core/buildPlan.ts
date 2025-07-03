@@ -29,6 +29,7 @@ export interface ArrayPlan {
 export type Plan = Map<string, ArrayPlan>
 
 export interface BuildPlanOptions {
+  schema: Schema
   primaryKeyMap?: Record<string, string>
   basePath?: string
 }
@@ -56,7 +57,7 @@ export function _traverseSchema(
   plan: Plan,
   schema: Schema,
   visited: Set<object> = new Set(),
-  options?: BuildPlanOptions,
+  options?: Omit<BuildPlanOptions, "schema">,
 ) {
   if (!subSchema || typeof subSchema !== "object" || visited.has(subSchema)) {
     return
@@ -235,9 +236,10 @@ export function _traverseSchema(
   visited.delete(subSchema)
 }
 
-export function buildPlan(schema: Schema, options?: BuildPlanOptions): Plan {
+export function buildPlan(options: BuildPlanOptions): Plan {
   const plan: Plan = new Map()
-  _traverseSchema(schema, "", plan, schema, new Set(), options)
+  const { schema, ...rest } = options
+  _traverseSchema(schema, "", plan, schema, new Set(), rest)
   return plan
 }
 

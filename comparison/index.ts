@@ -79,7 +79,7 @@ async function compare() {
   )) {
     console.log(`\n📋 Analyzing ${name} configuration...`);
 
-    const plan = buildPlan(scenarioSchema as any);
+    const plan = buildPlan({ schema: scenarioSchema as any });
     const newPatcher = new JsonSchemaPatcher({ plan });
 
     const newSchemaPatch = newPatcher.execute({original: doc1, modified: doc2});
@@ -116,7 +116,7 @@ async function compare() {
     "\n🎲 Running comprehensive cloud-config faker-based benchmark with stratified sampling..."
   );
 
-  const plan = buildPlan(mainSchema as any);
+  const plan = buildPlan({ schema: mainSchema as any });
   const newPatcher = new JsonSchemaPatcher({ plan });
 
   // Define complexity ranges and target sample counts
@@ -339,7 +339,7 @@ async function compare() {
     "\n🛒 Running comprehensive e-commerce faker-based benchmark with stratified sampling..."
   );
 
-  const ecommercePlan = buildPlan(ecommerceSchema as any);
+  const ecommercePlan = buildPlan({ schema: ecommerceSchema as any });
   const ecommercePatcher = new JsonSchemaPatcher({ plan: ecommercePlan });
 
   const ecommerceComplexityRanges = [

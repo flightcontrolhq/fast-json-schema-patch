@@ -239,7 +239,7 @@ describe("StructuredDiff", () => {
     ],
   };
 
-  const plan = buildPlan(schema as any)
+  const plan = buildPlan({ schema: schema as any });
 
   const result = new StructuredDiff({plan}).execute({
     pathPrefix: "/environments/0/services",

@@ -13,7 +13,7 @@ describe('Unique Array Performance', () => {
       }
     };
 
-    const plan = buildPlan(schema);
+    const plan = buildPlan({ schema } );
     const patcher = new JsonSchemaPatcher({ plan });
 
     const doc1 = {
@@ -49,7 +49,7 @@ describe('Unique Array Performance', () => {
       }
     };
 
-    const plan = buildPlan(schema);
+    const plan = buildPlan({ schema });
     const patcher = new JsonSchemaPatcher({ plan });
 
     // Generate large arrays with unique numbers - but with some overlap for replace optimization
@@ -85,7 +85,7 @@ describe('Unique Array Performance', () => {
       }
     };
 
-    const plan = buildPlan(schema);
+    const plan = buildPlan({ schema });
     const patcher = new JsonSchemaPatcher({ plan });
 
     // Test case where replace is optimal
