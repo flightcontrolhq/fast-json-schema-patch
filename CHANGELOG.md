@@ -1,5 +1,11 @@
 # fast-json-schema-patch
 
+## 0.2.1
+
+### Patch Changes
+
+- ec6ca7b: Update types definitions and reduce StructuredDiffResult output size
+
 ## 0.2.0
 
 ### Minor Changes
