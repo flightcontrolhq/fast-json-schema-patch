@@ -258,118 +258,83 @@ describe("StructuredDiff", () => {
           "type": "unchanged",
         },
         {
-          "content": "  "envVariables": {},",
+          "content": "  "id": "production-VuyfCU",",
           "key": "unchanged-2-2",
           "newLineNumber": 2,
           "oldLineNumber": 2,
           "type": "unchanged",
         },
         {
-          "content": "  "environments": [",
-          "key": "unchanged-3-3",
-          "newLineNumber": 3,
+          "content": "  "name": "Production",",
+          "key": "removed-3",
           "oldLineNumber": 3,
-          "type": "unchanged",
+          "type": "removed",
         },
         {
-          "content": "    {",
+          "content": "  "name": "New Production",",
+          "key": "added-3",
+          "newLineNumber": 3,
+          "type": "added",
+        },
+        {
+          "content": "  "region": "eu-north-1",",
           "key": "unchanged-4-4",
           "newLineNumber": 4,
           "oldLineNumber": 4,
           "type": "unchanged",
         },
         {
-          "content": "      "id": "production-VuyfCU",",
+          "content": "  "source": {",
           "key": "unchanged-5-5",
           "newLineNumber": 5,
           "oldLineNumber": 5,
           "type": "unchanged",
         },
         {
-          "content": "      "name": "Production",",
-          "key": "removed-6",
-          "oldLineNumber": 6,
-          "type": "removed",
-        },
-        {
-          "content": "      "name": "New Production",",
-          "key": "added-6",
+          "content": "    "pr": false,",
+          "key": "unchanged-6-6",
           "newLineNumber": 6,
-          "type": "added",
-        },
-        {
-          "content": "      "region": "eu-north-1",",
-          "key": "unchanged-7-7",
-          "newLineNumber": 7,
-          "oldLineNumber": 7,
+          "oldLineNumber": 6,
           "type": "unchanged",
         },
         {
-          "content": "      "source": {",
+          "content": "    "branch": "master",",
+          "key": "removed-7",
+          "oldLineNumber": 7,
+          "type": "removed",
+        },
+        {
+          "content": "    "branch": "new-branch",",
+          "key": "added-7",
+          "newLineNumber": 7,
+          "type": "added",
+        },
+        {
+          "content": "    "trigger": "push"",
           "key": "unchanged-8-8",
           "newLineNumber": 8,
           "oldLineNumber": 8,
           "type": "unchanged",
         },
         {
-          "content": "        "pr": false,",
+          "content": "  },",
           "key": "unchanged-9-9",
           "newLineNumber": 9,
           "oldLineNumber": 9,
           "type": "unchanged",
         },
         {
-          "content": "        "branch": "master",",
-          "key": "removed-10",
-          "oldLineNumber": 10,
-          "type": "removed",
-        },
-        {
-          "content": "        "branch": "new-branch",",
-          "key": "added-10",
+          "content": "  "envVariables": {}",
+          "key": "unchanged-10-10",
           "newLineNumber": 10,
-          "type": "added",
-        },
-        {
-          "content": "        "trigger": "push"",
-          "key": "unchanged-11-11",
-          "newLineNumber": 11,
-          "oldLineNumber": 11,
-          "type": "unchanged",
-        },
-        {
-          "content": "      },",
-          "key": "unchanged-12-12",
-          "newLineNumber": 12,
-          "oldLineNumber": 12,
-          "type": "unchanged",
-        },
-        {
-          "content": "      "envVariables": {}",
-          "key": "unchanged-13-13",
-          "newLineNumber": 13,
-          "oldLineNumber": 13,
-          "type": "unchanged",
-        },
-        {
-          "content": "    }",
-          "key": "unchanged-14-14",
-          "newLineNumber": 14,
-          "oldLineNumber": 14,
-          "type": "unchanged",
-        },
-        {
-          "content": "  ]",
-          "key": "unchanged-15-15",
-          "newLineNumber": 15,
-          "oldLineNumber": 15,
+          "oldLineNumber": 10,
           "type": "unchanged",
         },
         {
           "content": "}",
-          "key": "unchanged-16-16",
-          "newLineNumber": 16,
-          "oldLineNumber": 16,
+          "key": "unchanged-11-11",
+          "newLineNumber": 11,
+          "oldLineNumber": 11,
           "type": "unchanged",
         },
       ]
@@ -1358,11 +1323,9 @@ describe("StructuredDiff", () => {
 
   it("should strip the child array from the parent diff", () => {
     const originalParent = result.parentDiff.original as JsonObject;
-    const env = (originalParent.environments as JsonObject[])?.[0];
-    expect(env?.services).toBeUndefined();
+    expect(originalParent.services).toBeUndefined();
 
     const newParent = result.parentDiff.new as JsonObject;
-    const newEnv = (newParent.environments as JsonObject[])?.[0];
-    expect(newEnv?.services).toBeUndefined();
+    expect(newParent.services).toBeUndefined();
   });
 });

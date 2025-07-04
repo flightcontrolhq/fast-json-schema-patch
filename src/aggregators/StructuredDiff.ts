@@ -97,19 +97,11 @@ export class StructuredDiff {
     const { pathPrefix } = config;
     // For non-primaryKey strategies, we can't meaningfully separate child patches
     // So we treat all patches as "parent" patches and don't generate child diffs
-    const pathParts = pathPrefix.split("/").filter(Boolean);
-    const childArrayKey = pathParts.pop();
-
-    const originalParent = this.stripChildArray(
+    const originalParent = this.getAndStripChildArray(
       config.original,
-      pathParts,
-      childArrayKey
+      pathPrefix
     );
-    const newParent = this.stripChildArray(
-      config.modified,
-      pathParts,
-      childArrayKey
-    );
+    const newParent = this.getAndStripChildArray(config.modified, pathPrefix);
 
     const parentFormatter = getCachedFormatter(
       originalParent,
@@ -238,26 +230,28 @@ export class StructuredDiff {
       }
     }
 
-    const pathParts = pathPrefix.split("/").filter(Boolean);
-    const childArrayKey = pathParts.pop();
+    const parentPath = pathPrefix.substring(0, pathPrefix.lastIndexOf("/"));
 
-    const originalParent = this.stripChildArray(
+    const originalParent = this.getAndStripChildArray(
       config.original,
-      pathParts,
-      childArrayKey
+      pathPrefix
     );
-    const newParent = this.stripChildArray(
-      config.modified,
-      pathParts,
-      childArrayKey
-    );
+    const newParent = this.getAndStripChildArray(config.modified, pathPrefix);
 
     const parentFormatter = getCachedFormatter(
       originalParent,
       newParent,
       (orig, newVal) => new DiffFormatter(orig, newVal)
     );
-    const parentDiffLines = parentFormatter.format(parentPatches);
+    const transformedParentPatches = parentPatches.map((p) => {
+      // Make patch paths relative to the new parent context
+      if (p.path.startsWith(parentPath)) {
+        return { ...p, path: p.path.substring(parentPath.length) };
+      }
+      return p;
+    });
+
+    const parentDiffLines = parentFormatter.format(transformedParentPatches);
     const parentLineCounts = countChangedLines(parentDiffLines);
 
     const childDiffs: Record<string, FormattedChildDiff> = {};
@@ -405,90 +399,31 @@ export class StructuredDiff {
     };
   }
 
-  private stripChildArray(
+  private getAndStripChildArray(
     doc: JsonValue,
-    parentPathParts: string[],
-    childKey?: string
+    pathPrefix: string
   ): JsonValue {
-    if (!childKey) return doc;
+    const parentPath = pathPrefix.includes("/")
+      ? pathPrefix.substring(0, pathPrefix.lastIndexOf("/"))
+      : "";
+    const childKey = pathPrefix.includes("/")
+      ? pathPrefix.substring(pathPrefix.lastIndexOf("/") + 1)
+      : pathPrefix;
 
-    // More efficient approach: create shallow copies only where needed
-    // instead of deep cloning the entire document
-    if (parentPathParts.length === 0) {
-      // Direct child - create shallow copy and delete property
-      if (doc && typeof doc === "object" && !Array.isArray(doc)) {
-        const result = { ...doc } as JsonObject;
-        delete result[childKey];
-        return result;
-      }
-      return doc;
-    }
+    const parentContainer = getValueByPath(doc, parentPath);
 
-    // Ensure doc is an object we can work with
-    if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
-      return doc;
-    }
-
-    // Navigate to parent and create shallow copies along the path
-    const result = { ...(doc as JsonObject) };
-    let current: JsonValue = result;
-
-    // Navigate to the exact parent location
-    for (const part of parentPathParts) {
-      if (!current || typeof current !== "object" || Array.isArray(current)) {
-        return doc; // Can't navigate path, return original
-      }
-
-      const currentObj = current as JsonObject;
-      const value = currentObj[part];
-      if (value === undefined) {
-        return doc; // Path doesn't exist, return original
-      }
-
-      // If it's an array, we need to handle array indexing
-      if (Array.isArray(value)) {
-        // Create a shallow copy of the array
-        currentObj[part] = [...value];
-        current = currentObj[part] as JsonValue;
-        break; // Arrays are handled differently
-      }
-
-      if (typeof value !== "object" || value === null) {
-        return doc; // Can't navigate further, return original
-      }
-
-      // Create shallow copy for this level
-      currentObj[part] = { ...(value as JsonObject) };
-      current = currentObj[part] as JsonValue;
-    }
-
-    // If we ended up with an array, find the right element and strip the child
-    if (Array.isArray(current)) {
-      // For arrays, we need to process each element
-      for (let i = 0; i < current.length; i++) {
-        const item = current[i];
-        if (
-          item &&
-          typeof item === "object" &&
-          !Array.isArray(item) &&
-          childKey in item
-        ) {
-          const itemCopy = { ...(item as JsonObject) };
-          delete itemCopy[childKey];
-          current[i] = itemCopy;
-        }
-      }
-    } else if (
-      current &&
-      typeof current === "object" &&
-      !Array.isArray(current) &&
-      childKey in current
+    if (
+      parentContainer &&
+      typeof parentContainer === "object" &&
+      !Array.isArray(parentContainer)
     ) {
-      // Direct object - delete the property
-      const currentObj = current as JsonObject;
-      delete currentObj[childKey];
+      const result = { ...parentContainer } as JsonObject;
+      if (childKey in result) {
+        delete result[childKey];
+      }
+      return result;
     }
 
-    return result;
+    return {};
   }
 }
