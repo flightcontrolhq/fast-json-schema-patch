@@ -172,9 +172,6 @@ export class StructuredDiff {
     }
 
     const idKey = this.getIdKeyForPath(pathPrefix);
-    const arrayPlan = this.plan
-      ? this.getArrayPlanForPath(pathPrefix, this.plan)
-      : undefined;
     const parentPatches: Operation[] = [];
     const childPatchesById: Record<string, Operation[]> = {};
 
