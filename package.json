@@ -2,7 +2,7 @@
   "name": "fast-json-schema-patch",
   "license": "MIT",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Ultra-fast, schema-aware JSON patch generation and human-readable diffing. A high-performance JSON patch library that leverages schema knowledge to generate efficient, semantic patches with tools for creating human-readable diffs suitable for frontend applications.",
   "keywords": [
     "json-patch",
@@ -37,7 +37,7 @@
     "compare": "bun run comparison/index.ts",
     "test": "bun test",
     "check-exports": "attw --pack .",
-    "release": "bun test && bun build && bun changeset version && changeset publish",
+    "release": "bun test && bun run build && bun changeset version && changeset publish",
     "prepublishOnly": "bun test",
     "build": "tsc && tsdown src/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap"
   },

@@ -1,5 +1,11 @@
 # fast-json-schema-patch
 
+## 0.4.0
+
+### Minor Changes
+
+- e711957: performance improvements
+
 ## 0.3.0
 
 ### Minor Changes
