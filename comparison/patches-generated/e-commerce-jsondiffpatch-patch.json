@@ -1,19 +1,11 @@
 {
-  "store": {
-    "locale": [
-      "gk-CC",
-      "fr-FR"
-    ]
-  },
   "payments": {
-    "paypal": {
-      "clientId": [
-        "enim eiusmod commodo amet elit",
-        "4XaYipQxjhsTmXz1"
-      ],
-      "clientSecret": [
-        "ullamco proident Duis ut",
-        "eVQPM5gzipSgH8vnHywQUNHF5b0cuYY9"
+    "supportedMethods": {
+      "_t": "a",
+      "_0": [
+        "paypal",
+        0,
+        0
       ]
     }
   },
@@ -21,124 +13,51 @@
     "rates": {
       "0": [
         {
-          "country": "PC",
+          "country": "VC",
           "method": "standard",
-          "cost": 62080193.00391409,
-          "estimatedDays": 7745541
-        }
-      ],
-      "1": [
-        {
-          "country": "NW",
-          "method": "standard",
-          "cost": 18089757.08173358,
-          "estimatedDays": 21469247
-        }
-      ],
-      "2": [
-        {
-          "country": "YG",
-          "method": "standard",
-          "cost": 8429217.146444578,
-          "estimatedDays": 54488472
-        }
-      ],
-      "3": [
-        {
-          "country": "KO",
-          "method": "pickup",
-          "cost": 97684353.54026598,
-          "estimatedDays": 61287338
+          "cost": 11410275.721334396,
+          "estimatedDays": 18044258
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "PC",
+          "country": "VC",
           "method": "standard",
-          "cost": 62080193.00391409,
-          "estimatedDays": 7745541
-        },
-        0,
-        0
-      ],
-      "_1": [
-        {
-          "country": "NW",
-          "method": "standard",
-          "cost": 18089757.08173358,
-          "estimatedDays": 21469247
-        },
-        0,
-        0
-      ],
-      "_2": [
-        {
-          "country": "YG",
-          "method": "standard",
-          "cost": 8429217.146444578,
-          "estimatedDays": 54488472
-        },
-        0,
-        0
-      ],
-      "_3": [
-        {
-          "country": "KO",
-          "method": "pickup",
-          "cost": 97684353.54026598,
-          "estimatedDays": 61287338
+          "cost": 11410275.721334396,
+          "estimatedDays": 18044258
         },
         0,
         0
       ]
-    },
-    "freeOver": [
-      92833674.641178,
-      93.16210441130424
-    ]
-  },
-  "inventory": {
-    "thresholdAlert": [
-      9920905,
-      29
-    ]
+    }
   },
   "features": {
-    "relatedProducts": [
+    "reviewsEnabled": [
+      true,
+      false
+    ]
+  },
+  "analytics": {
+    "trackUserBehavior": [
       false,
       true
     ]
   },
-  "categories": {
-    "33": {
-      "name": [
-        "tempor",
-        "Games"
-      ],
-      "slug": [
-        "ltlc",
-        "games"
-      ]
-    },
-    "_t": "a"
-  },
   "products": {
-    "5": {
-      "price": [
-        43347999.85760231,
-        796.3828960588063
-      ]
-    },
-    "33": {
+    "10": {
       "categoryIds": {
-        "_t": "a",
-        "_2": [
-          "",
-          1,
-          3
-        ]
+        "4": [
+          "8a58Cjtn"
+        ],
+        "_t": "a"
       }
+    },
+    "31": {
+      "description": [
+        "et labore eu quis",
+        "Fresh Pizza designed with Gold for turbulent performance"
+      ]
     },
     "_t": "a"
   }

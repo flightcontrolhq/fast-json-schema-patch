@@ -1,57 +1,36 @@
 [
   {
     "op": "replace",
-    "path": "/products/33/categoryIds/2",
-    "value": "sit aute"
+    "path": "/products/31/description",
+    "value": "Fresh Pizza designed with Gold for turbulent performance"
+  },
+  {
+    "op": "add",
+    "path": "/products/10/categoryIds/4",
+    "value": "8a58Cjtn"
   },
   {
     "op": "replace",
-    "path": "/products/33/categoryIds/1",
-    "value": "et ut eiusmod consequat id"
-  },
-  {
-    "op": "replace",
-    "path": "/products/5/price",
-    "value": 796.3828960588063
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/slug",
-    "value": "games"
-  },
-  {
-    "op": "replace",
-    "path": "/categories/33/name",
-    "value": "Games"
-  },
-  {
-    "op": "replace",
-    "path": "/features/relatedProducts",
+    "path": "/analytics/trackUserBehavior",
     "value": true
   },
   {
     "op": "replace",
-    "path": "/inventory/thresholdAlert",
-    "value": 29
+    "path": "/features/reviewsEnabled",
+    "value": false
+  },
+  {
+    "op": "remove",
+    "path": "/payments/supportedMethods/2"
   },
   {
     "op": "replace",
-    "path": "/shipping/freeOver",
-    "value": 93.16210441130424
+    "path": "/payments/supportedMethods/1",
+    "value": "credit_card"
   },
   {
     "op": "replace",
-    "path": "/payments/paypal/clientSecret",
-    "value": "eVQPM5gzipSgH8vnHywQUNHF5b0cuYY9"
-  },
-  {
-    "op": "replace",
-    "path": "/payments/paypal/clientId",
-    "value": "4XaYipQxjhsTmXz1"
-  },
-  {
-    "op": "replace",
-    "path": "/store/locale",
-    "value": "fr-FR"
+    "path": "/payments/supportedMethods/0",
+    "value": "upi"
   }
 ]
