@@ -55,16 +55,16 @@ export function generateUniqueServiceId(env: any): string {
 
 export function getMinMax(complexity: "Low" | "Medium" | "High" | "Very High") {
   if (complexity === "Low") {
-    return { min: 1, max: 20 };
+    return { min: 1, max: 30 };
   }
   if (complexity === "Medium") {
-    return { min: 20, max: 50 };
+    return { min: 30, max: 80 };
   }
   if (complexity === "High") {
-    return { min: 50, max: 100 };
+    return { min: 80, max: 150 };
   }
   if (complexity === "Very High") {
-    return { min: 100, max: 500 };
+    return { min: 150, max: 500 };
   }
   throw new Error(`Invalid complexity: ${complexity}`);
 }

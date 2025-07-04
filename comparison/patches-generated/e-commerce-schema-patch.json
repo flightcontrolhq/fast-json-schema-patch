@@ -1,17 +1,68 @@
 [
   {
     "op": "replace",
-    "path": "/shipping/rates/0",
-    "value": {
-      "country": "CL",
-      "method": "standard",
-      "cost": 92568234.68820667,
-      "estimatedDays": 11
-    }
+    "path": "/store/locale",
+    "value": "fr-FR",
+    "oldValue": "gk-CC"
   },
   {
-    "op": "add",
-    "path": "/features/reviewsEnabled",
-    "value": true
+    "op": "replace",
+    "path": "/payments/paypal/clientId",
+    "value": "4XaYipQxjhsTmXz1",
+    "oldValue": "enim eiusmod commodo amet elit"
+  },
+  {
+    "op": "replace",
+    "path": "/payments/paypal/clientSecret",
+    "value": "eVQPM5gzipSgH8vnHywQUNHF5b0cuYY9",
+    "oldValue": "ullamco proident Duis ut"
+  },
+  {
+    "op": "replace",
+    "path": "/shipping/freeOver",
+    "value": 93.16210441130424,
+    "oldValue": 92833674.641178
+  },
+  {
+    "op": "replace",
+    "path": "/inventory/thresholdAlert",
+    "value": 29,
+    "oldValue": 9920905
+  },
+  {
+    "op": "replace",
+    "path": "/features/relatedProducts",
+    "value": true,
+    "oldValue": false
+  },
+  {
+    "op": "replace",
+    "path": "/categories/33/name",
+    "value": "Games",
+    "oldValue": "tempor"
+  },
+  {
+    "op": "replace",
+    "path": "/categories/33/slug",
+    "value": "games",
+    "oldValue": "ltlc"
+  },
+  {
+    "op": "replace",
+    "path": "/products/5/price",
+    "value": 796.3828960588063,
+    "oldValue": 43347999.85760231
+  },
+  {
+    "op": "replace",
+    "path": "/products/33/categoryIds/1",
+    "value": "et ut eiusmod consequat id",
+    "oldValue": "sit aute"
+  },
+  {
+    "op": "replace",
+    "path": "/products/33/categoryIds/2",
+    "value": "sit aute",
+    "oldValue": "et ut eiusmod consequat id"
   }
 ]

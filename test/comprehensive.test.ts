@@ -679,6 +679,7 @@ test("JsonSchemaPatcher handles array without primary key (fallback)", () => {
   expect(patches).toMatchInlineSnapshot(`
     [
       {
+        "oldValue": "b",
         "op": "replace",
         "path": "/environments/0/services/0/dependsOn/1",
         "value": "c",
@@ -1802,10 +1803,14 @@ describe("JsonSchemaPatcher comprehensive tests", () => {
     expect(patches).toMatchInlineSnapshot(`
       [
         {
+          "oldValue": 1,
           "op": "remove",
           "path": "/items/1",
         },
         {
+          "oldValue": {
+            "a": "b",
+          },
           "op": "replace",
           "path": "/items/1",
           "value": 2,
@@ -2031,8 +2036,8 @@ describe("Array diffing strategies", () => {
 
       // Should generate replace operations for changed elements
       expect(patches).toEqual([
-        { op: "replace", path: "/items/1", value: "x" },
-        { op: "replace", path: "/items/3", value: "e" },
+        { op: "replace", path: "/items/1", value: "x", oldValue: "b" },
+        { op: "replace", path: "/items/3", value: "e", oldValue: "d" },
       ]);
     });
 
@@ -2211,6 +2216,7 @@ describe("Array diffing strategies", () => {
         op: "replace",
         path: "/items/500",
         value: 9999,
+        oldValue: 500,
       });
     });
 
@@ -2231,6 +2237,7 @@ describe("Array diffing strategies", () => {
         {
           op: "remove",
           path: "/flags/1",
+          oldValue: false,
         },
         {
           op: "add",
@@ -2397,6 +2404,7 @@ describe("Array diffing strategies", () => {
       expect(uniquePatches).toMatchInlineSnapshot(`
         [
           {
+            "oldValue": "item-500",
             "op": "replace",
             "path": "/items/500",
             "value": "modified-item",

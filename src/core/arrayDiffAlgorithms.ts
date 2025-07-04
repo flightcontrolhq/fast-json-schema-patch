@@ -1,16 +1,19 @@
-import type {ArrayPlan} from "../core/buildPlan"
-import {deepEqual, deepEqualMemo, deepEqualSchemaAware} from "../performance/deepEqual"
-import {getEffectiveHashFields} from "../performance/getEffectiveHashFields"
-import type {JsonArray, JsonObject, JsonValue, Operation} from "../types"
+import type { ArrayPlan } from "../core/buildPlan";
+import {
+  deepEqual,
+  deepEqualMemo,
+  deepEqualSchemaAware,
+} from "../performance/deepEqual";
+import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
+import type { JsonArray, JsonObject, JsonValue, Operation } from "../types";
 
 export type ModificationCallback = (
   item1: JsonValue,
   item2: JsonValue,
   path: string,
   patches: Operation[],
-  skipEqualityCheck?: boolean,
-) => void
-
+  skipEqualityCheck?: boolean
+) => void;
 
 export function diffArrayByPrimaryKey(
   arr1: JsonArray,
@@ -20,149 +23,133 @@ export function diffArrayByPrimaryKey(
   patches: Operation[],
   onModification: ModificationCallback,
   hashFields?: string[],
-  plan?: ArrayPlan,
+  plan?: ArrayPlan
 ) {
-  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || [])
-  const hashFieldsLength = effectiveHashFields.length
-  const hasHashFields = hashFieldsLength > 0
-  
-  // V8: Cache array lengths to avoid property access in loops
-  const arr1Length = arr1.length
-  const arr2Length = arr2.length
-  
-  // V8: Pre-allocate with exact sizes to avoid hidden class transitions
-  const keyToIndex = new Map<string | number, number>()
-  const itemsByIndex = new Array(arr1Length)
-  
-  // V8: Use typed arrays for better performance on boolean operations
-  const isRemoved = new Uint8Array(arr1Length) // 0 = keep, 1 = remove
-  
-  const pathPrefix = path + "/"
-  
+  const effectiveHashFields = getEffectiveHashFields(
+    plan,
+    undefined,
+    undefined,
+    hashFields || []
+  );
+  const hashFieldsLength = effectiveHashFields.length;
+  const hasHashFields = hashFieldsLength > 0;
+
+  const arr1Length = arr1.length;
+  const arr2Length = arr2.length;
+
+  // Pre-allocate with exact sizes to avoid hidden class transitions
+  const keyToIndex = new Map<string | number, number>();
+  const itemsByIndex = new Array(arr1Length);
+  const pathPrefix = path + "/";
+
   // Phase 1: Build index mappings - O(n)
-  // V8: Monomorphic loop with consistent types
   for (let i = 0; i < arr1Length; i++) {
-    const item = arr1[i]
+    const item = arr1[i];
     if (typeof item === "object" && item !== null) {
-      const keyValue = item[primaryKey as keyof typeof item]
+      const keyValue = item[primaryKey as keyof typeof item];
       if (keyValue !== undefined && keyValue !== null) {
-        const keyType = typeof keyValue
-        // V8: Combined condition for better branch prediction
+        const keyType = typeof keyValue;
         if (keyType === "string" || keyType === "number") {
-          keyToIndex.set(keyValue as string | number, i)
-          itemsByIndex[i] = item
+          keyToIndex.set(keyValue as string | number, i);
+          itemsByIndex[i] = item;
         }
       }
     }
   }
-  
-  // V8: Pre-allocate arrays to avoid resizing during hot loop
-  const modificationPatches: Operation[] = []
-  const additionPatches: Operation[] = []
-  
+
+  const modificationPatches: Operation[] = [];
+  const additionPatches: Operation[] = [];
+
   // Phase 2: Process arr2 and mark operations - O(m)
   for (let i = 0; i < arr2Length; i++) {
-    const newItem = arr2[i]
-    
-    // V8: Early continue for cleaner hot path
+    const newItem = arr2[i];
+
     if (typeof newItem !== "object" || newItem === null) {
-      continue
-    }
-    
-    const keyValue = newItem[primaryKey as keyof typeof newItem]
-    if (keyValue === undefined || keyValue === null) {
-      continue
-    }
-    
-    const keyType = typeof keyValue
-    if (keyType !== "string" && keyType !== "number") {
-      continue
+      continue;
     }
 
-    const oldIndex = keyToIndex.get(keyValue as string | number)
+    const keyValue = newItem[primaryKey as keyof typeof newItem];
+    if (keyValue === undefined) {
+      continue;
+    }
+
+    const keyType = typeof keyValue;
+    if (keyType !== "string" && keyType !== "number") {
+      continue;
+    }
+
+    const oldIndex = keyToIndex.get(keyValue as string | number);
     if (oldIndex !== undefined) {
-      // V8: Delete immediately to avoid later lookup
-      keyToIndex.delete(keyValue as string | number)
-      
-      const oldItem = itemsByIndex[oldIndex]
-      let needsDiff = false
+      // Delete immediately to avoid later lookup
+      keyToIndex.delete(keyValue as string | number);
+
+      const oldItem = itemsByIndex[oldIndex];
+      let needsDiff = false;
 
       if (hasHashFields) {
-        const oldItemObj = oldItem as JsonObject
-        const newItemObj = newItem as JsonObject
-        
-        // V8: Traditional for loop with cached length
+        const oldItemObj = oldItem as JsonObject;
+        const newItemObj = newItem as JsonObject;
+
         for (let j = 0; j < hashFieldsLength; j++) {
-          const field = effectiveHashFields[j]
-          // V8: Short-circuit evaluation optimized
+          const field = effectiveHashFields[j];
+          // Short-circuit evaluation optimized
           if (field && oldItemObj[field] !== newItemObj[field]) {
-            needsDiff = true
-            break
+            needsDiff = true;
+            break;
           }
         }
-        
+
+        // Only expensive deep equal if hash fields match
         if (!needsDiff && oldItem !== newItem) {
-          needsDiff = !deepEqual(oldItem, newItem)
+          needsDiff = !deepEqual(oldItem, newItem);
         }
       } else if (plan) {
-        needsDiff = !deepEqualSchemaAware(oldItem, newItem, plan, effectiveHashFields)
+        needsDiff = !deepEqualSchemaAware(
+          oldItem,
+          newItem,
+          plan,
+          effectiveHashFields
+        );
       } else {
-        needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem)
+        // Reference equality first (fastest path)
+        needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem);
       }
 
       if (needsDiff) {
-        const itemPath = pathPrefix + oldIndex
-        onModification(oldItem, newItem, itemPath, modificationPatches, true)
+        const itemPath = pathPrefix + oldIndex;
+        onModification(oldItem, newItem, itemPath, modificationPatches, true);
       }
     } else {
-      additionPatches.push({op: "add", path: pathPrefix + "-", value: newItem})
+      additionPatches.push({
+        op: "add",
+        path: pathPrefix + "-",
+        value: newItem,
+      });
     }
   }
 
-  // Phase 3: Mark remaining items for removal - O(remaining items)
-  for (const index of keyToIndex.values()) {
-    isRemoved[index] = 1
+  // Phase 3: Generate removal patches directly - O(remaining items)
+  const removalIndices = Array.from(keyToIndex.values());
+
+  // O(k log k)) where k << n and k and n are the number of removals and items in the array respectively
+  removalIndices.sort((a, b) => b - a);
+
+  const removalPatches: Operation[] = new Array(removalIndices.length);
+
+  for (let i = 0; i < removalIndices.length; i++) {
+    const index = removalIndices[i] as number;
+    removalPatches[i] = {
+      op: "remove",
+      path: pathPrefix + index,
+      oldValue: itemsByIndex[index],
+    };
   }
-  
-  // Phase 4: Generate removal patches in descending order - O(n)
-  let removalCount = 0
-  for (const value of isRemoved) {
-    removalCount += value
-  }
-  
-  const removalPatches: Operation[] = new Array(removalCount)
-  let removalIndex = 0
-  
-  for (let i = arr1Length - 1; i >= 0; i--) {
-    if (isRemoved[i] === 1) {
-      removalPatches[removalIndex] = {
-        op: "remove",
-        path: pathPrefix + i,
-        oldValue: itemsByIndex[i],
-      }
-      removalIndex++
-    }
-  }
-  
-  const totalPatches = modificationPatches.length + removalPatches.length + additionPatches.length
+
+  const totalPatches =
+    modificationPatches.length + removalPatches.length + additionPatches.length;
   if (totalPatches > 0) {
-    patches.push(...modificationPatches, ...removalPatches, ...additionPatches)
+    patches.push(...modificationPatches, ...removalPatches, ...additionPatches);
   }
-}
-
-function collapseReplace(
-  ops: ("common" | "add" | "remove")[],
-): ("common" | "add" | "remove" | "replace")[] {
-  const out: ("common" | "add" | "remove" | "replace")[] = []
-  for (let i = 0; i < ops.length; i++) {
-    if (ops[i] === "remove" && ops[i + 1] === "add") {
-      out.push("replace")
-      i++ // skip next add
-    } else {
-      out.push(ops[i] as "common" | "add" | "remove" | "replace")
-    }
-  }
-  return out
 }
 
 export function diffArrayLCS(
@@ -172,143 +159,251 @@ export function diffArrayLCS(
   patches: Operation[],
   onModification: ModificationCallback,
   hashFields?: string[],
-  plan?: ArrayPlan,
+  plan?: ArrayPlan
 ) {
-  const effectiveHashFields = getEffectiveHashFields(plan, undefined, undefined, hashFields || [])
+  const effectiveHashFields = getEffectiveHashFields(
+    plan,
+    undefined,
+    undefined,
+    hashFields || []
+  );
 
-  const n = arr1.length
-  const m = arr2.length
+  const n = arr1.length;
+  const m = arr2.length;
 
-  const max = n + m
-  const offset = max
-
-  const createBuffer = () => {
-    const buf = new Int32Array(2 * max + 1)
-    buf.fill(-1) // sentinel for unreachable
-    return buf
+  // Early exit for empty arrays
+  if (n === 0) {
+    const prefixPath = path === "" ? "/" : path + "/";
+    for (let i = 0; i < m; i++) {
+      patches.push({
+        op: "add",
+        path: prefixPath + i,
+        value: arr2[i] as JsonValue,
+      });
+    }
+    return;
+  }
+  if (m === 0) {
+    for (let i = n - 1; i >= 0; i--) {
+      patches.push({
+        op: "remove",
+        path: path === "" ? "/" : path + "/" + i,
+      });
+    }
+    return;
   }
 
-  let vPrev = createBuffer()
-  let vCurr = createBuffer()
-  vPrev[offset + 1] = 0 // k=1 diagonal starts at x=0
+  const max = n + m;
+  const offset = max;
+  const bufSize = 2 * max + 1;
 
-  const trace: Int32Array[] = []
-  let endD = -1
+  // Pre-allocate buffers to avoid repeated allocations
+  const buffer1 = new Int32Array(bufSize);
+  const buffer2 = new Int32Array(bufSize);
+  buffer1.fill(-1);
+  buffer2.fill(-1);
+
+  let vPrev = buffer1;
+  let vCurr = buffer2;
+  vPrev[offset + 1] = 0;
+
+  // Pre-allocate trace array with estimated size
+  const trace = new Array(max + 1);
+  let traceLen = 0;
+  let endD = -1;
+
+  // Cache equality checks to avoid redundant comparisons
+  const equalCache = new Map<number, boolean>();
+  const cacheKey = (x: number, y: number): number => (x << 16) | y; // Assumes arrays < 65536 length
 
   const equalAt = (x: number, y: number): boolean => {
-    if (plan) {
-      return deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
-    }
-    return deepEqualMemo(arr1[x], arr2[y], effectiveHashFields)
-  }
+    const key = cacheKey(x, y);
+    let result = equalCache.get(key);
+    if (result !== undefined) return result;
 
-  const get = (buf: Int32Array, idx: number): number => {
-    return idx >= 0 && idx < buf.length && buf[idx] !== undefined ? buf[idx] : -1
-  }
+    result = plan
+      ? deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
+      : deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
 
-  const prefixPath = path === "" ? "/" : `${path}/`
+    equalCache.set(key, result);
+    return result;
+  };
 
-  // Forward pass ----------------------------------
+  const prefixPath = path === "" ? "/" : path + "/";
+
+  // Forward pass with optimizations
   outer: for (let d = 0; d <= max; d++) {
-    trace.push(vPrev.slice())
+    // Clone only the used portion of the array
+    const traceCopy = new Int32Array(bufSize);
+    traceCopy.set(vPrev);
+    trace[traceLen++] = traceCopy;
 
-    for (let k = -d; k <= d; k += 2) {
-      const kOffset = k + offset
+    const dMin = -d;
+    const dMax = d;
 
-      const down = k === -d || (k !== d && get(vPrev, kOffset - 1) < get(vPrev, kOffset + 1))
-      let x = down ? get(vPrev, kOffset + 1) : get(vPrev, kOffset - 1) + 1
-      let y = x - k
+    for (let k = dMin; k <= dMax; k += 2) {
+      const kOffset = k + offset;
 
-      // snake
+      // Inline get() for performance
+      const vLeft = kOffset > 0 ? (vPrev[kOffset - 1] as number) : -1;
+      const vRight =
+        kOffset < bufSize - 1 ? (vPrev[kOffset + 1] as number) : -1;
+
+      const down = k === dMin || (k !== dMax && vLeft < vRight);
+      let x = down ? vRight : vLeft + 1;
+      let y = x - k;
+
+      // Snake with bounds checking
       while (x < n && y < m && equalAt(x, y)) {
-        x++
-        y++
+        x++;
+        y++;
       }
 
-      vCurr[kOffset] = x
+      vCurr[kOffset] = x;
 
       if (x >= n && y >= m) {
-        trace.push(vCurr.slice())
-        endD = d
-        break outer
+        const finalCopy = new Int32Array(bufSize);
+        finalCopy.set(vCurr);
+        trace[traceLen++] = finalCopy;
+        endD = d;
+        break outer;
       }
     }
 
-    // swap buffers & reset vCurr
-    const tmp = vPrev
-    vPrev = vCurr
-    vCurr = tmp
-    vCurr.fill(-1)
+    // Swap buffers efficiently
+    const tmp = vPrev;
+    vPrev = vCurr;
+    vCurr = tmp;
+    vCurr.fill(-1);
   }
 
-  if (endD === -1) return // no diff (shouldn't happen)
+  if (endD === -1) return;
 
-  // Back-tracking ----------------------------------
-  let x = n
-  let y = m
-  const rawOps: ("common" | "add" | "remove")[] = []
+  // Backtracking to build edit script
+  const editScript: Array<{
+    op: "common" | "remove" | "add";
+    ai?: number;
+    bi?: number;
+  }> = [];
+
+  let x = n;
+  let y = m;
 
   for (let d = endD; d > 0; d--) {
-    const vRow = trace[d] as Int32Array
-    const k = x - y
-    const kOffset = k + offset
+    const vRow = trace[d];
+    const k = x - y;
+    const kOffset = k + offset;
 
-    const down = k === -d || (k !== d && get(vRow, kOffset - 1) < get(vRow, kOffset + 1))
-    const prevK = down ? k + 1 : k - 1
-    const prevX = get(vRow, prevK + offset)
-    const prevY = prevX - prevK
+    const vLeft = kOffset > 0 ? vRow[kOffset - 1] : -1;
+    const vRight = kOffset < bufSize - 1 ? vRow[kOffset + 1] : -1;
 
+    const down = k === -d || (k !== d && vLeft < vRight);
+    const prevK = down ? k + 1 : k - 1;
+    const prevX = vRow[prevK + offset];
+    const prevY = prevX - prevK;
+
+    // Add common elements (snake)
     while (x > prevX && y > prevY) {
-      rawOps.unshift("common")
-      x--
-      y--
+      x--;
+      y--;
+      editScript.push({ op: "common", ai: x, bi: y });
     }
 
+    // Add the edit operation
     if (down) {
-      rawOps.unshift("add")
-      y--
+      y--;
+      editScript.push({ op: "add", bi: y });
     } else {
-      rawOps.unshift("remove")
-      x--
+      x--;
+      editScript.push({ op: "remove", ai: x });
     }
   }
 
+  // Add remaining common elements
   while (x > 0 && y > 0) {
-    rawOps.unshift("common")
-    x--
-    y--
+    x--;
+    y--;
+    editScript.push({ op: "common", ai: x, bi: y });
   }
 
-  const ops2 = collapseReplace(rawOps)
+  // Reverse to get forward order
+  editScript.reverse();
 
-  let ai = 0
-  let bi = 0
-  let patchedIndex = 0
-     for (const op of ops2) {
-     switch (op) {
-       case "common":
-         // Items are known to be equal by equalAt(), but may have nested differences
-         // Skip top-level equality check since equalAt() already verified they're "equal"
-         onModification(arr1[ai] as JsonValue, arr2[bi] as JsonValue, `${prefixPath}${patchedIndex}`, patches, true)
-         ai++
-         bi++
-         patchedIndex++
-         break
-      case "replace":
-        patches.push({op: "replace", path: `${prefixPath}${patchedIndex}`, value: arr2[bi] as JsonValue})
-        ai++
-        bi++
-        patchedIndex++
-        break
-      case "remove":
-        patches.push({op: "remove", path: `${prefixPath}${patchedIndex}`})
-        ai++
-        break
-      case "add":
-        patches.push({op: "add", path: `${prefixPath}${patchedIndex}`, value: arr2[bi] as JsonValue})
-        bi++
-        patchedIndex++
-        break
+  // Optimize: collapse adjacent remove+add into replace operations
+  const optimizedScript: Array<{
+    op: "common" | "remove" | "add" | "replace";
+    ai?: number;
+    bi?: number;
+  }> = [];
+
+  for (let i = 0; i < editScript.length; i++) {
+    const current = editScript[i];
+    const next = editScript[i + 1];
+
+    // Check if we can combine remove + add into replace
+    if (
+      current &&
+      current.op === "remove" &&
+      next &&
+      next.op === "add" &&
+      current.ai !== undefined &&
+      next.bi !== undefined
+    ) {
+      optimizedScript.push({ op: "replace", ai: current.ai, bi: next.bi });
+      i++; // Skip the next operation
+    } else if (current) {
+      optimizedScript.push(current);
+    }
+  }
+
+  // Apply operations and generate patches
+  let currentIndex = 0;
+
+  for (const operation of optimizedScript) {
+    switch (operation.op) {
+      case "common": {
+        const v1 = arr1[operation.ai as number];
+        const v2 = arr2[operation.bi as number];
+        // Only call onModification for objects that might have nested differences
+        if (
+          typeof v1 === "object" &&
+          v1 !== null &&
+          typeof v2 === "object" &&
+          v2 !== null
+        ) {
+          onModification(v1, v2, prefixPath + currentIndex, patches, false);
+        }
+        currentIndex++;
+        break;
+      }
+      case "replace": {
+        patches.push({
+          op: "replace",
+          path: prefixPath + currentIndex,
+          value: arr2[operation.bi as number] as JsonValue,
+          oldValue: arr1[operation.ai as number],
+        });
+        currentIndex++;
+        break;
+      }
+      case "remove": {
+        patches.push({
+          op: "remove",
+          path: prefixPath + currentIndex,
+          oldValue: arr1[operation.ai as number],
+        });
+        // Don't increment currentIndex for removes
+        break;
+      }
+      case "add": {
+        patches.push({
+          op: "add",
+          path: prefixPath + currentIndex,
+          value: arr2[operation.bi as number] as JsonValue,
+        });
+        currentIndex++;
+        break;
+      }
     }
   }
 }
@@ -317,40 +412,130 @@ export function diffArrayUnique(
   arr1: JsonArray,
   arr2: JsonArray,
   path: string,
-  patches: Operation[],
+  patches: Operation[]
 ) {
-  const n = arr1.length
-  const m = arr2.length
-  const set1 = new Set(arr1)
-  const set2 = new Set(arr2)
-  const minLength = Math.min(n, m)
-  const replacedAtIndex = new Set<number>()
-  const replacedValues2 = new Set<JsonValue>()
+  const n = arr1.length;
+  const m = arr2.length;
+  const pathPrefix = path + "/";
 
+  const patches_temp: Operation[] = [];
+
+  if (n === 0 && m === 0) return;
+  if (n === 0) {
+    // All additions
+    for (let i = 0; i < m; i++) {
+      patches_temp.push({ op: "add", path: pathPrefix + "-", value: arr2[i] });
+    }
+    patches.push(...patches_temp);
+    return;
+  }
+  if (m === 0) {
+    // All removals (descending order)
+    for (let i = n - 1; i >= 0; i--) {
+      patches_temp.push({
+        op: "remove",
+        path: pathPrefix + i,
+        oldValue: arr1[i],
+      });
+    }
+    patches.push(...patches_temp);
+    return;
+  }
+
+  // Use Map for O(1) lookups instead of Set for complex logic
+  const arr1Map = new Map<JsonValue, number>();
+  const arr2Map = new Map<JsonValue, number>();
+
+  // Single pass to build both maps
+  for (let i = 0; i < n; i++) {
+    arr1Map.set(arr1[i] as JsonValue, i);
+  }
+  for (let i = 0; i < m; i++) {
+    arr2Map.set(arr2[i] as JsonValue, i);
+  }
+
+  const minLength = Math.min(n, m);
+  const replacedItems = new Set<JsonValue>();
+
+  // Phase 1: Handle replacements in common indices - O(min(n,m))
   for (let i = 0; i < minLength; i++) {
-    const val1 = arr1[i]
-    const val2 = arr2[i]
+    const val1 = arr1[i];
+    const val2 = arr2[i];
+
     if (val1 !== val2) {
-      patches.push({op: "replace", path: `${path}/${i}`, value: val2})
-      replacedAtIndex.add(i)
-      if (val2 !== undefined) replacedValues2.add(val2)
+      patches_temp.push({
+        op: "replace",
+        path: pathPrefix + i,
+        value: val2,
+        oldValue: val1,
+      });
+      replacedItems.add(val2 as JsonValue);
     }
   }
 
-  const removalIndices: number[] = []
+  // Phase 2: Handle removals - O(n)
+  // Collect removal indices first, then sort
+  const removalIndices: number[] = [];
+
   for (let i = n - 1; i >= 0; i--) {
-    const item = arr1[i]
-    if (item !== undefined && !set2.has(item) && !replacedAtIndex.has(i)) {
-      removalIndices.push(i)
+    const item = arr1[i];
+
+    // Skip if this position was replaced or item exists in arr2
+    if (i < minLength && arr1[i] !== arr2[i]) {
+      continue;
     }
-  }
-  for (const index of removalIndices) {
-    patches.push({op: "remove", path: `${path}/${index}`})
+
+    if (!arr2Map.has(item as JsonValue)) {
+      removalIndices.push(i);
+    }
   }
 
-  for (const item of set2) {
-    if (item !== undefined && !set1.has(item) && !replacedValues2.has(item)) {
-      patches.push({op: "add", path: `${path}/-`, value: item})
+  // Add removal patches (already in descending order)
+  for (const index of removalIndices) {
+    patches_temp.push({
+      op: "remove",
+      path: pathPrefix + index,
+      oldValue: arr1[index],
+    });
+  }
+
+  // Phase 3: Handle additions - O(m)
+  for (let i = 0; i < m; i++) {
+    const item = arr2[i];
+
+    // Skip if this was a replacement
+    if (i < minLength && arr1[i] !== arr2[i]) {
+      continue;
+    }
+
+    if (!arr1Map.has(item as JsonValue)) {
+      patches_temp.push({ op: "add", path: pathPrefix + "-", value: item });
     }
   }
+
+  patches.push(...patches_temp);
+}
+
+export function checkArraysUnique(arr1: JsonArray, arr2: JsonArray): boolean {
+  const len1 = arr1.length;
+  const len2 = arr2.length;
+
+  if (len1 !== len2) return false;
+
+  const seen1 = new Set<JsonValue>();
+  const seen2 = new Set<JsonValue>();
+
+  for (let i = 0; i < len1; i++) {
+    const val1 = arr1[i];
+    const val2 = arr2[i];
+
+    if (seen1.has(val1 as JsonValue) || seen2.has(val2 as JsonValue)) {
+      return false;
+    }
+
+    seen1.add(val1 as JsonValue);
+    seen2.add(val2 as JsonValue);
+  }
+
+  return true;
 }
