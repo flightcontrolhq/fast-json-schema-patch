@@ -1,5 +1,11 @@
 # fast-json-schema-patch
 
+## 0.3.0
+
+### Minor Changes
+
+- b11f93a: Improve parent context selection in `StructuredDiff`
+
 ## 0.2.3
 
 ### Patch Changes
