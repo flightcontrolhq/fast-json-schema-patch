@@ -1,24 +1,17 @@
 [
   {
-    "op": "add",
-    "path": "/payments/supportedMethods/3",
-    "value": "credit_card"
+    "op": "replace",
+    "path": "/shipping/rates/0",
+    "value": {
+      "country": "CL",
+      "method": "standard",
+      "cost": 92568234.68820667,
+      "estimatedDays": 11
+    }
   },
   {
-    "op": "replace",
+    "op": "add",
     "path": "/features/reviewsEnabled",
-    "value": false,
-    "oldValue": true
-  },
-  {
-    "op": "add",
-    "path": "/products/27/categoryIds/5",
-    "value": "U"
-  },
-  {
-    "op": "replace",
-    "path": "/users/20/name",
-    "value": "Pete Rogahn",
-    "oldValue": "commodo et eiusmod id"
+    "value": true
   }
 ]

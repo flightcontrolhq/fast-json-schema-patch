@@ -26,121 +26,124 @@ export function diffArrayByPrimaryKey(
   const hashFieldsLength = effectiveHashFields.length
   const hasHashFields = hashFieldsLength > 0
   
-  // V8 optimization: Pre-size Map with estimated capacity
-  const map1 = new Map<string | number, {item: JsonValue; index: number}>()
+  // V8: Cache array lengths to avoid property access in loops
   const arr1Length = arr1.length
+  const arr2Length = arr2.length
   
-  // V8/Safari: Monomorphic loop structure - consistent types and operations
+  // V8: Pre-allocate with exact sizes to avoid hidden class transitions
+  const keyToIndex = new Map<string | number, number>()
+  const itemsByIndex = new Array(arr1Length)
+  
+  // V8: Use typed arrays for better performance on boolean operations
+  const isRemoved = new Uint8Array(arr1Length) // 0 = keep, 1 = remove
+  
+  const pathPrefix = path + "/"
+  
+  // Phase 1: Build index mappings - O(n)
+  // V8: Monomorphic loop with consistent types
   for (let i = 0; i < arr1Length; i++) {
     const item = arr1[i]
-    // V8: Check type first, then null (more efficient branch prediction)
     if (typeof item === "object" && item !== null) {
-      // V8: Use 'in' operator for property existence (faster than hasOwnProperty)
-      if (primaryKey in item) {
-        const key = item[primaryKey as keyof typeof item]
-        const keyType = typeof key
-        // V8: Combined type check is faster than separate checks
+      const keyValue = item[primaryKey as keyof typeof item]
+      if (keyValue !== undefined && keyValue !== null) {
+        const keyType = typeof keyValue
+        // V8: Combined condition for better branch prediction
         if (keyType === "string" || keyType === "number") {
-          map1.set(key, {item, index: i})
+          keyToIndex.set(keyValue as string | number, i)
+          itemsByIndex[i] = item
         }
       }
     }
   }
-
-  // Pre-allocate arrays with realistic sizes to avoid resizing
+  
+  // V8: Pre-allocate arrays to avoid resizing during hot loop
   const modificationPatches: Operation[] = []
   const additionPatches: Operation[] = []
-  const removalEntries: Array<{item: JsonValue; index: number}> = []
   
-  const arr2Length = arr2.length
-  const pathPrefix = path + "/"
-  
-  // V8/Safari: Monomorphic loop with consistent variable types
+  // Phase 2: Process arr2 and mark operations - O(m)
   for (let i = 0; i < arr2Length; i++) {
     const newItem = arr2[i]
     
-    // V8: Early continue to keep hot path clean
-    if (typeof newItem !== "object" || newItem === null || !(primaryKey in newItem)) {
+    // V8: Early continue for cleaner hot path
+    if (typeof newItem !== "object" || newItem === null) {
       continue
     }
     
-    const key = newItem[primaryKey as keyof typeof newItem]
-    const keyType = typeof key
+    const keyValue = newItem[primaryKey as keyof typeof newItem]
+    if (keyValue === undefined || keyValue === null) {
+      continue
+    }
+    
+    const keyType = typeof keyValue
     if (keyType !== "string" && keyType !== "number") {
       continue
     }
 
-    const oldEntry = map1.get(key)
-    if (oldEntry !== undefined) {
-      // V8: Delete immediately to avoid later iteration
-      map1.delete(key)
+    const oldIndex = keyToIndex.get(keyValue as string | number)
+    if (oldIndex !== undefined) {
+      // V8: Delete immediately to avoid later lookup
+      keyToIndex.delete(keyValue as string | number)
       
-      const oldItem = oldEntry.item
+      const oldItem = itemsByIndex[oldIndex]
       let needsDiff = false
 
-      // V8: Branch prediction optimization - most common case first
-      if (plan) {
-        needsDiff = !deepEqualSchemaAware(oldItem, newItem, plan, effectiveHashFields)
-      } else if (hasHashFields) {
-        // V8: Optimize hot loop with local variables
+      if (hasHashFields) {
         const oldItemObj = oldItem as JsonObject
         const newItemObj = newItem as JsonObject
         
-        // V8: Use for loop instead of for...of (better optimization)
+        // V8: Traditional for loop with cached length
         for (let j = 0; j < hashFieldsLength; j++) {
           const field = effectiveHashFields[j]
+          // V8: Short-circuit evaluation optimized
           if (field && oldItemObj[field] !== newItemObj[field]) {
             needsDiff = true
             break
           }
         }
         
-        // V8: Only do expensive deep equal if hash fields match
         if (!needsDiff && oldItem !== newItem) {
           needsDiff = !deepEqual(oldItem, newItem)
         }
+      } else if (plan) {
+        needsDiff = !deepEqualSchemaAware(oldItem, newItem, plan, effectiveHashFields)
       } else {
-        // V8: Reference equality check first (fastest)
         needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem)
       }
 
       if (needsDiff) {
-        // V8: String concatenation is optimized, but template literals can be slower
-        const itemPath = pathPrefix + oldEntry.index
+        const itemPath = pathPrefix + oldIndex
         onModification(oldItem, newItem, itemPath, modificationPatches, true)
       }
     } else {
-      // V8: Reuse string constant for path
       additionPatches.push({op: "add", path: pathPrefix + "-", value: newItem})
     }
   }
 
-  // V8/Safari: Collect remaining entries efficiently
-  // Using for...of on Map is well-optimized in modern engines
-  for (const entry of map1.values()) {
-    removalEntries.push(entry)
-  }
-
-  // V8: Sort with inline comparison function (better JIT optimization)
-  if (removalEntries.length > 1) {
-    removalEntries.sort((a, b) => b.index - a.index)
+  // Phase 3: Mark remaining items for removal - O(remaining items)
+  for (const index of keyToIndex.values()) {
+    isRemoved[index] = 1
   }
   
-  // V8: Pre-allocate array with known size
-  const removalPatches: Operation[] = new Array(removalEntries.length)
-  const removalCount = removalEntries.length
+  // Phase 4: Generate removal patches in descending order - O(n)
+  let removalCount = 0
+  for (const value of isRemoved) {
+    removalCount += value
+  }
   
-  // V8: Simple for loop with local variable
-  for (let i = 0; i < removalCount; i++) {
-    const entry = removalEntries[i] as {item: JsonValue; index: number}
-    removalPatches[i] = {
-      op: "remove",
-      path: pathPrefix + entry.index,
-      oldValue: entry.item,
+  const removalPatches: Operation[] = new Array(removalCount)
+  let removalIndex = 0
+  
+  for (let i = arr1Length - 1; i >= 0; i--) {
+    if (isRemoved[i] === 1) {
+      removalPatches[removalIndex] = {
+        op: "remove",
+        path: pathPrefix + i,
+        oldValue: itemsByIndex[i],
+      }
+      removalIndex++
     }
   }
-
-  // V8/Safari: Batch push is more efficient than individual pushes
+  
   const totalPatches = modificationPatches.length + removalPatches.length + additionPatches.length
   if (totalPatches > 0) {
     patches.push(...modificationPatches, ...removalPatches, ...additionPatches)
