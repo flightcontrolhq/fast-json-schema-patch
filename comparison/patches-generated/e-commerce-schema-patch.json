@@ -1,13 +1,24 @@
 [
   {
+    "op": "add",
+    "path": "/payments/supportedMethods/3",
+    "value": "credit_card"
+  },
+  {
     "op": "replace",
-    "path": "/store/logoUrl",
-    "value": "https://loremflickr.com/2288/1980?lock=5730920209308270",
-    "oldValue": "https://jFZUtQwblhXetNdizhiWVhM.hdmnl+3o7Yiy9W4kCAx9tAJCi3IpimnE7doAB8hTQpeBfXdnLT0p7.rCUCK"
+    "path": "/features/reviewsEnabled",
+    "value": false,
+    "oldValue": true
   },
   {
     "op": "add",
-    "path": "/categories/24/parentId",
-    "value": null
+    "path": "/products/27/categoryIds/5",
+    "value": "U"
+  },
+  {
+    "op": "replace",
+    "path": "/users/20/name",
+    "value": "Pete Rogahn",
+    "oldValue": "commodo et eiusmod id"
   }
 ]

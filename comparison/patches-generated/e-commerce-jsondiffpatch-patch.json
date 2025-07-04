@@ -1,55 +1,57 @@
 {
-  "store": {
-    "logoUrl": [
-      "https://jFZUtQwblhXetNdizhiWVhM.hdmnl+3o7Yiy9W4kCAx9tAJCi3IpimnE7doAB8hTQpeBfXdnLT0p7.rCUCK",
-      "https://loremflickr.com/2288/1980?lock=5730920209308270"
-    ]
+  "payments": {
+    "supportedMethods": {
+      "3": [
+        "credit_card"
+      ],
+      "_t": "a"
+    }
   },
   "shipping": {
     "rates": {
       "0": [
         {
-          "country": "OB",
-          "method": "standard",
-          "cost": 19680363.563903812,
-          "estimatedDays": 13390215
-        }
-      ],
-      "1": [
-        {
-          "country": "VQ",
-          "method": "pickup",
-          "cost": 21446299.374377154,
-          "estimatedDays": 11191421
+          "country": "MS",
+          "method": "express",
+          "cost": 34241297.807160206,
+          "estimatedDays": 60656791
         }
       ],
       "_t": "a",
       "_0": [
         {
-          "country": "OB",
-          "method": "standard",
-          "cost": 19680363.563903812,
-          "estimatedDays": 13390215
-        },
-        0,
-        0
-      ],
-      "_1": [
-        {
-          "country": "VQ",
-          "method": "pickup",
-          "cost": 21446299.374377154,
-          "estimatedDays": 11191421
+          "country": "MS",
+          "method": "express",
+          "cost": 34241297.807160206,
+          "estimatedDays": 60656791
         },
         0,
         0
       ]
     }
   },
-  "categories": {
-    "24": {
-      "parentId": [
-        null
+  "features": {
+    "reviewsEnabled": [
+      true,
+      false
+    ]
+  },
+  "products": {
+    "27": {
+      "categoryIds": {
+        "5": [
+          "U"
+        ],
+        "_t": "a"
+      }
+    },
+    "_t": "a"
+  },
+  "users": {
+    "20": {
+      "name": [
+        "commodo et eiusmod id",
+        "Pete Rogahn"
       ]
     },
     "_t": "a"
