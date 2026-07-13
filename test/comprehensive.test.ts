@@ -328,6 +328,103 @@ describe("buildPlan", () => {
     expect(plan.has("elope/stamps")).toBe(false);
   });
 
+  it("traverses draft-2020 schemas that omit explicit type:object (F40)", () => {
+    // No "type" keyword anywhere at the object levels — legal in draft 2019/2020.
+    const schema = {
+      properties: {
+        users: {
+          type: "array",
+          items: {
+            properties: {
+              id: { type: "string" },
+              name: { type: "string" },
+            },
+            required: ["id"],
+            type: "object",
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema });
+    // At HEAD the root's missing type:"object" yielded an empty plan and the
+    // array degraded to LCS; the array must now be discovered.
+    expect(plan.get("/users")?.strategy).toBe("primaryKey");
+    expect(plan.get("/users")?.primaryKey).toBe("id");
+  });
+
+  it("traverses typeless nodes carrying only an items keyword (F40)", () => {
+    const schema = {
+      properties: {
+        // Object node with no "type", array node with no "type".
+        tags: {
+          items: { type: "string" },
+        },
+      },
+    };
+    const plan = buildPlan({ schema });
+    expect(plan.get("/tags")?.strategy).toBe("unique");
+  });
+
+  it("merges allOf item branches for primary-key detection (F35)", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        users: {
+          type: "array",
+          items: {
+            allOf: [
+              {
+                type: "object",
+                properties: { id: { type: "string" } },
+                required: ["id"],
+              },
+              {
+                type: "object",
+                properties: { name: { type: "string" } },
+                required: ["name"],
+              },
+            ],
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema: schema as any });
+    const arrayPlan = plan.get("/users");
+    // At HEAD allOf was never inspected -> lcs/null; now the id declared in the
+    // first branch is found and required fields are merged across branches.
+    expect(arrayPlan?.strategy).toBe("primaryKey");
+    expect(arrayPlan?.primaryKey).toBe("id");
+    expect(arrayPlan?.requiredFields).toEqual(new Set(["id", "name"]));
+    expect(arrayPlan?.hashFields?.sort()).toEqual(["id", "name"]);
+  });
+
+  it("merges allOf nested inside an anyOf/oneOf branch (F35)", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        users: {
+          type: "array",
+          items: {
+            oneOf: [
+              {
+                allOf: [
+                  {
+                    type: "object",
+                    properties: { id: { type: "number" } },
+                    required: ["id"],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema: schema as any });
+    expect(plan.get("/users")?.primaryKey).toBe("id");
+    expect(plan.get("/users")?.strategy).toBe("primaryKey");
+  });
+
   it("should give priority to custom key over inferred key", () => {
     const schema = {
       type: "object",

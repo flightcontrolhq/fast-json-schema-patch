@@ -91,25 +91,18 @@ export function _traverseSchema(
     }
   }
 
-  if (subSchema.type === "object") {
-    if (subSchema.properties) {
-      for (const key in subSchema.properties) {
-        _traverseSchema(
-          subSchema.properties[key] as JSONSchema,
-          // Escape so plan paths line up with the escaped patch paths the
-          // differ emits for keys containing "/" or "~".
-          `${docPath}/${escapeJsonPointer(key)}`,
-          plan,
-          schema,
-          visited,
-          options,
-        )
-      }
-    }
-    if (typeof subSchema.additionalProperties === "object" && subSchema.additionalProperties) {
+  // Traverse as an object whenever the shape keywords are present, regardless of
+  // whether an explicit `type: "object"` is declared (§4.3.1). JSON Schema does
+  // not require `type` alongside `properties`/`additionalProperties` (common in
+  // draft 2019/2020 schemas and anyOf branches); gating on the type keyword lost
+  // every plan beneath such nodes and degraded their arrays to whole-object LCS.
+  if (subSchema.properties) {
+    for (const key in subSchema.properties) {
       _traverseSchema(
-        subSchema.additionalProperties,
-        `${docPath}/*`,
+        subSchema.properties[key] as JSONSchema,
+        // Escape so plan paths line up with the escaped patch paths the
+        // differ emits for keys containing "/" or "~".
+        `${docPath}/${escapeJsonPointer(key)}`,
         plan,
         schema,
         visited,
@@ -117,8 +110,19 @@ export function _traverseSchema(
       )
     }
   }
+  if (typeof subSchema.additionalProperties === "object" && subSchema.additionalProperties) {
+    _traverseSchema(
+      subSchema.additionalProperties,
+      `${docPath}/*`,
+      plan,
+      schema,
+      visited,
+      options,
+    )
+  }
 
-  if (subSchema.type === "array" && subSchema.items) {
+  // Likewise, traverse as an array whenever `items` is present (§4.3.1).
+  if (subSchema.items) {
     const arrayPlan: ArrayPlan = {primaryKey: null, strategy: "lcs"}
 
     let itemsSchema = subSchema.items
@@ -145,18 +149,38 @@ export function _traverseSchema(
       arrayPlan.primaryKey = customKey
       arrayPlan.strategy = "primaryKey"
     } else if (!isPrimitive) {
+      // Resolve a leading $ref and merge `allOf` branches into a single synthetic
+      // object view (§4.5.1). Items composed with allOf — e.g. a branch that
+      // declares a required "id" — otherwise never surface a primary key, and
+      // required fields split across allOf branches are never combined, so the
+      // array silently degrades to LCS. Nested allOf and $ref branches are merged
+      // recursively; branch properties/required are unioned.
+      const mergeAllOf = (s: JSONSchema): JSONSchema => {
+        let cur = s
+        if (cur?.$ref) {
+          const resolved = _resolveRef(cur.$ref, schema)
+          if (!resolved) return cur
+          cur = resolved
+        }
+        if (!cur?.allOf || !Array.isArray(cur.allOf)) return cur
+
+        const mergedProps: Record<string, JSONSchema> = {...(cur.properties || {})}
+        const mergedRequired = new Set<string>(cur.required || [])
+        for (const branch of cur.allOf) {
+          const view = mergeAllOf(branch as JSONSchema)
+          if (view?.properties) Object.assign(mergedProps, view.properties)
+          for (const req of view?.required || []) mergedRequired.add(req)
+        }
+        return {type: "object", properties: mergedProps, required: [...mergedRequired]}
+      }
+
       // Find primary key and other metadata only for non-primitive object arrays
       const findMetadata = (
         s: JSONSchema,
       ): Pick<ArrayPlan, "primaryKey" | "requiredFields" | "hashFields"> | null => {
-        let currentSchema = s
-        if (!currentSchema || typeof currentSchema !== "object") return null
+        if (!s || typeof s !== "object") return null
 
-        if (currentSchema.$ref) {
-          const resolved = _resolveRef(currentSchema.$ref, schema)
-          if (!resolved) return null
-          currentSchema = resolved
-        }
+        const currentSchema = mergeAllOf(s)
         if (!currentSchema || currentSchema.type !== "object" || !currentSchema.properties) {
           return null
         }
