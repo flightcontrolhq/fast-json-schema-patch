@@ -91,6 +91,24 @@ export class StructuredDiff {
     return undefined;
   }
 
+  // Extracts the numeric array-index segment immediately following `pathPrefix`
+  // in `path` (e.g. "/users/3" with prefix "/users" -> 3). Returns undefined if
+  // `path` does not start with `pathPrefix` or is not followed by a digit
+  // segment. Previously built via `new RegExp(`^${escaped}/(\d+)`)` inside an
+  // untagged template literal, where `\d` cooks to the literal letter `d` (not
+  // a regex escape), so the fallback never matched numeric indices (F17).
+  // Stripping the prefix first and matching against a fixed regex literal
+  // avoids constructing a regex from interpolated text entirely.
+  private extractIndexAfterPrefix(
+    path: string,
+    pathPrefix: string
+  ): number | undefined {
+    if (!path.startsWith(pathPrefix)) return undefined;
+    const remainder = path.substring(pathPrefix.length);
+    const match = remainder.match(/^\/(\d+)/);
+    return match ? Number.parseInt(match[1] as string, 10) : undefined;
+  }
+
   private aggregateWithoutChildSeparation(
     patches: Operation[],
     config: StructuredDiffConfig
@@ -296,15 +314,9 @@ export class StructuredDiff {
 
         // This is a fallback for remove operations where the childId might not have been
         // resolved correctly. It extracts the index from the path.
-        const pathMatch = p.path.match(
-          new RegExp(
-            `^${pathPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(\d+)`
-          )
-        );
-        const pathIndex = pathMatch?.[1];
-        if (pathIndex) {
-          const index = Number.parseInt(pathIndex, 10);
-          const childPathPrefix = `${pathPrefix}/${index}`;
+        const pathIndex = this.extractIndexAfterPrefix(p.path, pathPrefix);
+        if (pathIndex !== undefined) {
+          const childPathPrefix = `${pathPrefix}/${pathIndex}`;
           return { ...p, path: p.path.substring(childPathPrefix.length) };
         }
         return p;

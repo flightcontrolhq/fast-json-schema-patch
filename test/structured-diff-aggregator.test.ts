@@ -1329,3 +1329,42 @@ describe("StructuredDiff", () => {
     expect(newParent.services).toBeUndefined();
   });
 });
+
+describe("StructuredDiff remove-fallback index extraction (F17)", () => {
+  // The remove-op fallback (used to relativize a child patch path whose
+  // childId wasn't resolved via originalChildIdsByIndex) used to build its
+  // regex as `new RegExp(`^${escapedPrefix}/(\d+)`)` inside an untagged
+  // template literal: `\d` cooks to the plain letter `d`, so the resulting
+  // pattern was effectively `^/users/(d+)` and never matched a numeric index.
+  // That silently left the absolute path unchanged instead of relativizing
+  // it. This exercises the extraction directly (it is not reachable through
+  // ordinary add/remove classification, so this is the most direct way to
+  // pin the regex behavior) via the private helper.
+  const plan = buildPlan({ schema: schema as any });
+  const sd = new StructuredDiff({ plan }) as unknown as {
+    extractIndexAfterPrefix(path: string, pathPrefix: string): number | undefined;
+  };
+
+  it("extracts a single-digit index right after the prefix", () => {
+    expect(sd.extractIndexAfterPrefix("/users/3", "/users")).toBe(3);
+  });
+
+  it("extracts a multi-digit index right after the prefix", () => {
+    expect(sd.extractIndexAfterPrefix("/users/42", "/users")).toBe(42);
+  });
+
+  it("extracts the leading index even when the path continues (nested op)", () => {
+    expect(sd.extractIndexAfterPrefix("/users/12/name", "/users")).toBe(12);
+  });
+
+  it("returns undefined when the path does not start with the prefix", () => {
+    expect(sd.extractIndexAfterPrefix("/other/3", "/users")).toBeUndefined();
+  });
+
+  it("returns undefined when there is no digit segment after the prefix (old bug: matched literal 'd's)", () => {
+    // Under the old `\d` -> `d` bug, a path made of literal "d" characters
+    // would spuriously match `^/users/(d+)`; a real numeric index would not.
+    expect(sd.extractIndexAfterPrefix("/users/ddd", "/users")).toBeUndefined();
+    expect(sd.extractIndexAfterPrefix("/users/name", "/users")).toBeUndefined();
+  });
+});
