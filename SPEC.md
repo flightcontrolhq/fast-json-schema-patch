@@ -157,17 +157,22 @@ document has path `""` (empty string). A pointer is `""` or a sequence of `/`-pr
 segments. `splitPath("")` is the empty list; `splitPath("/a/b")` is `["a","b"]` after unescaping.
 
 `3.5` **The `-` append token.** `-` denotes the position one past the last array element (RFC 6901
-§4). It is valid **only as the final segment of an `add` op path** (§8.3). Apply MUST reject `-`:
-in any non-final segment; on `remove`, `replace`, `test`, or as a `move`/`copy` destination final
-segment — with `INVALID_POINTER` (§8.6). (An OPTIONAL non-RFC "remove last" extension is reserved
-but not part of spec-v1; §10.4.)
+§4). It is valid as the final segment of an `add` op path and, by delegation to `add`, as a
+`move`/`copy` **destination** final segment (§8.3). Apply MUST reject `-` **in any non-final
+segment**, and as the final segment of a `remove`, `replace`, or `test`, or as a `move`/`copy`
+**source** final segment. On the **write side** (`remove`/`replace` finals and any non-final
+segment) rejection is `INVALID_POINTER`; on the **read side** (`test` finals and `move`/`copy`
+**source** finals) `-` fails own-index resolution and surfaces as `PATH_UNRESOLVABLE` (§3.6, §8.6).
+(An OPTIONAL non-RFC "remove last" extension is reserved but not part of spec-v1; §10.4.)
 
 `3.6` **Array-index syntax.** An array-index segment MUST match `^(0|[1-9][0-9]*)$`: a single `0`,
 or a nonzero digit followed by digits. Leading zeros (`01`), signs (`-0`, `+1`), decimals
-(`1.5`), and non-digits are invalid indices and MUST be rejected with `INVALID_POINTER` when the
-container at that point is an array (§8.6). A segment is interpreted as an array index only when
-the container it addresses is an array; against an object the same segment is an ordinary member
-key (§8.2.3).
+(`1.5`), and non-digits are invalid indices against an array container (§8.6). Rejection is
+`INVALID_POINTER` **only on write-side resolution** — an `add`/`remove`/`replace` target or any
+intermediate segment along the way. On **read-side resolution** (a `test` target, or a
+`move`/`copy` **source**) the malformed segment instead fails existence and surfaces as
+`PATH_UNRESOLVABLE` (§8.6). A segment is interpreted as an array index only when the container it
+addresses is an array; against an object the same segment is an ordinary member key (§8.2.3).
 
 ---
 
@@ -194,7 +199,8 @@ Plan = Map<documentPath, ArrayPlan>
 `4.1.1` `hashFields` and `itemSchema` are **non-normative optimization metadata**. `hashFields`
 is a prefilter hint only (§5.4.4) and MUST be output-neutral; `itemSchema` is never consulted at
 diff time and MAY be omitted entirely. `primaryKey`, `strategy`, and `requiredFields` are the
-output-relevant fields.
+output-relevant fields; their derivation from a schema is directly falsifiable via the
+plan-snapshot vector format (§10.6).
 
 ### 4.2 `buildPlan` inputs
 
@@ -246,9 +252,12 @@ nesting level its own plan path and teaches the diff-time lookup, §5.4.5, about
 
 `4.3.6` **`anyOf` / `oneOf` / `allOf`.** For each of these keywords present on a node, traverse
 every branch schema at the **current** path. Branches are **de-duplicated by structural
-fingerprint**: a canonical JSON string with recursively sorted object keys (a stable stringify) is
-computed per branch, and a branch whose fingerprint was already seen at this node is skipped. The
-fingerprint's cycle guard treats a re-encountered node as `undefined`.
+fingerprint within the same keyword's branch list only** (the dedup set is reset per keyword): a
+canonical JSON string with recursively sorted object keys (a stable stringify) is computed per
+branch, and a branch whose fingerprint was already seen **in that same keyword's list** is
+skipped. Fingerprints are **not** shared across `anyOf`/`oneOf`/`allOf` at a node, so an identical
+branch appearing under two different keywords is traversed once per keyword. The fingerprint's
+cycle guard treats a re-encountered node as `undefined`.
 
 ### 4.4 Constructing an ArrayPlan
 
@@ -326,7 +335,8 @@ otherwise output-equivalent plans).
 displaced plan is merged into it; when it loses, its metadata is merged into the retained plan.
 Merge rules: `hashFields` become the set-union of both; `requiredFields` are taken from whichever
 plan has them if the target lacks them. This merge is non-normative (it only affects prefilter
-hints) but is specified so implementations produce identical `hashFields` for vector comparison.
+hints) but is specified so implementations produce identical `hashFields` for vector comparison
+(the plan-snapshot vector format, §10.6, compares `hashFields` order-insensitively).
 
 ---
 
@@ -431,6 +441,13 @@ match in modified. Collect their original indices, **sort descending**, and for 
 
 This ordering is REQUIRED (§5.7 explains why it is round-trip-correct under sequential apply).
 
+`5.4.1.5` **Key equality (normative).** Index construction (Phase 1) and lookup (Phase 2) MUST
+treat two primaryKey values as the same key **iff they are equal by JSON type AND value** (§2.4.3):
+no coercion is performed, so a numeric key `1` and a string key `"1"` are **distinct** keys and
+never match each other (as are, e.g., `true` and `"true"` — though only string/number keys are
+indexed at all, §5.4.1.1). The reference stores keys in a `Map` keyed by the raw string/number
+value, which distinguishes `1` from `"1"` natively.
+
 #### 5.4.2 Worked example
 
 Original `users = [{id:a,name:A},{id:b,name:B},{id:c,name:C}]`; modified
@@ -478,17 +495,22 @@ first hit:
    look that up. (This is how an array nested under array elements — path
    `/services/3/ports` — matches its schema key `/services/ports`.)
 3. **Immediate-parent wildcard:** take the index-normalized `P`, replace its **last** segment
-   with `*`, and look that up (matches an `additionalProperties`-array key such as `/*` for a
-   direct wildcard-keyed array, or `/foo/*`).
+   with `*`, and look that up (matches a nested `additionalProperties`-array key such as `/foo/*`).
+   This step is **guarded by `P.lastIndexOf('/') > 0`** and is skipped entirely when `P` has no
+   parent segment (see limitation (iii)).
 
 If none hits, there is no plan (strategy `lcs`). **Known limitations an implementation MUST
 reproduce for conformance:** (i) the wildcard match forms **only a single trailing `*`**, so an
 `additionalProperties` plan registered at a *deeper* key such as `/*/items` is **not** reachable
 for a concrete path `/envA/items` — that array falls back to `lcs`; (ii) index-normalization
 strips **all** `/<digits>` segments, so an object member whose key is a decimal-digit string
-(e.g. `"0"`) is also stripped and may mis-route the lookup (§F33). These are pinned behaviors, not
-latitude. *(draft-pending §4.3.5 adds one wildcard element level for nested arrays and the lookup
-MUST be extended to match it.)*
+(e.g. `"0"`) is also stripped and may mis-route the lookup (§F33); (iii) a **top-level `/*` plan
+key** — a concrete array path with no parent segment, e.g. a root array member at path `/foo`,
+whose only `/` is at index 0 — is **never** matched at diff time, because step 3 above is guarded
+by `path.lastIndexOf('/') > 0` (a concrete path with `lastIndexOf('/') === 0` skips the wildcard
+lookup), so such an array falls back to `lcs`. These are pinned behaviors, not latitude.
+*(draft-pending §4.3.5 adds one wildcard element level for nested arrays and the lookup MUST be
+extended to match it.)*
 
 #### 5.4.6 Hash-field prefilter (non-normative)
 
@@ -521,6 +543,12 @@ Standard greedy Myers with these pinned choices (an implementer MUST match them,
 
 - `max = n + m`; diagonal index `k` ranges `-d..d` step 2 at edit-distance `d`; the V-array is
   offset by `max`. `V[offset+1] = 0` seeds the pass.
+- **V-buffer initialization (pinned).** The V-buffers are sized `2·max + 1` and **all cells
+  initialize to `-1`**; only `V[offset+1]` is then seeded to `0`. Any read of a diagonal outside
+  the allocated range (`kOffset ≤ 0` on the left, `kOffset ≥ bufSize-1` on the right) is likewise
+  taken as `-1`. These `-1` sentinels feed the `V[k-1] < V[k+1]` tie-break (next bullet) at the
+  diagonal extremes, fixing the down/right choice there and therefore the exact shortest script
+  chosen.
 - For each `k`: **go down** (advance in `modified`, i.e. an insertion) when `k === -d`, **or**
   (`k !== d` **and** `V[k-1] < V[k+1]`); otherwise **go right** (advance in `original`, a
   deletion). "Down" takes `x = V[k+1]`; "right" takes `x = V[k-1] + 1`. Then `y = x - k`.
@@ -561,7 +589,10 @@ Walk the (collapsed) script maintaining `currentIndex` starting at `0`; `prefix`
   `diff(...)` at `prefix + currentIndex` (they are already deep-equal per the snake, so this
   yields no ops; it is a no-op that MUST NOT emit anything — an implementation MAY skip it).
   `currentIndex++`.
-- **replace** (§5.5.4): emit at `prefix + currentIndex`; `currentIndex++`.
+- **replace** (§5.5.4): emit a whole-item replace at `prefix + currentIndex`; `currentIndex++` —
+  **unless granular descent applies** (§5.5.4.2), in which case recurse
+  `diff(original[ai], modified[bi], prefix + currentIndex)` at `prefix + currentIndex` instead of
+  emitting a whole-item replace, and still `currentIndex++`.
 - **remove:** emit `{ op: "remove", path: prefix + currentIndex, oldValue: original[ai] }`;
   `currentIndex` is **not** incremented (subsequent ops address the shifted array).
 - **add:** emit `{ op: "add", path: prefix + currentIndex, value: modified[bi] }`;
@@ -636,8 +667,9 @@ token (RFC 6902-standard; the reference and fast-json-patch both accept it, incl
 | `replace` | ✔ | ✔ | ✔ (default mode) | `value` new, `oldValue` old (§6.4). |
 
 `6.3.1` **Append paths.** primaryKey additions (§5.4.1.2) and — in the general/primitive case —
-unique/LCS empty-source additions use `path` ending in `/-`. LCS emits **concrete indices** for
-in-place adds (§5.5.5). A conforming consumer MUST handle both concrete-index and `/-` add paths.
+`unique` additions use `path` ending in `/-`. **LCS never emits `/-`:** it emits **concrete
+indices** for all adds, including empty-source additions (`/0`, `/1`, …; §5.5.1) and in-place adds
+(§5.5.5). A conforming consumer MUST handle both concrete-index and `/-` add paths.
 
 ### 6.4 `oldValue` extension
 
@@ -746,8 +778,11 @@ the path shape.
 | `test` | target exists | assert target deep-equals `value` (§2.4.1); else `TEST_FAILED` | no change |
 
 `8.3.1` **`add` index range:** `add` accepts index `== length` (append) and `-`; index `> length`
-→ `INDEX_OUT_OF_BOUNDS`. **`remove`/`replace` index range:** index `< length` required; index
-`>= length` (or `-`) → `INDEX_OUT_OF_BOUNDS` / `INVALID_POINTER`.
+→ `INDEX_OUT_OF_BOUNDS`. **`remove`/`replace` index range (split rule):** the `-` append token is
+rejected with `INVALID_POINTER`; a well-formed numeric index `>= length` is rejected with
+`INDEX_OUT_OF_BOUNDS` (index `< length` is required). **`test` index range:** because `test`
+resolves **read-side** (§8.6), both a `-` final and a numeric index `>= length` fail existence and
+surface as `PATH_UNRESOLVABLE`, not `INVALID_POINTER`/`INDEX_OUT_OF_BOUNDS`.
 
 `8.3.2` **`add` overwrites an existing object member** (does not error); a member mapping to
 `undefined` and an absent member behave identically.
@@ -758,6 +793,16 @@ source (later ops mutating one must not affect the other).
 
 `8.3.4` **`test`** uses **exact deep-equal** (§2.4.1), never a hash/memo prefilter that could be
 fooled.
+
+`8.3.5` **Error precedence (normative).** When an op could fail for more than one reason, checks
+are evaluated in this fixed order and the **first** applicable failure is thrown: (1) a **missing
+required field** — `value` on `add`/`replace`, `from` on `move`/`copy` — → `INVALID_OPERATION`;
+then (2) **pointer/index syntax and bounds** (§3.5, §3.6, §8.3.1: `INVALID_POINTER`,
+`INDEX_OUT_OF_BOUNDS`, and, on write-side object segments, the `UNSAFE_KEY` guard §8.6.1); then
+(3) **existence** of the target or an intermediate segment (§8.2.2) → `PATH_UNRESOLVABLE`; then
+(4) **value checks** — `OLD_VALUE_MISMATCH` (§8.4) or `TEST_FAILED` (§8.3). (Thus e.g. an `add`
+missing `value` with an also-malformed index throws `INVALID_OPERATION`, not `INVALID_POINTER`;
+verified by probe.)
 
 ### 8.4 `oldValue` validation
 
@@ -783,20 +828,25 @@ of:
 
 | code | meaning |
 |------|---------|
-| `INVALID_POINTER` | malformed pointer: `-` where not allowed (§3.5), leading-zero/sign/decimal array index (§3.6) |
-| `PATH_UNRESOLVABLE` | a target or intermediate segment does not exist (§8.2.2); remove/replace of a nonexistent member |
+| `INVALID_POINTER` | malformed pointer on **write-side** resolution (add/remove/replace targets and intermediates, move/copy destinations): `-` on a remove/replace final or any non-final segment (§3.5), leading-zero/sign/decimal array index (§3.6). Read-side malformed/`-` segments surface as `PATH_UNRESOLVABLE` instead. |
+| `PATH_UNRESOLVABLE` | a target or intermediate segment does not exist (§8.2.2); remove/replace of a nonexistent member; a malformed or `-` segment encountered during **read-side** resolution — `test`, or a `move`/`copy` **source** (§3.5, §3.6); a read-side `__proto__`/`constructor`/`prototype` segment (§8.6.1) |
 | `INDEX_OUT_OF_BOUNDS` | array index out of range for the op (§8.3.1) |
 | `TEST_FAILED` | `test` value mismatch (§8.3) |
 | `OLD_VALUE_MISMATCH` | `validateOldValues`: document value ≠ `oldValue` (§8.4) |
 | `INVALID_OPERATION` | unknown op; missing required field (`value`/`from`); remove at root; `move` into own child |
 | `UNSAFE_KEY` | prototype-pollution guard tripped (§8.6.1) |
 
-`8.6.1` **Prototype-pollution guard.** A pointer segment equal to `__proto__` (**anywhere**) is
-rejected with `UNSAFE_KEY`. A segment equal to `prototype` is rejected **only** when its
-*immediately preceding* segment is `constructor`. Standalone `constructor` and standalone
-`prototype` (not preceded by `constructor`) are legitimate JSON object keys and MUST remain
-usable. The guard is checked on every object segment traversed and on the final object segment;
-it does not apply to array-index segments.
+`8.6.1` **Prototype-pollution guard (write-side only).** During **write-side** resolution
+(`add`/`remove`/`replace` targets and intermediates, and `move`/`copy` **destinations**), a
+pointer segment equal to `__proto__` (**anywhere** on the write-side path) is rejected with
+`UNSAFE_KEY`. A segment equal to `prototype` is rejected **only** when its *immediately preceding*
+segment is `constructor`. Standalone `constructor` and standalone `prototype` (not preceded by
+`constructor`) are legitimate JSON object keys and MUST remain usable. The guard is checked on
+every object segment traversed and on the final object segment; it does not apply to array-index
+segments. **Read-side** resolution (`test` targets and `move`/`copy` **sources**) does **not** run
+this guard: it resolves segments by own-property lookup (`Object.hasOwn`), so a `__proto__`,
+`constructor`, or `prototype` segment simply fails existence and surfaces as `PATH_UNRESOLVABLE`,
+never `UNSAFE_KEY`.
 
 `8.6.2` `operationIndex` is the 0-based index of the failing op within `patches`. `operation` is
 the failing op unmodified.
@@ -957,6 +1007,44 @@ primaryKey contract §7.2 was pinned at 500/500 trials; LCS exactness at 800/800
 300/300). New vectors for schema-derived plan corners (§4) SHOULD be authored by hand, since the
 existing suite under-covers plan derivation.
 
+`10.5.1` **primaryKey gate coverage (REQUIRED).** The vector suite MUST include at least one diff
+vector for **each** §5.4.3 gate-failure class, each asserting the `lcs` **fallback** (exact
+reconstruction, §7.1) rather than keyed emission: (a) an array element that is **not an object**;
+(b) an element whose primaryKey value is **missing, `null`, or not a string/number**; and (c) a
+**duplicate** primaryKey value within `original` **or** within `modified`. A `primaryKeyMap`
+override (§4.4.3) MUST NOT bypass the gate — a gate-failing override case SHOULD also be covered.
+
+### 10.6 Plan-snapshot vector format (normative)
+
+To make §4 plan derivation falsifiable independently of any diff, a **plan-snapshot vector** is a
+JSON record:
+
+```
+{
+  "name":    string,                          // unique id
+  "schema":  Schema,                          // REQUIRED
+  "options": { primaryKeyMap?, basePath? },   // optional
+  "expectedPlan": [                           // sorted by `path`
+    {
+      "path":           documentPath,
+      "primaryKey":     string | null,
+      "strategy":       "primaryKey" | "unique" | "lcs",
+      "requiredFields": string[],   // sorted; [] when absent
+      "hashFields":     string[]    // sorted; [] when absent
+    }
+  ]
+}
+```
+
+`10.6.1` The implementation under test computes `buildPlan(schema, options)` and compares the
+resulting `documentPath → ArrayPlan` map against `expectedPlan`: the **set of paths** must match,
+and for each path the `primaryKey`, `strategy`, `requiredFields` (as a sorted string array), and
+`hashFields` (as a sorted string array) must match. `itemSchema` (§4.1.1) is **never** compared.
+Both the entry list and the two field arrays are compared **order-insensitively** (by sorting);
+the `expectedPlan` array is authored sorted by `path` for readability. This format makes the §4
+derivation — including §4.1.1 (which fields are output-relevant) and §4.7.4 (metadata merge /
+`hashFields`) — directly falsifiable.
+
 ---
 
 ## Appendix A. Summary of draft-pending fixes (contract vs. HEAD)
@@ -985,3 +1073,6 @@ key, prototype-pollution guard, error codes, invert round-trip).
   `allOf` branch is not found (§4.5.1).
 - **B.4** `unique` set-diff/move semantics are unspecified in spec-v1; unequal lengths fall back to
   LCS (§5.6.2).
+- **B.5** A top-level `/*` plan key (a concrete array path with no parent segment, e.g. a root
+  array member at `/foo`) is never matched at diff time — the wildcard lookup is guarded by
+  `path.lastIndexOf('/') > 0` — so such arrays fall back to LCS (§5.4.5, limitation (iii)).
