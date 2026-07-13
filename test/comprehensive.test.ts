@@ -631,6 +631,51 @@ describe("JsonSchemaPatcher", () => {
   });
 });
 
+describe("JsonSchemaPatcher constructor validation (F42)", () => {
+  it("throws an actionable TypeError (not a cryptic one) when plan is undefined", () => {
+    expect(() => new JsonSchemaPatcher({ plan: undefined as any })).toThrow(
+      TypeError
+    );
+    try {
+      new JsonSchemaPatcher({ plan: undefined as any });
+      throw new Error("expected constructor to throw");
+    } catch (e) {
+      expect(e).toBeInstanceOf(TypeError);
+      const message = (e as TypeError).message;
+      // Actionable: names buildPlan() and the schemaless `new Map()` escape hatch.
+      expect(message).toContain("buildPlan");
+      expect(message).toContain("new Map()");
+    }
+  });
+
+  it("throws when options itself is missing entirely", () => {
+    expect(() => new JsonSchemaPatcher({} as any)).toThrow(TypeError);
+  });
+
+  it("throws when plan is a plain object instead of a Map", () => {
+    expect(() => new JsonSchemaPatcher({ plan: {} as any })).toThrow(TypeError);
+  });
+
+  it("accepts an empty Map for documented schemaless mode", () => {
+    expect(() => new JsonSchemaPatcher({ plan: new Map() })).not.toThrow();
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
+    const patch = patcher.execute({
+      original: { a: 1 },
+      modified: { a: 2 },
+    });
+    expect(patch).toEqual([
+      { op: "replace", path: "/a", value: 2, oldValue: 1 },
+    ]);
+  });
+
+  it("accepts a real buildPlan() Map", () => {
+    const plan = buildPlan({
+      schema: { type: "object", properties: { a: { type: "number" } } } as any,
+    });
+    expect(() => new JsonSchemaPatcher({ plan })).not.toThrow();
+  });
+});
+
 test("JsonSchemaPatcher generates correct patches for array with primary key", () => {
   const doc1 = {
     environments: [

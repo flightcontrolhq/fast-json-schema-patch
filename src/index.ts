@@ -41,6 +41,19 @@ export class JsonSchemaPatcher {
   private simplePathCache = new Set<string>();
 
   constructor(options: { plan: Plan }) {
+    // F42: fail fast with an actionable message instead of a cryptic
+    // "undefined is not an object (evaluating this.plan.size)" TypeError
+    // thrown later from the planIsEmpty computation below. Any Map instance
+    // is accepted, including an empty one (`new Map()`), which is the
+    // documented schemaless mode (SPEC §10.1: "schema omitted/null -> diff
+    // with an empty plan").
+    if (!(options?.plan instanceof Map)) {
+      throw new TypeError(
+        "JsonSchemaPatcher requires { plan: Map<string, ArrayPlan> }. " +
+          "Build one with buildPlan({ schema }), or pass { plan: new Map() } " +
+          "to diff without a schema (schemaless mode)."
+      );
+    }
     this.plan = options.plan;
     this.planIsEmpty = this.plan.size === 0;
   }
