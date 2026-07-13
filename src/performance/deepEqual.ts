@@ -9,6 +9,20 @@ export function getPlanFingerprint(plan?: ArrayPlan): string {
   return `${plan.primaryKey || ""}-${plan.hashFields?.join(",") || ""}-${plan.strategy || ""}`
 }
 
+/**
+ * True if `value` is a non-null, non-array object whose prototype is
+ * neither the plain `Object.prototype` nor `null` (e.g. `Date`, `RegExp`,
+ * `Map`, a class instance). Per SPEC §2.1.2, non-JSON inputs are out of
+ * scope; such values are treated as opaque leaves for equality (F16)
+ * instead of being walked as if they were plain JSON objects, which would
+ * silently see zero own-enumerable-keys on both sides and compare equal.
+ */
+export function isOpaqueObject(value: unknown): boolean {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false
+  const proto = Object.getPrototypeOf(value)
+  return proto !== Object.prototype && proto !== null
+}
+
 export function deepEqual(obj1: unknown, obj2: unknown): boolean {
   if (obj1 === obj2) return true;
 
@@ -29,6 +43,19 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
     }
 
     if (arrA !== arrB) return false;
+
+    // SPEC §2.1.2 / F16: non-JSON inputs are out of scope; as a cheap guard,
+    // treat opaque objects (Date, Map, RegExp, class instances, ...) as
+    // leaves compared via valueOf()/=== instead of structural own-key
+    // comparison. Without this, two different Dates (both with zero own
+    // enumerable keys) silently compare equal via the empty-keys path below.
+    if (isOpaqueObject(obj1) || isOpaqueObject(obj2)) {
+      if (Object.getPrototypeOf(obj1) !== Object.getPrototypeOf(obj2)) return false;
+      return (
+        (obj1 as { valueOf(): unknown }).valueOf() ===
+        (obj2 as { valueOf(): unknown }).valueOf()
+      );
+    }
 
     const keys = Object.keys(obj1);
     length = keys.length;
@@ -77,6 +104,14 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   // both are non-null objects
   const a = obj1 as JsonObject
   const b = obj2 as JsonObject
+
+  // Opaque objects (Date, Map, RegExp, class instances, ...) must not take
+  // the own-key fast paths below: e.g. two different Dates both have zero own
+  // enumerable keys and would otherwise compare equal. Defer to deepEqual,
+  // which treats them as leaves compared via valueOf()/=== (F16, SPEC §2.1.2).
+  if (isOpaqueObject(a) || isOpaqueObject(b)) {
+    return deepEqual(a, b)
+  }
 
   // Fast path for empty objects
   const keysA = Object.keys(a)

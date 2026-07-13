@@ -65,6 +65,16 @@ console.log(patch);
 This library extends the standard JSON Patch format by adding an `oldValue` field to `remove` and `replace` operations.
 This addition makes UI rendering and state reconciliation easier but is not part of the strict RFC 6902 specification.
 
+### A Note on Inputs: JSON Values Only
+
+`original` and `modified` must be JSON values — the value space produced by `JSON.parse` (`null`, boolean, number, string, plain object, or array). Handling of non-JSON inputs is not fully defended against:
+
+- `Date`, `RegExp`, `Map`, and other class instances are compared as opaque leaves (via `valueOf()`/`===`, so two different `Date`s will correctly diff instead of silently comparing equal), but they are otherwise echoed as-is into `value`/`oldValue` and will **not** round-trip through `JSON.stringify`/`JSON.parse` the way a plain object would.
+- `undefined` values and `function`-valued fields are not valid JSON; diffing them can produce operations that omit `value` entirely.
+- Circular references are **not** detected and will overflow the call stack.
+
+If your data may contain any of the above, round-trip it through `JSON.parse(JSON.stringify(doc))` (or an equivalent JSON-safe transform) before diffing.
+
 ---
 
 ## 🔁 Applying and Inverting Patches

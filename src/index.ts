@@ -7,7 +7,7 @@ import {
   type ModificationCallback,
 } from "./core/arrayDiffAlgorithms";
 import type { ArrayPlan, Plan } from "./core/buildPlan";
-import { deepEqualMemo } from "./performance/deepEqual";
+import { deepEqualMemo, isOpaqueObject } from "./performance/deepEqual";
 import { bumpEpoch } from "./performance/epoch";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "./types";
 import {
@@ -55,6 +55,27 @@ export class JsonSchemaPatcher {
     return wildcardPath;
   }
 
+  /**
+   * Computes an RFC 6902-style patch (with an added `oldValue` on `remove`/
+   * `replace`) that transforms `original` into `modified`.
+   *
+   * **JSON-only contract (SPEC §2.1.2):** `original` and `modified` MUST be
+   * JSON values — the value space produced by `JSON.parse` (`null`, boolean,
+   * number, string, plain object, or array). Behavior on non-JSON inputs is
+   * out of scope and not fully defended against:
+   *  - `Date`, `RegExp`, `Map`, and other class instances are treated as
+   *    opaque leaves during equality (compared via `valueOf()`/`===`), but
+   *    are otherwise serialized/echoed as-is into `value`/`oldValue` — they
+   *    will NOT round-trip through `JSON.stringify`/`JSON.parse` the way a
+   *    plain object would.
+   *  - `undefined` values and `function`-valued fields are not valid JSON;
+   *    diffing them can produce operations that omit `value` entirely.
+   *  - Circular references are not detected and will overflow the call
+   *    stack (`RangeError`).
+   * Pass documents that have already round-tripped through `JSON.parse` (or
+   * are otherwise known to be JSON-safe) to stay within the supported
+   * contract.
+   */
   execute({
     original,
     modified,
@@ -104,6 +125,18 @@ export class JsonSchemaPatcher {
 
     if (Array.isArray(obj1)) {
       this.diffArray(obj1, obj2 as JsonArray, path, patches);
+      return;
+    }
+
+    // SPEC §2.1.2 / F16: a non-JSON object value (Date, RegExp, Map, a class
+    // instance) has no meaningful own-enumerable-key structure to walk as an
+    // object member set — diffObject would see zero keys on both sides and
+    // silently emit no patch even when the values differ. Treat it as an
+    // opaque leaf instead: replace wholesale when unequal (per valueOf()/===).
+    if (isOpaqueObject(obj1) || isOpaqueObject(obj2)) {
+      if (!deepEqualMemo(obj1, obj2)) {
+        patches.push({ op: "replace", path, value: obj2, oldValue: obj1 });
+      }
       return;
     }
 
