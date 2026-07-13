@@ -1,6 +1,7 @@
 import type { ArrayPlan, Plan } from "../core/buildPlan";
 import { cachedJsonStringify, getCachedFormatter } from "../performance/cache";
 import { deepEqualSchemaAware } from "../performance/deepEqual";
+import { bumpEpoch } from "../performance/epoch";
 import { fastHash } from "../performance/fashHash";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type {
@@ -150,6 +151,12 @@ export class StructuredDiff {
   }
 
   execute(config: StructuredDiffConfig): StructuredDiffResult {
+    // Advance the cache epoch so identity-keyed memoization caches (stringify,
+    // path-map, formatter, schema-aware equality) do not return stale results
+    // for inputs mutated in place since a previous diff. Required here for the
+    // precomputed-`config.patches` path, where the JsonSchemaPatcher.execute
+    // that would otherwise bump the epoch is not invoked (SPEC §2.4.4).
+    bumpEpoch();
     const { pathPrefix } = config;
 
     // Validate that the path actually represents an array

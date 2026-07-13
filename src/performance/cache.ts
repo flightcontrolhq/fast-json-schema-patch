@@ -1,23 +1,35 @@
 import {parse} from "json-source-map"
 import type {JsonValue, PathMap} from "../types"
+import {getEpoch} from "./epoch"
+
+// These caches key on object identity, so they cannot detect an in-place
+// mutation of a previously-cached object. Per SPEC §2.4.4 they MUST be
+// output-neutral: a cache MUST NOT return a stale result after an input is
+// mutated between diffs. Each entry therefore records the epoch it was written
+// in and is treated as a MISS once the epoch advances; a public diff entry
+// point (JsonSchemaPatcher.execute / StructuredDiff.execute) bumps the epoch,
+// scoping identity-keyed memoization to a single execute() call.
 
 /**
  * Cache for JSON.stringify results
  * Using WeakMap with object identity as keys to avoid memory leaks
  */
-const jsonStringCache = new WeakMap<object, string>()
+const jsonStringCache = new WeakMap<object, {epoch: number; value: string}>()
 
 /**
  * Cache for buildPathMap results
  * Using WeakMap with object identity as keys to avoid memory leaks
  */
-const pathMapCache = new WeakMap<object, PathMap>()
+const pathMapCache = new WeakMap<object, {epoch: number; value: PathMap}>()
 
 /**
  * Cache for DiffFormatter instances
  * Using a composite key approach for (original, new) pairs
  */
-const formatterCache = new WeakMap<object, WeakMap<object, unknown>>()
+const formatterCache = new WeakMap<
+  object,
+  WeakMap<object, {epoch: number; value: unknown}>
+>()
 
 /**
  * Cached version of JSON.stringify with 2-space indentation
@@ -27,12 +39,13 @@ export function cachedJsonStringify(obj: JsonValue): string {
     return JSON.stringify(obj, null, 2)
   }
 
-  if (jsonStringCache.has(obj)) {
-    return jsonStringCache.get(obj) as string
+  const cached = jsonStringCache.get(obj)
+  if (cached && cached.epoch === getEpoch()) {
+    return cached.value
   }
 
   const result = JSON.stringify(obj, null, 2)
-  jsonStringCache.set(obj, result)
+  jsonStringCache.set(obj, {epoch: getEpoch(), value: result})
   return result
 }
 
@@ -42,8 +55,9 @@ export function cachedBuildPathMap(obj: JsonValue): PathMap {
     return {}
   }
 
-  if (pathMapCache.has(obj)) {
-    return pathMapCache.get(obj) as PathMap
+  const cached = pathMapCache.get(obj)
+  if (cached && cached.epoch === getEpoch()) {
+    return cached.value
   }
 
   const jsonText = cachedJsonStringify(obj)
@@ -57,7 +71,7 @@ export function cachedBuildPathMap(obj: JsonValue): PathMap {
     pathMap = {}
   }
 
-  pathMapCache.set(obj, pathMap)
+  pathMapCache.set(obj, {epoch: getEpoch(), value: pathMap})
   return pathMap
 }
 
@@ -81,11 +95,12 @@ export function getCachedFormatter<T>(
     formatterCache.set(originalObj, innerCache)
   }
 
-  if (innerCache.has(newObj)) {
-    return innerCache.get(newObj) as T
+  const cached = innerCache.get(newObj)
+  if (cached && cached.epoch === getEpoch()) {
+    return cached.value as T
   }
 
   const formatter = createFormatter(originalObj, newObj)
-  innerCache.set(newObj, formatter)
+  innerCache.set(newObj, {epoch: getEpoch(), value: formatter})
   return formatter
 }

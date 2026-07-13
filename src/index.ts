@@ -8,6 +8,7 @@ import {
 } from "./core/arrayDiffAlgorithms";
 import type { ArrayPlan, Plan } from "./core/buildPlan";
 import { deepEqualMemo } from "./performance/deepEqual";
+import { bumpEpoch } from "./performance/epoch";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "./types";
 import {
   escapeJsonPointer,
@@ -61,6 +62,12 @@ export class JsonSchemaPatcher {
     original: JsonValue;
     modified: JsonValue;
   }): Operation[] {
+    // Advance the cache epoch so identity-keyed memoization caches (deepEqual,
+    // stringify, path-map, formatter) from any earlier diff are treated as
+    // stale. This makes a mutate-then-rediff loop recompute instead of
+    // returning a cached verdict for an object that was mutated in place, while
+    // preserving memo hits WITHIN this single call (SPEC §2.4.4).
+    bumpEpoch();
     const patches: Operation[] = [];
     this.diff(original, modified, "", patches);
     return patches;

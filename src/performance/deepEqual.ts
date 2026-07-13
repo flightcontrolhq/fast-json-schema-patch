@@ -1,5 +1,6 @@
 import type {ArrayPlan} from "../core/buildPlan"
 import type {JsonObject} from "../types"
+import {getEpoch} from "./epoch"
 import {fastHash} from "./fashHash"
 import {getEffectiveHashFields} from "./getEffectiveHashFields"
 
@@ -49,9 +50,16 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
   return Number.isNaN(obj1) && Number.isNaN(obj2);
 }
 
-const eqCache = new WeakMap<object, WeakMap<object, boolean>>()
+// Identity-keyed memoization caches (SPEC §2.4.4). Because they key on object
+// identity they cannot see an in-place mutation of a previously-cached object,
+// so each entry records the epoch it was written in and is treated as a MISS
+// once the epoch advances. A public diff entry point bumps the epoch (see
+// epoch.ts), which scopes memoization to a single execute() call and makes a
+// mutate-then-rediff loop recompute instead of returning a stale verdict.
+type EqEntry = {epoch: number; value: boolean}
+const eqCache = new WeakMap<object, WeakMap<object, EqEntry>>()
 // Enhanced cache for schema-aware equality with plan information
-const schemaEqCache = new WeakMap<object, WeakMap<object, Map<string, boolean>>>()
+const schemaEqCache = new WeakMap<object, WeakMap<object, Map<string, EqEntry>>>()
 
 export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] = []): boolean {
   // Fast reference equality check first
@@ -90,9 +98,10 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
     }
   }
 
-  // memoization cache
+  // memoization cache (epoch-scoped: stale entries are treated as misses)
   let inner = eqCache.get(a)
-  if (inner?.has(b)) return inner.get(b) ?? false
+  const hit = inner?.get(b)
+  if (hit && hit.epoch === getEpoch()) return hit.value
 
   // deep recursive compare (original implementation)
   const result = deepEqual(a, b)
@@ -102,7 +111,7 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
     inner = new WeakMap()
     eqCache.set(a, inner)
   }
-  inner.set(b, result)
+  inner.set(b, {epoch: getEpoch(), value: result})
 
   return result
 }
@@ -148,10 +157,13 @@ export function deepEqualSchemaAware(
   // Schema-aware memoization cache with plan fingerprint
   const planFingerprint = getPlanFingerprint(plan)
 
+  const epoch = getEpoch()
   let planCache = schemaEqCache.get(a)
   if (planCache?.has(b)) {
     const cached = planCache.get(b)?.get(planFingerprint)
-    if (cached !== undefined) return cached
+    // Epoch-scoped: an entry from an earlier diff is stale (input may have been
+    // mutated in place) and must be recomputed.
+    if (cached !== undefined && cached.epoch === epoch) return cached.value
   }
 
   // Schema-aware comparison: check significant fields first
@@ -167,7 +179,7 @@ export function deepEqualSchemaAware(
         if (!planCache.has(b)) {
           planCache.set(b, new Map())
         }
-        planCache.get(b)?.set(planFingerprint, false)
+        planCache.get(b)?.set(planFingerprint, {epoch, value: false})
         return false
       }
     }
@@ -186,7 +198,7 @@ export function deepEqualSchemaAware(
       if (!planCache.has(b)) {
         planCache.set(b, new Map())
       }
-      planCache.get(b)?.set(planFingerprint, false)
+      planCache.get(b)?.set(planFingerprint, {epoch, value: false})
       return false
     }
   }
@@ -202,7 +214,7 @@ export function deepEqualSchemaAware(
   if (!planCache.has(b)) {
     planCache.set(b, new Map())
   }
-  planCache.get(b)?.set(planFingerprint, result)
+  planCache.get(b)?.set(planFingerprint, {epoch, value: result})
 
   return result
 }
