@@ -286,6 +286,48 @@ describe("buildPlan", () => {
     expect(plan.get("/items")?.primaryKey).toBe("id");
   });
 
+  it("basePath must match on a segment boundary, not a sibling prefix (F14)", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        env: {
+          type: "object",
+          properties: {
+            vars: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["id"],
+                properties: { id: { type: "string" } },
+              },
+            },
+          },
+        },
+        envelope: {
+          type: "object",
+          properties: {
+            stamps: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["id"],
+                properties: { id: { type: "string" } },
+              },
+            },
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema, basePath: "/env" });
+    // "/env" must NOT capture the sibling "/envelope/stamps".
+    const keys = [...plan.keys()].sort();
+    expect(keys).toEqual(["/vars"]);
+    expect(plan.get("/vars")?.primaryKey).toBe("id");
+    // The corrupted "elope/stamps" key produced by string-prefix stripping
+    // must never appear.
+    expect(plan.has("elope/stamps")).toBe(false);
+  });
+
   it("should give priority to custom key over inferred key", () => {
     const schema = {
       type: "object",

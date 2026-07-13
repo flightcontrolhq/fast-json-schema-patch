@@ -211,14 +211,16 @@ export function _traverseSchema(
       }
     }
 
-    if (options?.basePath && !docPath.startsWith(options.basePath)) {
-      // Skip paths outside the requested basePath
-      // Note: we still continue traversal into child schemas so nested arrays under
-      // a non-matching prefix aren't processed either.
-    } else {
-      const targetPath = options?.basePath
-        ? docPath.replace(options.basePath as string, "")
-        : docPath
+    // basePath must match on a path-segment boundary (§4.6.2). A raw
+    // startsWith/replace wrongly captures siblings ("/env" matching "/envelope")
+    // and can strip mid-segment, producing plan keys that never match at diff
+    // time. Match iff docPath === basePath or docPath starts with basePath + "/",
+    // and relativize by slicing exactly basePath.length characters.
+    const basePath = options?.basePath
+    const inBase =
+      !basePath || docPath === basePath || docPath.startsWith(`${basePath}/`)
+    if (inBase) {
+      const targetPath = basePath ? docPath.slice(basePath.length) : docPath
 
       const existingPlan = plan.get(targetPath)
       if (!existingPlan) {
