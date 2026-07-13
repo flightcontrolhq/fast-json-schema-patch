@@ -1,5 +1,6 @@
 import {
   checkArraysUnique,
+  checkPrimaryKeyApplicable,
   diffArrayByPrimaryKey,
   diffArrayLCS,
   diffArrayUnique,
@@ -171,7 +172,16 @@ export class JsonSchemaPatcher {
       };
     };
 
-    if (strategy === "primaryKey" && plan?.primaryKey) {
+    // primaryKey applicability gate (SPEC §5.4.3): commit to the keyed strategy
+    // only when every element of both arrays is a plain object with a unique
+    // string|number key. Any violation (non-object/keyless element, or duplicate
+    // key within either array) falls back to LCS below, which is exact. A
+    // primaryKeyMap override selects the strategy but does NOT bypass this gate.
+    if (
+      strategy === "primaryKey" &&
+      plan?.primaryKey &&
+      checkPrimaryKeyApplicable(arr1, arr2, plan.primaryKey)
+    ) {
       diffArrayByPrimaryKey(
         arr1,
         arr2,

@@ -15,6 +15,62 @@ export type ModificationCallback = (
   skipEqualityCheck?: boolean
 ) => void;
 
+/**
+ * primaryKey applicability gate (SPEC §5.4.3).
+ *
+ * Before committing to the primaryKey strategy, verify in one O(n+m) pass over
+ * both arrays that:
+ *   (a) every element of both arrays is a plain object whose value at
+ *       `primaryKey` is a string or number (present, non-null); and
+ *   (b) there are no duplicate key values within `arr1` and none within `arr2`.
+ *
+ * If either check fails, the caller MUST fall back to diffArrayLCS for this
+ * diff. Without the gate, non-conforming elements are silently skipped
+ * (added/removed items vanish from the patch, F05) and duplicate keys corrupt
+ * the last-write-wins index so even identical arrays emit a growing patch (F06).
+ * Key equality is by JSON type AND value (no coercion, §5.4.1.5): a Set
+ * distinguishes numeric `1` from string `"1"` natively.
+ */
+export function checkPrimaryKeyApplicable(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  primaryKey: string
+): boolean {
+  const seen1 = new Set<string | number>();
+  for (let i = 0; i < arr1.length; i++) {
+    const item = arr1[i];
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      return false;
+    }
+    const keyValue = (item as JsonObject)[primaryKey];
+    const keyType = typeof keyValue;
+    if (keyType !== "string" && keyType !== "number") {
+      return false;
+    }
+    const key = keyValue as string | number;
+    if (seen1.has(key)) return false;
+    seen1.add(key);
+  }
+
+  const seen2 = new Set<string | number>();
+  for (let i = 0; i < arr2.length; i++) {
+    const item = arr2[i];
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      return false;
+    }
+    const keyValue = (item as JsonObject)[primaryKey];
+    const keyType = typeof keyValue;
+    if (keyType !== "string" && keyType !== "number") {
+      return false;
+    }
+    const key = keyValue as string | number;
+    if (seen2.has(key)) return false;
+    seen2.add(key);
+  }
+
+  return true;
+}
+
 export function diffArrayByPrimaryKey(
   arr1: JsonArray,
   arr2: JsonArray,

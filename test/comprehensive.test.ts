@@ -2625,3 +2625,136 @@ describe("Array diffing strategies", () => {
     });
   });
 });
+
+describe("primaryKey applicability gate (SPEC §5.4.3, F05/F06)", () => {
+  const keyedSchema = {
+    type: "object",
+    properties: {
+      users: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["id"],
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+          },
+        },
+      },
+    },
+  };
+
+  function patcherFor(s: any) {
+    return new JsonSchemaPatcher({ plan: buildPlan({ schema: s }) });
+  }
+
+  it("selects the primaryKey strategy when the gate passes (sanity)", () => {
+    const plan = buildPlan({ schema: keyedSchema });
+    expect(plan.get("/users")?.strategy).toBe("primaryKey");
+    expect(plan.get("/users")?.primaryKey).toBe("id");
+  });
+
+  it("F05: adding a keyless item falls back to LCS and round-trips", () => {
+    const patcher = patcherFor(keyedSchema);
+    const original = { users: [{ id: "a", name: "A" }] };
+    const modified = {
+      users: [{ id: "a", name: "A" }, { name: "no-id-yet" }],
+    };
+    const patches = patcher.execute({ original, modified });
+    // At HEAD the keyless item was silently skipped -> the add was lost.
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+
+  it("F05: removing a keyless item falls back to LCS and round-trips", () => {
+    const patcher = patcherFor(keyedSchema);
+    const original = {
+      users: [{ id: "a", name: "A" }, { name: "no-id-yet" }],
+    };
+    const modified = { users: [{ id: "a", name: "A" }] };
+    const patches = patcher.execute({ original, modified });
+    // At HEAD the keyless item was silently skipped -> resurrected on apply.
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+
+  it("F05: a string element in a keyed array falls back to LCS and round-trips", () => {
+    const patcher = patcherFor(keyedSchema);
+    const original = { users: [{ id: "a", name: "A" }] };
+    const modified = { users: [{ id: "a", name: "A" }, "just-a-string"] };
+    const patches = patcher.execute({ original, modified });
+    // At HEAD the non-object element was silently skipped -> patches empty.
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+
+  it("F05: an item whose key is null falls back to LCS and round-trips", () => {
+    const patcher = patcherFor(keyedSchema);
+    const original = { users: [{ id: "a", name: "A" }] };
+    const modified = {
+      users: [{ id: "a", name: "A" }, { id: null, name: "B" }],
+    };
+    const patches = patcher.execute({ original, modified });
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+
+  it("F06: identical arrays with duplicate keys produce zero patches", () => {
+    const patcher = patcherFor(keyedSchema);
+    const shape = {
+      users: [
+        { id: "u1", name: "a" },
+        { id: "u1", name: "b" },
+      ],
+    };
+    // Fresh deep copies so no reference-equality shortcut masks the bug.
+    const original = JSON.parse(JSON.stringify(shape));
+    const modified = JSON.parse(JSON.stringify(shape));
+    const patches = patcher.execute({ original, modified });
+    // At HEAD the last-write-wins index corrupted the diff, emitting a
+    // mutating patch that grew the array even for identical content.
+    expect(patches).toEqual([]);
+  });
+
+  it("F06: changed duplicate-key arrays fall back to LCS and round-trip", () => {
+    const patcher = patcherFor(keyedSchema);
+    const original = {
+      users: [
+        { id: "u1", name: "a" },
+        { id: "u1", name: "b" },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "u1", name: "a" },
+        { id: "u1", name: "c" },
+      ],
+    };
+    const patches = patcher.execute({ original, modified });
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+
+  it("gate is not bypassed by a primaryKeyMap override (duplicate keys -> LCS)", () => {
+    const plan = buildPlan({
+      schema: keyedSchema,
+      primaryKeyMap: { "/users": "id" },
+    });
+    const patcher = new JsonSchemaPatcher({ plan });
+    const original = {
+      users: [
+        { id: "u1", v: 1 },
+        { id: "u1", v: 2 },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "u1", v: 1 },
+        { id: "u1", v: 9 },
+      ],
+    };
+    const patches = patcher.execute({ original, modified });
+    expect(patches.length).toBeGreaterThan(0);
+    expect(applySchemaPatch(original, patches)).toEqual(modified);
+  });
+});
