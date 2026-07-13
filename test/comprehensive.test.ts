@@ -2453,6 +2453,23 @@ describe("Array diffing strategies", () => {
       expect(patches.every((p) => p.op === "remove")).toBe(true);
     });
 
+    test("disjoint arrays round-trip (deep backtrack, band-trace indexing F08)", () => {
+      // Fully disjoint: no common prefix/suffix, large edit distance D≈2*len,
+      // so backtracking walks every stored V-band — guards the O(D²) band
+      // indexing against the old full-buffer copy.
+      const a = Array.from({ length: 400 }, (_, i) => `A-${i}`);
+      const b = Array.from({ length: 400 }, (_, i) => `B-${i}`);
+      const patches = roundtrips(a, b);
+      // Every element differs: 400 replaces (collapsed remove+add) round-trip.
+      expect(patches.length).toBeGreaterThan(0);
+    });
+
+    test("many scattered interior edits round-trip", () => {
+      const a = Array.from({ length: 600 }, (_, i) => i);
+      const b = a.map((v, i) => (i % 7 === 0 ? v + 10000 : v));
+      roundtrips(a, b);
+    });
+
     test("70k-element single-edit array round-trips (regression, no cliff)", () => {
       const a = Array.from({ length: 70000 }, (_, i) => i);
       const b = [...a];
