@@ -2375,6 +2375,103 @@ describe("Array diffing strategies", () => {
     });
   });
 
+  describe("LCS common prefix/suffix trimming (§5.5.0, F09)", () => {
+    const lcsPatcher = () =>
+      new JsonSchemaPatcher({
+        plan: new Map([
+          ["/items", { primaryKey: null, strategy: "lcs" as const }],
+        ]),
+      });
+
+    const roundtrips = (a: any[], b: any[]) => {
+      const patches = lcsPatcher().execute({
+        original: { items: a } as any,
+        modified: { items: b } as any,
+      });
+      const applied = applySchemaPatch(
+        structuredClone({ items: a }) as any,
+        patches
+      );
+      expect(applied).toEqual({ items: b });
+      return patches;
+    };
+
+    test("all-equal arrays emit no ops", () => {
+      const patches = roundtrips(
+        ["a", "b", "c", "d"],
+        ["a", "b", "c", "d"]
+      );
+      expect(patches).toHaveLength(0);
+    });
+
+    test("pure append emits only ascending adds at the tail", () => {
+      const patches = roundtrips(["a", "b", "c"], ["a", "b", "c", "d", "e"]);
+      expect(patches).toEqual([
+        { op: "add", path: "/items/3", value: "d" },
+        { op: "add", path: "/items/4", value: "e" },
+      ]);
+    });
+
+    test("pure prepend emits only ascending adds at the head", () => {
+      const patches = roundtrips(["c", "d"], ["a", "b", "c", "d"]);
+      expect(patches).toEqual([
+        { op: "add", path: "/items/0", value: "a" },
+        { op: "add", path: "/items/1", value: "b" },
+      ]);
+    });
+
+    test("pure truncate emits only descending removes", () => {
+      const patches = roundtrips(["a", "b", "c", "d"], ["a", "b"]);
+      expect(patches).toEqual([
+        { op: "remove", path: "/items/3", oldValue: "d" },
+        { op: "remove", path: "/items/2", oldValue: "c" },
+      ]);
+    });
+
+    test("single interior edit only touches the changed window", () => {
+      const a = Array.from({ length: 200 }, (_, i) => `x${i}`);
+      const b = [...a];
+      b[100] = "CHANGED";
+      const patches = roundtrips(a, b);
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/100", value: "CHANGED", oldValue: "x100" },
+      ]);
+    });
+
+    test("prefix is trimmed before suffix ([a,b,a] -> [a,a])", () => {
+      // Deterministic per §5.5.0.1: prefix 'a' (lo=1) then suffix 'a' (hi=1),
+      // leaving window [b] -> [] and a single remove at the prefix boundary.
+      const patches = roundtrips(["a", "b", "a"], ["a", "a"]);
+      expect(patches).toEqual([
+        { op: "remove", path: "/items/1", oldValue: "b" },
+      ]);
+    });
+
+    test("overlapping prefix/suffix candidates still round-trip ([a,a,a] -> [a])", () => {
+      const patches = roundtrips(["a", "a", "a"], ["a"]);
+      expect(patches).toHaveLength(2);
+      expect(patches.every((p) => p.op === "remove")).toBe(true);
+    });
+
+    test("70k-element single-edit array round-trips (regression, no cliff)", () => {
+      const a = Array.from({ length: 70000 }, (_, i) => i);
+      const b = [...a];
+      b[65536] = -1; // past the old 65535 packing cliff
+      const patches = lcsPatcher().execute({
+        original: { items: a },
+        modified: { items: b },
+      });
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/65536", value: -1, oldValue: 65536 },
+      ]);
+      const applied = applySchemaPatch(
+        structuredClone({ items: a }) as any,
+        patches
+      );
+      expect(applied).toEqual({ items: b });
+    });
+  });
+
   describe("unique (Longest Increasing Subsequence) strategy", () => {
     test("should be selected for primitive arrays", () => {
       const schema = {
@@ -2487,7 +2584,11 @@ describe("Array diffing strategies", () => {
 
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-      // The unique algorithm generates replace operations for minimal patch size
+      // These arrays are not unique (booleans repeat), so the strategy falls
+      // back to LCS. With common prefix/suffix trimming (§5.5.0) the trimmed
+      // window is [false,true] -> [true,false]; Myers emits a 2-op script.
+      // (Before trimming the same edit distance produced add at /flags/3; the
+      // add now lands at /flags/2 — still 2 ops, still an exact round-trip.)
       expect(patches).toHaveLength(2);
       expect(patches).toEqual([
         {
@@ -2497,7 +2598,7 @@ describe("Array diffing strategies", () => {
         },
         {
           op: "add",
-          path: "/flags/3",
+          path: "/flags/2",
           value: false,
         },
       ]);

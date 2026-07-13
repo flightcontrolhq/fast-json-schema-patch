@@ -525,10 +525,49 @@ Applies when no plan matches, when the plan strategy is `lcs`, or as the fallbac
 §5.4.4 / §5.6. It computes a shortest edit script by **Myers' O(ND) diff** and emits positional
 ops. LCS reconstruction is **always exact** (§7.1).
 
+Let `prefix = (path === "" ? "/" : path + "/")` throughout §5.5 (so a root-level array uses `/`
+before the index, never a bare `/`).
+
+#### 5.5.0 Common prefix/suffix trimming (normative step 0)
+
+Before running Myers, the differ **MUST** trim the shared ends of the two arrays and run the
+remainder of the algorithm on the trimmed **window** only. This is step 0 of the normative LCS
+algorithm; §5.5.1–§5.5.5 operate on the window it produces.
+
+`5.5.0.1` **Trim order (pinned).** Compute the **maximal common prefix first**, then the
+**maximal common suffix of the remainder**, using the same deep-equal predicate (§2.4.1) as the
+snake (§5.5.2):
+
+- `lo` ← the largest value such that `original[i]` deep-equals `modified[i]` for every
+  `i` in `0..lo-1` (so `lo` stops at the first differing pair, or at `min(n, m)`).
+- `hi` ← the largest value such that `original[n-1-j]` deep-equals `modified[m-1-j]` for every
+  `j` in `0..hi-1`, **subject to** `hi ≤ n - lo` and `hi ≤ m - lo` (the suffix scan never crosses
+  into the already-consumed prefix).
+
+The **window** is `original[lo .. n-hi)` (length `wn = n - lo - hi`) and
+`modified[lo .. m-hi)` (length `wm = m - lo - hi`). Because prefix is taken before suffix, the
+split is deterministic even when the same element could belong to either end — e.g.
+`[a,b,a] → [a,a]` fixes the prefix `a` first (`lo=1`), then the suffix `a` (`hi=1`), leaving the
+window `[b] → []` and emitting a single `remove` at index `lo`.
+
+`5.5.0.2` **Index offset.** Emission (§5.5.5) begins with `currentIndex = lo`: the `lo` trimmed
+prefix elements are unchanged `common` entries that occupy output indices `0..lo-1` and are never
+emitted. Window coordinates `(x, y)` map to array indices `(lo + x, lo + y)` for both equality
+comparisons and value retrieval. The pinned Myers tie-breaks (§5.5.2) therefore apply to the
+**window**.
+
+`5.5.0.3` **Window fast paths.** If `wn = 0` and `wm = 0`, the arrays are deep-equal and **no ops**
+are emitted. If `wn = 0` (pure insertion — append, prepend, or interior insert), emit
+`{ op: "add", path: prefix + (lo + j), value: modified[lo + j] }` for `j` from `0` to `wm-1`
+(ascending). If `wm = 0` (pure deletion — truncate, or prefix/suffix/interior removal), emit
+`{ op: "remove", path: prefix + (lo + j), oldValue: original[lo + j] }` for `j` from `wn-1` down
+to `0` (**descending**). The §5.5.1 empty-array paths are the `lo = 0, hi = 0` special case of
+these window fast paths.
+
 #### 5.5.1 Empty-array fast paths
 
-Let `prefix = (path === "" ? "/" : path + "/")` (so a root-level array uses `/` before the index,
-never a bare `/`).
+These are the degenerate case of §5.5.0 when one array is empty (`lo = hi = 0`); an implementation
+MAY special-case them ahead of the trim scan.
 
 - `original` empty, `modified` length `m`: for `i` from `0` to `m-1`, emit
   `{ op: "add", path: prefix + i, value: modified[i] }` (ascending).
@@ -537,6 +576,11 @@ never a bare `/`).
   `oldValue`).
 
 #### 5.5.2 Myers forward pass and tie-break (pinned)
+
+Throughout §5.5.2–§5.5.3, `n`, `m`, `original`, and `modified` denote the **trimmed window** of
+§5.5.0: `n = wn`, `m = wm`, `original[x]` is array element `original[lo + x]`, and `modified[y]`
+is array element `modified[lo + y]`. (When no trimming applies, `lo = hi = 0` and the window is the
+whole array.)
 
 Standard greedy Myers with these pinned choices (an implementer MUST match them, since they fix
 *which* shortest script is chosen and therefore the exact op sequence):
@@ -583,7 +627,8 @@ changes between `spec-v1-draft` and `spec-v1`.)
 
 #### 5.5.5 Emission from the script
 
-Walk the (collapsed) script maintaining `currentIndex` starting at `0`; `prefix` as in §5.5.1:
+Walk the (collapsed) script maintaining `currentIndex` starting at `lo` (§5.5.0.2 — the trimmed
+common prefix occupies output indices `0..lo-1`); `prefix` as above:
 
 - **common:** if both `original[ai]` and `modified[bi]` are objects/arrays, recurse
   `diff(...)` at `prefix + currentIndex` (they are already deep-equal per the snake, so this

@@ -236,9 +236,10 @@ export function diffArrayLCS(
   const n = arr1.length;
   const m = arr2.length;
 
-  // Early exit for empty arrays
+  const prefixPath = path === "" ? "/" : path + "/";
+
+  // Empty-array fast paths (SPEC §5.5.1).
   if (n === 0) {
-    const prefixPath = path === "" ? "/" : path + "/";
     for (let i = 0; i < m; i++) {
       patches.push({
         op: "add",
@@ -249,7 +250,6 @@ export function diffArrayLCS(
     return;
   }
   if (m === 0) {
-    const prefixPath = path === "" ? "/" : path + "/";
     for (let i = n - 1; i >= 0; i--) {
       patches.push({
         op: "remove",
@@ -260,26 +260,8 @@ export function diffArrayLCS(
     return;
   }
 
-  const max = n + m;
-  const offset = max;
-  const bufSize = 2 * max + 1;
-
-  // Pre-allocate buffers to avoid repeated allocations
-  const buffer1 = new Int32Array(bufSize);
-  const buffer2 = new Int32Array(bufSize);
-  buffer1.fill(-1);
-  buffer2.fill(-1);
-
-  let vPrev = buffer1;
-  let vCurr = buffer2;
-  vPrev[offset + 1] = 0;
-
-  // Pre-allocate trace array with estimated size
-  const trace = new Array(max + 1);
-  let traceLen = 0;
-  let endD = -1;
-
-  // Cache equality checks to avoid redundant comparisons.
+  // Equality predicate (SPEC §2.4.1). The SAME predicate drives the common
+  // prefix/suffix trim (§5.5.0) and the Myers snake (§5.5.2).
   // Key is exact for any realistic array size (x * (m + 1) + y stays a safe
   // integer up to ~90M elements), unlike bit-packing which collides at 65536.
   const equalCache = new Map<number, boolean>();
@@ -298,7 +280,67 @@ export function diffArrayLCS(
     return result;
   };
 
-  const prefixPath = path === "" ? "/" : path + "/";
+  // §5.5.0 Trim step 0: maximal common prefix first, then the maximal common
+  // suffix of the remainder. Myers then runs only on the trimmed window
+  // [lo, n-hi) × [lo, m-hi); emitted indices are offset by lo. This bounds cost
+  // by the edit region rather than the array length (F09) and keeps the Myers
+  // coordinates small.
+  let lo = 0;
+  while (lo < n && lo < m && equalAt(lo, lo)) lo++;
+  let hi = 0;
+  while (hi < n - lo && hi < m - lo && equalAt(n - 1 - hi, m - 1 - hi)) hi++;
+
+  const wn = n - lo - hi; // original window length
+  const wm = m - lo - hi; // modified window length
+
+  // Windowed fast paths (generalise §5.5.1 to the trimmed remainder).
+  if (wn === 0 && wm === 0) return; // arrays are deep-equal
+  if (wn === 0) {
+    // Pure insertion window (append / prepend / interior insert): ascending
+    // adds at the evolving index, which starts at the prefix length lo.
+    for (let j = 0; j < wm; j++) {
+      patches.push({
+        op: "add",
+        path: prefixPath + (lo + j),
+        value: arr2[lo + j] as JsonValue,
+      });
+    }
+    return;
+  }
+  if (wm === 0) {
+    // Pure deletion window (truncate / prefix / suffix / interior removal):
+    // descending removes so lower indices stay valid during application.
+    for (let j = wn - 1; j >= 0; j--) {
+      patches.push({
+        op: "remove",
+        path: prefixPath + (lo + j),
+        oldValue: arr1[lo + j] as JsonValue,
+      });
+    }
+    return;
+  }
+
+  // Myers O(ND) forward pass over the trimmed window. Window coordinates
+  // x∈[0,wn], y∈[0,wm] map to array indices (lo + x, lo + y); the pinned
+  // tie-breaks (§5.5.2) therefore apply to the window.
+  const max = wn + wm;
+  const offset = max;
+  const bufSize = 2 * max + 1;
+
+  // Pre-allocate buffers to avoid repeated allocations
+  const buffer1 = new Int32Array(bufSize);
+  const buffer2 = new Int32Array(bufSize);
+  buffer1.fill(-1);
+  buffer2.fill(-1);
+
+  let vPrev = buffer1;
+  let vCurr = buffer2;
+  vPrev[offset + 1] = 0;
+
+  // Pre-allocate trace array with estimated size
+  const trace = new Array(max + 1);
+  let traceLen = 0;
+  let endD = -1;
 
   // Forward pass with optimizations
   outer: for (let d = 0; d <= max; d++) {
@@ -323,14 +365,14 @@ export function diffArrayLCS(
       let y = x - k;
 
       // Snake with bounds checking
-      while (x < n && y < m && equalAt(x, y)) {
+      while (x < wn && y < wm && equalAt(lo + x, lo + y)) {
         x++;
         y++;
       }
 
       vCurr[kOffset] = x;
 
-      if (x >= n && y >= m) {
+      if (x >= wn && y >= wm) {
         const finalCopy = new Int32Array(bufSize);
         finalCopy.set(vCurr);
         trace[traceLen++] = finalCopy;
@@ -348,15 +390,15 @@ export function diffArrayLCS(
 
   if (endD === -1) return;
 
-  // Backtracking to build edit script
+  // Backtracking to build edit script (window coordinates).
   const editScript: Array<{
     op: "common" | "remove" | "add";
     ai?: number;
     bi?: number;
   }> = [];
 
-  let x = n;
-  let y = m;
+  let x = wn;
+  let y = wm;
 
   for (let d = endD; d > 0; d--) {
     const vRow = trace[d];
@@ -425,14 +467,16 @@ export function diffArrayLCS(
     }
   }
 
-  // Apply operations and generate patches
-  let currentIndex = 0;
+  // Apply operations and generate patches. currentIndex starts at lo: the
+  // trimmed common prefix occupies output indices 0..lo-1 unchanged. Window
+  // coordinates ai/bi are offset by lo when fetching values (§5.5.5).
+  let currentIndex = lo;
 
   for (const operation of optimizedScript) {
     switch (operation.op) {
       case "common": {
-        const v1 = arr1[operation.ai as number];
-        const v2 = arr2[operation.bi as number];
+        const v1 = arr1[lo + (operation.ai as number)];
+        const v2 = arr2[lo + (operation.bi as number)];
         // Only call onModification for objects that might have nested differences
         if (
           typeof v1 === "object" &&
@@ -449,8 +493,8 @@ export function diffArrayLCS(
         patches.push({
           op: "replace",
           path: prefixPath + currentIndex,
-          value: arr2[operation.bi as number] as JsonValue,
-          oldValue: arr1[operation.ai as number],
+          value: arr2[lo + (operation.bi as number)] as JsonValue,
+          oldValue: arr1[lo + (operation.ai as number)],
         });
         currentIndex++;
         break;
@@ -459,7 +503,7 @@ export function diffArrayLCS(
         patches.push({
           op: "remove",
           path: prefixPath + currentIndex,
-          oldValue: arr1[operation.ai as number],
+          oldValue: arr1[lo + (operation.ai as number)],
         });
         // Don't increment currentIndex for removes
         break;
@@ -468,7 +512,7 @@ export function diffArrayLCS(
         patches.push({
           op: "add",
           path: prefixPath + currentIndex,
-          value: arr2[operation.bi as number] as JsonValue,
+          value: arr2[lo + (operation.bi as number)] as JsonValue,
         });
         currentIndex++;
         break;
