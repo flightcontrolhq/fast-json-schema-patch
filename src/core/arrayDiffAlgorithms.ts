@@ -39,7 +39,7 @@ export function canonicalFingerprint(
       if (i > 0) s += ",";
       s += canonicalFingerprint(value[i] as JsonValue, opaqueId);
     }
-    return s + "]";
+    return `${s}]`;
   }
   const obj = value as JsonObject;
   const keys = Object.keys(obj).sort();
@@ -49,7 +49,7 @@ export function canonicalFingerprint(
     if (i > 0) s += ",";
     s += `${JSON.stringify(k)}:${canonicalFingerprint(obj[k] as JsonValue, opaqueId)}`;
   }
-  return s + "}";
+  return `${s}}`;
 }
 
 export type ModificationCallback = (
@@ -267,6 +267,10 @@ export function diffArrayLCS(
   arr2: JsonArray,
   path: string,
   patches: Operation[],
+  // Reserved for granular descent of collapsed `replace` pairs (§5.5.4.2 / F10,
+  // compactness phase); intentionally unused until then. `common` entries are
+  // proven equal by interning and never routed through it (F20).
+  // biome-ignore lint/correctness/noUnusedFunctionParameters: wired for P3 F10 granular descent
   onModification: ModificationCallback,
   hashFields?: string[],
   plan?: ArrayPlan
@@ -545,17 +549,15 @@ export function diffArrayLCS(
   for (const operation of optimizedScript) {
     switch (operation.op) {
       case "common": {
-        const v1 = arr1[lo + (operation.ai as number)];
-        const v2 = arr2[lo + (operation.bi as number)];
-        // Only call onModification for objects that might have nested differences
-        if (
-          typeof v1 === "object" &&
-          v1 !== null &&
-          typeof v2 === "object" &&
-          v2 !== null
-        ) {
-          onModification(v1, v2, prefixPath + currentIndex, patches, false);
-        }
+        // A `common` entry means idsA[ai] === idsB[bi], i.e. the elements are
+        // proven deep-equal by interning (§2.4). The old code still called
+        // onModification here, which re-ran a full deep-equal that could only
+        // return "equal" and emit nothing — dead re-verification, up to a
+        // second (or, with a plan, third) full structural walk per element on
+        // mostly-unchanged arrays (F20). It is deleted. `onModification` is
+        // retained as a parameter for the granular-descent of collapsed
+        // `replace` pairs (§5.5.4.2 / F10), which lands in the compactness
+        // phase; do NOT route common entries through it.
         currentIndex++;
         break;
       }
