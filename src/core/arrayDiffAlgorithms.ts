@@ -3,9 +3,54 @@ import {
   deepEqual,
   deepEqualMemo,
   deepEqualSchemaAware,
+  isOpaqueObject,
 } from "../performance/deepEqual";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "../types";
+
+/**
+ * Canonical, key-sorted fingerprint of a JSON value (F21). Two values produce
+ * the SAME string iff they are deep-equal per SPEC §2.4.1: primitives via
+ * `JSON.stringify`, arrays order-sensitively, objects with their keys sorted
+ * (so §2.4.2 object-key-order-insensitivity holds). This is exact for JSON
+ * inputs, so interning by this fingerprint needs no deepEqual confirmation.
+ *
+ * Non-JSON inputs are out of scope (§2.1.2). Opaque objects (Date, RegExp, Map,
+ * class instances — §F16) have no reliable structural form, so each distinct
+ * *reference* is assigned a unique tag via `opaqueId`. This is SOUND (never a
+ * false positive that would drop a real change): distinct references compare
+ * unequal (matching deepEqual's treatment of two different Dates), and the same
+ * reference compares equal. It may over-emit for two equal-valued-but-distinct
+ * opaque instances, which is acceptable for out-of-scope inputs.
+ */
+export function canonicalFingerprint(
+  value: JsonValue,
+  opaqueId: (o: object) => number
+): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value) as string;
+  }
+  if (isOpaqueObject(value)) {
+    return ` O${opaqueId(value as object)}`;
+  }
+  if (Array.isArray(value)) {
+    let s = "[";
+    for (let i = 0; i < value.length; i++) {
+      if (i > 0) s += ",";
+      s += canonicalFingerprint(value[i] as JsonValue, opaqueId);
+    }
+    return s + "]";
+  }
+  const obj = value as JsonObject;
+  const keys = Object.keys(obj).sort();
+  let s = "{";
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i] as string;
+    if (i > 0) s += ",";
+    s += `${JSON.stringify(k)}:${canonicalFingerprint(obj[k] as JsonValue, opaqueId)}`;
+  }
+  return s + "}";
+}
 
 export type ModificationCallback = (
   item1: JsonValue,
@@ -260,25 +305,15 @@ export function diffArrayLCS(
     return;
   }
 
-  // Equality predicate (SPEC §2.4.1). The SAME predicate drives the common
-  // prefix/suffix trim (§5.5.0) and the Myers snake (§5.5.2).
-  // Key is exact for any realistic array size (x * (m + 1) + y stays a safe
-  // integer up to ~90M elements), unlike bit-packing which collides at 65536.
-  const equalCache = new Map<number, boolean>();
-  const cacheKey = (x: number, y: number): number => x * (m + 1) + y;
-
-  const equalAt = (x: number, y: number): boolean => {
-    const key = cacheKey(x, y);
-    let result = equalCache.get(key);
-    if (result !== undefined) return result;
-
-    result = plan
+  // Deep-equal predicate (SPEC §2.4.1) used by the prefix/suffix trim (§5.5.0).
+  // Trimming queries each position at most once (lo and hi advance
+  // monotonically), so no per-pair cache is needed here; the Myers snake uses
+  // interned ids instead (below). The old n*m-capacity equalCache Map is gone
+  // (F34) along with its collision-prone key (F21).
+  const deepEqualAt = (x: number, y: number): boolean =>
+    plan
       ? deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
       : deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
-
-    equalCache.set(key, result);
-    return result;
-  };
 
   // §5.5.0 Trim step 0: maximal common prefix first, then the maximal common
   // suffix of the remainder. Myers then runs only on the trimmed window
@@ -286,9 +321,9 @@ export function diffArrayLCS(
   // by the edit region rather than the array length (F09) and keeps the Myers
   // coordinates small.
   let lo = 0;
-  while (lo < n && lo < m && equalAt(lo, lo)) lo++;
+  while (lo < n && lo < m && deepEqualAt(lo, lo)) lo++;
   let hi = 0;
-  while (hi < n - lo && hi < m - lo && equalAt(n - 1 - hi, m - 1 - hi)) hi++;
+  while (hi < n - lo && hi < m - lo && deepEqualAt(n - 1 - hi, m - 1 - hi)) hi++;
 
   const wn = n - lo - hi; // original window length
   const wm = m - lo - hi; // modified window length
@@ -319,6 +354,41 @@ export function diffArrayLCS(
     }
     return;
   }
+
+  // F21/F34: intern the window elements to integer ids via a canonical,
+  // key-sorted fingerprint shared across BOTH arrays, so the Myers snake
+  // compares ids in O(1) (`idsA[x] === idsB[y]`) instead of deep-comparing each
+  // pair and memoizing the verdict in a Map that could grow to O(wn·wm). Each
+  // element is fingerprinted exactly once — O(window content) — regardless of
+  // how many times Myers revisits it. All state here is call-local, so there is
+  // no cross-call cache and no epoch concern (F02). Fingerprint equality is
+  // exact deep-equal for JSON inputs (§2.4), so no deepEqual confirmation is
+  // needed.
+  const fpToId = new Map<string, number>();
+  let nextId = 0;
+  const opaqueIdMap = new Map<object, number>();
+  let opaqueSeq = 0;
+  const opaqueId = (o: object): number => {
+    let id = opaqueIdMap.get(o);
+    if (id === undefined) {
+      id = opaqueSeq++;
+      opaqueIdMap.set(o, id);
+    }
+    return id;
+  };
+  const intern = (value: JsonValue): number => {
+    const fp = canonicalFingerprint(value, opaqueId);
+    let id = fpToId.get(fp);
+    if (id === undefined) {
+      id = nextId++;
+      fpToId.set(fp, id);
+    }
+    return id;
+  };
+  const idsA = new Int32Array(wn);
+  const idsB = new Int32Array(wm);
+  for (let i = 0; i < wn; i++) idsA[i] = intern(arr1[lo + i] as JsonValue);
+  for (let i = 0; i < wm; i++) idsB[i] = intern(arr2[lo + i] as JsonValue);
 
   // Myers O(ND) forward pass over the trimmed window. Window coordinates
   // x∈[0,wn], y∈[0,wm] map to array indices (lo + x, lo + y); the pinned
@@ -364,8 +434,8 @@ export function diffArrayLCS(
       let x = down ? vRight : vLeft + 1;
       let y = x - k;
 
-      // Snake with bounds checking
-      while (x < wn && y < wm && equalAt(lo + x, lo + y)) {
+      // Snake: interned-id equality is exact deep-equal for the window (F21).
+      while (x < wn && y < wm && idsA[x] === idsB[y]) {
         x++;
         y++;
       }

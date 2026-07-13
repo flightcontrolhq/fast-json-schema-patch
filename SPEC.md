@@ -600,10 +600,14 @@ Standard greedy Myers with these pinned choices (an implementer MUST match them,
   advance both. Equality here MAY be memoized/interned but MUST equal deep-equal.
 - Terminate when `x >= n` and `y >= m`; that `d` is the edit distance.
 
-Equality comparisons during the pass MUST be exact deep-equal. Any per-pair cache key MUST be
-collision-free for the array sizes in play (the reference keys by `x*(m+1)+y`, exact for arrays up
-to ~`2^53` elements; a `(x<<16)|y` style key that collides past 65535 elements is
-**non-conforming**).
+Equality comparisons during the pass MUST be exact deep-equal (§2.4.4). The reference implementation
+**interns** each window element to an integer id via a canonical, key-sorted fingerprint shared
+across both arrays (equal fingerprint ⟺ deep-equal for JSON inputs, §2.4.1–§2.4.2), so the snake
+compares `idsA[x] === idsB[y]` in O(1). Fingerprint interning is an output-neutral implementation
+detail (§2.4.4); a lossy hash MUST confirm id-equality collisions with full deep-equal. An
+implementation MAY instead memoize deep-equal per visited pair, but any such pair-cache key MUST be
+collision-free for the array sizes in play (`x*(m+1)+y` is exact to ~`2^53` elements; a `(x<<16)|y`
+style key that collides past 65535 elements is **non-conforming**).
 
 #### 5.5.3 Backtracking and the edit script
 

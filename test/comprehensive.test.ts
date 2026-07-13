@@ -2470,6 +2470,39 @@ describe("Array diffing strategies", () => {
       roundtrips(a, b);
     });
 
+    test("object elements with reordered keys are common, not changed (F21 canonical fingerprint)", () => {
+      // §2.4.2: object equality is key-order-insensitive. Canonical (key-sorted)
+      // interning must treat these as identical -> zero ops.
+      const a = [
+        { id: 1, name: "x", tags: ["p", "q"] },
+        { id: 2, name: "y" },
+      ];
+      const b = [
+        { name: "x", tags: ["p", "q"], id: 1 },
+        { name: "y", id: 2 },
+      ];
+      const patches = roundtrips(a, b);
+      expect(patches).toHaveLength(0);
+    });
+
+    test("f64-equal numbers intern equal (1 vs 1.0), array order-sensitive", () => {
+      // 1 and 1.0 are the same f64 (§2.2) -> same fingerprint -> common.
+      expect(roundtrips([1, 2, 3], [1.0, 2.0, 3.0])).toHaveLength(0);
+      // But array order matters (§2.4.2): [1,2] != [2,1] within an element.
+      const patches = roundtrips([{ v: [1, 2] }], [{ v: [2, 1] }]);
+      expect(patches.length).toBeGreaterThan(0);
+    });
+
+    test("a single changed object element in a long common run round-trips", () => {
+      const mk = (i: number, val: number) => ({ id: i, payload: `p${i}`, val });
+      const a = Array.from({ length: 300 }, (_, i) => mk(i, i));
+      const b = a.map((o, i) => (i === 150 ? mk(150, 99999) : o));
+      const patches = roundtrips(a, b);
+      // Only element 150 changed; the interned run trims to a 1-element window.
+      expect(patches).toHaveLength(1);
+      expect(patches[0]).toMatchObject({ op: "replace", path: "/items/150" });
+    });
+
     test("70k-element single-edit array round-trips (regression, no cliff)", () => {
       const a = Array.from({ length: 70000 }, (_, i) => i);
       const b = [...a];
