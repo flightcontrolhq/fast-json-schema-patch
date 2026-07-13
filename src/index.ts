@@ -12,6 +12,8 @@ import { escapeJsonPointer, getWildcardPath, normalizePath } from "./utils/pathU
 
 export { buildPlan } from "./core/buildPlan";
 export { StructuredDiff } from "./aggregators/StructuredDiff";
+export { applyPatch, invertPatch, toRfc6902, JsonPatchError } from "./apply/applyPatch";
+export type { ApplyPatchOptions, PatchErrorCode } from "./apply/applyPatch";
 
 export type {
   StructuredDiffConfig,

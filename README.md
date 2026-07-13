@@ -67,6 +67,34 @@ This addition makes UI rendering and state reconciliation easier but is not part
 
 ---
 
+## 🔁 Applying and Inverting Patches
+
+You can apply patches back to a document — no separate library needed. `applyPatch` supports all six RFC 6902 operations (`add`, `remove`, `replace`, `move`, `copy`, `test`), so it can also apply patches produced by other RFC 6902 tools.
+
+```typescript
+import { applyPatch, invertPatch } from 'fast-json-schema-patch';
+
+// Reconstruct the modified document from the original + patch
+const result = applyPatch(original, patch);
+
+// Compute an undo patch (uses the original, pre-patch document)
+const undo = invertPatch(original, patch);
+applyPatch(result, undo); // deep-equals `original`
+```
+
+Behavior guarantees:
+
+- **Immutable**: the input document is never mutated. Untouched subtrees are shared by reference between input and output (copy-on-write), so applying a small patch to a large document is cheap. ⚠️ Because of that sharing, don't mutate the returned document in place — pass `{ cloneResult: true }` if you need a fully independent copy to mutate.
+- **Atomic**: if any operation fails, a `JsonPatchError` is thrown (with a machine-readable `code`, the failing `operation`, and `operationIndex`) and your document is left untouched.
+- **Validating**: pass `{ validateOldValues: true }` to check each operation's `oldValue` against the current document before applying — an implicit `test` for every `remove`/`replace`, useful when the document may have drifted.
+- **Safe**: pointer segments that would mutate the prototype chain (`__proto__`, `constructor`→`prototype`) are rejected with an `UNSAFE_KEY` error.
+
+Migrating from `fast-json-patch`: `applyPatch(doc, patch)` here returns the new document directly (not an `OperationResult[]` with `.newDocument`) and never mutates the input (no `mutateDocument` flag). Use `toRfc6902(patch)` to strip this library's `oldValue` fields before handing patches to strict third-party tools.
+
+> ℹ️ Arrays diffed with the `primaryKey` strategy are compared *semantically*: patches capture item modifications, removals, and additions, but not pure reorderings of otherwise-identical items. Applying such a patch reconstructs the modified document's content exactly; surviving items keep their original relative order and additions are appended at the end.
+
+---
+
 ## 📋 Generating JSON Schema from Zod
 
 If you're using [Zod](https://zod.dev/) for runtime validation, you can easily generate JSON schemas for use with `fast-json-schema-patch`. Zod 4 introduced native JSON Schema conversion:
@@ -152,6 +180,24 @@ The main class for generating patches.
 - `original`: The original document to compare from.
 - `modified`: The modified document to compare to.
 - **Returns**: An array of JSON Patch operations.
+
+### `applyPatch`
+Applies an RFC 6902 patch to a document and returns the resulting document.
+
+**`applyPatch(document, patches, options?)`**
+- `document`: The document to apply the patch to (never mutated).
+- `patches`: An array of JSON Patch operations (`add`, `remove`, `replace`, `move`, `copy`, `test`).
+- `options.validateOldValues` (optional): When `true`, `remove`/`replace` operations carrying an `oldValue` are validated against the current document value before being applied.
+- **Returns**: The patched document. Unchanged subtrees are shared by reference with the input.
+- **Throws**: `JsonPatchError` if any operation cannot be applied; the input document is left untouched.
+
+### `invertPatch`
+Computes the inverse of a patch, for undo/rollback flows.
+
+**`invertPatch(document, patches)`**
+- `document`: The **original** (pre-patch) document the patch was generated from.
+- `patches`: The patch to invert.
+- **Returns**: An array of operations such that `applyPatch(applyPatch(document, patches), invertPatch(document, patches))` deep-equals `document`.
 
 ### `StructuredDiff`
 The main class for creating human-readable diffs.
