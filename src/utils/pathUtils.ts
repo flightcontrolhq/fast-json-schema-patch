@@ -132,6 +132,30 @@ export function getWildcardPath(path: string): string | null {
 }
 
 /**
+ * Maps a concrete nested-array element path to its wildcard element plan key.
+ *
+ * An array that is itself an element of another array (an array-of-arrays) has a
+ * concrete document path ending in a numeric index (e.g. "/matrix/0") and its
+ * plan is registered under a wildcard element key ("/matrix/*", per §4.3.5).
+ * The parent portion is index-normalized so nesting under other arrays still
+ * resolves (e.g. "/root/0/tags/1" -> "/root/tags/*").
+ *
+ * Returns null when the path does not end in an index (ordinary object-property
+ * arrays), or when there is no parent segment (a top-level element, which is
+ * never matched — §5.4.5 limitation iii).
+ */
+export function getElementWildcardPath(path: string): string | null {
+  const lastSlash = path.lastIndexOf("/")
+  if (lastSlash <= 0) return null
+
+  const lastSegment = path.slice(lastSlash + 1)
+  if (!/^\d+$/.test(lastSegment)) return null
+
+  const parent = path.slice(0, lastSlash)
+  return `${normalizePath(parent)}/*`
+}
+
+/**
  * Unescapes JSON Pointer special characters
  * ~1 becomes /, ~0 becomes ~
  */

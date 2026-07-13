@@ -8,7 +8,12 @@ import {
 import type { ArrayPlan, Plan } from "./core/buildPlan";
 import { deepEqualMemo } from "./performance/deepEqual";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "./types";
-import { escapeJsonPointer, getWildcardPath, normalizePath } from "./utils/pathUtils";
+import {
+  escapeJsonPointer,
+  getElementWildcardPath,
+  getWildcardPath,
+  normalizePath,
+} from "./utils/pathUtils";
 
 export { buildPlan } from "./core/buildPlan";
 export { StructuredDiff } from "./aggregators/StructuredDiff";
@@ -243,6 +248,21 @@ export class JsonSchemaPatcher {
     if (plan) {
       this.planLookupCache.set(path, plan);
       return plan;
+    }
+
+    // Nested-array element (array-of-arrays): an array that is itself an element
+    // of another array has a concrete path ending in an index and registers
+    // under a wildcard element key `${parent}/*` (§4.3.5, §5.4.5). This must be
+    // resolved BEFORE index normalization, which would otherwise collapse
+    // `/matrix/0` to the OUTER array's key `/matrix` and hand the inner array
+    // the wrong plan.
+    const elementWildcardPath = getElementWildcardPath(path);
+    if (elementWildcardPath) {
+      plan = this.plan.get(elementWildcardPath);
+      if (plan) {
+        this.planLookupCache.set(path, plan);
+        return plan;
+      }
     }
 
     // Lazy path operations - only do expensive operations if exact match fails

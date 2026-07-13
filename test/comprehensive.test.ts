@@ -1,5 +1,9 @@
 import { describe, test, expect, spyOn, it } from "bun:test";
-import { buildPlan, JsonSchemaPatcher } from "../src/index";
+import {
+  applyPatch as applySchemaPatch,
+  buildPlan,
+  JsonSchemaPatcher,
+} from "../src/index";
 import { deepEqual } from "../src/performance/deepEqual";
 import { fastHash } from "../src/performance/fashHash";
 import { _resolveRef } from "../src/core/buildPlan";
@@ -449,6 +453,71 @@ describe("buildPlan", () => {
       },
     });
     expect(plan.get("/users")?.primaryKey).toBe("customId");
+  });
+});
+
+describe("nested arrays-of-arrays (F04)", () => {
+  const matrixSchema = {
+    type: "object",
+    properties: {
+      matrix: {
+        type: "array",
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["id"],
+            properties: {
+              id: { type: "string" },
+              v: { type: "number" },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  it("registers the inner array at a distinct wildcard element path", () => {
+    const plan = buildPlan({ schema: matrixSchema as any });
+    // Outer array: elements are arrays, not keyed objects -> lcs, no clobber.
+    expect(plan.get("/matrix")?.strategy).toBe("lcs");
+    expect(plan.get("/matrix")?.primaryKey).toBe(null);
+    // Inner array registers under the wildcard element key, not "/matrix".
+    expect(plan.get("/matrix/*")?.strategy).toBe("primaryKey");
+    expect(plan.get("/matrix/*")?.primaryKey).toBe("id");
+  });
+
+  it("resolves a concrete inner-array path to the wildcard element plan", () => {
+    const patcher = new JsonSchemaPatcher({
+      plan: buildPlan({ schema: matrixSchema as any }),
+    });
+    const innerPlan = (patcher as any).getPlanForPath("/matrix/0");
+    expect(innerPlan?.strategy).toBe("primaryKey");
+    expect(innerPlan?.primaryKey).toBe("id");
+  });
+
+  it("produces correct, non-empty patches for a matrix diff that apply cleanly", () => {
+    const plan = buildPlan({ schema: matrixSchema as any });
+    const patcher = new JsonSchemaPatcher({ plan });
+
+    const original = { matrix: [[{ id: "a", v: 1 }]] };
+    const modified = {
+      matrix: [
+        [
+          { id: "a", v: 1 },
+          { id: "b", v: 2 },
+        ],
+        [{ id: "c", v: 3 }],
+      ],
+    };
+
+    const patches = patcher.execute({ original, modified });
+    // At HEAD the inner primaryKey plan clobbered the outer lcs plan and the
+    // outer array (whose elements are arrays) emitted ZERO ops.
+    expect(patches.length).toBeGreaterThan(0);
+
+    const result = applySchemaPatch(original, patches);
+    expect(result).toEqual(modified);
   });
 });
 

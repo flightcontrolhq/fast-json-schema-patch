@@ -258,9 +258,30 @@ export function _traverseSchema(
       }
     }
 
-    // We continue traversal into array items. The path does not change here
-    // as the diffing logic will add array indices.
-    _traverseSchema(subSchema.items, docPath, plan, schema, visited, options)
+    // Continue traversal into array items. For an object item the path is
+    // unchanged (the differ adds the array index at diff time, so an item
+    // property registers at `${docPath}/<prop>`). But when `items` is itself an
+    // array schema (array-of-arrays), the inner array MUST register at a
+    // DISTINCT path — a wildcard element segment `${docPath}/*` — so its plan
+    // never overwrites the outer array's plan at the same key (§4.3.5).
+    // Otherwise an inner primaryKey plan clobbers the outer LCS plan and the
+    // outer array (whose elements are arrays, not keyed objects) silently emits
+    // no ops. Detection uses the resolved item schema and keys off the shape
+    // keyword `items` (consistent with §4.3.1), so an explicit type is not
+    // required.
+    const itemsIsArray = !!(
+      itemsSchema &&
+      typeof itemsSchema === "object" &&
+      (itemsSchema.items || itemsSchema.type === "array")
+    )
+    _traverseSchema(
+      subSchema.items,
+      itemsIsArray ? `${docPath}/*` : docPath,
+      plan,
+      schema,
+      visited,
+      options,
+    )
   }
   visited.delete(subSchema)
 }
