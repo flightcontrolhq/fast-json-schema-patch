@@ -201,10 +201,19 @@ export function diffArrayByPrimaryKey(
     };
   }
 
-  const totalPatches =
-    modificationPatches.length + removalPatches.length + additionPatches.length;
-  if (totalPatches > 0) {
-    patches.push(...modificationPatches, ...removalPatches, ...additionPatches);
+  // Plain loops rather than spread pushes: a single array can contribute
+  // >125k ops (e.g. clearing a 150k-item keyed array), and
+  // `patches.push(...ops)` passes every element as a call argument, which
+  // throws RangeError: Maximum call stack size exceeded past the engine's
+  // argument limit (F13).
+  for (let i = 0; i < modificationPatches.length; i++) {
+    patches.push(modificationPatches[i] as Operation);
+  }
+  for (let i = 0; i < removalPatches.length; i++) {
+    patches.push(removalPatches[i] as Operation);
+  }
+  for (let i = 0; i < additionPatches.length; i++) {
+    patches.push(additionPatches[i] as Operation);
   }
 }
 
@@ -486,7 +495,9 @@ export function diffArrayUnique(
     for (let i = 0; i < m; i++) {
       patches_temp.push({ op: "add", path: pathPrefix + "-", value: arr2[i] });
     }
-    patches.push(...patches_temp);
+    for (let i = 0; i < patches_temp.length; i++) {
+      patches.push(patches_temp[i] as Operation);
+    }
     return;
   }
   if (m === 0) {
@@ -498,7 +509,9 @@ export function diffArrayUnique(
         oldValue: arr1[i],
       });
     }
-    patches.push(...patches_temp);
+    for (let i = 0; i < patches_temp.length; i++) {
+      patches.push(patches_temp[i] as Operation);
+    }
     return;
   }
 
@@ -573,7 +586,10 @@ export function diffArrayUnique(
     }
   }
 
-  patches.push(...patches_temp);
+  // Plain loop rather than spread push to avoid RangeError on large arrays (F13).
+  for (let i = 0; i < patches_temp.length; i++) {
+    patches.push(patches_temp[i] as Operation);
+  }
 }
 
 export function checkArraysUnique(arr1: JsonArray, arr2: JsonArray): boolean {

@@ -2758,3 +2758,48 @@ describe("primaryKey applicability gate (SPEC §5.4.3, F05/F06)", () => {
     expect(applySchemaPatch(original, patches)).toEqual(modified);
   });
 });
+
+describe("large-array op emission uses loops, not spread pushes (F13)", () => {
+  const keyedSchema = {
+    type: "object",
+    properties: {
+      users: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["id"],
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+          },
+        },
+      },
+    },
+  };
+
+  it("clearing a very large keyed array does not RangeError and is correct", () => {
+    // At HEAD emission ended in `patches.push(...removalPatches)`; spread
+    // arguments are passed on the call stack, so under bun this throws
+    // RangeError past ~630k args (the threshold is lower under a deeper test
+    // stack, and ~125k on Node). The plain-loop emission must handle it.
+    // Verify count + a spot index without a full 800k apply (keep runtime sane).
+    const N = 800000;
+    const users = new Array(N);
+    for (let i = 0; i < N; i++) users[i] = { id: `u${i}`, name: `n${i}` };
+    const patcher = new JsonSchemaPatcher({
+      plan: buildPlan({ schema: keyedSchema }),
+    });
+    const patches = patcher.execute({
+      original: { users },
+      modified: { users: [] },
+    });
+    expect(patches).toHaveLength(N);
+    // Removals are emitted in descending original-index order.
+    expect(patches[0]).toEqual({
+      op: "remove",
+      path: `/users/${N - 1}`,
+      oldValue: { id: `u${N - 1}`, name: `n${N - 1}` },
+    });
+    expect(patches[N - 1]?.path).toBe("/users/0");
+  });
+});
