@@ -1846,6 +1846,9 @@ describe("JsonSchemaPatcher comprehensive tests", () => {
     expect(patches2).toMatchInlineSnapshot(`
       [
         {
+          "oldValue": {
+            "id": "1",
+          },
           "op": "remove",
           "path": "/items/0",
         },

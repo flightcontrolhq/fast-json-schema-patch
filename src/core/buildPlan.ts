@@ -1,4 +1,5 @@
 import type {JsonObject} from "../types"
+import {escapeJsonPointer} from "../utils/pathUtils"
 
 export interface JSONSchema extends JsonObject {
   $ref?: string
@@ -95,7 +96,9 @@ export function _traverseSchema(
       for (const key in subSchema.properties) {
         _traverseSchema(
           subSchema.properties[key] as JSONSchema,
-          `${docPath}/${key}`,
+          // Escape so plan paths line up with the escaped patch paths the
+          // differ emits for keys containing "/" or "~".
+          `${docPath}/${escapeJsonPointer(key)}`,
           plan,
           schema,
           visited,

@@ -184,10 +184,12 @@ export function diffArrayLCS(
     return;
   }
   if (m === 0) {
+    const prefixPath = path === "" ? "/" : path + "/";
     for (let i = n - 1; i >= 0; i--) {
       patches.push({
         op: "remove",
-        path: path === "" ? "/" : path + "/" + i,
+        path: prefixPath + i,
+        oldValue: arr1[i] as JsonValue,
       });
     }
     return;
@@ -212,9 +214,11 @@ export function diffArrayLCS(
   let traceLen = 0;
   let endD = -1;
 
-  // Cache equality checks to avoid redundant comparisons
+  // Cache equality checks to avoid redundant comparisons.
+  // Key is exact for any realistic array size (x * (m + 1) + y stays a safe
+  // integer up to ~90M elements), unlike bit-packing which collides at 65536.
   const equalCache = new Map<number, boolean>();
-  const cacheKey = (x: number, y: number): number => (x << 16) | y; // Assumes arrays < 65536 length
+  const cacheKey = (x: number, y: number): number => x * (m + 1) + y;
 
   const equalAt = (x: number, y: number): boolean => {
     const key = cacheKey(x, y);

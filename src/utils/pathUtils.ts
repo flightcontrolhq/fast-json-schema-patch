@@ -144,6 +144,8 @@ export function unescapeJsonPointer(part: string): string {
  * / becomes ~1, ~ becomes ~0
  */
 export function escapeJsonPointer(part: string): string {
+  // Fast path: most keys contain no special characters
+  if (part.indexOf("~") === -1 && part.indexOf("/") === -1) return part
   return part.replace(/~/g, "~0").replace(/\//g, "~1")
 }
 

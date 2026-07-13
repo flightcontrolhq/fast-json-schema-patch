@@ -8,7 +8,7 @@ import {
 import type { ArrayPlan, Plan } from "./core/buildPlan";
 import { deepEqualMemo } from "./performance/deepEqual";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "./types";
-import { getWildcardPath, normalizePath } from "./utils/pathUtils";
+import { escapeJsonPointer, getWildcardPath, normalizePath } from "./utils/pathUtils";
 
 export { buildPlan } from "./core/buildPlan";
 export { StructuredDiff } from "./aggregators/StructuredDiff";
@@ -106,7 +106,7 @@ export class JsonSchemaPatcher {
     const allKeys = new Set([...keys1, ...keys2]);
 
     for (const key of allKeys) {
-      const newPath = `${path}/${key}`;
+      const newPath = `${path}/${escapeJsonPointer(key)}`;
       const val1 = obj1[key];
       const val2 = obj2[key];
 
