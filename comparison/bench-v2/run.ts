@@ -71,7 +71,7 @@ async function timeIt(label: string, fn: () => void, singleMs: number): Promise<
   const bench = new Bench(cfg);
   bench.add(label, fn);
   await bench.run();
-  const l = (bench.tasks[0].result as any).latency;
+  const l = (bench.tasks[0]?.result as any).latency;
   return { meanMs: l.mean, p99Ms: l.p99, minMs: l.min, samples: l.samplesCount };
 }
 
@@ -187,8 +187,9 @@ async function measure(a: Adapter, c: CorpusCase, caseFile: string): Promise<Lib
   // Diff wall-time.
   base.diff = await timeIt(`diff:${a.id}:${c.name}`, () => a.diff(c), first.ms);
 
-  // Apply wall-time (only for adapters with a real applier and a valid patch).
-  if (a.hasApplier && verdict !== "CRASH") {
+  // Apply wall-time (only for adapters with a real applier and a valid patch;
+  // CRASH verdicts already returned above).
+  if (a.hasApplier) {
     const p = patch;
     const applySingle = singleRun(() => a.apply(c, p));
     if (!applySingle.threw)
@@ -198,7 +199,7 @@ async function measure(a: Adapter, c: CorpusCase, caseFile: string): Promise<Lib
   // Peak memory (pathological shapes only), via fresh subprocess.
   if (c.measureMemory) {
     const mem = probeMemory(caseFile, a.id);
-    if ("crash" in mem) {
+    if (mem && "crash" in mem) {
       // Do not overwrite a PASS/CORRUPT verdict; annotate memory failure.
       base.memory = null;
       base.verdictDetail = base.verdictDetail
