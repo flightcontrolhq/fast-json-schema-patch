@@ -1,0 +1,304 @@
+/**
+ * spec/fuzz/generate-corpus.ts — deterministic differential-fuzz corpus generator.
+ *
+ * Regenerate with:  bun run spec/fuzz/generate-corpus.ts
+ *
+ * PURPOSE
+ * -------
+ * Produces a large, seeded corpus of (schema, options, original, modified)
+ * triples together with the TypeScript reference's answer for each one:
+ *   - `tsPatch`   — the ops emitted by `JsonSchemaPatcher.execute()`
+ *   - `tsApplied` — the document produced by `applyPatch(original, tsPatch)`
+ *
+ * The Go port's differential test (go/differential_test.go) replays every
+ * record: it builds the same plan, diffs the same documents, asserts its patch
+ * is STRUCTURALLY EQUAL to `tsPatch` (§10.3.2), then applies ITS OWN patch and
+ * asserts the result deep-equals `tsApplied` (§8.7.4). Zero mismatches are
+ * required; any divergence is a bug in one engine or a spec hole.
+ *
+ * DETERMINISM
+ * -----------
+ * A single fixed faker seed drives every random draw — document shapes,
+ * modification selection, everything. Re-running produces byte-identical
+ * corpus files. Nothing here reads the clock or an unseeded RNG.
+ *
+ * COVERAGE
+ * --------
+ * The config matrix crosses two document families (flightcontrol cloud-config
+ * and e-commerce) against plan-option variants that force each array-diff
+ * strategy (primaryKey / unique / lcs) and against every capability toggle
+ * (includeOldValue, emitMoves, wholesaleReplaceFallback — SPEC §10.4). See the
+ * `configs` and `capabilityVariants` tables below.
+ *
+ * SCHEMA STORAGE
+ * --------------
+ * Schemas are written once to corpus/schemas/<ref>.json and referenced by
+ * `schemaRef` in each record rather than inlined: the cloud schema alone is
+ * ~150 KB, so inlining it into every one of ~500 records would bloat the
+ * committed corpus by two orders of magnitude. The referenced file IS the
+ * record's `schema` — the Go test resolves it the same way. (This is the only
+ * deviation from a literally self-contained record and is intentional.)
+ */
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { faker } from "@faker-js/faker";
+import { applyPatch, buildPlan, JsonSchemaPatcher } from "../../src/index";
+import type { Operation } from "../../src/types";
+import mainSchema from "../../schema/schema.json";
+import ecommerceSchema from "../../schema/e-commerce.json";
+import { createRandomCloudConfig } from "../../comparison/data-generators";
+import { applyModificationsForTargetComplexity } from "../../comparison/modification-functions";
+import {
+  applyECommerceModificationsForTargetComplexity,
+  generateRandomECommerceConfig,
+} from "../../comparison/ecommerceModifications";
+
+// ---------------------------------------------------------------------------
+// Determinism: one fixed seed for the entire run.
+// ---------------------------------------------------------------------------
+const SEED = 0xc0ffee;
+faker.seed(SEED);
+
+type Complexity = "Low" | "Medium";
+const RANGES: Record<Complexity, { label: string; min: number; max: number }> = {
+  Low: { label: "Low", min: 1, max: 30 },
+  Medium: { label: "Medium", min: 30, max: 80 },
+};
+// Modification budget per complexity (drives how many edits are applied).
+const TARGET: Record<Complexity, number> = { Low: 12, Medium: 45 };
+
+type PlanOpts = {
+  primaryKeyMap?: Record<string, string>;
+  basePath?: string;
+  primaryKeyCandidates?: string[];
+};
+
+type Family = "cloud" | "ecommerce";
+
+interface Config {
+  label: string;
+  family: Family;
+  schemaRef: string;
+  schema: unknown;
+  planOpts: PlanOpts;
+  complexities: Complexity[];
+  /** doc pairs to generate per (capability variant); total = docsPer × caps. */
+  docsPer: number;
+}
+
+// Plan-option variants chosen to exercise every strategy (SPEC §4.4/§4.5):
+//   *-auto  → primaryKey on id-keyed arrays, unique on primitive arrays, lcs on
+//             keyless object arrays (shipping.rates); the natural mix.
+//   *-lcs   → primaryKeyCandidates:[] disables auto-detection, so every object
+//             array falls back to lcs (§4.5.3) while primitive arrays stay unique.
+//   *-empty → schema {} yields the empty plan: every array (incl. primitive) is
+//             lcs (§5.4.5.3), the pure schemaless path.
+//   *-pkmap → primaryKeyMap forces a non-default key, overriding auto-detection.
+// Low-complexity documents dominate (small, so the corpus stays committable);
+// a dedicated *-stress config contributes a handful of large Medium documents
+// per family to exercise long-array LCS / primary-key reconciliation.
+const configs: Config[] = [
+  {
+    label: "cloud-auto",
+    family: "cloud",
+    schemaRef: "cloud",
+    schema: mainSchema,
+    planOpts: {},
+    complexities: ["Low"],
+    docsPer: 31,
+  },
+  {
+    label: "cloud-lcs",
+    family: "cloud",
+    schemaRef: "cloud",
+    schema: mainSchema,
+    planOpts: { primaryKeyCandidates: [] },
+    complexities: ["Low"],
+    docsPer: 16,
+  },
+  {
+    label: "cloud-pkmap",
+    family: "cloud",
+    schemaRef: "cloud",
+    schema: mainSchema,
+    planOpts: { primaryKeyMap: { "/environments": "name" } },
+    complexities: ["Low"],
+    docsPer: 10,
+  },
+  {
+    label: "cloud-empty",
+    family: "cloud",
+    schemaRef: "empty",
+    schema: {},
+    planOpts: {},
+    complexities: ["Low"],
+    docsPer: 8,
+  },
+  {
+    label: "cloud-stress",
+    family: "cloud",
+    schemaRef: "cloud",
+    schema: mainSchema,
+    planOpts: {},
+    complexities: ["Medium"],
+    docsPer: 2,
+  },
+  {
+    label: "ecommerce-auto",
+    family: "ecommerce",
+    schemaRef: "ecommerce",
+    schema: ecommerceSchema,
+    planOpts: {},
+    complexities: ["Low"],
+    docsPer: 25,
+  },
+  {
+    label: "ecommerce-lcs",
+    family: "ecommerce",
+    schemaRef: "ecommerce",
+    schema: ecommerceSchema,
+    planOpts: { primaryKeyCandidates: [] },
+    complexities: ["Low"],
+    docsPer: 10,
+  },
+  {
+    label: "ecommerce-stress",
+    family: "ecommerce",
+    schemaRef: "ecommerce",
+    schema: ecommerceSchema,
+    planOpts: {},
+    complexities: ["Medium"],
+    docsPer: 2,
+  },
+];
+
+// Capability variants (SPEC §10.4). Defaults reproduce pre-capability output.
+const capabilityVariants: {
+  includeOldValue: boolean;
+  emitMoves: boolean;
+  wholesaleReplaceFallback: boolean;
+}[] = [
+  { includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: false },
+  { includeOldValue: false, emitMoves: false, wholesaleReplaceFallback: false },
+  { includeOldValue: true, emitMoves: true, wholesaleReplaceFallback: false },
+  { includeOldValue: false, emitMoves: true, wholesaleReplaceFallback: false },
+  { includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: true },
+];
+
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+
+function makePair(family: Family, complexity: Complexity): { original: unknown; modified: unknown } {
+  const range = RANGES[complexity];
+  const target = TARGET[complexity];
+  if (family === "cloud") {
+    const original = createRandomCloudConfig({ complexity });
+    const modified = clone(original);
+    applyModificationsForTargetComplexity(modified, target, range);
+    return { original, modified };
+  }
+  const original = generateRandomECommerceConfig({ complexity });
+  const modified = clone(original);
+  applyECommerceModificationsForTargetComplexity(modified, target, range);
+  return { original, modified };
+}
+
+interface Record {
+  name: string;
+  schemaRef: string;
+  options: PlanOpts & {
+    includeOldValue: boolean;
+    emitMoves: boolean;
+    wholesaleReplaceFallback: boolean;
+  };
+  original: unknown;
+  modified: unknown;
+  tsPatch: Operation[];
+  tsApplied: unknown;
+}
+
+const outDir = join(import.meta.dir, "corpus");
+const schemaDir = join(outDir, "schemas");
+mkdirSync(schemaDir, { recursive: true });
+
+// Emit the referenced schema files (deduped by ref).
+const schemasByRef = new Map<string, unknown>();
+for (const c of configs) schemasByRef.set(c.schemaRef, c.schema);
+schemasByRef.set("empty", {});
+for (const [ref, schema] of schemasByRef) {
+  writeFileSync(join(schemaDir, `${ref}.json`), `${JSON.stringify(schema, null, 2)}\n`);
+}
+
+// Stats accumulators for the run summary.
+const stats = {
+  total: 0,
+  byConfig: new Map<string, number>(),
+  byCapability: new Map<string, number>(),
+  emptyPatches: 0,
+  totalOps: 0,
+  opCounts: new Map<string, number>(),
+};
+
+// One .jsonl file per config label (corpus/*.jsonl).
+for (const config of configs) {
+  const lines: string[] = [];
+  let seq = 0;
+  for (const complexity of config.complexities) {
+    for (let d = 0; d < config.docsPer; d++) {
+      const { original, modified } = makePair(config.family, complexity);
+      for (const caps of capabilityVariants) {
+        const plan = buildPlan({ schema: config.schema as never, ...config.planOpts });
+        const patcher = new JsonSchemaPatcher({
+          plan,
+          includeOldValue: caps.includeOldValue,
+          emitMoves: caps.emitMoves,
+          wholesaleReplaceFallback: caps.wholesaleReplaceFallback,
+        });
+        const tsPatch = patcher.execute({ original, modified });
+        // Apply against a fresh clone so the pristine `original` stays intact
+        // for the record; applyPatch inserts patch values by reference.
+        const tsApplied = applyPatch(clone(original), tsPatch, {});
+
+        const capLabel = `iov=${caps.includeOldValue ? 1 : 0},mov=${
+          caps.emitMoves ? 1 : 0
+        },whole=${caps.wholesaleReplaceFallback ? 1 : 0}`;
+        const record: Record = {
+          name: `${config.label}/${complexity}/${seq}/${capLabel}`,
+          schemaRef: config.schemaRef,
+          options: { ...config.planOpts, ...caps },
+          original,
+          modified,
+          tsPatch,
+          tsApplied,
+        };
+        lines.push(JSON.stringify(record));
+
+        // Stats.
+        stats.total++;
+        stats.byConfig.set(config.label, (stats.byConfig.get(config.label) ?? 0) + 1);
+        stats.byCapability.set(capLabel, (stats.byCapability.get(capLabel) ?? 0) + 1);
+        if (tsPatch.length === 0) stats.emptyPatches++;
+        stats.totalOps += tsPatch.length;
+        for (const op of tsPatch) {
+          stats.opCounts.set(op.op, (stats.opCounts.get(op.op) ?? 0) + 1);
+        }
+        seq++;
+      }
+    }
+  }
+  writeFileSync(join(outDir, `${config.label}.jsonl`), `${lines.join("\n")}\n`);
+}
+
+// ---------------------------------------------------------------------------
+// Run summary (also useful as a commit-message reference).
+// ---------------------------------------------------------------------------
+const sorted = (m: Map<string, number>) => [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+console.log(`seed: 0x${SEED.toString(16)}`);
+console.log(`records: ${stats.total}`);
+console.log(`empty patches: ${stats.emptyPatches}`);
+console.log(`total ops: ${stats.totalOps} (avg ${(stats.totalOps / stats.total).toFixed(1)}/record)`);
+console.log("by config:");
+for (const [k, v] of sorted(stats.byConfig)) console.log(`  ${k}: ${v}`);
+console.log("by capability:");
+for (const [k, v] of sorted(stats.byCapability)) console.log(`  ${k}: ${v}`);
+console.log("ops by type:");
+for (const [k, v] of sorted(stats.opCounts)) console.log(`  ${k}: ${v}`);
