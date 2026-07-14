@@ -37,6 +37,8 @@
   ],
   "scripts": {
     "compare": "bun run comparison/index.ts",
+    "bench:ts": "bun run comparison/bench-v2/run.ts",
+    "bench:go": "cd go-bench && go run .",
     "test": "bun test",
     "check-exports": "attw --pack .",
     "release": "bun test && bun run build && bun changeset version && changeset publish",

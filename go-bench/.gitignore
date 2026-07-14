@@ -1,0 +1,2 @@
+# built binary (module name collides with dir name)
+/go-bench
