@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"sort"
 	"strconv"
 	"unicode/utf8"
@@ -125,8 +126,13 @@ func encodeValue(buf *bytes.Buffer, v Value) error {
 	case string:
 		encodeString(buf, x)
 	case Number:
-		if x.text == "" {
-			return fmt.Errorf("schemapatch: cannot encode Number with empty text")
+		// Backstop grammar gate (SPEC §2.2): even though every ingress
+		// ([Decode]/[ParseNumber]/[NewNumber]/[FromAny]) validates, Encode
+		// re-checks so a malformed literal can never reach the wire — an empty
+		// text, or a hand-built non-finite, fails here rather than emitting
+		// invalid JSON.
+		if !ValidNumberText(x.text) {
+			return fmt.Errorf("schemapatch: cannot encode invalid JSON number %q", x.text)
 		}
 		buf.WriteString(x.text)
 	case []Value:
@@ -229,11 +235,14 @@ func FromAny(v any) (Value, error) {
 	case *Object:
 		return x, nil
 	case json.Number:
+		if !ValidNumberText(x.String()) {
+			return nil, fmt.Errorf("schemapatch: %q is not a valid JSON number", x.String())
+		}
 		return Number{text: x.String()}, nil
 	case float64:
-		return Number{text: strconv.FormatFloat(x, 'g', -1, 64)}, nil
+		return numberFromFloat(x, 64)
 	case float32:
-		return Number{text: strconv.FormatFloat(float64(x), 'g', -1, 32)}, nil
+		return numberFromFloat(float64(x), 32)
 	case int:
 		return Number{text: strconv.FormatInt(int64(x), 10)}, nil
 	case int8:
@@ -271,6 +280,17 @@ func FromAny(v any) (Value, error) {
 	default:
 		return nil, fmt.Errorf("schemapatch: cannot convert value of type %T", v)
 	}
+}
+
+// numberFromFloat converts a Go float to a [Number], rejecting the non-finite
+// values (NaN, +Inf, -Inf) that have no JSON representation (SPEC §2.2). bitSize
+// (32 or 64) controls the shortest-round-trip formatting so a float32 does not
+// gain spurious f64 precision digits.
+func numberFromFloat(f float64, bitSize int) (Value, error) {
+	if math.IsNaN(f) || math.IsInf(f, 0) {
+		return nil, fmt.Errorf("schemapatch: %v has no JSON number representation", f)
+	}
+	return Number{text: strconv.FormatFloat(f, 'g', -1, bitSize)}, nil
 }
 
 func mapToObject(m map[string]any) (Value, error) {

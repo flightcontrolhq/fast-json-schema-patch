@@ -22,7 +22,10 @@
 // and comparison happens at IEEE-754 f64 semantics (SPEC §2.2).
 package schemapatch
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 // Value is any node of the ordered JSON value model. Its dynamic type is one of
 // nil, bool, string, [Number], []Value, or *[Object]. It is an alias for any so
@@ -39,10 +42,93 @@ type Number struct {
 	text string
 }
 
-// NewNumber returns a Number carrying the given literal text. The text is not
-// validated here; callers that need a guaranteed-valid Number should obtain it
-// via [Decode].
-func NewNumber(text string) Number { return Number{text: text} }
+// NewNumber returns a Number carrying the given literal text. text MUST be a
+// valid JSON number per RFC 8259 (see [ValidNumberText]); an invalid literal —
+// "NaN", "Infinity", "1.", ".5", "01", "+1", "" — is a programming error and
+// panics, so an out-of-band non-JSON number can never enter the value model
+// through this constructor and later corrupt an [Encode]. Callers holding
+// untrusted text should use [ParseNumber], which reports the error instead of
+// panicking; callers with already-parsed JSON should use [Decode].
+func NewNumber(text string) Number {
+	n, err := ParseNumber(text)
+	if err != nil {
+		panic(err)
+	}
+	return n
+}
+
+// ParseNumber returns a Number for text, or an error if text is not a valid JSON
+// number per RFC 8259 (see [ValidNumberText]). It is the non-panicking form of
+// [NewNumber] for untrusted input.
+func ParseNumber(text string) (Number, error) {
+	if !ValidNumberText(text) {
+		return Number{}, fmt.Errorf("schemapatch: %q is not a valid JSON number", text)
+	}
+	return Number{text: text}, nil
+}
+
+// ValidNumberText reports whether s is a valid JSON number literal per the RFC
+// 8259 grammar:
+//
+//	number = [ "-" ] int [ frac ] [ exp ]
+//	int    = "0" / ( digit1-9 *DIGIT )
+//	frac   = "." 1*DIGIT
+//	exp    = ("e" / "E") [ "+" / "-" ] 1*DIGIT
+//
+// It rejects everything JSON forbids that Go's own float parsing would wave
+// through — the non-finite words NaN/Inf/Infinity, a leading "+", leading zeros,
+// a bare-point "1." or ".5", hex floats, and underscore separators — so it is
+// the single grammar gate shared by [ParseNumber], [FromAny], and [Encode]. It
+// matches the numbers [Decode] accepts, so decoded Numbers always pass.
+func ValidNumberText(s string) bool {
+	i, n := 0, len(s)
+	if n == 0 {
+		return false
+	}
+	if s[i] == '-' {
+		i++
+	}
+	// int: single "0", or a nonzero digit followed by more digits.
+	if i >= n {
+		return false
+	}
+	if s[i] == '0' {
+		i++
+	} else if s[i] >= '1' && s[i] <= '9' {
+		i++
+		for i < n && s[i] >= '0' && s[i] <= '9' {
+			i++
+		}
+	} else {
+		return false
+	}
+	// frac: "." then at least one digit.
+	if i < n && s[i] == '.' {
+		i++
+		start := i
+		for i < n && s[i] >= '0' && s[i] <= '9' {
+			i++
+		}
+		if i == start {
+			return false
+		}
+	}
+	// exp: e/E, optional sign, then at least one digit.
+	if i < n && (s[i] == 'e' || s[i] == 'E') {
+		i++
+		if i < n && (s[i] == '+' || s[i] == '-') {
+			i++
+		}
+		start := i
+		for i < n && s[i] >= '0' && s[i] <= '9' {
+			i++
+		}
+		if i == start {
+			return false
+		}
+	}
+	return i == n
+}
 
 // String returns the original literal text of the number.
 func (n Number) String() string { return n.text }
