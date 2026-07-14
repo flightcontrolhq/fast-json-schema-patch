@@ -66,6 +66,14 @@ type Options = {
   primaryKeyMap?: Record<string, string>;
   basePath?: string;
   primaryKeyCandidates?: string[];
+  /**
+   * ignorePaths capability (GEN §10): JSON Pointers whose subtrees the diff MUST
+   * treat as equal. Passed to the JsonSchemaPatcher constructor (not buildPlan).
+   * Round-trip verdicts for such a case are evaluated MODULO these subtrees
+   * (CORE §7.6): apply(original, patch) equals modified everywhere except at a
+   * matched ignore location, where it retains original's value.
+   */
+  ignorePaths?: string[];
 };
 
 type Roundtrip = "exact" | "multiset";
@@ -528,6 +536,311 @@ for (const n of [10_000, 70_000, 100_000]) {
       note:
         "The runner replays these steps in-process against both engines; the notebook renders PASS/FAIL. Corpus original/modified hold the first diff's pair.",
     },
+  });
+}
+
+// ===========================================================================
+// 7. spec-v2 declared-topology workloads (W2/W3) + ignorePaths + dense apply (D7)
+// ===========================================================================
+// These are the surfaces a schema-aware engine expresses that a generic RFC 6902
+// differ cannot: a composite (multi-field) key, an order-significant keyed array,
+// set membership, atomic (whole-container) replacement, ignored volatile fields,
+// and a dense many-ops-under-one-object apply shape. Every competitor diffs these
+// SCHEMALESSLY (it has no topology vocabulary) — that IS the comparison. All data
+// is pure index arithmetic (no faker/jsf), so appending this section leaves every
+// pre-existing case file byte-identical.
+
+// --- composite-key map: identity spans TWO fields (region, sku) (CORE §8.4) ---
+{
+  const COMPOSITE_SCHEMA = {
+    type: "object",
+    properties: {
+      inventory: {
+        type: "array",
+        "x-schema-patch-topology": "map",
+        "x-schema-patch-keys": ["region", "sku"],
+        items: {
+          type: "object",
+          properties: {
+            region: { type: "string" },
+            sku: { type: "string" },
+            qty: { type: "number" },
+            price: { type: "number" },
+          },
+        },
+      },
+    },
+  };
+  const regions = ["us", "eu", "ap"];
+  const invItem = (r: number, s: number) => ({
+    region: regions[r],
+    sku: `sku-${String(s).padStart(4, "0")}`,
+    qty: r * 100 + s,
+    price: (s + 1) * 3,
+  });
+  const base: JsonValue[] = [];
+  for (let r = 0; r < 3; r++) for (let s = 0; s < 20; s++) base.push(invItem(r, s));
+  let mod: JsonValue[] = (base as ReturnType<typeof invItem>[])
+    .filter((_, i) => i % 9 !== 0) // remove ~1/9 of the (region,sku) pairs
+    .map((it, i) => (i % 4 === 0 ? { ...it, price: it.price + 5, qty: it.qty + 1 } : { ...it }));
+  // add new pairs reusing an existing region with a fresh sku (a NEW composite key)
+  mod = [...mod, invItem(0, 100), invItem(1, 101), invItem(2, 102)];
+  push({
+    name: "topology-map-composite-key",
+    category: "topology",
+    description:
+      "Array keyed by a 2-field composite tuple (region, sku) via x-schema-patch-keys; modify/add/remove by composite identity (a generic differ sees only positions)",
+    schema: COMPOSITE_SCHEMA,
+    original: { inventory: base } as JsonValue,
+    modified: { inventory: mod } as JsonValue,
+    roundtrip: "multiset", // map/insignificant: survivors++appends, order-insensitive
+    measureMemory: false,
+    tags: ["topology", "map", "composite-key"],
+  });
+}
+
+// --- order-significant map: exact keyed order via moves (reorder + modify) -----
+{
+  const ORDERED_SCHEMA = {
+    type: "object",
+    properties: {
+      steps: {
+        type: "array",
+        "x-schema-patch-topology": "map",
+        "x-schema-patch-keys": ["id"],
+        "x-schema-patch-order": "significant",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            label: { type: "string" },
+            weight: { type: "number" },
+          },
+        },
+      },
+    },
+  };
+  const base = Array.from({ length: 40 }, (_, i) => ({
+    id: `st${String(i).padStart(3, "0")}`,
+    label: `step-${i}`,
+    weight: i,
+  }));
+  let mod = base.map((it, i) => (i % 5 === 0 ? { ...it, label: `${it.label}-v2` } : { ...it }));
+  mod = [...mod.slice(7), ...mod.slice(0, 7)]; // rotate by 7 -> a real reordering
+  push({
+    name: "topology-map-order-significant",
+    category: "topology",
+    description:
+      "Keyed array declared x-schema-patch-order:significant, rotated by 7 with in-place label edits; exact order is reconstructed by the move machinery (CORE §7.4/§8.4)",
+    schema: ORDERED_SCHEMA,
+    original: { steps: base } as JsonValue,
+    modified: { steps: mod } as JsonValue,
+    roundtrip: "exact", // map/significant: exact order reconstruction
+    measureMemory: false,
+    tags: ["topology", "map", "order-significant", "reorder"],
+  });
+}
+
+// --- set topology (scalars): membership identity, order insignificant (CORE §8.5)
+{
+  const SET_SCALAR_SCHEMA = {
+    type: "object",
+    properties: {
+      tags: { type: "array", "x-schema-patch-topology": "set", items: { type: "string" } },
+    },
+  };
+  const base = Array.from({ length: 50 }, (_, i) => `tag-${String(i).padStart(3, "0")}`);
+  let mod = base.filter((_, i) => i % 7 !== 0); // remove ~1/7 of the members
+  mod = [...mod].reverse(); // reorder survivors (a set no-op)
+  mod = [...mod, "tag-900", "tag-901", "tag-902"]; // add new members
+  push({
+    name: "topology-set-scalars",
+    category: "topology",
+    description:
+      "Array declared x-schema-patch-topology:set over distinct strings; add/remove members and reverse the survivors (reorder is a no-op for a set)",
+    schema: SET_SCALAR_SCHEMA,
+    original: { tags: base } as JsonValue,
+    modified: { tags: mod } as JsonValue,
+    roundtrip: "multiset", // set: content/multiset round-trip, order insignificant
+    measureMemory: false,
+    tags: ["topology", "set", "scalars", "reorder"],
+  });
+}
+
+// --- set topology (objects): identity is the whole (deep-equal) element ---------
+{
+  const SET_OBJ_SCHEMA = {
+    type: "object",
+    properties: {
+      members: {
+        type: "array",
+        "x-schema-patch-topology": "set",
+        items: { type: "object", properties: { a: { type: "string" }, b: { type: "number" } } },
+      },
+    },
+  };
+  const base = Array.from({ length: 30 }, (_, i) => ({ a: `m${i}`, b: i }));
+  let mod = base.filter((_, i) => i % 6 !== 0).map((it) => ({ ...it }));
+  mod = [...mod].reverse();
+  mod = [...mod, { a: "m100", b: 100 }, { a: "m101", b: 101 }];
+  push({
+    name: "topology-set-objects",
+    category: "topology",
+    description:
+      "Set of distinct objects (identity = whole deep value); membership add/remove plus a reverse (no in-place edits, since a value change IS a remove+add for a set)",
+    schema: SET_OBJ_SCHEMA,
+    original: { members: base } as JsonValue,
+    modified: { members: mod } as JsonValue,
+    roundtrip: "multiset",
+    measureMemory: false,
+    tags: ["topology", "set", "objects", "reorder"],
+  });
+}
+
+// --- atomic array: any deep difference replaces the WHOLE array (CORE §8.6) ------
+{
+  const ATOMIC_ARR_SCHEMA = {
+    type: "object",
+    properties: {
+      matrix: {
+        type: "array",
+        "x-schema-patch-topology": "atomic",
+        items: { type: "array", items: { type: "number" } },
+      },
+    },
+  };
+  const base = { matrix: Array.from({ length: 20 }, (_, i) => Array.from({ length: 5 }, (_, j) => i * 5 + j)) };
+  const mod = deepCopy(base);
+  mod.matrix[3]![2] = 999; // one deep change -> the whole array is one replace
+  push({
+    name: "topology-atomic-array",
+    category: "topology",
+    description:
+      "Array declared x-schema-patch-topology:atomic; a single deep element change forces one whole-array replace (a generic differ emits a granular positional op instead)",
+    schema: ATOMIC_ARR_SCHEMA,
+    original: base as unknown as JsonValue,
+    modified: mod as unknown as JsonValue,
+    roundtrip: "exact",
+    measureMemory: false,
+    tags: ["topology", "atomic", "array"],
+  });
+}
+
+// --- atomic object: any member difference replaces the WHOLE object (CORE §8.6) -
+{
+  const ATOMIC_OBJ_SCHEMA = {
+    type: "object",
+    properties: {
+      config: {
+        type: "object",
+        "x-schema-patch-granularity": "atomic",
+        properties: {
+          host: { type: "string" },
+          port: { type: "number" },
+          tls: { type: "boolean" },
+          region: { type: "string" },
+          replicas: { type: "number" },
+        },
+      },
+    },
+  };
+  const base = { config: { host: "a", port: 8080, tls: false, region: "us", replicas: 3 } };
+  const mod = { config: { host: "a", port: 9090, tls: true, region: "us", replicas: 3 } };
+  push({
+    name: "topology-atomic-object",
+    category: "topology",
+    description:
+      "Object declared x-schema-patch-granularity:atomic; two changed members yield ONE whole-object replace (a generic differ emits a replace per member)",
+    schema: ATOMIC_OBJ_SCHEMA,
+    original: base as unknown as JsonValue,
+    modified: mod as unknown as JsonValue,
+    roundtrip: "exact",
+    measureMemory: false,
+    tags: ["topology", "atomic", "object"],
+  });
+}
+
+// --- ignorePaths: volatile timestamp fields are skipped (GEN §10) ---------------
+// modified is deepCopy(base) with values edited in place (key order preserved), so
+// the round-trip is verified byte-exact MODULO the ignored subtrees (CORE §7.6).
+{
+  const IGNORE_SCHEMA = {
+    type: "object",
+    properties: {
+      meta: {
+        type: "object",
+        properties: { generatedAt: { type: "string" }, version: { type: "number" } },
+      },
+      records: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            status: { type: "string" },
+            updatedAt: { type: "string" },
+            lastSeenAt: { type: "string" },
+          },
+        },
+      },
+    },
+  };
+  const base = {
+    meta: { generatedAt: "2020-01-01T00:00:00Z", version: 1 },
+    records: Array.from({ length: 40 }, (_, i) => ({
+      id: `r${String(i).padStart(3, "0")}`,
+      status: i % 3 === 0 ? "active" : "idle",
+      updatedAt: `2020-01-01T00:00:${String(i % 60).padStart(2, "0")}Z`,
+      lastSeenAt: "2020-01-01T01:00:00Z",
+    })),
+  };
+  const mod = deepCopy(base);
+  mod.meta.generatedAt = "2020-06-15T12:00:00Z"; // volatile (ignored)
+  for (let i = 0; i < mod.records.length; i++) {
+    const rec = mod.records[i]!;
+    rec.updatedAt = `2020-06-15T12:00:${String(i % 60).padStart(2, "0")}Z`; // volatile (ignored)
+    rec.lastSeenAt = "2020-06-15T13:00:00Z"; // volatile (ignored)
+    if (i % 8 === 0) rec.status = rec.status === "active" ? "idle" : "active"; // REAL
+  }
+  push({
+    name: "ignorepaths-volatile-timestamps",
+    category: "ignore-paths",
+    description:
+      "A doc whose every record has churned volatile timestamps plus a handful of real status flips; ignorePaths skips the timestamps so ours emits only the real changes while a generic differ emits ~40x the noise",
+    schema: IGNORE_SCHEMA,
+    options: { ignorePaths: ["/meta/generatedAt", "/records/*/updatedAt", "/records/*/lastSeenAt"] },
+    original: base as unknown as JsonValue,
+    modified: mod as unknown as JsonValue,
+    roundtrip: "exact", // exact MODULO the ignored subtrees (see reconstructs())
+    measureMemory: false,
+    tags: ["ignore-paths", "volatile", "timestamps"],
+  });
+}
+
+// --- dense many-ops-under-one-object apply shape (D7 clone-set workload) ---------
+// Every member of one object changes value; a schemaless diff yields N replace ops
+// all sharing the parent /obj, so apply must clone that object ONCE (the D7 fix),
+// not once per op. This is the case the apply race (ours-apply vs evanphx) exists
+// to time.
+{
+  const N = 5000;
+  const pad = (i: number) => `k${String(i).padStart(5, "0")}`;
+  const baseObj: Record<string, JsonValue> = {};
+  const modObj: Record<string, JsonValue> = {};
+  for (let i = 0; i < N; i++) {
+    baseObj[pad(i)] = i;
+    modObj[pad(i)] = i + 1_000_000;
+  }
+  push({
+    name: "apply-dense-many-ops-under-one-object",
+    category: "apply-dense",
+    description: `An object with ${N} members whose values ALL change; a schemaless diff is ${N} replace ops under one parent object — the D7 per-invocation clone-set apply workload`,
+    schema: null,
+    original: { obj: baseObj } as JsonValue,
+    modified: { obj: modObj } as JsonValue,
+    roundtrip: "exact",
+    measureMemory: false,
+    tags: ["apply-dense", "d7", "clone-set"],
   });
 }
 

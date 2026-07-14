@@ -1,0 +1,56 @@
+{
+  "name": "topology-atomic-object",
+  "category": "topology",
+  "description": "Object declared x-schema-patch-granularity:atomic; two changed members yield ONE whole-object replace (a generic differ emits a replace per member)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "config": {
+        "type": "object",
+        "x-schema-patch-granularity": "atomic",
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "number"
+          },
+          "tls": {
+            "type": "boolean"
+          },
+          "region": {
+            "type": "string"
+          },
+          "replicas": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "roundtrip": "exact",
+  "measureMemory": false,
+  "tags": [
+    "topology",
+    "atomic",
+    "object"
+  ],
+  "original": {
+    "config": {
+      "host": "a",
+      "port": 8080,
+      "tls": false,
+      "region": "us",
+      "replicas": 3
+    }
+  },
+  "modified": {
+    "config": {
+      "host": "a",
+      "port": 9090,
+      "tls": true,
+      "region": "us",
+      "replicas": 3
+    }
+  }
+}

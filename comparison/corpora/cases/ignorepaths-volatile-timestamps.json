@@ -1,0 +1,551 @@
+{
+  "name": "ignorepaths-volatile-timestamps",
+  "category": "ignore-paths",
+  "description": "A doc whose every record has churned volatile timestamps plus a handful of real status flips; ignorePaths skips the timestamps so ours emits only the real changes while a generic differ emits ~40x the noise",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "meta": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          }
+        }
+      },
+      "records": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "updatedAt": {
+              "type": "string"
+            },
+            "lastSeenAt": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "ignorePaths": [
+      "/meta/generatedAt",
+      "/records/*/updatedAt",
+      "/records/*/lastSeenAt"
+    ]
+  },
+  "roundtrip": "exact",
+  "measureMemory": false,
+  "tags": [
+    "ignore-paths",
+    "volatile",
+    "timestamps"
+  ],
+  "original": {
+    "meta": {
+      "generatedAt": "2020-01-01T00:00:00Z",
+      "version": 1
+    },
+    "records": [
+      {
+        "id": "r000",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:00Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r001",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:01Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r002",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:02Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r003",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:03Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r004",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:04Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r005",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:05Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r006",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:06Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r007",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:07Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r008",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:08Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r009",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:09Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r010",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:10Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r011",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:11Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r012",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:12Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r013",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:13Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r014",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:14Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r015",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:15Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r016",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:16Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r017",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:17Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r018",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:18Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r019",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:19Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r020",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:20Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r021",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:21Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r022",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:22Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r023",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:23Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r024",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:24Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r025",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:25Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r026",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:26Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r027",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:27Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r028",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:28Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r029",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:29Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r030",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:30Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r031",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:31Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r032",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:32Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r033",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:33Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r034",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:34Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r035",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:35Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r036",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:36Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r037",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:37Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r038",
+        "status": "idle",
+        "updatedAt": "2020-01-01T00:00:38Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      },
+      {
+        "id": "r039",
+        "status": "active",
+        "updatedAt": "2020-01-01T00:00:39Z",
+        "lastSeenAt": "2020-01-01T01:00:00Z"
+      }
+    ]
+  },
+  "modified": {
+    "meta": {
+      "generatedAt": "2020-06-15T12:00:00Z",
+      "version": 1
+    },
+    "records": [
+      {
+        "id": "r000",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:00Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r001",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:01Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r002",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:02Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r003",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:03Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r004",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:04Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r005",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:05Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r006",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:06Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r007",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:07Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r008",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:08Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r009",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:09Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r010",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:10Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r011",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:11Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r012",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:12Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r013",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:13Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r014",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:14Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r015",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:15Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r016",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:16Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r017",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:17Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r018",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:18Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r019",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:19Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r020",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:20Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r021",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:21Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r022",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:22Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r023",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:23Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r024",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:24Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r025",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:25Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r026",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:26Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r027",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:27Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r028",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:28Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r029",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:29Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r030",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:30Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r031",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:31Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r032",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:32Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r033",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:33Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r034",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:34Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r035",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:35Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r036",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:36Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r037",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:37Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r038",
+        "status": "idle",
+        "updatedAt": "2020-06-15T12:00:38Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      },
+      {
+        "id": "r039",
+        "status": "active",
+        "updatedAt": "2020-06-15T12:00:39Z",
+        "lastSeenAt": "2020-06-15T13:00:00Z"
+      }
+    ]
+  }
+}

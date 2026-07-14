@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "seed": 20240521,
   "generatedBy": "comparison/corpora/generate.ts",
-  "count": 19,
+  "count": 27,
   "cases": [
     {
       "name": "realistic-cloud-config-small",
@@ -353,6 +353,159 @@
       "isStalenessDescriptor": true,
       "bytesOriginal": 1526,
       "bytesModified": 1526
+    },
+    {
+      "name": "topology-map-composite-key",
+      "file": "cases/topology-map-composite-key.json",
+      "category": "topology",
+      "description": "Array keyed by a 2-field composite tuple (region, sku) via x-schema-patch-keys; modify/add/remove by composite identity (a generic differ sees only positions)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "map",
+        "composite-key"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3216,
+      "bytesModified": 3011
+    },
+    {
+      "name": "topology-map-order-significant",
+      "file": "cases/topology-map-order-significant.json",
+      "category": "topology",
+      "description": "Keyed array declared x-schema-patch-order:significant, rotated by 7 with in-place label edits; exact order is reconstructed by the move machinery (CORE §7.4/§8.4)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "map",
+        "order-significant",
+        "reorder"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 1791,
+      "bytesModified": 1815
+    },
+    {
+      "name": "topology-set-scalars",
+      "file": "cases/topology-set-scalars.json",
+      "category": "topology",
+      "description": "Array declared x-schema-patch-topology:set over distinct strings; add/remove members and reverse the survivors (reorder is a no-op for a set)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "set",
+        "scalars",
+        "reorder"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 510,
+      "bytesModified": 460
+    },
+    {
+      "name": "topology-set-objects",
+      "file": "cases/topology-set-objects.json",
+      "category": "topology",
+      "description": "Set of distinct objects (identity = whole deep value); membership add/remove plus a reverse (no in-place edits, since a value change IS a remove+add for a set)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "set",
+        "objects",
+        "reorder"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 563,
+      "bytesModified": 514
+    },
+    {
+      "name": "topology-atomic-array",
+      "file": "cases/topology-atomic-array.json",
+      "category": "topology",
+      "description": "Array declared x-schema-patch-topology:atomic; a single deep element change forces one whole-array replace (a generic differ emits a granular positional op instead)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "atomic",
+        "array"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 342,
+      "bytesModified": 343
+    },
+    {
+      "name": "topology-atomic-object",
+      "file": "cases/topology-atomic-object.json",
+      "category": "topology",
+      "description": "Object declared x-schema-patch-granularity:atomic; two changed members yield ONE whole-object replace (a generic differ emits a replace per member)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "topology",
+        "atomic",
+        "object"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 74,
+      "bytesModified": 73
+    },
+    {
+      "name": "ignorepaths-volatile-timestamps",
+      "file": "cases/ignorepaths-volatile-timestamps.json",
+      "category": "ignore-paths",
+      "description": "A doc whose every record has churned volatile timestamps plus a handful of real status flips; ignorePaths skips the timestamps so ours emits only the real changes while a generic differ emits ~40x the noise",
+      "hasSchema": true,
+      "options": {
+        "ignorePaths": [
+          "/meta/generatedAt",
+          "/records/*/updatedAt",
+          "/records/*/lastSeenAt"
+        ]
+      },
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "ignore-paths",
+        "volatile",
+        "timestamps"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 4139,
+      "bytesModified": 4141
+    },
+    {
+      "name": "apply-dense-many-ops-under-one-object",
+      "file": "cases/apply-dense-many-ops-under-one-object.json",
+      "category": "apply-dense",
+      "description": "An object with 5000 members whose values ALL change; a schemaless diff is 5000 replace ops under one parent object — the D7 per-invocation clone-set apply workload",
+      "hasSchema": false,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "apply-dense",
+        "d7",
+        "clone-set"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 68899,
+      "bytesModified": 85009
     }
   ]
 }

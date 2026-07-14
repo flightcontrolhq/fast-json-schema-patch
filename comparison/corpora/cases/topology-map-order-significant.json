@@ -1,0 +1,448 @@
+{
+  "name": "topology-map-order-significant",
+  "category": "topology",
+  "description": "Keyed array declared x-schema-patch-order:significant, rotated by 7 with in-place label edits; exact order is reconstructed by the move machinery (CORE §7.4/§8.4)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "steps": {
+        "type": "array",
+        "x-schema-patch-topology": "map",
+        "x-schema-patch-keys": [
+          "id"
+        ],
+        "x-schema-patch-order": "significant",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            },
+            "weight": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "roundtrip": "exact",
+  "measureMemory": false,
+  "tags": [
+    "topology",
+    "map",
+    "order-significant",
+    "reorder"
+  ],
+  "original": {
+    "steps": [
+      {
+        "id": "st000",
+        "label": "step-0",
+        "weight": 0
+      },
+      {
+        "id": "st001",
+        "label": "step-1",
+        "weight": 1
+      },
+      {
+        "id": "st002",
+        "label": "step-2",
+        "weight": 2
+      },
+      {
+        "id": "st003",
+        "label": "step-3",
+        "weight": 3
+      },
+      {
+        "id": "st004",
+        "label": "step-4",
+        "weight": 4
+      },
+      {
+        "id": "st005",
+        "label": "step-5",
+        "weight": 5
+      },
+      {
+        "id": "st006",
+        "label": "step-6",
+        "weight": 6
+      },
+      {
+        "id": "st007",
+        "label": "step-7",
+        "weight": 7
+      },
+      {
+        "id": "st008",
+        "label": "step-8",
+        "weight": 8
+      },
+      {
+        "id": "st009",
+        "label": "step-9",
+        "weight": 9
+      },
+      {
+        "id": "st010",
+        "label": "step-10",
+        "weight": 10
+      },
+      {
+        "id": "st011",
+        "label": "step-11",
+        "weight": 11
+      },
+      {
+        "id": "st012",
+        "label": "step-12",
+        "weight": 12
+      },
+      {
+        "id": "st013",
+        "label": "step-13",
+        "weight": 13
+      },
+      {
+        "id": "st014",
+        "label": "step-14",
+        "weight": 14
+      },
+      {
+        "id": "st015",
+        "label": "step-15",
+        "weight": 15
+      },
+      {
+        "id": "st016",
+        "label": "step-16",
+        "weight": 16
+      },
+      {
+        "id": "st017",
+        "label": "step-17",
+        "weight": 17
+      },
+      {
+        "id": "st018",
+        "label": "step-18",
+        "weight": 18
+      },
+      {
+        "id": "st019",
+        "label": "step-19",
+        "weight": 19
+      },
+      {
+        "id": "st020",
+        "label": "step-20",
+        "weight": 20
+      },
+      {
+        "id": "st021",
+        "label": "step-21",
+        "weight": 21
+      },
+      {
+        "id": "st022",
+        "label": "step-22",
+        "weight": 22
+      },
+      {
+        "id": "st023",
+        "label": "step-23",
+        "weight": 23
+      },
+      {
+        "id": "st024",
+        "label": "step-24",
+        "weight": 24
+      },
+      {
+        "id": "st025",
+        "label": "step-25",
+        "weight": 25
+      },
+      {
+        "id": "st026",
+        "label": "step-26",
+        "weight": 26
+      },
+      {
+        "id": "st027",
+        "label": "step-27",
+        "weight": 27
+      },
+      {
+        "id": "st028",
+        "label": "step-28",
+        "weight": 28
+      },
+      {
+        "id": "st029",
+        "label": "step-29",
+        "weight": 29
+      },
+      {
+        "id": "st030",
+        "label": "step-30",
+        "weight": 30
+      },
+      {
+        "id": "st031",
+        "label": "step-31",
+        "weight": 31
+      },
+      {
+        "id": "st032",
+        "label": "step-32",
+        "weight": 32
+      },
+      {
+        "id": "st033",
+        "label": "step-33",
+        "weight": 33
+      },
+      {
+        "id": "st034",
+        "label": "step-34",
+        "weight": 34
+      },
+      {
+        "id": "st035",
+        "label": "step-35",
+        "weight": 35
+      },
+      {
+        "id": "st036",
+        "label": "step-36",
+        "weight": 36
+      },
+      {
+        "id": "st037",
+        "label": "step-37",
+        "weight": 37
+      },
+      {
+        "id": "st038",
+        "label": "step-38",
+        "weight": 38
+      },
+      {
+        "id": "st039",
+        "label": "step-39",
+        "weight": 39
+      }
+    ]
+  },
+  "modified": {
+    "steps": [
+      {
+        "id": "st007",
+        "label": "step-7",
+        "weight": 7
+      },
+      {
+        "id": "st008",
+        "label": "step-8",
+        "weight": 8
+      },
+      {
+        "id": "st009",
+        "label": "step-9",
+        "weight": 9
+      },
+      {
+        "id": "st010",
+        "label": "step-10-v2",
+        "weight": 10
+      },
+      {
+        "id": "st011",
+        "label": "step-11",
+        "weight": 11
+      },
+      {
+        "id": "st012",
+        "label": "step-12",
+        "weight": 12
+      },
+      {
+        "id": "st013",
+        "label": "step-13",
+        "weight": 13
+      },
+      {
+        "id": "st014",
+        "label": "step-14",
+        "weight": 14
+      },
+      {
+        "id": "st015",
+        "label": "step-15-v2",
+        "weight": 15
+      },
+      {
+        "id": "st016",
+        "label": "step-16",
+        "weight": 16
+      },
+      {
+        "id": "st017",
+        "label": "step-17",
+        "weight": 17
+      },
+      {
+        "id": "st018",
+        "label": "step-18",
+        "weight": 18
+      },
+      {
+        "id": "st019",
+        "label": "step-19",
+        "weight": 19
+      },
+      {
+        "id": "st020",
+        "label": "step-20-v2",
+        "weight": 20
+      },
+      {
+        "id": "st021",
+        "label": "step-21",
+        "weight": 21
+      },
+      {
+        "id": "st022",
+        "label": "step-22",
+        "weight": 22
+      },
+      {
+        "id": "st023",
+        "label": "step-23",
+        "weight": 23
+      },
+      {
+        "id": "st024",
+        "label": "step-24",
+        "weight": 24
+      },
+      {
+        "id": "st025",
+        "label": "step-25-v2",
+        "weight": 25
+      },
+      {
+        "id": "st026",
+        "label": "step-26",
+        "weight": 26
+      },
+      {
+        "id": "st027",
+        "label": "step-27",
+        "weight": 27
+      },
+      {
+        "id": "st028",
+        "label": "step-28",
+        "weight": 28
+      },
+      {
+        "id": "st029",
+        "label": "step-29",
+        "weight": 29
+      },
+      {
+        "id": "st030",
+        "label": "step-30-v2",
+        "weight": 30
+      },
+      {
+        "id": "st031",
+        "label": "step-31",
+        "weight": 31
+      },
+      {
+        "id": "st032",
+        "label": "step-32",
+        "weight": 32
+      },
+      {
+        "id": "st033",
+        "label": "step-33",
+        "weight": 33
+      },
+      {
+        "id": "st034",
+        "label": "step-34",
+        "weight": 34
+      },
+      {
+        "id": "st035",
+        "label": "step-35-v2",
+        "weight": 35
+      },
+      {
+        "id": "st036",
+        "label": "step-36",
+        "weight": 36
+      },
+      {
+        "id": "st037",
+        "label": "step-37",
+        "weight": 37
+      },
+      {
+        "id": "st038",
+        "label": "step-38",
+        "weight": 38
+      },
+      {
+        "id": "st039",
+        "label": "step-39",
+        "weight": 39
+      },
+      {
+        "id": "st000",
+        "label": "step-0-v2",
+        "weight": 0
+      },
+      {
+        "id": "st001",
+        "label": "step-1",
+        "weight": 1
+      },
+      {
+        "id": "st002",
+        "label": "step-2",
+        "weight": 2
+      },
+      {
+        "id": "st003",
+        "label": "step-3",
+        "weight": 3
+      },
+      {
+        "id": "st004",
+        "label": "step-4",
+        "weight": 4
+      },
+      {
+        "id": "st005",
+        "label": "step-5-v2",
+        "weight": 5
+      },
+      {
+        "id": "st006",
+        "label": "step-6",
+        "weight": 6
+      }
+    ]
+  }
+}

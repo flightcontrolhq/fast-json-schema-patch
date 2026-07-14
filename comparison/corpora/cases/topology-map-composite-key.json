@@ -1,0 +1,746 @@
+{
+  "name": "topology-map-composite-key",
+  "category": "topology",
+  "description": "Array keyed by a 2-field composite tuple (region, sku) via x-schema-patch-keys; modify/add/remove by composite identity (a generic differ sees only positions)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "inventory": {
+        "type": "array",
+        "x-schema-patch-topology": "map",
+        "x-schema-patch-keys": [
+          "region",
+          "sku"
+        ],
+        "items": {
+          "type": "object",
+          "properties": {
+            "region": {
+              "type": "string"
+            },
+            "sku": {
+              "type": "string"
+            },
+            "qty": {
+              "type": "number"
+            },
+            "price": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  },
+  "roundtrip": "multiset",
+  "measureMemory": false,
+  "tags": [
+    "topology",
+    "map",
+    "composite-key"
+  ],
+  "original": {
+    "inventory": [
+      {
+        "region": "us",
+        "sku": "sku-0000",
+        "qty": 0,
+        "price": 3
+      },
+      {
+        "region": "us",
+        "sku": "sku-0001",
+        "qty": 1,
+        "price": 6
+      },
+      {
+        "region": "us",
+        "sku": "sku-0002",
+        "qty": 2,
+        "price": 9
+      },
+      {
+        "region": "us",
+        "sku": "sku-0003",
+        "qty": 3,
+        "price": 12
+      },
+      {
+        "region": "us",
+        "sku": "sku-0004",
+        "qty": 4,
+        "price": 15
+      },
+      {
+        "region": "us",
+        "sku": "sku-0005",
+        "qty": 5,
+        "price": 18
+      },
+      {
+        "region": "us",
+        "sku": "sku-0006",
+        "qty": 6,
+        "price": 21
+      },
+      {
+        "region": "us",
+        "sku": "sku-0007",
+        "qty": 7,
+        "price": 24
+      },
+      {
+        "region": "us",
+        "sku": "sku-0008",
+        "qty": 8,
+        "price": 27
+      },
+      {
+        "region": "us",
+        "sku": "sku-0009",
+        "qty": 9,
+        "price": 30
+      },
+      {
+        "region": "us",
+        "sku": "sku-0010",
+        "qty": 10,
+        "price": 33
+      },
+      {
+        "region": "us",
+        "sku": "sku-0011",
+        "qty": 11,
+        "price": 36
+      },
+      {
+        "region": "us",
+        "sku": "sku-0012",
+        "qty": 12,
+        "price": 39
+      },
+      {
+        "region": "us",
+        "sku": "sku-0013",
+        "qty": 13,
+        "price": 42
+      },
+      {
+        "region": "us",
+        "sku": "sku-0014",
+        "qty": 14,
+        "price": 45
+      },
+      {
+        "region": "us",
+        "sku": "sku-0015",
+        "qty": 15,
+        "price": 48
+      },
+      {
+        "region": "us",
+        "sku": "sku-0016",
+        "qty": 16,
+        "price": 51
+      },
+      {
+        "region": "us",
+        "sku": "sku-0017",
+        "qty": 17,
+        "price": 54
+      },
+      {
+        "region": "us",
+        "sku": "sku-0018",
+        "qty": 18,
+        "price": 57
+      },
+      {
+        "region": "us",
+        "sku": "sku-0019",
+        "qty": 19,
+        "price": 60
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0000",
+        "qty": 100,
+        "price": 3
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0001",
+        "qty": 101,
+        "price": 6
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0002",
+        "qty": 102,
+        "price": 9
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0003",
+        "qty": 103,
+        "price": 12
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0004",
+        "qty": 104,
+        "price": 15
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0005",
+        "qty": 105,
+        "price": 18
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0006",
+        "qty": 106,
+        "price": 21
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0007",
+        "qty": 107,
+        "price": 24
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0008",
+        "qty": 108,
+        "price": 27
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0009",
+        "qty": 109,
+        "price": 30
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0010",
+        "qty": 110,
+        "price": 33
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0011",
+        "qty": 111,
+        "price": 36
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0012",
+        "qty": 112,
+        "price": 39
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0013",
+        "qty": 113,
+        "price": 42
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0014",
+        "qty": 114,
+        "price": 45
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0015",
+        "qty": 115,
+        "price": 48
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0016",
+        "qty": 116,
+        "price": 51
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0017",
+        "qty": 117,
+        "price": 54
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0018",
+        "qty": 118,
+        "price": 57
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0019",
+        "qty": 119,
+        "price": 60
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0000",
+        "qty": 200,
+        "price": 3
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0001",
+        "qty": 201,
+        "price": 6
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0002",
+        "qty": 202,
+        "price": 9
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0003",
+        "qty": 203,
+        "price": 12
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0004",
+        "qty": 204,
+        "price": 15
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0005",
+        "qty": 205,
+        "price": 18
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0006",
+        "qty": 206,
+        "price": 21
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0007",
+        "qty": 207,
+        "price": 24
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0008",
+        "qty": 208,
+        "price": 27
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0009",
+        "qty": 209,
+        "price": 30
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0010",
+        "qty": 210,
+        "price": 33
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0011",
+        "qty": 211,
+        "price": 36
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0012",
+        "qty": 212,
+        "price": 39
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0013",
+        "qty": 213,
+        "price": 42
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0014",
+        "qty": 214,
+        "price": 45
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0015",
+        "qty": 215,
+        "price": 48
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0016",
+        "qty": 216,
+        "price": 51
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0017",
+        "qty": 217,
+        "price": 54
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0018",
+        "qty": 218,
+        "price": 57
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0019",
+        "qty": 219,
+        "price": 60
+      }
+    ]
+  },
+  "modified": {
+    "inventory": [
+      {
+        "region": "us",
+        "sku": "sku-0001",
+        "qty": 2,
+        "price": 11
+      },
+      {
+        "region": "us",
+        "sku": "sku-0002",
+        "qty": 2,
+        "price": 9
+      },
+      {
+        "region": "us",
+        "sku": "sku-0003",
+        "qty": 3,
+        "price": 12
+      },
+      {
+        "region": "us",
+        "sku": "sku-0004",
+        "qty": 4,
+        "price": 15
+      },
+      {
+        "region": "us",
+        "sku": "sku-0005",
+        "qty": 6,
+        "price": 23
+      },
+      {
+        "region": "us",
+        "sku": "sku-0006",
+        "qty": 6,
+        "price": 21
+      },
+      {
+        "region": "us",
+        "sku": "sku-0007",
+        "qty": 7,
+        "price": 24
+      },
+      {
+        "region": "us",
+        "sku": "sku-0008",
+        "qty": 8,
+        "price": 27
+      },
+      {
+        "region": "us",
+        "sku": "sku-0010",
+        "qty": 11,
+        "price": 38
+      },
+      {
+        "region": "us",
+        "sku": "sku-0011",
+        "qty": 11,
+        "price": 36
+      },
+      {
+        "region": "us",
+        "sku": "sku-0012",
+        "qty": 12,
+        "price": 39
+      },
+      {
+        "region": "us",
+        "sku": "sku-0013",
+        "qty": 13,
+        "price": 42
+      },
+      {
+        "region": "us",
+        "sku": "sku-0014",
+        "qty": 15,
+        "price": 50
+      },
+      {
+        "region": "us",
+        "sku": "sku-0015",
+        "qty": 15,
+        "price": 48
+      },
+      {
+        "region": "us",
+        "sku": "sku-0016",
+        "qty": 16,
+        "price": 51
+      },
+      {
+        "region": "us",
+        "sku": "sku-0017",
+        "qty": 17,
+        "price": 54
+      },
+      {
+        "region": "us",
+        "sku": "sku-0019",
+        "qty": 20,
+        "price": 65
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0000",
+        "qty": 100,
+        "price": 3
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0001",
+        "qty": 101,
+        "price": 6
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0002",
+        "qty": 102,
+        "price": 9
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0003",
+        "qty": 104,
+        "price": 17
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0004",
+        "qty": 104,
+        "price": 15
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0005",
+        "qty": 105,
+        "price": 18
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0006",
+        "qty": 106,
+        "price": 21
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0008",
+        "qty": 109,
+        "price": 32
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0009",
+        "qty": 109,
+        "price": 30
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0010",
+        "qty": 110,
+        "price": 33
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0011",
+        "qty": 111,
+        "price": 36
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0012",
+        "qty": 113,
+        "price": 44
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0013",
+        "qty": 113,
+        "price": 42
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0014",
+        "qty": 114,
+        "price": 45
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0015",
+        "qty": 115,
+        "price": 48
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0017",
+        "qty": 118,
+        "price": 59
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0018",
+        "qty": 118,
+        "price": 57
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0019",
+        "qty": 119,
+        "price": 60
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0000",
+        "qty": 200,
+        "price": 3
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0001",
+        "qty": 202,
+        "price": 11
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0002",
+        "qty": 202,
+        "price": 9
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0003",
+        "qty": 203,
+        "price": 12
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0004",
+        "qty": 204,
+        "price": 15
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0006",
+        "qty": 207,
+        "price": 26
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0007",
+        "qty": 207,
+        "price": 24
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0008",
+        "qty": 208,
+        "price": 27
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0009",
+        "qty": 209,
+        "price": 30
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0010",
+        "qty": 211,
+        "price": 38
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0011",
+        "qty": 211,
+        "price": 36
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0012",
+        "qty": 212,
+        "price": 39
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0013",
+        "qty": 213,
+        "price": 42
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0015",
+        "qty": 216,
+        "price": 53
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0016",
+        "qty": 216,
+        "price": 51
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0017",
+        "qty": 217,
+        "price": 54
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0018",
+        "qty": 218,
+        "price": 57
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0019",
+        "qty": 220,
+        "price": 65
+      },
+      {
+        "region": "us",
+        "sku": "sku-0100",
+        "qty": 100,
+        "price": 303
+      },
+      {
+        "region": "eu",
+        "sku": "sku-0101",
+        "qty": 201,
+        "price": 306
+      },
+      {
+        "region": "ap",
+        "sku": "sku-0102",
+        "qty": 302,
+        "price": 309
+      }
+    ]
+  }
+}
