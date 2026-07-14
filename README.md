@@ -28,8 +28,28 @@ The core of the library is the `JsonSchemaPatcher`, which uses a diff plan to op
 ```typescript
 import { JsonSchemaPatcher, buildPlan } from 'fast-json-schema-patch';
 
-// 1. Define a plan for your data structure, this needs to be done only once for a given schema
-const plan = buildPlan({schema});
+// 0. Describe your data with a JSON Schema. `id` is `required`, so the
+//    `users` array auto-detects the `primaryKey` diffing strategy (§4.5).
+const schema = {
+  type: 'object',
+  properties: {
+    users: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string' },
+          name: { type: 'string' },
+          status: { type: 'string' },
+        },
+      },
+    },
+  },
+};
+
+// 1. Build a plan from the schema — this needs to be done only once per schema.
+const plan = buildPlan({ schema });
 
 // 2. Instantiate the patcher with the plan
 const patcher = new JsonSchemaPatcher({ plan });
@@ -51,12 +71,14 @@ const modified = {
 };
 
 // 3. Generate the optimized patch
-const patch = patcher.execute({original, modified});
+const patch = patcher.execute({ original, modified });
 console.log(patch);
-// Output: [
-//   { op: "remove", path: "/users/1", oldValue: { id: 'user2', ... } },
+// Output (modifications first, then removals, then `/-` appends — see
+// SPEC.md §5.4.1.4 for the primaryKey strategy's normative emission order):
+// [
 //   { op: "replace", path: "/users/0/status", value: "online", oldValue: "active" },
-//   { op: "add", path: "/users/-", value: { id: 'user3', ... } }
+//   { op: "remove", path: "/users/1", oldValue: { id: "user2", name: "Jane Smith", status: "inactive" } },
+//   { op: "add", path: "/users/-", value: { id: "user3", name: "Sam Ray", status: "active" } }
 // ]
 ```
 
@@ -101,7 +123,7 @@ Behavior guarantees:
 
 Migrating from `fast-json-patch`: `applyPatch(doc, patch)` here returns the new document directly (not an `OperationResult[]` with `.newDocument`) and never mutates the input (no `mutateDocument` flag). Use `toRfc6902(patch)` to strip this library's `oldValue` fields before handing patches to strict third-party tools.
 
-> ℹ️ Arrays diffed with the `primaryKey` strategy are compared *semantically*: patches capture item modifications, removals, and additions, but not pure reorderings of otherwise-identical items. Applying such a patch reconstructs the modified document's content exactly; surviving items keep their original relative order and additions are appended at the end.
+> ℹ️ Arrays diffed with the `primaryKey` strategy are compared *semantically*: patches capture item modifications, removals, and additions, but not pure reorderings of otherwise-identical items. Applying such a patch reconstructs the modified document's content exactly; surviving items keep their original relative order and additions are appended at the end. Enable `emitMoves` (see the `JsonSchemaPatcher` options below) to upgrade this to exact order fidelity: relocated items are expressed as `move` ops and the patched document matches `modified`'s order exactly, not just its content.
 
 ---
 
@@ -178,18 +200,23 @@ Creates a plan for optimizing JSON patch generation based on a JSON schema.
   - `schema`: A JSON Schema object that describes your data structure.
   - `primaryKeyMap` (optional): A record mapping path prefixes to primary key field names.
   - `basePath` (optional): The base path for the schema traversal.
+  - `primaryKeyCandidates` (optional): Override the ordered field-name candidate list used to auto-detect an array's primary key (default `["id", "name", "port"]`). The first candidate that is a `required` `string`/`number` property of the item schema is selected. Pass `[]` to disable auto-detection entirely for arrays without an explicit `primaryKeyMap` entry, keeping them on the `lcs`/`unique` strategy instead of (sometimes wrongly) matching on a mutable field like `name`.
+  - `onWarning` (optional): `(message: string) => void`, called instead of writing to `console.warn` when traversal hits a `$ref` it cannot resolve. **Only local same-document references (`$ref` starting with `#/`) are ever resolved** — anything else (a relative/absolute URL, or any other non-`#/`-rooted string) always triggers this callback and is treated as unresolvable, so the branch is skipped and traversal continues elsewhere. Omit to stay silent (the default).
 - **Returns**: A `Plan` object that can be used with `JsonSchemaPatcher` and `StructuredDiff`.
 
 ### `JsonSchemaPatcher`
 The main class for generating patches.
 
-**`new JsonSchemaPatcher({ plan })`**
+**`new JsonSchemaPatcher({ plan, includeOldValue?, emitMoves?, wholesaleReplaceFallback? })`**
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
+- `includeOldValue` (optional, default `true`): When `false`, omits the non-standard `oldValue` field from every `remove`/`replace` op, producing smaller, strict RFC 6902-shaped patches. `invertPatch` still works without `oldValue` present, since it recovers prior values from the original document you pass it.
+- `emitMoves` (optional, default `false`): When `true`, a relocated (unchanged) array element is expressed as a single RFC 6902 `move` instead of a remove+add pair, across all three array strategies (`lcs`, `unique`, `primaryKey`). Also upgrades the `unique` and `primaryKey` strategies to reconstruct the modified array's order exactly (see the note on the `primaryKey` strategy below).
+- `wholesaleReplaceFallback` (optional, default `false`): When `true`, caps a heavily-rewritten array's patch size — if the estimated size of one array's granular ops would exceed the array's own serialized size, the differ emits a single whole-array `replace` instead. Applies independently to every array, including nested ones; small/typical diffs are unaffected.
 
 **`patcher.execute({original, modified})`**
 - `original`: The original document to compare from.
 - `modified`: The modified document to compare to.
-- **Returns**: An array of JSON Patch operations.
+- **Returns**: A `DiffOperation[]` — an `add`/`remove`/`replace`/`move` subset of the wider `Operation` type that `applyPatch`/`invertPatch` accept (`move` only appears when `emitMoves` is enabled). `DiffOperation[]` is usable anywhere an `Operation[]` is expected.
 
 ### `applyPatch`
 Applies an RFC 6902 patch to a document and returns the resulting document.
@@ -216,12 +243,18 @@ The main class for creating human-readable diffs.
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 
 **`structuredDiff.execute(config)`**
-- `config`: An `StructuredDiffConfig` object with the following properties:
+- `config`: A `StructuredDiffConfig` object with the following properties:
   - `pathPrefix`: The path prefix of the array to aggregate (e.g., `/users`).
   - `original`: The original document.
   - `modified`: The modified document.
   - `patches` (optional): Pre-computed patch array from `JsonSchemaPatcher`. If not provided, patches will be generated automatically.
-- **Returns**: An `StructuredDiffResult` object containing `parentDiff` and a record of `childDiffs`.
+- **Returns**: A `StructuredDiffResult` object containing `parentDiff` and a record of `childDiffs`.
+
+### `setWarningHandler`
+Registers (or clears) a callback for the one internal warning `StructuredDiff`/`DiffFormatter` can hit: a JSON parse failure while building a path map for diff-line formatting (not expected in normal operation, but defended against rather than left to throw).
+
+**`setWarningHandler(handler)`**
+- `handler`: `(message: string) => void`, or `undefined` to go back to silent (the default — no handler is registered until one is set).
 
 ## 🔬 Benchmarking Your Use Case
 
