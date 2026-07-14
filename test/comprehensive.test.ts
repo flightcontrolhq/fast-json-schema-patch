@@ -8,7 +8,7 @@ import { deepEqual } from "../src/performance/deepEqual";
 import { fastHash } from "../src/performance/fashHash";
 import { _resolveRef } from "../src/core/buildPlan";
 import { _traverseSchema } from "../src/core/buildPlan";
-import type { Operation } from "../src/types";
+import type { DiffOperation, Operation } from "../src/types";
 import originalSchema from "../schema/schema.json";
 import { faker } from "@faker-js/faker";
 import {
@@ -934,7 +934,7 @@ test("JsonSchemaPatcher generates correct patches for array with primary key", (
   const patcher = new JsonSchemaPatcher({ plan });
   const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-  const expectedPatches: Operation[] = [
+  const expectedPatches: DiffOperation[] = [
     {
       op: "remove",
       path: "/environments/0/services/1",
@@ -997,7 +997,7 @@ test("JsonSchemaPatcher handles empty arrays correctly", () => {
   const patcher = new JsonSchemaPatcher({ plan: buildPlan({ schema }) });
   const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-  const expectedPatches: Operation[] = [
+  const expectedPatches: DiffOperation[] = [
     {
       op: "add",
       path: "/environments/0/services/-",
@@ -1045,7 +1045,7 @@ test("JsonSchemaPatcher handles array with all items removed", () => {
   const patcher = new JsonSchemaPatcher({ plan: buildPlan({ schema }) });
   const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-  const expectedPatches: Operation[] = [
+  const expectedPatches: DiffOperation[] = [
     {
       op: "remove",
       path: "/environments/0/services/1",
@@ -1128,7 +1128,7 @@ test("JsonSchemaPatcher handles array without primary key (fallback)", () => {
   const patcher = new JsonSchemaPatcher({ plan: buildPlan({ schema }) });
   const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-  const expectedPatches: Operation[] = [
+  const expectedPatches: DiffOperation[] = [
     {
       op: "replace",
       path: "/environments/0/services/0/dependsOn/1",
@@ -1190,7 +1190,7 @@ test("JsonSchemaPatcher works with a pre-built plan", () => {
   const patcher = new JsonSchemaPatcher({ plan });
   const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-  const expectedPatches: Operation[] = [
+  const expectedPatches: DiffOperation[] = [
     {
       op: "replace",
       path: "/environments/0/services/0/cpu",
@@ -2339,13 +2339,13 @@ describe("JsonSchemaPatcher comprehensive tests", () => {
 
     const patches = patcher.execute({ original: doc1, modified: doc2 });
     expect(
-      patches.some((p) => p.path.includes("name") && p.value === "Jane")
+      patches.some((p) => p.path.includes("name") && "value" in p && p.value === "Jane")
     ).toBe(true);
     expect(
-      patches.some((p) => p.path.includes("theme") && p.value === "light")
+      patches.some((p) => p.path.includes("theme") && "value" in p && p.value === "light")
     ).toBe(true);
     expect(
-      patches.some((p) => p.path.includes("lang") && p.value === "en")
+      patches.some((p) => p.path.includes("lang") && "value" in p && p.value === "en")
     ).toBe(true);
   });
 
@@ -2357,7 +2357,7 @@ describe("JsonSchemaPatcher comprehensive tests", () => {
     const obj2 = { items: ["a", "b", "c"] };
 
     const patches = patcher.execute({ original: obj1, modified: obj2 });
-    expect(patches.some((p) => p.value === "b")).toBe(true);
+    expect(patches.some((p) => "value" in p && p.value === "b")).toBe(true);
   });
 
   test("should handle array diffing with parent wildcard path", () => {
@@ -2859,7 +2859,7 @@ describe("Array diffing strategies", () => {
       const patches = patcher.execute({ original: doc1, modified: doc2 });
       // Descends outer lcs -> inner primaryKey plan (`/matrix/*`, keyed by id) ->
       // granular field op. No whole-array or whole-item replace.
-      expect(patches.some((p) => typeof p.value === "object")).toBe(false);
+      expect(patches.some((p) => "value" in p && typeof p.value === "object")).toBe(false);
       expect(patches).toContainEqual({
         op: "replace",
         path: "/matrix/1/0/v",
@@ -2933,7 +2933,7 @@ describe("Array diffing strategies", () => {
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
       // Should generate efficient patches for reordering
-      expect(patches.some((p) => p.value === 6)).toBe(true);
+      expect(patches.some((p) => "value" in p && p.value === 6)).toBe(true);
       expect(patches.length).toBeGreaterThan(0);
     });
 
@@ -2949,7 +2949,7 @@ describe("Array diffing strategies", () => {
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
       expect(patches.some((p) => p.op === "remove")).toBe(true);
-      expect(patches.some((p) => p.value === "e")).toBe(true);
+      expect(patches.some((p) => "value" in p && p.value === "e")).toBe(true);
     });
 
     test("should generate replace operations for primitive changes", () => {

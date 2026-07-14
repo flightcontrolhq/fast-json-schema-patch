@@ -14,5 +14,6 @@ export type {
   FormattedChildDiff,
   StructuredDiffLine,
   Operation,
+  DiffOperation,
 } from "./types";
 export type { Plan, BuildPlanOptions } from "./core/buildPlan";

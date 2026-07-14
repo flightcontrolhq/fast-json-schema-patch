@@ -49,6 +49,26 @@ export interface Operation {
   oldValue?: JsonValue;
 }
 
+/**
+ * F27: the narrow, discriminated shape `JsonSchemaPatcher.execute()` actually
+ * emits — a strict subset of the wide RFC 6902 `Operation` used by
+ * `applyPatch`/`invertPatch` (which must also accept hand-written `copy`/
+ * `test` ops and `move` ops as valid patch input). The diff generator never
+ * emits `copy` or `test`; `move` is only ever emitted when the P3 `emitMoves`
+ * capability (SPEC §5.8, §10.4.4) is enabled on the `JsonSchemaPatcher`, but
+ * the type itself is unconditional — callers that never opt into `emitMoves`
+ * simply never observe the `move` variant at runtime.
+ *
+ * Each `DiffOperation` variant is structurally assignable to `Operation`, so
+ * `DiffOperation[]` is usable anywhere `Operation[]` is expected (e.g. as
+ * input to `applyPatch`/`invertPatch`/`toRfc6902`) without a cast.
+ */
+export type DiffOperation =
+  | { op: "add"; path: string; value: JsonValue }
+  | { op: "remove"; path: string; oldValue?: JsonValue }
+  | { op: "replace"; path: string; value: JsonValue; oldValue?: JsonValue }
+  | { op: "move"; path: string; from: string };
+
 export interface DiffLine {
   lineNumber: number;
   content: string;

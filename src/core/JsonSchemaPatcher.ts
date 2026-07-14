@@ -11,7 +11,7 @@ import {
 import type { ArrayPlan, Plan } from "./buildPlan";
 import { deepEqualMemo, isOpaqueObject } from "../performance/deepEqual";
 import { bumpEpoch } from "../performance/epoch";
-import type { JsonArray, JsonObject, JsonValue, Operation } from "../types";
+import type { DiffOperation, JsonArray, JsonObject, JsonValue, Operation } from "../types";
 import { escapeJsonPointer, unescapeJsonPointer } from "../utils/pathUtils";
 
 /**
@@ -181,7 +181,7 @@ export class JsonSchemaPatcher {
   }: {
     original: JsonValue;
     modified: JsonValue;
-  }): Operation[] {
+  }): DiffOperation[] {
     // Advance the cache epoch so identity-keyed memoization caches (deepEqual,
     // stringify, path-map, formatter) from any earlier diff are treated as
     // stale. This makes a mutate-then-rediff loop recompute instead of
@@ -198,7 +198,13 @@ export class JsonSchemaPatcher {
       patches,
       this.planIsEmpty ? undefined : this.planTrie
     );
-    return patches;
+    // F27: every emission site above only ever pushes add/remove/replace (and,
+    // under emitMoves, move) ops shaped exactly like `DiffOperation` — never
+    // RFC 6902's `copy`/`test`. The internal buffer stays `Operation[]` (it is
+    // threaded through helpers shared with `applyPatch`'s wider vocabulary),
+    // so the narrowing here is a type-level assertion of an invariant the
+    // implementation above already upholds, not a runtime transform.
+    return patches as DiffOperation[];
   }
 
   private diff(
