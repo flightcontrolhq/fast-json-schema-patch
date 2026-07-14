@@ -1,64 +1,43 @@
 import type {JsonObject, JsonValue} from "../types"
 
 /**
- * Cache for path resolution results to avoid repeated computations
- */
-const pathResolutionCache = new Map<string, WeakMap<object, JsonValue | undefined>>()
-
-/**
- * Resolves a JSON Pointer path to get a value from an object
- * Handles JSON Pointer escaping (~0 for ~, ~1 for /)
+ * Resolves a JSON Pointer path to get a value from an object.
+ * Handles JSON Pointer escaping (~0 for ~, ~1 for /).
+ *
+ * D3 (spec-v1-rc external-review defect round, SPEC §2.4.4): this previously
+ * memoised results in a module-level `Map<path, WeakMap<obj, value>>` keyed on
+ * object identity and NEVER epoch-scoped, so after an in-place mutation of a
+ * cached document it returned the stale pre-mutation value (probe:
+ * getValueByPath(doc,"/a")===1, then doc.a=999, then still 1). Unlike the
+ * equality caches (deepEqual.ts, F02) this cache was not on any SPEC hot path —
+ * its only callers are the StructuredDiff aggregator (out of SPEC scope, §1.5)
+ * and DiffFormatter's `-` resolution, both resolving short prefixes a couple of
+ * times per execute. A micro-bench of an epoch-scoped variant vs no cache on
+ * that exact pattern showed the cache as dead weight once made correct
+ * (~0.97x — the bookkeeping cost exceeded the ~2 intra-execute reuse hits), and
+ * the module-level Map leaked one entry per distinct path string forever. So the
+ * cache was removed rather than epoch-scoped: a plain, always-fresh resolver.
  */
 export function getValueByPath<T = JsonValue>(obj: JsonValue, path: string): T | undefined {
   if (path === "") return obj as T
-
-  // Check cache first
-  let objCache = pathResolutionCache.get(path)
-  if (!objCache) {
-    objCache = new WeakMap()
-    pathResolutionCache.set(path, objCache)
-  }
-
-  if (typeof obj === "object" && obj !== null && objCache.has(obj)) {
-    return objCache.get(obj) as T | undefined
-  }
 
   const parts = path.split("/").slice(1)
   let current: JsonValue = obj
 
   for (const part of parts) {
-    if (typeof current !== "object" || current === null) {
-      if (typeof obj === "object" && obj !== null) {
-        objCache.set(obj, undefined)
-      }
-      return undefined
-    }
+    if (typeof current !== "object" || current === null) return undefined
 
     const key = unescapeJsonPointer(part)
 
     if (Array.isArray(current)) {
       const index = Number.parseInt(key, 10)
-      if (Number.isNaN(index) || index < 0 || index >= current.length) {
-        if (typeof obj === "object" && obj !== null) {
-          objCache.set(obj, undefined)
-        }
-        return undefined
-      }
+      if (Number.isNaN(index) || index < 0 || index >= current.length) return undefined
       current = current[index] as JsonValue
     } else {
       const objCurrent = current as JsonObject
-      if (!Object.hasOwn(objCurrent, key)) {
-        if (typeof obj === "object" && obj !== null) {
-          objCache.set(obj, undefined)
-        }
-        return undefined
-      }
+      if (!Object.hasOwn(objCurrent, key)) return undefined
       current = objCurrent[key] as JsonValue
     }
-  }
-
-  if (typeof obj === "object" && obj !== null) {
-    objCache.set(obj, current)
   }
 
   return current as T

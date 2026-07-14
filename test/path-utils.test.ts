@@ -182,4 +182,24 @@ describe("getValueByPath", () => {
     expect(getValueByPath(doc, "/list/-")).toBeUndefined()
     expect(getValueByPath(doc, "/list/-")).toBeUndefined()
   })
+
+  // D3 (spec-v1-rc external-review defect round, SPEC §2.4.4): getValueByPath
+  // memoised results keyed on object identity without any epoch scope, so a
+  // resolve -> mutate-in-place -> resolve loop returned the STALE pre-mutation
+  // value (probe: read "/a" as 1, set doc.a = 999, then read "/a" again and
+  // still get 1). The cache was removed; every resolve now reflects the current
+  // document state.
+  test("mutate-then-resolve reflects the new value, never a stale cached one", () => {
+    const mutable: { a: number } = { a: 1 }
+    expect(getValueByPath<number>(mutable, "/a")).toBe(1)
+    mutable.a = 999
+    expect(getValueByPath<number>(mutable, "/a")).toBe(999)
+  })
+
+  test("a path that resolved to undefined re-resolves after the key is added", () => {
+    const mutable: Record<string, string> = {}
+    expect(getValueByPath(mutable, "/late")).toBeUndefined()
+    mutable.late = "here"
+    expect(getValueByPath<string>(mutable, "/late")).toBe("here")
+  })
 })
