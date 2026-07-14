@@ -1323,10 +1323,12 @@ describe("StructuredDiff", () => {
 
   it("should strip the child array from the parent diff", () => {
     const originalParent = result.parentDiff.original as JsonObject;
-    expect(originalParent.services).toBeUndefined();
+    const env = (originalParent.environments as JsonObject[])?.[0];
+    expect(env?.services).toBeUndefined();
 
     const newParent = result.parentDiff.new as JsonObject;
-    expect(newParent.services).toBeUndefined();
+    const newEnv = (newParent.environments as JsonObject[])?.[0];
+    expect(newEnv?.services).toBeUndefined();
   });
 });
 
