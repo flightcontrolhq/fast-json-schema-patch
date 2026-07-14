@@ -9,6 +9,7 @@ import {
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "../types";
 import { emitArrayMovesPatch, type MatchedPair } from "./arrayMoves";
+import { ignoreMember, type IgnoreTrieNode } from "./ignorePaths";
 
 /**
  * Canonical, key-sorted fingerprint of a JSON value (F21). Two values produce
@@ -27,7 +28,13 @@ import { emitArrayMovesPatch, type MatchedPair } from "./arrayMoves";
  */
 export function canonicalFingerprint(
   value: JsonValue,
-  opaqueId: (o: object) => number
+  opaqueId: (o: object) => number,
+  // ignorePaths (SPEC §5.10.5): when present, ignored members/elements are
+  // OMITTED from the fingerprint, so two items differing only in ignored fields
+  // produce the SAME string and intern to the same id (common / move-pairable).
+  // When `undefined` (no ignore paths, or none beneath here) the output is
+  // byte-identical to the pre-capability fingerprint — byte-stable.
+  ignoreNode?: IgnoreTrieNode
 ): string {
   if (value === null || typeof value !== "object") {
     return JSON.stringify(value) as string;
@@ -36,20 +43,29 @@ export function canonicalFingerprint(
     return ` O${opaqueId(value as object)}`;
   }
   if (Array.isArray(value)) {
+    // Array element -> the ignore node advances through one wildcard (§5.10.3).
+    const elemIgnore = ignoreNode?.wildcard;
     let s = "[";
+    let first = true;
     for (let i = 0; i < value.length; i++) {
-      if (i > 0) s += ",";
-      s += canonicalFingerprint(value[i] as JsonValue, opaqueId);
+      if (elemIgnore?.end) continue; // a fully-ignored element is omitted
+      if (!first) s += ",";
+      first = false;
+      s += canonicalFingerprint(value[i] as JsonValue, opaqueId, elemIgnore);
     }
     return `${s}]`;
   }
   const obj = value as JsonObject;
   const keys = Object.keys(obj).sort();
   let s = "{";
+  let first = true;
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i] as string;
-    if (i > 0) s += ",";
-    s += `${JSON.stringify(k)}:${canonicalFingerprint(obj[k] as JsonValue, opaqueId)}`;
+    const childIgnore = ignoreNode ? ignoreMember(ignoreNode, k) : undefined;
+    if (childIgnore?.end) continue; // an ignored member is omitted (§5.10.5)
+    if (!first) s += ",";
+    first = false;
+    s += `${JSON.stringify(k)}:${canonicalFingerprint(obj[k] as JsonValue, opaqueId, childIgnore)}`;
   }
   return `${s}}`;
 }
@@ -349,7 +365,12 @@ export function diffArrayLCS(
   // emitMoves capability (SPEC §5.8, §10.4.4): when true, the main Myers path
   // emits a single RFC 6902 `move` for each relocated (deep-equal) element
   // instead of a remove+add pair (F22). Default false — byte-stable output.
-  emitMoves: boolean = false
+  emitMoves: boolean = false,
+  // ignorePaths (SPEC §5.10.5): the item-level ignore node (the array's wildcard
+  // child). Threaded into the interning fingerprint so ignored members do not
+  // participate in element identity. `undefined` when no ignore path lies within
+  // these items — then interning is byte-identical to the pre-capability path.
+  itemIgnore?: IgnoreTrieNode
 ) {
   const effectiveHashFields = getEffectiveHashFields(
     plan,
@@ -472,7 +493,7 @@ export function diffArrayLCS(
     return id;
   };
   const intern = (value: JsonValue): number => {
-    const fp = canonicalFingerprint(value, opaqueId);
+    const fp = canonicalFingerprint(value, opaqueId, itemIgnore);
     let id = fpToId.get(fp);
     if (id === undefined) {
       id = nextId++;

@@ -931,6 +931,106 @@ fully deterministic and Go-reproducible given a conforming `JSON.stringify`-equi
 `includeOldValue`: it never changes *which* strategy runs, only whether that strategy's output (or
 `emitMoves`'s, if also on) is kept or replaced wholesale for a given array.
 
+### 5.10 `ignorePaths` capability (normative when enabled)
+
+`ignorePaths` is an **OPTIONAL** generator capability (default **off**, §10.4.6). It is a
+**set of JSON Pointers**, each addressing **object-member locations**, that mark subtrees the diff
+MUST treat as **equal in both directions**: no operation is emitted **at or beneath** any matched
+location, in **any** strategy. When the set is empty/absent, diffing is exactly §5.1–§5.9 and output
+is byte-stable versus the pre-capability tree. Surfaced as the `JsonSchemaPatcher` constructor
+option `ignorePaths?: string[]` (TS) / the `IgnorePaths(...)` `PatcherOption` (Go). Modeled on
+wI2L/jsondiff's `Ignores`.
+
+`5.10.1` **Construction and validation (pinned).** Each pointer is validated when the patcher is
+constructed; a violation is a **construction-time error** (`TypeError` in TS, a returned `error` in
+Go), never a silent no-op:
+
+- A pointer MUST be `""`-less and begin with `/` — the empty/root pointer `""` is **rejected** (the
+  document root is not an object-member location), and a non-empty pointer without a leading `/` is
+  **rejected** (malformed, mirroring §8.2's pointer grammar).
+- Each `/`-separated segment (unescaped per §3.3) MUST NOT be a **canonical array index** (§2.3.2 —
+  `"0"`, or a non-zero digit followed by digits, in `0..2^32-2`) and MUST NOT be `-`. Such a segment
+  is **rejected**: ignore pointers address object members structurally, and an array level is only
+  ever matched by a `*` wildcard (§5.10.3), never a literal index. *(A segment that merely looks
+  numeric but is not a canonical index — e.g. `"01"` — is a legal object-member name and is
+  accepted; this mirrors §F33's numeric-string object keys.)*
+- A `*` segment is the **wildcard** — "any member at this level", identical semantics to plan
+  wildcards (§5.4.5.1). Duplicate pointers are permitted (idempotent).
+
+`5.10.2` **Trie compilation.** The validated pointer set is compiled **once** into an **ignore trie**
+mirroring the plan trie (§5.4.5.1): each pointer is split on `/`; a `*` segment is the node's
+**wildcard** edge, any other segment is **unescaped** (§3.3) and an exact **child** edge keyed by the
+raw member name; the node where a pointer terminates is marked **terminal** ("ignored here"). The
+trie is threaded down the diff recursion **in parallel with** the plan trie, as an independent node
+pointer. An **absent** ignore set threads no node (every location is diffable), preserving byte-for-
+byte pre-capability output.
+
+`5.10.3` **Threaded matching (pinned).** Starting at the ignore-trie root, the node is advanced by
+the container being descended, **mirroring §5.4.5.2 for object members** and traversing array levels
+**transparently through the wildcard**:
+
+- **Object member `key`** (§5.2): advance to the node's **exact child** for `key` if present, **else**
+  its **wildcard** edge, **else none**. *Exact edges take precedence over the wildcard at every
+  level.* A decimal-digit member key is an ordinary exact/​wildcard descent, never an array index
+  (§F33) — array indices are consumed only by the array rule below.
+- **Array element** (§5.4/§5.5/§5.6 recursing into an item — object, array, or primitive alike):
+  advance to the node's **wildcard** edge, **else none**. The array index level is represented by a
+  single `*` (there is no literal-index edge, §5.10.1), so `/users/*/updatedAt` reaches, for each
+  element of a `users` array, the member `updatedAt` under that element: `users` (child) → `*`
+  (array-element wildcard) → `updatedAt` (child, terminal). This is how "the wildcard matches the
+  object-member level under array items exactly as plan paths do" — the array level is traversed
+  transparently, one `*` per nesting, and the item's members are matched against the node **beyond**
+  it. It holds identically inside keyed (§5.4) and LCS (§5.5) array items.
+
+`5.10.4` **Effect (pinned).** When the recursion reaches a node that is **terminal**, that entire
+subtree is **equal**: emit **nothing** at or beneath it. Concretely:
+
+- **`diff` (§5.1)** emits nothing when the threaded ignore node is terminal.
+- **Object diff (§5.2)** computes each member's child ignore node (§5.10.3) and, when it is terminal,
+  emits **no** `add`/`remove`/recursion for that member — so a member present on only one side but
+  ignored produces no op, and a member present on both but ignored is not descended.
+- **Array diff (§5.3–§5.6)** short-circuits to **no ops** for the whole array when the array-element
+  ignore node (the node's wildcard) is terminal (e.g. `/arr/*` — every element ignored). Otherwise it
+  recurses element members through §5.10.3.
+
+`5.10.5` **Post-ignore equality for keyed/relocation matching (pinned).** The equality used to decide
+element identity in the array strategies is taken **after** ignore-filtering, so two items that
+differ **only** in ignored members compare **equal**:
+
+- **LCS interning (§5.5.2).** The canonical fingerprint used to intern window elements is computed
+  with the item's ignore node, **omitting** ignored members (and ignored array elements). Two items
+  differing only in ignored fields therefore share an interned id and are treated as **common** (no
+  op) or, under `emitMoves` (§5.8), as a single **relocation** — never a spurious remove+add. The
+  prefix/suffix **trim** predicate (§5.5.0) MAY remain full deep-equal (§2.4.1): a fully-equal pair is
+  necessarily ignore-equal, so the window handles the remainder.
+- **primaryKey (§5.4) and unique (§5.6).** Element pairing is by key/position, unaffected by ignored
+  members. The change flag MAY be computed by full deep-equal; when it is conservatively `true` for an
+  ignored-only difference, the element recursion (§5.10.4) emits nothing, so the emitted patch is
+  **output-equivalent** to post-ignore equality.
+
+`5.10.6` **Interaction with `wholesaleReplaceFallback` (§5.9, pinned).** A wholesale replace emits the
+**entire** modified array as one `replace` value, which would **leak** ignored content (re-writing
+ignored members on apply). Therefore, when **any** ignore terminal lies **beneath** an array (i.e. the
+array's ignore node has a terminal anywhere in its subtree), `wholesaleReplaceFallback` is **disabled
+for that array**: it keeps the ignore-filtered granular op stream. When no ignore path lies beneath an
+array, the §5.9 estimate/threshold are computed on the (already ignore-filtered) granular ops exactly
+as in §5.9.
+
+`5.10.7` **Interaction with `primaryKey` (§4.5/§5.4, pinned).** A plan's `primaryKey` **field** MUST
+NOT be ignorable. At construction, for every array plan carrying a non-null `primaryKey k` at plan key
+`P`, the key-field location `P` `/` `*` `/` `k` is checked against the ignore trie; if that location is
+**at or beneath** any ignore terminal (the field itself, or an ancestor container such as the whole
+item `P/*` or the whole array `P`), construction **fails** with a validation error. (Walking `P`: a
+literal segment follows exact-child-else-wildcard; a `*` segment in `P` — an `additionalProperties` or
+nested-array level, §4.3.2/§4.3.5 — explores both exact children and the wildcard, since either may
+match at diff time.) This keeps keyed pairing well-defined: the field that establishes item identity
+can never be filtered away.
+
+`5.10.8` **Determinism.** All of §5.10 depends only on the pinned trie construction (§5.10.1–§5.10.2),
+the pinned traversal (§5.10.3), and the pinned ignore-filtered fingerprint (§5.10.5) — no per-instance
+caches, no data-dependent ordering — so the emitted patch is fully deterministic and Go/TS-identical
+for a given `(ignorePaths, plan, original, modified)`.
+
 ---
 
 ## 6. Patch format
@@ -1085,6 +1185,18 @@ trivially exact (§7.1-style) regardless of which strategy would otherwise have 
 capability changes **only** the op stream for oversized arrays; it never changes the reconstructed
 document, and composes with `emitMoves`/`includeOldValue` (the estimate is computed on whatever
 those capabilities would otherwise emit).
+
+### 7.6 `ignorePaths`: reconstruction modulo ignored subtrees
+
+`7.6.1` With `ignorePaths` on (§5.10, §10.4.6), the reconstruction contracts of §7.1–§7.5 hold
+**modulo the ignored subtrees**: `applyPatch(original, patch)` equals `modified` **everywhere except
+at or beneath a matched ignore location**, where it retains `original`'s value (no op touched it). No
+contract is *weakened* for non-ignored content — LCS/unique stay exact, primaryKey stays
+keyed-collection (exact under `emitMoves`) — over the projection that drops the ignored subtrees.
+Because a `move`-paired relocation may carry an item whose *ignored* members still differ from
+`modified`'s (§5.10.5), the exactness is likewise stated over that projection: the moved item is
+`modified`-equal on every non-ignored member. Conformance checks that use ignorePaths compare under
+this projection (§10.3.1).
 
 ---
 
@@ -1350,6 +1462,7 @@ capabilities.
 | `emitMoves` | off | OPTIONAL — **landed** (§10.4.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (§5.8) |
 | `wholesaleReplaceFallback` | off | OPTIONAL — **landed** (§10.4.5) | emit a single container `replace` when the granular patch would exceed the container's own serialized size (§5.9) |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§10.4.3) | override the auto-detection candidate list (§4.5.5) |
+| `ignorePaths` | `[]` (none) | OPTIONAL — **landed** (§10.4.6) | a set of object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy (§5.10) |
 
 `10.4.1` **Granular LCS descent (§5.5.4.2) is NOT a capability** — it is normative default
 behavior in `spec-v1`, landed in the compactness phase (F10). It is always on; there is no flag to
@@ -1410,6 +1523,25 @@ own size and never triggers. Composes with `emitMoves` (the estimate is computed
 moves-emitted stream, §5.9.5) and with `includeOldValue` (governs whether the wholesale replace
 itself carries `oldValue`, and is folded into the estimate for the discarded stream via §5.9.2).
 
+`10.4.6` **`ignorePaths` (wI2L/jsondiff parity).** Surfaced as the `JsonSchemaPatcher` constructor
+option `ignorePaths?: string[]` (TS — an invalid pointer throws a `TypeError` at construction) and as
+the `IgnorePaths(...)` `PatcherOption` (Go — an invalid pointer makes `NewPatcher` return a non-nil
+`error`), **default empty** (byte-for-byte identical to the pre-capability output; an empty/absent set
+threads no ignore node, §5.10.2). Each pointer addresses **object-member** locations (validated per
+§5.10.1: leading `/`, no `""`/root, no array-index or `-` segment, `*` allowed); the compiled ignore
+trie (§5.10.2) is threaded in parallel with the plan trie and marks matched subtrees **equal in both
+directions** — **no** ops at or beneath them in any strategy (§5.10.3–§5.10.4), including inside keyed
+(§5.4) and LCS (§5.5) array items via the transparent array-level wildcard (`/users/*/updatedAt`
+ignores every user's `updatedAt`). Interactions are pinned: LCS interning is ignore-filtered so two
+items differing only in ignored fields are `common`/`move`-pairable, not remove+add (§5.10.5);
+`wholesaleReplaceFallback` is **disabled** for any array with an ignore terminal beneath it, so ignored
+content can never leak through an ancestor's wholesale replace (§5.10.6); and a plan's `primaryKey`
+field is **not ignorable** — an ignore entry covering it fails construction (§5.10.7). Round-trip
+contracts (§7) hold **modulo the ignored subtrees** (§7.6). Because construction-time validation errors
+are not expressible in the diff/apply/plan/invert vector wire formats (they precede any diff), they are
+covered by unit tests in both engines rather than by vectors (§10.5.2); the happy-path and interaction
+behaviors ARE covered by diff vectors and the differential corpus.
+
 ### 10.5 Vector provenance
 
 Vectors SHOULD be harvested from the reference test suite and from randomized fuzzing (the
@@ -1423,6 +1555,15 @@ reconstruction, §7.1) rather than keyed emission: (a) an array element that is 
 (b) an element whose primaryKey value is **missing, `null`, or not a string/number**; and (c) a
 **duplicate** primaryKey value within `original` **or** within `modified`. A `primaryKeyMap`
 override (§4.4.3) MUST NOT bypass the gate — a gate-failing override case SHOULD also be covered.
+
+`10.5.2` **`ignorePaths` construction-error coverage (REQUIRED, engine-local).** The §5.10.1/§5.10.7
+construction-time validation errors — an array-index or `-` segment, a rootless/empty pointer, and an
+ignore entry covering a plan `primaryKey` field — occur **before any diff runs**, so they are not
+expressible in the diff/apply/plan/invert vector wire formats (which encode only a document pair or a
+patch, never a constructor rejection). Each engine MUST therefore cover them with **unit tests**
+(`test/ignore-paths.test.ts` in TS, `ignore_paths_test.go` in Go), asserting the same rejection set.
+The happy-path and interaction semantics (§5.10.3–§5.10.6) ARE vector-covered (`diff/capabilities-ignore-paths`)
+and exercised differentially (`spec/fuzz/corpus/ignore-*.jsonl`).
 
 ### 10.6 Plan-snapshot vector format (normative)
 
