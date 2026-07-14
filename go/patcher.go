@@ -89,6 +89,12 @@ func NewPatcher(plan Plan, opts ...PatcherOption) (*Patcher, error) {
 		if err := validatePrimaryKeysNotIgnored(p.plan, root); err != nil {
 			return nil, err
 		}
+		// CORE §8.2.3: an ignorePaths terminal at or beneath a declared atomic
+		// array/object node is a construction error — an atomic container is
+		// replaced whole and cannot express "replace everything except this".
+		if err := validateAtomicNotIgnored(p.plan, root); err != nil {
+			return nil, err
+		}
 	}
 	return p, nil
 }
@@ -153,6 +159,18 @@ func (p *Patcher) diff(a, b Value, path string, patches *[]Operation, node *Plan
 // insertion order), followed by keys present only in modified in the same
 // ordering.
 func (p *Patcher) diffObject(obj1, obj2 *Object, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
+	// spec-v2 object dispatch (GEN §11.1): a declared granularity:"atomic" object
+	// emits ONE whole-object replace when it differs and STOPS — no per-member
+	// walk, no recursion (CORE §8.6). The trie has no children beneath an atomic
+	// node (buildPlan pruned the subtree, CORE §8.3.3), so the check belongs here
+	// at the object's own node.
+	if op := node.arrayPlan(); op.isObjectPlan() {
+		if !DeepEqual(obj1, obj2) {
+			*patches = append(*patches, p.replaceOp(path, obj1, obj2))
+		}
+		return
+	}
+
 	for _, key := range ecmaOwnKeys(obj1) {
 		// ignorePaths (GEN §10.3/GEN §10.4): a terminal child ignore node means
 		// this member is EQUAL — emit no remove/recursion (add/remove are pushed
@@ -198,6 +216,17 @@ func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operatio
 	if ignoreNode.item().terminal() {
 		return
 	}
+	// spec-v2 array dispatch (GEN §11.2): a declared atomic array emits ONE
+	// whole-array replace when it differs and STOPS — no recursion beneath
+	// (CORE §8.6.2). Handled BEFORE the wholesaleReplaceFallback wrapper because an
+	// atomic node is EXEMPT from that capability (already wholesale, CORE §8.6.3)
+	// and forbids an ignore terminal beneath it (construction error, CORE §8.2.3).
+	if ap := node.arrayPlan(); ap != nil && ap.Topology == TopologyAtomic {
+		if !DeepEqual(arr1, arr2) {
+			*patches = append(*patches, p.replaceOp(path, arr1, arr2))
+		}
+		return
+	}
 	// ignorePaths interaction (GEN §10.6): if any ignore terminal lies BENEATH
 	// this array, a wholesale replace would leak ignored content into its value —
 	// so the capability is DISABLED for that array and the ignore-filtered
@@ -222,6 +251,12 @@ func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operatio
 // (GEN §3.2) may still force an LCS fallback.
 func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
 	plan := node.arrayPlan()
+	// An ObjectPlan can never legitimately sit at an array path (a conflict would
+	// have failed construction); treat it as no plan (⇒ lcs), mirroring the TS
+	// engine's isObjectPlan guard.
+	if plan.isObjectPlan() {
+		plan = nil
+	}
 	strategy := StrategyLCS
 	if plan != nil && plan.Strategy != "" {
 		strategy = plan.Strategy
@@ -248,6 +283,42 @@ func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches
 			elementNode = node
 		}
 		p.refine(oldVal, newVal, cbPath, cbPatches, skipEqualityCheck, elementNode, itemIgnore)
+	}
+
+	// spec-v2 declared-topology dispatch (GEN §11.2). A declared topology REPLACES
+	// the runtime-gated selection below (atomic was already handled in diffArray).
+	// Each topology's identity gate falls back to sequence/LCS on violation
+	// (CORE §8.4.2/§8.5.1); the LCS fallback is byte-identical to the compat tail.
+	if plan != nil && plan.Topology != "" {
+		lcsFallback := func() { p.diffArrayLCS(arr1, arr2, path, patches, onMod, itemIgnore) }
+		switch plan.Topology {
+		case TopologySequence:
+			// Forced LCS even where a primary key would auto-detect (CORE §8.7).
+			lcsFallback()
+			return
+		case TopologySet:
+			if checkArraysSetUnique(arr1, arr2) {
+				p.diffArraySet(arr1, arr2, path, patches)
+				return
+			}
+			lcsFallback()
+			return
+		case TopologyMap:
+			if checkCompositeKeyApplicable(arr1, arr2, plan.Keys) {
+				// order=significant → moves machinery, run unconditionally
+				// (GEN §11.4.2, independent of the emitMoves option);
+				// order=insignificant → the keyed three-phase emission (CORE §7.2).
+				if plan.Order == "significant" {
+					p.diffArrayByCompositeKeyMoves(arr1, arr2, plan.Keys, path, patches, onMod)
+				} else {
+					p.diffArrayByCompositeKey(arr1, arr2, plan.Keys, path, patches, onMod)
+				}
+				return
+			}
+			lcsFallback()
+			return
+		}
+		// TopologyAtomic is unreachable here (handled in diffArray).
 	}
 
 	// primaryKey applicability gate (GEN §4.3). A primaryKeyMap override selects the

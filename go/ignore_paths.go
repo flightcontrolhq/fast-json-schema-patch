@@ -136,18 +136,87 @@ func ignoreSubtreeHasTerminal(n *ignoreNode) bool {
 // field itself, the whole item (P/*), or the whole array (P).
 func validatePrimaryKeysNotIgnored(plan Plan, root *ignoreNode) error {
 	for planKey, ap := range plan.paths {
-		if ap == nil || ap.PrimaryKey == "" {
+		if ap == nil || ap.isObjectPlan() {
 			continue
 		}
-		if ignoreCoversKeyField(root, planKeySegments(planKey), 0, ap.PrimaryKey) {
+		// A declared map topology's identity is its whole composite key tuple, so
+		// NO key field may be ignorable (same spirit as GEN §10.7 for primaryKey).
+		// Compat plans carry only a single PrimaryKey.
+		keyFields := ap.Keys
+		if len(keyFields) == 0 {
+			if ap.PrimaryKey == "" {
+				continue
+			}
+			keyFields = []string{ap.PrimaryKey}
+		}
+		for _, key := range keyFields {
+			if ignoreCoversKeyField(root, planKeySegments(planKey), 0, key) {
+				display := planKey
+				if display == "" {
+					display = "/"
+				}
+				return fmt.Errorf("schemapatch: ignorePaths: an ignore entry covers the key field %q of the array plan at %q — a primaryKey/map key field must not be ignorable (GEN §10.7)", key, display)
+			}
+		}
+	}
+	return nil
+}
+
+// validateAtomicNotIgnored enforces CORE §8.2.3: an ignorePaths terminal at or
+// beneath a declared atomic array/object node is a construction error. An atomic
+// container is replaced whole and cannot express an ignored subtree. It returns a
+// non-nil error on the first such collision.
+func validateAtomicNotIgnored(plan Plan, root *ignoreNode) error {
+	for planKey, ap := range plan.paths {
+		if ap == nil {
+			continue
+		}
+		if ap.Granularity != "atomic" && ap.Topology != TopologyAtomic {
+			continue
+		}
+		if ignoreTerminalAtOrBeneath(root, planKeySegments(planKey), 0) {
 			display := planKey
 			if display == "" {
 				display = "/"
 			}
-			return fmt.Errorf("schemapatch: ignorePaths: an ignore entry covers the primaryKey field %q of the array plan at %q — a primaryKey field must not be ignorable (GEN §10.7)", ap.PrimaryKey, display)
+			return fmt.Errorf("schemapatch: ignorePaths: an ignore entry lies at or beneath the declared atomic node at %q — an atomic container is replaced whole and cannot express an ignored subtree (CORE §8.2.3)", display)
 		}
 	}
 	return nil
+}
+
+// ignoreTerminalAtOrBeneath reports whether, following the plan path segs into the
+// ignore trie, the reached node has any terminal at or below it (CORE §8.2.3). A
+// "*" plan segment (additionalProperties or nested-array level) matches any member
+// at diff time, so both the ignore wildcard and every exact child are explored.
+// Ignore terminals strictly ABOVE the node are NOT flagged (they ignore the whole
+// atomic container, which is permitted).
+func ignoreTerminalAtOrBeneath(node *ignoreNode, segs []string, i int) bool {
+	if node == nil {
+		return false
+	}
+	if i >= len(segs) {
+		return ignoreSubtreeHasTerminal(node)
+	}
+	seg := segs[i]
+	if seg == "*" {
+		if ignoreTerminalAtOrBeneath(node.wildcard, segs, i+1) {
+			return true
+		}
+		for _, c := range node.children {
+			if ignoreTerminalAtOrBeneath(c, segs, i+1) {
+				return true
+			}
+		}
+		return false
+	}
+	raw := UnescapeToken(seg)
+	if exact, ok := node.children[raw]; ok {
+		if ignoreTerminalAtOrBeneath(exact, segs, i+1) {
+			return true
+		}
+	}
+	return ignoreTerminalAtOrBeneath(node.wildcard, segs, i+1)
 }
 
 // ignoreCoversKeyField walks a plan key P (segs) through the ignore trie, then

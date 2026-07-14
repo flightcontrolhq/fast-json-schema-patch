@@ -40,6 +40,33 @@ type ArrayPlan struct {
 	// or number, in RequiredFields order (CORE §3.5.4). A prefilter hint only
 	// (GEN §4.6); MUST be output-neutral. nil when empty.
 	HashFields []string
+
+	// --- spec-v2 declared-topology fields (CORE §8.3). Present iff the node
+	// carries an x-schema-patch-* declaration; absent (zero-valued) the entry is
+	// identical to a spec-v1 ArrayPlan and output is byte-for-byte spec-v1. ---
+
+	// Topology is the declared array semantics (CORE §8.3.1), or "" for a
+	// compat-derived plan. When set it is AUTHORITATIVE for dispatch (GEN §11),
+	// overriding the compat Strategy/PrimaryKey fields (which are still filled to
+	// the topology's compatibility view for introspection).
+	Topology ArraySemantics
+	// Keys is the composite key tuple in DECLARED order (map topology only,
+	// CORE §8.4); nil otherwise.
+	Keys []string
+	// Order is "significant"|"insignificant" for a map topology (CORE §8.4.4;
+	// default "insignificant"); "" otherwise.
+	Order string
+	// Granularity is "atomic" iff this entry is a declared-atomic OBJECT plan
+	// (CORE §8.3.2), the ObjectPlan of the union; "" for every array plan. An
+	// entry with Granularity != "" is an ObjectPlan and MUST NOT be dispatched as
+	// an array.
+	Granularity string
+}
+
+// isObjectPlan reports whether ap is a declared-atomic object plan (CORE §8.3.2)
+// rather than an array plan. Nil-safe.
+func (ap *ArrayPlan) isObjectPlan() bool {
+	return ap != nil && ap.Granularity != ""
 }
 
 // clone returns a deep copy of the plan, including independent RequiredFields
@@ -58,6 +85,9 @@ func (ap *ArrayPlan) clone() *ArrayPlan {
 	}
 	if ap.HashFields != nil {
 		cp.HashFields = append([]string(nil), ap.HashFields...)
+	}
+	if ap.Keys != nil {
+		cp.Keys = append([]string(nil), ap.Keys...)
 	}
 	return &cp
 }
@@ -175,8 +205,10 @@ var defaultPrimaryKeyCandidates = []string{"id", "name", "port"}
 // BuildPlan derives a [Plan] from a JSON Schema (CORE §3). schema is a decoded
 // [Value] (typically a *[Object]); traversal keys off the shape keywords
 // (properties/additionalProperties/items) regardless of an explicit type (SPEC
-// CORE §3.3.1). The error return is reserved for future input validation; the current
-// implementation never fails, mirroring the reference buildPlan.
+// CORE §3.3.1). It returns a non-nil error on a spec-v2 declared-topology
+// construction violation (CORE §8.2.3): an unknown x-schema-patch-* value, a map
+// without keys, or conflicting declared topologies at one document path. A
+// spec-v1 schema (no x-schema-patch-* extensions) never fails.
 func BuildPlan(schema Value, opts BuildPlanOptions) (Plan, error) {
 	candidates := opts.PrimaryKeyCandidates
 	if candidates == nil {
@@ -191,6 +223,9 @@ func BuildPlan(schema Value, opts BuildPlanOptions) (Plan, error) {
 		onWarning:     opts.OnWarning,
 	}
 	b.traverse(schema, "", make(map[*Object]bool))
+	if b.err != nil {
+		return Plan{}, b.err
+	}
 	return Plan{paths: b.plan, root: b.buildTrie()}, nil
 }
 
@@ -201,6 +236,9 @@ type planBuilder struct {
 	basePath      string
 	candidates    []string
 	onWarning     func(string)
+	// err holds the first construction-time validation error (CORE §8.2.3),
+	// once set traversal short-circuits and BuildPlan returns it.
+	err error
 }
 
 func (b *planBuilder) warn(msg string) {
@@ -214,6 +252,9 @@ func (b *planBuilder) warn(msg string) {
 // schema-node identity: a node on the current stack is not re-entered and is
 // removed when its subtree completes (CORE §3.3).
 func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bool) {
+	if b.err != nil {
+		return // a construction error was already recorded; stop traversal
+	}
 	obj, ok := sub.(*Object)
 	if !ok {
 		return
@@ -251,6 +292,27 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 		}
 	}
 
+	// spec-v2 object granularity (CORE §8.3.2/§8.3.3). An object node is one
+	// carrying the shape keywords properties/additionalProperties (CORE §3.3.1).
+	granularity, gErr := parseObjectGranularity(obj)
+	if gErr != nil {
+		b.fail(gErr)
+		return
+	}
+	propsV, hasProps := obj.Get("properties")
+	addlV, hasAddl := obj.Get("additionalProperties")
+	_, addlIsObj := addlV.(*Object)
+	isObjectNode := (hasProps && truthy(propsV)) || (hasAddl && addlIsObj)
+	if granularity == "atomic" && isObjectNode {
+		// Register the atomic object and PRUNE its whole subtree — nothing
+		// recurses below an atomic node (CORE §8.6.2).
+		b.registerObject(docPath)
+		return
+	}
+	if granularity != "" && !isObjectNode {
+		b.warn("x-schema-patch-granularity on a non-object node: ignored (CORE §8.2.3)")
+	}
+
 	// Object node: recurse into properties (schema key order) and, if
 	// additionalProperties is a schema, into the "*" wildcard segment (CORE §3.3.2).
 	if props, ok := obj.Get("properties"); ok {
@@ -276,7 +338,17 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 
 // registerArray constructs the ArrayPlan for an array node, registers it subject
 // to basePath, and recurses into the item schema (CORE §3.4, CORE §3.6, CORE §3.3.5).
-func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visited map[*Object]bool) {
+// A declared x-schema-patch-topology (CORE §3.4.0/§8.3.1) short-circuits the
+// compat derivation and overrides primaryKeyMap + auto-detection; an atomic array
+// prunes its whole subtree (CORE §8.3.3).
+func (b *planBuilder) registerArray(obj *Object, items Value, docPath string, visited map[*Object]bool) {
+	// spec-v2: parse the declared array topology (construction validation, §8.2.3).
+	topo, err := parseArrayTopology(obj, b.warn)
+	if err != nil {
+		b.fail(err)
+		return
+	}
+
 	// Resolve a leading $ref on items once (CORE §3.4); keep the original on
 	// failure.
 	itemsSchema := items
@@ -297,28 +369,63 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 			isPrimitive = t == "string" || t == "number" || t == "boolean"
 		}
 	}
-	if isPrimitive {
-		plan.Strategy = StrategyUnique
-	}
 
-	// primaryKeyMap override (CORE §3.4.3), else auto-detect for object items (CORE §3.5).
-	customKey := ""
-	if b.primaryKeyMap != nil {
-		customKey = b.primaryKeyMap[docPath]
-	}
-	if customKey != "" {
-		plan.PrimaryKey = customKey
-		plan.Strategy = StrategyPrimaryKey
-	} else if !isPrimitive {
-		if md := b.detectKey(itemsSchema); md != nil {
-			plan.PrimaryKey = md.primaryKey
-			plan.RequiredFields = md.requiredFields
-			plan.HashFields = md.hashFields
+	if topo != nil {
+		// CORE §3.4.0: declared topology governs dispatch; fill the compat
+		// strategy/primaryKey view for introspection (CORE §8.3.1).
+		plan.Topology = topo.topology
+		if topo.topology == TopologyMap {
+			plan.Keys = topo.keys
+			plan.Order = topo.order
 			plan.Strategy = StrategyPrimaryKey
+			if len(topo.keys) > 0 {
+				plan.PrimaryKey = topo.keys[0]
+			}
+			// requiredFields/hashFields are non-normative prefilter hints
+			// (CORE §8.3.1); populate from the item object schema where present.
+			if !isPrimitive {
+				if md := b.detectKey(itemsSchema); md != nil {
+					plan.RequiredFields = md.requiredFields
+					plan.HashFields = md.hashFields
+				}
+			}
+		} else {
+			// sequence / set / atomic: strategy "lcs", no primaryKey (CORE §8.3.1).
+			plan.Strategy = StrategyLCS
+			plan.PrimaryKey = ""
+		}
+	} else {
+		// Compatibility derivation (CORE §3.4.1–§3.5) — spec-v1 behavior.
+		if isPrimitive {
+			plan.Strategy = StrategyUnique
+		}
+		customKey := ""
+		if b.primaryKeyMap != nil {
+			customKey = b.primaryKeyMap[docPath]
+		}
+		if customKey != "" {
+			plan.PrimaryKey = customKey
+			plan.Strategy = StrategyPrimaryKey
+		} else if !isPrimitive {
+			if md := b.detectKey(itemsSchema); md != nil {
+				plan.PrimaryKey = md.primaryKey
+				plan.RequiredFields = md.requiredFields
+				plan.HashFields = md.hashFields
+				plan.Strategy = StrategyPrimaryKey
+			}
 		}
 	}
 
-	b.register(docPath, plan)
+	b.registerArrayPlan(docPath, plan)
+	if b.err != nil {
+		return
+	}
+
+	// A declared atomic array prunes its whole subtree (CORE §8.3.3/§8.6.2):
+	// nothing recurses below it.
+	if topo != nil && topo.topology == TopologyAtomic {
+		return
+	}
 
 	// Recurse into items. An array-of-arrays inner array registers at a distinct
 	// "*" wildcard path so it never overwrites the outer plan (CORE §3.3.5).
@@ -330,30 +437,6 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 		}
 	}
 	b.traverse(items, nextPath, visited)
-}
-
-// register inserts plan at the basePath-relativized key, reconciling with any
-// existing plan by strategy rank (CORE §3.6.2, CORE §3.7).
-func (b *planBuilder) register(docPath string, plan *ArrayPlan) {
-	inBase := b.basePath == "" || docPath == b.basePath || strings.HasPrefix(docPath, b.basePath+"/")
-	if !inBase {
-		return
-	}
-	target := docPath
-	if b.basePath != "" {
-		target = docPath[len(b.basePath):]
-	}
-
-	existing, ok := b.plan[target]
-	switch {
-	case !ok:
-		b.plan[target] = plan
-	case isBetterPlan(plan, existing):
-		mergePlanMetadata(plan, existing)
-		b.plan[target] = plan
-	default:
-		mergePlanMetadata(existing, plan)
-	}
 }
 
 // keyMetadata is the result of a successful primary-key detection (CORE §3.5.4).
