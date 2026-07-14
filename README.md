@@ -278,8 +278,17 @@ plus a seeded differential-fuzz corpus ([`spec/fuzz`](./spec/fuzz)).
 go get github.com/flightcontrolhq/fast-json-schema-patch/go
 ```
 
-See [`go/README.md`](./go/README.md) for the quick start, capability options, and
-the subdirectory-module tagging note (`go/vX.Y.Z`).
+`Compare` diffs two typed Go values against a schema in one call (`nil` schema =
+schemaless); `CompareJSON` is the same for raw JSON bytes:
+
+```go
+patch, err := schemapatch.Compare(schema, original, modified) // structs, maps, slices
+patch, err := schemapatch.CompareJSON(schemaBytes, originalBytes, modifiedBytes)
+```
+
+See [`go/README.md`](./go/README.md) for the quick start, the determinism contract
+(bytes preserve source order; `encoding/json` canonicalizes maps), capability
+options, and the subdirectory-module tagging note (`go/vX.Y.Z`).
 
 ## 🔗 Related Standards
 

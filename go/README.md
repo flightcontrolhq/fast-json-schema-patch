@@ -20,92 +20,197 @@ go get github.com/flightcontrolhq/fast-json-schema-patch/go
 
 ## Quick start
 
-Unlike `encoding/json`'s `map[string]any`, this library uses an **ordered value
-model** so that object member order and numeric literal text survive a
-decode→diff→encode round-trip (SPEC §2.2). You bring your documents in as JSON
-bytes and decode them with `Decode`; you serialize patches and results back out
-with `EncodeOperations` / `Encode`.
+The fastest way in is `Compare` — hand it two Go values (typed structs, maps,
+slices, or already-decoded JSON) and a JSON Schema, and it returns the patch. It
+marshals each argument with `encoding/json` under the hood, so it feels like the
+typed-value diffing you may know from `wI2L/jsondiff`.
 
 ```go
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	schemapatch "github.com/flightcontrolhq/fast-json-schema-patch/go"
 )
 
+// Deployment-like types with a keyed containers slice.
+type Container struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+type PodSpec struct {
+	Containers []Container `json:"containers"`
+}
+type Deployment struct {
+	Replicas int     `json:"replicas"`
+	Template PodSpec `json:"template"`
+}
+
 func main() {
-	// 0. Describe your data with a JSON Schema. `id` is `required`, so the
-	//    `users` array auto-detects the `primaryKey` diffing strategy (§4.5).
-	schema, err := schemapatch.Decode([]byte(`{
+	// Describe your data with a JSON Schema. Each container's `name` is
+	// `required`, so the containers slice auto-detects the `primaryKey` diffing
+	// strategy (§4.5): elements are matched by key, not by position.
+	schema := json.RawMessage(`{
 		"type": "object",
 		"properties": {
-			"users": {
-				"type": "array",
-				"items": {
-					"type": "object",
-					"required": ["id"],
-					"properties": {
-						"id":     {"type": "string"},
-						"name":   {"type": "string"},
-						"status": {"type": "string"}
+			"template": {
+				"type": "object",
+				"properties": {
+					"containers": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["name"],
+							"properties": {
+								"name":  {"type": "string"},
+								"image": {"type": "string"}
+							}
+						}
 					}
 				}
 			}
 		}
-	}`))
+	}`)
+
+	original := Deployment{
+		Replicas: 2,
+		Template: PodSpec{Containers: []Container{
+			{Name: "web", Image: "nginx:1.25"},
+			{Name: "sidecar", Image: "envoy:1.29"},
+		}},
+	}
+	modified := Deployment{
+		Replicas: 3,
+		Template: PodSpec{Containers: []Container{
+			// containers reordered; only web's image changed
+			{Name: "sidecar", Image: "envoy:1.29"},
+			{Name: "web", Image: "nginx:1.27"},
+		}},
+	}
+
+	patch, err := schemapatch.Compare(schema, original, modified)
 	if err != nil {
 		panic(err)
 	}
 
-	// 1. Build a plan from the schema — done once per schema.
-	plan, err := schemapatch.BuildPlan(schema, schemapatch.BuildPlanOptions{})
+	out, err := json.MarshalIndent(patch, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-
-	// 2. Decode the documents through the ordered value model.
-	original, _ := schemapatch.Decode([]byte(`{
-		"users": [
-			{"id": "user1", "name": "John Doe",   "status": "active"},
-			{"id": "user2", "name": "Jane Smith", "status": "inactive"}
-		]
-	}`))
-	modified, _ := schemapatch.Decode([]byte(`{
-		"users": [
-			{"id": "user1", "name": "John Doe", "status": "online"},
-			{"id": "user3", "name": "Sam Ray",  "status": "active"}
-		]
-	}`))
-
-	// 3. Diff. NewPatcher takes the plan plus optional capability toggles.
-	patch := schemapatch.NewPatcher(plan).Execute(original, modified)
-
-	out, _ := schemapatch.EncodeOperations(patch)
 	fmt.Println(string(out))
-	// Output (modifications first, then removals, then `/-` appends — see
-	// SPEC.md §5.4.1.4 for the primaryKey strategy's normative emission order):
+	// The reorder is absorbed by the keyed match — only the changed fields emit:
 	// [
-	//   {"op":"replace","path":"/users/0/status","value":"online","oldValue":"active"},
-	//   {"op":"remove","path":"/users/1","oldValue":{"id":"user2","name":"Jane Smith","status":"inactive"}},
-	//   {"op":"add","path":"/users/-","value":{"id":"user3","name":"Sam Ray","status":"active"}}
+	//   {"op":"replace","path":"/replicas","value":3,"oldValue":2},
+	//   {"op":"replace","path":"/template/containers/0/image","value":"nginx:1.27","oldValue":"nginx:1.25"}
 	// ]
 }
 ```
 
-This is the same schema, documents, and output as the [TypeScript quick
-start](../README.md#-quick-start) — the two engines emit byte-identical patches.
+Pass `nil` for the schema to diff schemalessly (every array uses lcs). The
+capability toggles from [NewPatcher](#capability-options) work here too:
+`schemapatch.Compare(schema, a, b, schemapatch.EmitMoves(true))`.
+
+### Already have JSON bytes?
+
+`CompareJSON` is the same one-call flow when your documents are already
+serialized. It decodes each through the ordered value model, so object member
+order and numeric literal text are preserved end-to-end (SPEC §2.2) — a guarantee
+`Compare` cannot make because `encoding/json` canonicalizes on the way in (see
+[Determinism](#determinism)).
+
+```go
+schema := []byte(`{ "type": "object", "properties": { ... } }`)
+original := []byte(`{"users":[{"id":"user1","status":"active"}]}`)
+modified := []byte(`{"users":[{"id":"user1","status":"online"}]}`)
+
+patch, err := schemapatch.CompareJSON(schema, original, modified)
+if err != nil {
+	panic(err)
+}
+out, err := schemapatch.EncodeOperations(patch) // compact JSON patch array
+if err != nil {
+	panic(err)
+}
+fmt.Println(string(out))
+```
+
+`CompareJSON(nil, a, b)` diffs schemalessly. This emits the same bytes as the
+[TypeScript quick start](../README.md#-quick-start) — the two engines are
+byte-identical.
+
+### Determinism
+
+Both entry points are deterministic for fixed inputs, but they canonicalize
+differently:
+
+- **`CompareJSON` (bytes) preserves source shape.** `Decode` keeps object member
+  order and number literal text exactly as written (SPEC §2.2). This is the
+  documented deterministic route — use it when member order or a specific numeric
+  literal must survive into the patch.
+- **`Compare` (values) canonicalizes via `encoding/json`.** Struct fields marshal
+  in declaration order (deterministic, and yours to control). `map[K]V` members
+  marshal in **sorted key order** — deterministic across runs, but a map's
+  original insertion order is not preserved (Go maps have none). Non-finite floats
+  (`NaN`, `±Inf`) are rejected with an error, consistent with the value model's
+  own rejection of numbers with no JSON representation (SPEC §2.2).
+
+### Advanced: the ordered `Value` pipeline
+
+`Compare`/`CompareJSON` build a `Plan` and run a `Patcher` for you. When you need
+plan reuse across many diffs, non-default `BuildPlanOptions` (`PrimaryKeyMap`,
+`BasePath`, custom candidates), or to hold documents in the ordered value model
+directly, drive the three stages yourself:
+
+```go
+schema, err := schemapatch.Decode([]byte(`{ "type": "object", "properties": { ... } }`))
+if err != nil {
+	panic(err)
+}
+
+// Build the plan once, reuse it for every diff against this schema.
+plan, err := schemapatch.BuildPlan(schema, schemapatch.BuildPlanOptions{})
+if err != nil {
+	panic(err)
+}
+patcher := schemapatch.NewPatcher(plan) // add capability options here
+
+original, err := schemapatch.Decode([]byte(`{"users":[{"id":"user1","status":"active"}]}`))
+if err != nil {
+	panic(err)
+}
+modified, err := schemapatch.Decode([]byte(`{"users":[{"id":"user1","status":"online"}]}`))
+if err != nil {
+	panic(err)
+}
+
+patch := patcher.Execute(original, modified)
+out, err := schemapatch.EncodeOperations(patch)
+if err != nil {
+	panic(err)
+}
+fmt.Println(string(out))
+```
 
 ## Applying and inverting
 
 ```go
 // Reconstruct the modified document from original + patch.
 result, err := schemapatch.ApplyPatch(original, patch, schemapatch.ApplyOptions{})
+if err != nil {
+	panic(err)
+}
 
 // Compute an undo patch (uses the original, pre-patch document).
 undo, err := schemapatch.InvertPatch(original, patch)
-applied, _ := schemapatch.ApplyPatch(result, undo, schemapatch.ApplyOptions{})
+if err != nil {
+	panic(err)
+}
+applied, err := schemapatch.ApplyPatch(result, undo, schemapatch.ApplyOptions{})
+if err != nil {
+	panic(err)
+}
 // applied deep-equals original — check with schemapatch.DeepEqual(applied, original)
 ```
 
@@ -127,7 +232,8 @@ applied, _ := schemapatch.ApplyPatch(result, undo, schemapatch.ApplyOptions{})
 ## Capability options
 
 `NewPatcher` accepts functional options mirroring the TypeScript capabilities
-(SPEC §10.4). The defaults reproduce pre-capability output byte-for-byte:
+(SPEC §10.4), and `Compare`/`CompareJSON` forward their trailing `opts` straight
+through to it. The defaults reproduce pre-capability output byte-for-byte:
 
 | Option                              | Default | Effect |
 | ----------------------------------- | ------- | ------ |
