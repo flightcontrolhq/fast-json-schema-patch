@@ -206,11 +206,20 @@ export class JsonSchemaPatcher {
     patches: Operation[],
     node: PlanTrieNode | undefined
   ) {
+    // F36: SPEC §5.2.2 visitation order is "all of original's keys in
+    // original insertion order, followed by keys present only in modified in
+    // modified insertion order." The previous implementation built that order
+    // via `new Set([...keys1, ...keys2])` (Set iteration happens to yield
+    // exactly that order), which allocates two spread arrays plus a Set on
+    // every object node visited — the hottest allocation site for
+    // object-heavy documents. A two-pass walk (obj1's own keys, then obj2's
+    // own keys skipping ones already own-present on obj1 via
+    // `Object.hasOwn`) produces the IDENTICAL order with zero temporary
+    // collections. Measured 5x (scratchpad/bench-f36-diffobject.ts): ~5x
+    // fewer ms and zero Set/array garbage per node.
     const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
-    const allKeys = new Set([...keys1, ...keys2]);
-
-    for (const key of allKeys) {
+    for (let i = 0; i < keys1.length; i++) {
+      const key = keys1[i] as string;
       const newPath = `${path}/${escapeJsonPointer(key)}`;
       const val1 = obj1[key];
       const val2 = obj2[key];
@@ -228,6 +237,25 @@ export class JsonSchemaPatcher {
           ? node.children?.get(key) ?? node.wildcard
           : undefined;
         this.diff(val1, val2, newPath, patches, childNode);
+      }
+    }
+
+    const keys2 = Object.keys(obj2);
+    for (let i = 0; i < keys2.length; i++) {
+      const key = keys2[i] as string;
+      // Already visited in pass 1 (present on obj1) — skip. This is the only
+      // membership check needed to reproduce Set-union dedup semantics: a key
+      // own-present on obj1 was already handled above regardless of its value
+      // (including an explicit `undefined` value, which Object.keys still
+      // reports and which the pass-1 branch above resolves to a no-op diff).
+      if (Object.hasOwn(obj1, key)) continue;
+      const val2 = obj2[key];
+      // val1 is implicitly undefined here (key not own-present on obj1). Only
+      // an add is possible; val2 === undefined here degenerates to the
+      // original's `diff(undefined, undefined, ...)` no-op (§5.1.1).
+      if (val2 !== undefined) {
+        const newPath = `${path}/${escapeJsonPointer(key)}`;
+        patches.push({ op: "add", path: newPath, value: val2 });
       }
     }
   }

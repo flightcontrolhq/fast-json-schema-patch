@@ -391,9 +391,11 @@ is an own member with a non-`undefined` value.
 
 `5.2.2` **Key visitation order.** Visit the union of `original`'s keys and `modified`'s keys as:
 **all of `original`'s keys in `original` insertion order, followed by the keys present only in
-`modified` in `modified` insertion order.** (Reference forms `new Set([...keys(original),
-...keys(modified)])`; Set iteration yields exactly this order.) A conforming generator MUST
-reproduce this visitation order (§2.3.2).
+`modified` in `modified` insertion order.** (The reference implements this as two passes —
+`original`'s own keys, then `modified`'s own keys skipping any already own-present on `original`
+— which is output-equivalent to, but allocates less than, forming
+`new Set([...keys(original), ...keys(modified)])` and iterating it; F36.) A conforming generator
+MUST reproduce this visitation order (§2.3.2).
 
 `5.2.3` For each visited `key`, let `childPath = path + "/" + escape(key)` (§3.2):
 
