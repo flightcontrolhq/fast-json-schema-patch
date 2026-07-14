@@ -1,7 +1,7 @@
 [
   {
     "name": "val-replace-pass",
-    "comment": "§8.4.1: matching oldValue passes validation",
+    "comment": "CORE §5.4.1: matching oldValue passes validation",
     "doc": {
       "a": 1
     },
@@ -22,7 +22,7 @@
   },
   {
     "name": "val-replace-fail",
-    "comment": "§8.4.1: stale oldValue -> OLD_VALUE_MISMATCH (atomic abort)",
+    "comment": "CORE §5.4.1: stale oldValue -> OLD_VALUE_MISMATCH (atomic abort)",
     "doc": {
       "a": 1
     },
@@ -44,7 +44,7 @@
   },
   {
     "name": "val-remove-pass",
-    "comment": "§8.4.1: remove with matching oldValue passes",
+    "comment": "CORE §5.4.1: remove with matching oldValue passes",
     "doc": {
       "a": 1,
       "b": 2
@@ -65,7 +65,7 @@
   },
   {
     "name": "val-remove-fail",
-    "comment": "§8.4.1: remove with stale oldValue -> OLD_VALUE_MISMATCH",
+    "comment": "CORE §5.4.1: remove with stale oldValue -> OLD_VALUE_MISMATCH",
     "doc": {
       "a": 1
     },
@@ -86,7 +86,7 @@
   },
   {
     "name": "val-skips-op-without-oldvalue",
-    "comment": "§8.4.2: an op lacking oldValue is applied unchecked even when validation is on",
+    "comment": "CORE §5.4.2: an op lacking oldValue is applied unchecked even when validation is on",
     "doc": {
       "a": 1
     },
@@ -106,7 +106,7 @@
   },
   {
     "name": "val-off-ignores-oldvalue",
-    "comment": "§8.4: with validation OFF, a stale oldValue is ignored",
+    "comment": "CORE §5.4: with validation OFF, a stale oldValue is ignored",
     "doc": {
       "a": 1
     },
@@ -124,7 +124,7 @@
   },
   {
     "name": "val-add-unchecked",
-    "comment": "§8.4.2: add never carries oldValue, so it is always unchecked",
+    "comment": "CORE §5.4.2: add never carries oldValue, so it is always unchecked",
     "doc": {},
     "patch": [
       {
@@ -142,7 +142,7 @@
   },
   {
     "name": "val-deep-oldvalue-match",
-    "comment": "§8.4.1: oldValue comparison is deep (§2.4.1), key-order-insensitive",
+    "comment": "CORE §5.4.1: oldValue comparison is deep (CORE §1.4.1), key-order-insensitive",
     "doc": {
       "a": {
         "x": 1,

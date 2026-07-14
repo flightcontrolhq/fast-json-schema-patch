@@ -2,11 +2,11 @@ import type { Plan } from "./buildPlan";
 import { unescapeJsonPointer } from "../utils/pathUtils";
 
 /**
- * `ignorePaths` capability (SPEC §5.10). A node in the compiled **ignore trie**:
+ * `ignorePaths` capability (GEN §10). A node in the compiled **ignore trie**:
  * a set of object-member JSON Pointers whose subtrees the diff treats as EQUAL
  * in both directions (no ops at or beneath a matched location, in any strategy).
  *
- * The trie mirrors the plan trie (§5.4.5.1): a `*` segment is the `wildcard`
+ * The trie mirrors the plan trie (GEN §4.5.1): a `*` segment is the `wildcard`
  * edge, any other segment is UNESCAPED and stored as an exact `children` edge.
  * `end` is set iff an ignore pointer terminates at this node ("ignored here").
  * It is threaded down the diff recursion in PARALLEL with the plan trie as an
@@ -20,9 +20,9 @@ export interface IgnoreTrieNode {
 }
 
 /**
- * Canonical array-index test (SPEC §2.3.2): "0", or a non-zero decimal digit
+ * Canonical array-index test (CORE §1.3.2): "0", or a non-zero decimal digit
  * followed by digits, whose value is in `0..2^32-2`. A segment matching this
- * (or `-`) is rejected at construction (§5.10.1) because ignore pointers address
+ * (or `-`) is rejected at construction (GEN §10.1) because ignore pointers address
  * object members only and an array level is matched solely by `*`. A segment
  * that merely looks numeric but is not canonical (e.g. "01", a leading zero) is
  * a legal object-member name (§F33) and is NOT an index.
@@ -41,9 +41,9 @@ function isArrayIndexSegment(seg: string): boolean {
 }
 
 /**
- * Compile a validated `ignorePaths` set into an ignore trie (SPEC §5.10.1/
- * §5.10.2). Returns `undefined` for an empty/absent set (threads no node).
- * Throws `TypeError` on the first invalid pointer (§5.10.1): a non-string, the
+ * Compile a validated `ignorePaths` set into an ignore trie (GEN §10.1/
+ * GEN §10.2). Returns `undefined` for an empty/absent set (threads no node).
+ * Throws `TypeError` on the first invalid pointer (GEN §10.1): a non-string, the
  * empty/root pointer `""`, a pointer without a leading `/`, or any segment that
  * is a canonical array index or `-`.
  */
@@ -55,17 +55,17 @@ export function compileIgnoreTrie(
   for (const path of paths) {
     if (typeof path !== "string") {
       throw new TypeError(
-        `ignorePaths entries must be JSON Pointer strings; got ${typeof path} (SPEC §5.10.1)`
+        `ignorePaths entries must be JSON Pointer strings; got ${typeof path} (GEN §10.1)`
       );
     }
     if (path === "") {
       throw new TypeError(
-        'ignorePaths: the empty/root pointer "" is not an object-member location (SPEC §5.10.1)'
+        'ignorePaths: the empty/root pointer "" is not an object-member location (GEN §10.1)'
       );
     }
     if (path.charCodeAt(0) !== 0x2f /* "/" */) {
       throw new TypeError(
-        `ignorePaths: pointer ${JSON.stringify(path)} must begin with "/" (SPEC §5.10.1)`
+        `ignorePaths: pointer ${JSON.stringify(path)} must begin with "/" (GEN §10.1)`
       );
     }
     const rawSegments = path.split("/").slice(1);
@@ -81,7 +81,7 @@ export function compileIgnoreTrie(
         throw new TypeError(
           `ignorePaths: pointer ${JSON.stringify(path)} contains an array-index (or "-") segment ${JSON.stringify(
             seg
-          )}; ignore pointers address object members only — use "*" for an array level (SPEC §5.10.1)`
+          )}; ignore pointers address object members only — use "*" for an array level (GEN §10.1)`
         );
       }
       node.children ??= new Map();
@@ -98,7 +98,7 @@ export function compileIgnoreTrie(
 }
 
 /**
- * Advance the ignore trie for an OBJECT member `key` (SPEC §5.10.3): the exact
+ * Advance the ignore trie for an OBJECT member `key` (GEN §10.3): the exact
  * child edge if present, else the wildcard edge, else none. Exact edges take
  * precedence over the wildcard at every level (a decimal-digit member key is an
  * ordinary exact/wildcard descent, never an array index — §F33).
@@ -113,7 +113,7 @@ export function ignoreMember(
 
 /**
  * True iff the subtree rooted at `node` contains ANY ignore terminal (SPEC
- * §5.10.6). Used to DISABLE `wholesaleReplaceFallback` for an array with an
+ * GEN §10.6). Used to DISABLE `wholesaleReplaceFallback` for an array with an
  * ignore path beneath it, so ignored content never leaks through a whole-array
  * replace of an ancestor.
  */
@@ -132,7 +132,7 @@ export function ignoreSubtreeHasTerminal(
 }
 
 /**
- * SPEC §5.10.7: a plan's `primaryKey` field MUST NOT be ignorable. Throws
+ * GEN §10.7: a plan's `primaryKey` field MUST NOT be ignorable. Throws
  * `TypeError` when any array plan's key-field location (`P` `/` `*` `/` `key`)
  * is at or beneath an ignore terminal — the field itself, the whole item
  * (`P/*`), or the whole array (`P`). Walking `P`: a literal segment follows
@@ -154,7 +154,7 @@ export function validatePrimaryKeysNotIgnored(
           key
         )} of the array plan at ${JSON.stringify(
           planKey || "/"
-        )} — a primaryKey field must not be ignorable (SPEC §5.10.7)`
+        )} — a primaryKey field must not be ignorable (GEN §10.7)`
       );
     }
   }
@@ -187,7 +187,7 @@ function ignoreCoversKeyField(
     return ignoreCoversKeyField(node.wildcard, segs, i + 1, key);
   }
   // i === segs.length: `node` is the array's node. Consume the array-element
-  // wildcard (§5.10.3), then match the key member (exact-else-wildcard).
+  // wildcard (GEN §10.3), then match the key member (exact-else-wildcard).
   const itemNode = node.wildcard;
   if (!itemNode) return false;
   if (itemNode.end) return true; // the whole item is ignored -> covers the key

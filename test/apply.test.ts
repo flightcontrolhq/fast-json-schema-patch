@@ -106,7 +106,7 @@ describe("applyPatch - RFC 6902 Appendix A", () => {
   })
 })
 
-// D4 (spec-v1-rc external-review defect round, SPEC §8.3/§8.3.5, RFC 6902 §4.6):
+// D4 (spec-v1-rc external-review defect round, CORE §5.3/CORE §5.3.5, RFC 6902 §4.6):
 // `test` MUST carry a `value` member. A `test` with NO `value` is a tier-1
 // required-field failure -> INVALID_OPERATION, evaluated BEFORE the tier-2
 // pointer-syntax gate and the tier-3 read-side existence check. The presence
@@ -205,7 +205,7 @@ describe("applyPatch - paths and errors", () => {
     expect(() => applyPatch({ a: 1 }, [{ op: "replace", path: "/b", value: 2 }])).toThrow(JsonPatchError)
   })
 
-  // D2 (spec-v1-rc external-review defect round, SPEC §3.7 / RFC 6901 §3): a
+  // D2 (spec-v1-rc external-review defect round, CORE §2.7 / RFC 6901 §3): a
   // non-empty pointer without a leading "/" is a whole-pointer syntax error and
   // MUST be rejected with INVALID_POINTER before any resolution — it MUST NOT
   // alias to the root (splitPath("foo") === splitPath("") === [], the old bug

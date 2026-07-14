@@ -1,7 +1,7 @@
 [
   {
     "name": "obj-add-member",
-    "comment": "§5.2.3: modified-only key -> add (no oldValue)",
+    "comment": "GEN §2.3: modified-only key -> add (no oldValue)",
     "original": {
       "a": 1
     },
@@ -19,7 +19,7 @@
   },
   {
     "name": "obj-remove-member",
-    "comment": "§5.2.3: original-only key -> remove with oldValue",
+    "comment": "GEN §2.3: original-only key -> remove with oldValue",
     "original": {
       "a": 1,
       "b": 2
@@ -37,7 +37,7 @@
   },
   {
     "name": "obj-replace-member",
-    "comment": "§5.2.3/§5.1.4: present-in-both primitive change -> replace",
+    "comment": "GEN §2.3/GEN §1.4: present-in-both primitive change -> replace",
     "original": {
       "a": 1
     },
@@ -55,7 +55,7 @@
   },
   {
     "name": "obj-nested-change",
-    "comment": "§5.2.3: recurse into nested object member",
+    "comment": "GEN §2.3: recurse into nested object member",
     "original": {
       "a": {
         "b": {
@@ -81,7 +81,7 @@
   },
   {
     "name": "obj-key-visitation-order",
-    "comment": "§5.2.2: original keys in original order, then modified-only keys in modified order",
+    "comment": "GEN §2.2: original keys in original order, then modified-only keys in modified order",
     "original": {
       "b": 1,
       "a": 1
@@ -113,7 +113,7 @@
   },
   {
     "name": "obj-mixed-add-remove-replace",
-    "comment": "§5.2.2/§5.2.3: mixed member operations in visitation order",
+    "comment": "GEN §2.2/GEN §2.3: mixed member operations in visitation order",
     "original": {
       "keep": 1,
       "drop": 2,
@@ -145,7 +145,7 @@
   },
   {
     "name": "obj-empty-to-populated",
-    "comment": "§5.2.3: all members added",
+    "comment": "GEN §2.3: all members added",
     "original": {},
     "modified": {
       "a": 1,
@@ -172,7 +172,7 @@
   },
   {
     "name": "obj-populated-to-empty",
-    "comment": "§5.2.3: all members removed (visitation = original order)",
+    "comment": "GEN §2.3: all members removed (visitation = original order)",
     "original": {
       "a": 1,
       "b": 2,
@@ -199,7 +199,7 @@
   },
   {
     "name": "obj-replaced-by-different-object",
-    "comment": "§5.2.3: recurse into object-vs-object member yielding nested ops",
+    "comment": "GEN §2.3: recurse into object-vs-object member yielding nested ops",
     "original": {
       "a": {
         "x": 1,
@@ -223,7 +223,7 @@
   },
   {
     "name": "obj-identical-noop",
-    "comment": "§5.1: deep-equal objects (key order differs) emit nothing",
+    "comment": "GEN §1: deep-equal objects (key order differs) emit nothing",
     "original": {
       "a": 1,
       "b": 2
@@ -236,7 +236,7 @@
   },
   {
     "name": "obj-add-object-valued-member",
-    "comment": "§5.2.3: adding a whole subtree is a single add",
+    "comment": "GEN §2.3: adding a whole subtree is a single add",
     "original": {},
     "modified": {
       "a": {
@@ -267,7 +267,7 @@
   },
   {
     "name": "obj-remove-then-add-different-keys",
-    "comment": "§5.2.2: remove of original-only precedes add of modified-only",
+    "comment": "GEN §2.2: remove of original-only precedes add of modified-only",
     "original": {
       "x": 1
     },

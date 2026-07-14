@@ -1,7 +1,7 @@
 [
   {
     "name": "iov-object-remove-no-oldvalue",
-    "comment": "§6.4.2: remove carries no oldValue under includeOldValue=false",
+    "comment": "CORE §4.4.2: remove carries no oldValue under includeOldValue=false",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -23,7 +23,7 @@
   },
   {
     "name": "iov-object-replace-no-oldvalue",
-    "comment": "§6.4.2: replace carries value but no oldValue",
+    "comment": "CORE §4.4.2: replace carries value but no oldValue",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -45,7 +45,7 @@
   },
   {
     "name": "iov-large-subtree-removal",
-    "comment": "§10.4.2: removing a large subtree drops to a tiny op (no oldValue payload)",
+    "comment": "CONF §5.2: removing a large subtree drops to a tiny op (no oldValue payload)",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -78,7 +78,7 @@
   },
   {
     "name": "iov-array-lcs-remove",
-    "comment": "§6.4.2: LCS remove suppresses oldValue",
+    "comment": "CORE §4.4.2: LCS remove suppresses oldValue",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -102,7 +102,7 @@
   },
   {
     "name": "iov-kind-mismatch-replace",
-    "comment": "§5.1.4/§6.4.2: opaque-kind replace suppresses oldValue",
+    "comment": "GEN §1.4/CORE §4.4.2: opaque-kind replace suppresses oldValue",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -126,7 +126,7 @@
   },
   {
     "name": "iov-primaryKey-removal",
-    "comment": "§5.4/§6.4.2: primaryKey removal suppresses oldValue",
+    "comment": "GEN §4/CORE §4.4.2: primaryKey removal suppresses oldValue",
     "schema": {
       "type": "object",
       "properties": {
@@ -183,7 +183,7 @@
   },
   {
     "name": "iov-lcs-whole-item-replace",
-    "comment": "§5.5/§6.4.2: LCS whole-item (primitive) replace suppresses oldValue",
+    "comment": "GEN §5/CORE §4.4.2: LCS whole-item (primitive) replace suppresses oldValue",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -205,7 +205,7 @@
   },
   {
     "name": "iov-unique-replace",
-    "comment": "§5.6/§6.4.2: unique positional replace suppresses oldValue",
+    "comment": "GEN §6/CORE §4.4.2: unique positional replace suppresses oldValue",
     "schema": {
       "type": "object",
       "properties": {
@@ -246,7 +246,7 @@
   },
   {
     "name": "iov-add-unaffected",
-    "comment": "§6.3.2: add never carries oldValue in either mode (identical to default)",
+    "comment": "CORE §4.3.2: add never carries oldValue in either mode (identical to default)",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -266,7 +266,7 @@
   },
   {
     "name": "iov-mixed-only-remove-replace-suppressed",
-    "comment": "§6.4.2: only remove/replace lose oldValue; add and paths/values unchanged",
+    "comment": "CORE §4.4.2: only remove/replace lose oldValue; add and paths/values unchanged",
     "options": {
       "capabilities": {
         "includeOldValue": false
@@ -301,7 +301,7 @@
   },
   {
     "name": "iov-granular-descent-honored",
-    "comment": "§10.4.2: nested ops from granular descent also honor the flag",
+    "comment": "CONF §5.2: nested ops from granular descent also honor the flag",
     "options": {
       "capabilities": {
         "includeOldValue": false

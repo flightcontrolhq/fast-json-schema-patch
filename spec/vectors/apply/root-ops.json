@@ -1,7 +1,7 @@
 [
   {
     "name": "root-add-replaces-document",
-    "comment": "§8.5.1: add at '' replaces the whole document",
+    "comment": "CORE §5.5.1: add at '' replaces the whole document",
     "doc": {
       "a": 1
     },
@@ -22,7 +22,7 @@
   },
   {
     "name": "root-replace-document",
-    "comment": "§8.5.1: replace at '' swaps the root (may change type)",
+    "comment": "CORE §5.5.1: replace at '' swaps the root (may change type)",
     "doc": [
       1
     ],
@@ -41,7 +41,7 @@
   },
   {
     "name": "root-replace-primitive-to-string",
-    "comment": "§8.5.1: root type change primitive->string",
+    "comment": "CORE §5.5.1: root type change primitive->string",
     "doc": 1,
     "patch": [
       {
@@ -54,7 +54,7 @@
   },
   {
     "name": "root-remove-invalid",
-    "comment": "§8.5.2: remove at '' -> INVALID_OPERATION",
+    "comment": "CORE §5.5.2: remove at '' -> INVALID_OPERATION",
     "doc": {
       "a": 1
     },
@@ -71,7 +71,7 @@
   },
   {
     "name": "root-test-success",
-    "comment": "§8.3: test at '' against the whole document (key-order-insensitive) succeeds",
+    "comment": "CORE §5.3: test at '' against the whole document (key-order-insensitive) succeeds",
     "doc": {
       "a": 1,
       "b": 2
@@ -93,7 +93,7 @@
   },
   {
     "name": "root-test-failure",
-    "comment": "§8.3: test at '' mismatch -> TEST_FAILED",
+    "comment": "CORE §5.3: test at '' mismatch -> TEST_FAILED",
     "doc": {
       "a": 1
     },
@@ -113,7 +113,7 @@
   },
   {
     "name": "root-empty-patch-noop",
-    "comment": "§8.7.5: the empty patch returns the document unchanged",
+    "comment": "CORE §5.7.5: the empty patch returns the document unchanged",
     "doc": {
       "a": 1
     },
@@ -124,7 +124,7 @@
   },
   {
     "name": "root-copy-from-root",
-    "comment": "§8.3: copy from '' clones the whole document into a member",
+    "comment": "CORE §5.3: copy from '' clones the whole document into a member",
     "doc": {
       "a": 1
     },

@@ -1,7 +1,7 @@
 [
   {
     "name": "uk-proto-final",
-    "comment": "§8.6.1: __proto__ as the final write-side segment -> UNSAFE_KEY",
+    "comment": "CORE §5.6.1: __proto__ as the final write-side segment -> UNSAFE_KEY",
     "doc": {
       "a": 1
     },
@@ -19,7 +19,7 @@
   },
   {
     "name": "uk-proto-intermediate",
-    "comment": "§8.6.1: __proto__ anywhere on the write-side path -> UNSAFE_KEY",
+    "comment": "CORE §5.6.1: __proto__ anywhere on the write-side path -> UNSAFE_KEY",
     "doc": {
       "a": 1
     },
@@ -37,7 +37,7 @@
   },
   {
     "name": "uk-proto-deep",
-    "comment": "§8.6.1: a nested __proto__ segment is still guarded",
+    "comment": "CORE §5.6.1: a nested __proto__ segment is still guarded",
     "doc": {
       "a": {
         "b": 1
@@ -57,7 +57,7 @@
   },
   {
     "name": "uk-constructor-prototype",
-    "comment": "§8.6.1: 'prototype' preceded by an existing 'constructor' -> UNSAFE_KEY",
+    "comment": "CORE §5.6.1: 'prototype' preceded by an existing 'constructor' -> UNSAFE_KEY",
     "doc": {
       "constructor": {}
     },
@@ -75,7 +75,7 @@
   },
   {
     "name": "uk-constructor-prototype-intermediate",
-    "comment": "§8.6.1: constructor/prototype guarded as an intermediate too (fires before existence, §8.3.5)",
+    "comment": "CORE §5.6.1: constructor/prototype guarded as an intermediate too (fires before existence, CORE §5.3.5)",
     "doc": {
       "constructor": {}
     },
@@ -93,7 +93,7 @@
   },
   {
     "name": "uk-move-dest-proto",
-    "comment": "§8.6.1: a move DESTINATION of __proto__ is a write-side segment -> UNSAFE_KEY",
+    "comment": "CORE §5.6.1: a move DESTINATION of __proto__ is a write-side segment -> UNSAFE_KEY",
     "doc": {
       "a": 1
     },
@@ -111,7 +111,7 @@
   },
   {
     "name": "uk-allowed-standalone-constructor",
-    "comment": "§8.6.1: standalone 'constructor' is a legitimate key and MUST remain usable",
+    "comment": "CORE §5.6.1: standalone 'constructor' is a legitimate key and MUST remain usable",
     "doc": {
       "a": 1
     },
@@ -129,7 +129,7 @@
   },
   {
     "name": "uk-allowed-standalone-prototype",
-    "comment": "§8.6.1: 'prototype' NOT preceded by 'constructor' is a legitimate key",
+    "comment": "CORE §5.6.1: 'prototype' NOT preceded by 'constructor' is a legitimate key",
     "doc": {
       "a": 1
     },
@@ -147,7 +147,7 @@
   },
   {
     "name": "uk-allowed-prototype-under-non-constructor",
-    "comment": "§8.6.1: 'prototype' under a non-constructor parent is usable",
+    "comment": "CORE §5.6.1: 'prototype' under a non-constructor parent is usable",
     "doc": {
       "a": {}
     },
@@ -166,7 +166,7 @@
   },
   {
     "name": "uk-readside-proto-unresolvable",
-    "comment": "§8.6.1: read-side (test) __proto__ resolves by own-property -> PATH_UNRESOLVABLE, never UNSAFE_KEY",
+    "comment": "CORE §5.6.1: read-side (test) __proto__ resolves by own-property -> PATH_UNRESOLVABLE, never UNSAFE_KEY",
     "doc": {
       "a": 1
     },
@@ -184,7 +184,7 @@
   },
   {
     "name": "uk-readside-move-source-proto",
-    "comment": "§8.6.1: a move SOURCE of __proto__ is read-side -> PATH_UNRESOLVABLE",
+    "comment": "CORE §5.6.1: a move SOURCE of __proto__ is read-side -> PATH_UNRESOLVABLE",
     "doc": {
       "a": 1
     },

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// applyVector mirrors the §10.2 apply vector format. doc/patch/expected are kept
+// applyVector mirrors the CONF §3 apply vector format. doc/patch/expected are kept
 // raw so they decode through the order-preserving [Decode]/[DecodeOperations]
 // the engine consumes. Exactly one of Expected or Error is present.
 type applyVector struct {
@@ -83,7 +83,7 @@ func runApplyVector(t *testing.T, vec applyVector) {
 		CloneResult:       vec.Options.CloneResult,
 	}
 
-	// Snapshot the input to prove apply never mutates it (SPEC §8.1.3).
+	// Snapshot the input to prove apply never mutates it (CORE §5.1.3).
 	before := Clone(doc)
 
 	got, err := ApplyPatch(doc, patch, opts)

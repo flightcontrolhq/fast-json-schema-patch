@@ -51,7 +51,7 @@ type Deployment struct {
 func main() {
 	// Describe your data with a JSON Schema. Each container's `name` is
 	// `required`, so the containers slice auto-detects the `primaryKey` diffing
-	// strategy (§4.5): elements are matched by key, not by position.
+	// strategy (CORE §3.5): elements are matched by key, not by position.
 	schema := json.RawMessage(`{
 		"type": "object",
 		"properties": {
@@ -116,7 +116,7 @@ capability toggles from [NewPatcher](#capability-options) work here too:
 
 `CompareJSON` is the same one-call flow when your documents are already
 serialized. It decodes each through the ordered value model, so object member
-order and numeric literal text are preserved end-to-end (SPEC §2.2) — a guarantee
+order and numeric literal text are preserved end-to-end (CORE §1.2) — a guarantee
 `Compare` cannot make because `encoding/json` canonicalizes on the way in (see
 [Determinism](#determinism)).
 
@@ -146,7 +146,7 @@ Both entry points are deterministic for fixed inputs, but they canonicalize
 differently:
 
 - **`CompareJSON` (bytes) preserves source shape.** `Decode` keeps object member
-  order and number literal text exactly as written (SPEC §2.2). This is the
+  order and number literal text exactly as written (CORE §1.2). This is the
   documented deterministic route — use it when member order or a specific numeric
   literal must survive into the patch.
 - **`Compare` (values) canonicalizes via `encoding/json`.** Struct fields marshal
@@ -154,7 +154,7 @@ differently:
   marshal in **sorted key order** — deterministic across runs, but a map's
   original insertion order is not preserved (Go maps have none). Non-finite floats
   (`NaN`, `±Inf`) are rejected with an error, consistent with the value model's
-  own rejection of numbers with no JSON representation (SPEC §2.2).
+  own rejection of numbers with no JSON representation (CORE §1.2).
 
 ### Advanced: the ordered `Value` pipeline
 
@@ -176,7 +176,7 @@ if err != nil {
 }
 patcher, err := schemapatch.NewPatcher(plan) // add capability options here
 if err != nil {
-	panic(err) // only fails for invalid IgnorePaths (SPEC §5.10)
+	panic(err) // only fails for invalid IgnorePaths (GEN §10)
 }
 
 original, err := schemapatch.Decode([]byte(`{"users":[{"id":"user1","status":"active"}]}`))
@@ -217,7 +217,7 @@ if err != nil {
 // applied deep-equals original — check with schemapatch.DeepEqual(applied, original)
 ```
 
-`ApplyPatch` guarantees (SPEC §8):
+`ApplyPatch` guarantees (CORE §5):
 
 - **Immutable** — the input document is never mutated; untouched subtrees are
   shared by reference (copy-on-write). Pass `ApplyOptions{CloneResult: true}` if
@@ -235,15 +235,15 @@ if err != nil {
 ## Capability options
 
 `NewPatcher` accepts functional options mirroring the TypeScript capabilities
-(SPEC §10.4), and `Compare`/`CompareJSON` forward their trailing `opts` straight
+(CONF §5), and `Compare`/`CompareJSON` forward their trailing `opts` straight
 through to it. The defaults reproduce pre-capability output byte-for-byte:
 
 | Option                              | Default | Effect |
 | ----------------------------------- | ------- | ------ |
-| `IncludeOldValue(bool)`             | `true`  | Attach the full prior value as `oldValue` on every `remove`/`replace` (§6.4). Pass `false` to omit it. |
-| `EmitMoves(bool)`                   | `false` | Express relocations of otherwise-identical items as `move` ops so the applied document matches `modified`'s order exactly, not just its content (§5.8). |
-| `WholesaleReplaceFallback(bool)`    | `false` | For a heavily-rewritten array, replace it wholesale when that is smaller than the element-wise edit script (§5.9), capping patch size. |
-| `IgnorePaths(paths...)`             | none    | Object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy; use `*` for an array level (§5.10). An invalid pointer makes `NewPatcher` return an error. |
+| `IncludeOldValue(bool)`             | `true`  | Attach the full prior value as `oldValue` on every `remove`/`replace` (CORE §4.4). Pass `false` to omit it. |
+| `EmitMoves(bool)`                   | `false` | Express relocations of otherwise-identical items as `move` ops so the applied document matches `modified`'s order exactly, not just its content (GEN §8). |
+| `WholesaleReplaceFallback(bool)`    | `false` | For a heavily-rewritten array, replace it wholesale when that is smaller than the element-wise edit script (GEN §9), capping patch size. |
+| `IgnorePaths(paths...)`             | none    | Object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy; use `*` for an array level (GEN §10). An invalid pointer makes `NewPatcher` return an error. |
 
 ```go
 patcher, err := schemapatch.NewPatcher(plan,
@@ -261,9 +261,9 @@ patch := patcher.Execute(original, modified)
 
 | Field                   | Effect |
 | ----------------------- | ------ |
-| `PrimaryKeyMap`         | `map[docPath]keyField` — force the `primaryKey` strategy on specific array paths, overriding auto-detection (§4.4.3). |
-| `PrimaryKeyCandidates`  | Override the ordered auto-detection candidate list (default `["id","name","port"]`, §4.5.3). An **empty, non-nil** slice disables auto-detection entirely — every object array falls back to `lcs`. A `nil` slice keeps the default. |
-| `BasePath`              | Restrict and relativize the plan to the subtree at or under this pointer, for diffing a sub-document (§4.3.1). |
+| `PrimaryKeyMap`         | `map[docPath]keyField` — force the `primaryKey` strategy on specific array paths, overriding auto-detection (CORE §3.4.3). |
+| `PrimaryKeyCandidates`  | Override the ordered auto-detection candidate list (default `["id","name","port"]`, CORE §3.5.3). An **empty, non-nil** slice disables auto-detection entirely — every object array falls back to `lcs`. A `nil` slice keeps the default. |
+| `BasePath`              | Restrict and relativize the plan to the subtree at or under this pointer, for diffing a sub-document (CORE §3.3.1). |
 
 ## Value model
 
@@ -274,14 +274,14 @@ Documents are represented as an ordered JSON value model rooted at `Value`
   (`NewObject`, `(*Object).Get`, `(*Object).Set`);
 - **arrays** → `[]Value`;
 - **numbers** → `Number`, preserving the original literal text while comparing
-  at `float64` (SPEC §2.2);
+  at `float64` (CORE §1.2);
 - **strings / bools / null** → `string` / `bool` / `nil`.
 
 Helpers: `Decode([]byte) (Value, error)` and `Encode(Value) ([]byte, error)`
 round-trip preserving member order and number text; `EncodeOperations` /
 `DecodeOperations` do the same for `[]Operation`. For interop with ordinary Go
 values there are `FromAny(any) (Value, error)` and `ToAny(Value) any`.
-`DeepEqual(a, b Value) bool` compares under JSON semantics (§2.4); `Clone` makes
+`DeepEqual(a, b Value) bool` compares under JSON semantics (CORE §1.4); `Clone` makes
 a deep copy.
 
 ## Conformance
@@ -291,7 +291,7 @@ verified two ways from the `go/` directory:
 
 - `*_conformance_test.go` replay every vector under
   [`spec/vectors/{diff,apply,plan,invert}`](../spec/vectors) — the shared,
-  language-neutral oracle (SPEC §10).
+  language-neutral oracle (CONF).
 - `differential_test.go` replays a seeded differential-fuzz corpus
   ([`spec/fuzz`](../spec/fuzz)) of ~520 records, asserting each Go patch is
   structurally equal to the TypeScript reference's patch and that applying it
@@ -323,9 +323,9 @@ performance (this table is capabilities only).
 | Typed-value entry | Yes — `Compare(schema, source, target any, ...)`.<!-- proof: go/compare_any_test.go --> | Yes — `Compare(source, target interface{}, ...)` (compare.go:11). |
 | Apply | Yes — `ApplyPatch`, all six RFC 6902 ops, immutable and atomic.<!-- proof: go/apply.go; go/apply_conformance_test.go; spec/vectors/apply/ (93 vectors) --> | No — an `apply` method exists but is deliberately unexported: "will **NEVER** be exported... is feature-wise out of scope of the project" (apply.go:19-22, citing wI2L/jsondiff#28). |
 | Invert (incl. WITHOUT `oldValue`) | Yes — `InvertPatch(doc, patch)` recovers prior values from the original document even when the patch carries no `oldValue`.<!-- proof: go/invert.go; go/invert_conformance_test.go; spec/vectors/invert/ (28 vectors) --> | Partial — `Patch.Invert()` requires the patch to have been generated with `Invertible()` (a preceding `test` op); otherwise returns `ErrNonReversible` (patch.go:34-58). |
-| Move factorization | Yes, scoped to one array — `EmitMoves(true)` expresses a relocated element as one `move` within its own array.<!-- proof: spec/vectors/diff/capabilities-emit-moves.json; SPEC.md §5.8 --> | Yes, document-wide — `Factorize()` turns any matching remove+add pair anywhere in the tree into `move`/`copy`. |
-| Size rationalization (wholesale) | Yes — `WholesaleReplaceFallback(true)` caps an array's patch at roughly its own serialized size.<!-- proof: spec/vectors/diff/capabilities-wholesale.json; SPEC.md §5.5.6 --> | Yes — `Rationalize()` replaces a set of child ops with one parent `replace` when it marshals smaller. |
-| Ignores | Yes — `IgnorePaths(...)` (JSON Pointer + `*` wildcard).<!-- proof: spec/vectors/diff/capabilities-ignore-paths.json; SPEC.md §5.10 --> | Yes — `Ignores()` (variadic JSON Pointer list), marked experimental. |
+| Move factorization | Yes, scoped to one array — `EmitMoves(true)` expresses a relocated element as one `move` within its own array.<!-- proof: spec/vectors/diff/capabilities-emit-moves.json; GEN §8 --> | Yes, document-wide — `Factorize()` turns any matching remove+add pair anywhere in the tree into `move`/`copy`. |
+| Size rationalization (wholesale) | Yes — `WholesaleReplaceFallback(true)` caps an array's patch at roughly its own serialized size.<!-- proof: spec/vectors/diff/capabilities-wholesale.json; GEN §9 --> | Yes — `Rationalize()` replaces a set of child ops with one parent `replace` when it marshals smaller. |
+| Ignores | Yes — `IgnorePaths(...)` (JSON Pointer + `*` wildcard).<!-- proof: spec/vectors/diff/capabilities-ignore-paths.json; GEN §10 --> | Yes — `Ignores()` (variadic JSON Pointer list), marked experimental. |
 | Deterministic cross-language output | Yes — checked against the TypeScript engine via 300+ shared conformance vectors plus a 576-record differential-fuzz corpus, zero mismatches.<!-- proof: go/differential_test.go ("differential fuzz records executed: 576 across 9 files") --> | N/A — single-language implementation. |
 | Conformance test suite | Yes — 300+ spec-linked vectors under `spec/vectors/`, documented and run by both engines.<!-- proof: go/*_conformance_test.go; ../spec/vectors/README.md --> | Partial — internal `testdata/tests/jsonpatch/*.json` fixtures for its own tests only; not published as a spec-linked suite for external implementers. |
 

@@ -1,7 +1,7 @@
 [
   {
     "name": "ptr-replace-no-leading-slash-invalid",
-    "comment": "§3.7 (D2): replace with path \"foo\" (no leading /) is a malformed whole-pointer -> INVALID_POINTER, NOT an alias to the root document",
+    "comment": "CORE §2.7 (D2): replace with path \"foo\" (no leading /) is a malformed whole-pointer -> INVALID_POINTER, NOT an alias to the root document",
     "doc": {
       "foo": 1
     },
@@ -19,7 +19,7 @@
   },
   {
     "name": "ptr-add-no-leading-slash-invalid",
-    "comment": "§3.7 (D2): add with path \"foo\" (no leading /) -> INVALID_POINTER",
+    "comment": "CORE §2.7 (D2): add with path \"foo\" (no leading /) -> INVALID_POINTER",
     "doc": {
       "foo": 1
     },
@@ -37,7 +37,7 @@
   },
   {
     "name": "ptr-move-from-no-leading-slash-invalid",
-    "comment": "§3.7 (D2): move whose `from` is \"foo\" (no leading /) -> INVALID_POINTER on the read-side source too (whole-pointer syntax error precedes read/write resolution)",
+    "comment": "CORE §2.7 (D2): move whose `from` is \"foo\" (no leading /) -> INVALID_POINTER on the read-side source too (whole-pointer syntax error precedes read/write resolution)",
     "doc": {
       "foo": 1
     },

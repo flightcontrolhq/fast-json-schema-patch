@@ -23,7 +23,7 @@ func Clone(v Value) Value {
 // shallowClone returns a copy of the object whose member slots can be
 // reassigned without affecting o, but whose member VALUES are shared by
 // reference with o. It is the copy-on-write primitive apply uses to clone one
-// container on a touched path (SPEC §8.7.1); descent then clones the next level
+// container on a touched path (CORE §5.7.1); descent then clones the next level
 // as needed.
 func (o *Object) shallowClone() *Object {
 	c := &Object{

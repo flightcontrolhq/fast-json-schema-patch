@@ -1,7 +1,7 @@
 [
   {
     "name": "inv-move-member",
-    "comment": "§9.2: move inverts to the reverse move (from<->path)",
+    "comment": "CORE §6.2: move inverts to the reverse move (from<->path)",
     "document": {
       "a": 1,
       "keep": 0
@@ -23,7 +23,7 @@
   },
   {
     "name": "inv-move-array-element",
-    "comment": "§9.2: array move inverts to the reverse move",
+    "comment": "CORE §6.2: array move inverts to the reverse move",
     "document": [
       1,
       2,
@@ -46,7 +46,7 @@
   },
   {
     "name": "inv-move-overwrite-member",
-    "comment": "§9.2: move overwriting an existing member inverts to reverse move + restore the overwritten value",
+    "comment": "CORE §6.2: move overwriting an existing member inverts to reverse move + restore the overwritten value",
     "document": {
       "a": 1,
       "b": 2
@@ -73,7 +73,7 @@
   },
   {
     "name": "inv-copy-member",
-    "comment": "§9.2: copy of a value to a new member inverts to remove",
+    "comment": "CORE §6.2: copy of a value to a new member inverts to remove",
     "document": {
       "a": 1
     },
@@ -93,7 +93,7 @@
   },
   {
     "name": "inv-copy-overwrite-member",
-    "comment": "§9.2: copy overwriting an existing member inverts to replace restoring it",
+    "comment": "CORE §6.2: copy overwriting an existing member inverts to replace restoring it",
     "document": {
       "a": 1,
       "b": 2
@@ -115,7 +115,7 @@
   },
   {
     "name": "inv-copy-array-append",
-    "comment": "§9.1.1/§9.2: copy to /- inverts to remove at the resolved index",
+    "comment": "CORE §6.1.1/CORE §6.2: copy to /- inverts to remove at the resolved index",
     "document": [
       1,
       2

@@ -18,7 +18,7 @@ func TestEscapeUnescapeToken(t *testing.T) {
 		{"/", "~1"},
 		{"~/", "~0~1"},
 		{"/~", "~1~0"},
-		// SPEC §3.2/§3.3 ordering: "~1" as a literal key must survive a
+		// CORE §2.2/CORE §2.3 ordering: "~1" as a literal key must survive a
 		// round-trip. Encode: ~ -> ~0 first, giving "~01"; then / pass is a
 		// no-op -> "~01". Decode: ~1 -> "/" first would corrupt a naive impl,
 		// but "~01" has no "~1" substring adjacent, decoding ~0 -> ~ gives "~1".
@@ -37,7 +37,7 @@ func TestEscapeUnescapeToken(t *testing.T) {
 }
 
 func TestUnescapeOrder(t *testing.T) {
-	// "~1" must be replaced before "~0" (SPEC §3.3). "~01" -> "~1": the ~1 pass
+	// "~1" must be replaced before "~0" (CORE §2.3). "~01" -> "~1": the ~1 pass
 	// finds no "~1" (the string is ~,0,1), then ~0 -> ~ yields "~1".
 	if got := UnescapeToken("~01"); got != "~1" {
 		t.Fatalf("UnescapeToken(~01) = %q, want ~1", got)

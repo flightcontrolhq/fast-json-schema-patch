@@ -55,7 +55,7 @@ export interface Operation {
  * `applyPatch`/`invertPatch` (which must also accept hand-written `copy`/
  * `test` ops and `move` ops as valid patch input). The diff generator never
  * emits `copy` or `test`; `move` is only ever emitted when the P3 `emitMoves`
- * capability (SPEC §5.8, §10.4.4) is enabled on the `JsonSchemaPatcher`, but
+ * capability (GEN §8, CONF §5.4) is enabled on the `JsonSchemaPatcher`, but
  * the type itself is unconditional — callers that never opt into `emitMoves`
  * simply never observe the `move` variant at runtime.
  *

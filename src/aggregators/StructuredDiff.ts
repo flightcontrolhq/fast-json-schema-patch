@@ -177,7 +177,7 @@ export class StructuredDiff {
     // path-map, formatter, schema-aware equality) do not return stale results
     // for inputs mutated in place since a previous diff. Required here for the
     // precomputed-`config.patches` path, where the JsonSchemaPatcher.execute
-    // that would otherwise bump the epoch is not invoked (SPEC §2.4.4).
+    // that would otherwise bump the epoch is not invoked (CORE §1.4.4).
     bumpEpoch();
     const { pathPrefix } = config;
 

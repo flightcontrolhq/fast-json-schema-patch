@@ -12,8 +12,8 @@
  *
  * The Go port's differential test (go/differential_test.go) replays every
  * record: it builds the same plan, diffs the same documents, asserts its patch
- * is STRUCTURALLY EQUAL to `tsPatch` (§10.3.2), then applies ITS OWN patch and
- * asserts the result deep-equals `tsApplied` (§8.7.4). Zero mismatches are
+ * is STRUCTURALLY EQUAL to `tsPatch` (CONF §4.2), then applies ITS OWN patch and
+ * asserts the result deep-equals `tsApplied` (CORE §5.7.4). Zero mismatches are
  * required; any divergence is a bug in one engine or a spec hole.
  *
  * DETERMINISM
@@ -27,7 +27,7 @@
  * The config matrix crosses two document families (flightcontrol cloud-config
  * and e-commerce) against plan-option variants that force each array-diff
  * strategy (primaryKey / unique / lcs) and against every capability toggle
- * (includeOldValue, emitMoves, wholesaleReplaceFallback — SPEC §10.4). See the
+ * (includeOldValue, emitMoves, wholesaleReplaceFallback — CONF §5). See the
  * `configs` and `capabilityVariants` tables below.
  *
  * SCHEMA STORAGE
@@ -105,13 +105,13 @@ interface Config {
   docsPer: number;
 }
 
-// Plan-option variants chosen to exercise every strategy (SPEC §4.4/§4.5):
+// Plan-option variants chosen to exercise every strategy (CORE §3.4/CORE §3.5):
 //   *-auto  → primaryKey on id-keyed arrays, unique on primitive arrays, lcs on
 //             keyless object arrays (shipping.rates); the natural mix.
 //   *-lcs   → primaryKeyCandidates:[] disables auto-detection, so every object
-//             array falls back to lcs (§4.5.3) while primitive arrays stay unique.
+//             array falls back to lcs (CORE §3.5.3) while primitive arrays stay unique.
 //   *-empty → schema {} yields the empty plan: every array (incl. primitive) is
-//             lcs (§5.4.5.3), the pure schemaless path.
+//             lcs (GEN §4.5.3), the pure schemaless path.
 //   *-pkmap → primaryKeyMap forces a non-default key, overriding auto-detection.
 // Low-complexity documents dominate (small, so the corpus stays committable);
 // a dedicated *-stress config contributes a handful of large Medium documents
@@ -191,7 +191,7 @@ const configs: Config[] = [
   },
 ];
 
-// Capability variants (SPEC §10.4). Defaults reproduce pre-capability output.
+// Capability variants (CONF §5). Defaults reproduce pre-capability output.
 const capabilityVariants: {
   includeOldValue: boolean;
   emitMoves: boolean;
@@ -308,14 +308,14 @@ for (const config of configs) {
 }
 
 // ---------------------------------------------------------------------------
-// ignorePaths differential corpus (SPEC §5.10). A dedicated, self-contained
+// ignorePaths differential corpus (GEN §10). A dedicated, self-contained
 // family: a fixed schema (keyed users + unique tags + a meta object) and
 // deterministically-generated doc pairs whose modifications DELIBERATELY include
 // ignored-field drift, reorders (for move-pairing under emitMoves), and real
 // changes. Crossed with ignore-path sets (none of which covers the `id` key,
-// §5.10.7) and capability toggles. The Go differential test replays each record
+// GEN §10.7) and capability toggles. The Go differential test replays each record
 // with the same ignorePaths and asserts structural op equality + apply equality
-// (§10.3.2/§8.7.4). A SEPARATE seeded PRNG is used so the faker/jsf-driven
+// (CONF §4.2/CORE §5.7.4). A SEPARATE seeded PRNG is used so the faker/jsf-driven
 // corpus above stays byte-identical.
 // ---------------------------------------------------------------------------
 interface IgnoreVariant {

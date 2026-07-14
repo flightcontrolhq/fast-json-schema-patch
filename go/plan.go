@@ -8,24 +8,24 @@ import (
 )
 
 // Strategy names the array-diff algorithm a [Plan] selects for an array path
-// (SPEC §4.1). Its string values are the normative tokens compared by the
-// plan-snapshot conformance vectors (SPEC §10.6).
+// (CORE §3.1). Its string values are the normative tokens compared by the
+// plan-snapshot conformance vectors (CONF §7).
 type Strategy string
 
 const (
 	// StrategyPrimaryKey diffs a keyed array of objects by a primary-key field
-	// (SPEC §5.4).
+	// (GEN §4).
 	StrategyPrimaryKey Strategy = "primaryKey"
-	// StrategyUnique diffs an array of unique primitives by position (SPEC §5.6).
+	// StrategyUnique diffs an array of unique primitives by position (GEN §6).
 	StrategyUnique Strategy = "unique"
-	// StrategyLCS diffs by shortest edit script (SPEC §5.5). It is the default
+	// StrategyLCS diffs by shortest edit script (GEN §5). It is the default
 	// and the universal fallback.
 	StrategyLCS Strategy = "lcs"
 )
 
 // ArrayPlan is the derived diff strategy for one array document path (SPEC
-// §4.1). PrimaryKey, Strategy, and RequiredFields are output-relevant; HashFields
-// is a non-normative prefilter hint (SPEC §4.1.1, §5.4.4).
+// CORE §3.1). PrimaryKey, Strategy, and RequiredFields are output-relevant; HashFields
+// is a non-normative prefilter hint (CORE §3.1.1, GEN §4.4).
 type ArrayPlan struct {
 	// PrimaryKey is the key field for StrategyPrimaryKey, or "" (meaning null)
 	// for unique/lcs arrays.
@@ -34,11 +34,11 @@ type ArrayPlan struct {
 	Strategy Strategy
 	// RequiredFields is the item schema's required[] set, in schema order
 	// (deduplicated); nil when auto-detection did not run or found no key. It is
-	// compared order-insensitively by the §10.6 vectors.
+	// compared order-insensitively by the CONF §7 vectors.
 	RequiredFields []string
 	// HashFields is the subset of RequiredFields whose declared type is string
-	// or number, in RequiredFields order (SPEC §4.5.4). A prefilter hint only
-	// (§5.4.6); MUST be output-neutral. nil when empty.
+	// or number, in RequiredFields order (CORE §3.5.4). A prefilter hint only
+	// (GEN §4.6); MUST be output-neutral. nil when empty.
 	HashFields []string
 }
 
@@ -63,18 +63,18 @@ func (ap *ArrayPlan) clone() *ArrayPlan {
 }
 
 // Plan maps document paths to array strategies, derived once from a JSON Schema
-// by [BuildPlan] and reused across diffs (SPEC §4). It holds both the flat
+// by [BuildPlan] and reused across diffs (CORE §3). It holds both the flat
 // path→[ArrayPlan] map (queryable with [Plan.Lookup]) and the compiled trie
-// (SPEC §5.4.5) the differ threads for structural strategy selection.
+// (GEN §4.5) the differ threads for structural strategy selection.
 type Plan struct {
 	paths map[string]*ArrayPlan
 	root  *PlanNode
 }
 
-// PlanNode is one node of the compiled plan trie (SPEC §5.4.5.1). The differ
+// PlanNode is one node of the compiled plan trie (GEN §4.5.1). The differ
 // threads a node down its recursion instead of normalizing concrete path
 // strings. All accessors are nil-receiver-safe so a caller can thread a nil node
-// (the "empty plan threads no node" case, §5.4.5.2) without branching.
+// (the "empty plan threads no node" case, GEN §4.5.2) without branching.
 type PlanNode struct {
 	plan     *ArrayPlan
 	children map[string]*PlanNode
@@ -82,7 +82,7 @@ type PlanNode struct {
 }
 
 // ArrayPlan returns a defensive copy of the strategy registered at this node, or
-// nil when the node carries no plan (SPEC §5.4.5.3: absent plan ⇒ lcs). The copy
+// nil when the node carries no plan (GEN §4.5.3: absent plan ⇒ lcs). The copy
 // (see [ArrayPlan.clone]) means an introspecting caller cannot mutate the
 // compiled plan the patcher relies on; the differ reads the internal plan
 // through the unexported [PlanNode.arrayPlan] to avoid the copy.
@@ -100,7 +100,7 @@ func (n *PlanNode) arrayPlan() *ArrayPlan {
 	return n.plan
 }
 
-// Member advances the trie for an object member key (SPEC §5.4.5.2): the exact
+// Member advances the trie for an object member key (GEN §4.5.2): the exact
 // child edge for key if present, else the wildcard edge, else nil. Exact edges
 // take precedence over the wildcard at every level.
 func (n *PlanNode) Member(key string) *PlanNode {
@@ -114,7 +114,7 @@ func (n *PlanNode) Member(key string) *PlanNode {
 }
 
 // Wildcard advances the trie for a nested-array element (array-of-arrays, SPEC
-// §5.4.5.2 / §4.3.5): the node's wildcard edge, or nil.
+// GEN §4.5.2 / CORE §3.3.5): the node's wildcard edge, or nil.
 func (n *PlanNode) Wildcard() *PlanNode {
 	if n == nil {
 		return nil
@@ -145,37 +145,37 @@ func (p Plan) Paths() []string {
 // Len returns the number of array paths in the plan.
 func (p Plan) Len() int { return len(p.paths) }
 
-// Root returns the trie root for structural strategy selection (SPEC §5.4.5.2).
+// Root returns the trie root for structural strategy selection (GEN §4.5.2).
 // It is nil for an empty plan ("an empty plan threads no node").
 func (p Plan) Root() *PlanNode { return p.root }
 
-// BuildPlanOptions configures [BuildPlan] (SPEC §4.2, §4.5.5, §4.3.4).
+// BuildPlanOptions configures [BuildPlan] (CORE §3.2, CORE §3.5.5, CORE §3.3.4).
 type BuildPlanOptions struct {
 	// PrimaryKeyMap overrides the strategy per document path: a path present
 	// here is diffed by StrategyPrimaryKey on the given key, bypassing
-	// auto-detection and the primitive check (SPEC §4.4.3). The path is the full
+	// auto-detection and the primitive check (CORE §3.4.3). The path is the full
 	// path from the root (before any BasePath relativization).
 	PrimaryKeyMap map[string]string
 	// BasePath restricts and relativizes plan keys to the subtree at or under it
-	// on a segment boundary (SPEC §4.6). Empty means no restriction.
+	// on a segment boundary (CORE §3.6). Empty means no restriction.
 	BasePath string
 	// PrimaryKeyCandidates replaces the ordered auto-detection candidate list
-	// (SPEC §4.5.3, §4.5.5). nil selects the default ["id","name","port"]; a
+	// (CORE §3.5.3, CORE §3.5.5). nil selects the default ["id","name","port"]; a
 	// non-nil empty slice disables auto-detection entirely.
 	PrimaryKeyCandidates []string
 	// OnWarning, when non-nil, receives a message for each unsupported (non-local
-	// or unresolvable) $ref encountered during traversal (SPEC §4.3.4). The
+	// or unresolvable) $ref encountered during traversal (CORE §3.3.4). The
 	// default is silent.
 	OnWarning func(message string)
 }
 
-// defaultPrimaryKeyCandidates is the SPEC §4.5.3 default candidate list.
+// defaultPrimaryKeyCandidates is the CORE §3.5.3 default candidate list.
 var defaultPrimaryKeyCandidates = []string{"id", "name", "port"}
 
-// BuildPlan derives a [Plan] from a JSON Schema (SPEC §4). schema is a decoded
+// BuildPlan derives a [Plan] from a JSON Schema (CORE §3). schema is a decoded
 // [Value] (typically a *[Object]); traversal keys off the shape keywords
 // (properties/additionalProperties/items) regardless of an explicit type (SPEC
-// §4.3.1). The error return is reserved for future input validation; the current
+// CORE §3.3.1). The error return is reserved for future input validation; the current
 // implementation never fails, mirroring the reference buildPlan.
 func BuildPlan(schema Value, opts BuildPlanOptions) (Plan, error) {
 	candidates := opts.PrimaryKeyCandidates
@@ -210,9 +210,9 @@ func (b *planBuilder) warn(msg string) {
 }
 
 // traverse walks a schema node, accumulating an escaped document path and
-// registering array plans (SPEC §4.3). visited guards against $ref cycles by
+// registering array plans (CORE §3.3). visited guards against $ref cycles by
 // schema-node identity: a node on the current stack is not re-entered and is
-// removed when its subtree completes (SPEC §4.3).
+// removed when its subtree completes (CORE §3.3).
 func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bool) {
 	obj, ok := sub.(*Object)
 	if !ok {
@@ -225,7 +225,7 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 	defer delete(visited, obj)
 
 	// $ref: resolve local references only; a non-local/unresolvable ref skips
-	// this node and its subtree (SPEC §4.3.4). Resolving does not change docPath.
+	// this node and its subtree (CORE §3.3.4). Resolving does not change docPath.
 	if ref, ok := stringProp(obj, "$ref"); ok && ref != "" {
 		if resolved := b.resolveRef(ref); resolved != nil {
 			b.traverse(resolved, docPath, visited)
@@ -234,7 +234,7 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 	}
 
 	// anyOf/oneOf/allOf: traverse every branch at the current path, deduplicated
-	// by structural fingerprint within each keyword's own branch list (SPEC §4.3.6).
+	// by structural fingerprint within each keyword's own branch list (CORE §3.3.6).
 	for _, kw := range [...]string{"anyOf", "oneOf", "allOf"} {
 		branches, ok := arrayProp(obj, kw)
 		if !ok {
@@ -252,7 +252,7 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 	}
 
 	// Object node: recurse into properties (schema key order) and, if
-	// additionalProperties is a schema, into the "*" wildcard segment (SPEC §4.3.2).
+	// additionalProperties is a schema, into the "*" wildcard segment (CORE §3.3.2).
 	if props, ok := obj.Get("properties"); ok {
 		if p, ok := props.(*Object); ok {
 			for i := 0; i < p.Len(); i++ {
@@ -268,16 +268,16 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 	}
 
 	// Array node: build and register an ArrayPlan, then recurse into items
-	// (SPEC §4.3.3, §4.3.5).
+	// (CORE §3.3.3, CORE §3.3.5).
 	if items, ok := obj.Get("items"); ok && truthy(items) {
 		b.registerArray(obj, items, docPath, visited)
 	}
 }
 
 // registerArray constructs the ArrayPlan for an array node, registers it subject
-// to basePath, and recurses into the item schema (SPEC §4.4, §4.6, §4.3.5).
+// to basePath, and recurses into the item schema (CORE §3.4, CORE §3.6, CORE §3.3.5).
 func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visited map[*Object]bool) {
-	// Resolve a leading $ref on items once (SPEC §4.4); keep the original on
+	// Resolve a leading $ref on items once (CORE §3.4); keep the original on
 	// failure.
 	itemsSchema := items
 	if io, ok := items.(*Object); ok {
@@ -290,7 +290,7 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 
 	plan := &ArrayPlan{Strategy: StrategyLCS}
 
-	// Primitive items → unique (SPEC §4.4.2).
+	// Primitive items → unique (CORE §3.4.2).
 	isPrimitive := false
 	if it, ok := itemsSchema.(*Object); ok {
 		if t, ok := stringProp(it, "type"); ok {
@@ -301,7 +301,7 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 		plan.Strategy = StrategyUnique
 	}
 
-	// primaryKeyMap override (SPEC §4.4.3), else auto-detect for object items (§4.5).
+	// primaryKeyMap override (CORE §3.4.3), else auto-detect for object items (CORE §3.5).
 	customKey := ""
 	if b.primaryKeyMap != nil {
 		customKey = b.primaryKeyMap[docPath]
@@ -321,7 +321,7 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 	b.register(docPath, plan)
 
 	// Recurse into items. An array-of-arrays inner array registers at a distinct
-	// "*" wildcard path so it never overwrites the outer plan (SPEC §4.3.5).
+	// "*" wildcard path so it never overwrites the outer plan (CORE §3.3.5).
 	nextPath := docPath
 	if it, ok := itemsSchema.(*Object); ok {
 		inner, hasItems := it.Get("items")
@@ -333,7 +333,7 @@ func (b *planBuilder) registerArray(_ *Object, items Value, docPath string, visi
 }
 
 // register inserts plan at the basePath-relativized key, reconciling with any
-// existing plan by strategy rank (SPEC §4.6.2, §4.7).
+// existing plan by strategy rank (CORE §3.6.2, CORE §3.7).
 func (b *planBuilder) register(docPath string, plan *ArrayPlan) {
 	inBase := b.basePath == "" || docPath == b.basePath || strings.HasPrefix(docPath, b.basePath+"/")
 	if !inBase {
@@ -356,7 +356,7 @@ func (b *planBuilder) register(docPath string, plan *ArrayPlan) {
 	}
 }
 
-// keyMetadata is the result of a successful primary-key detection (SPEC §4.5.4).
+// keyMetadata is the result of a successful primary-key detection (CORE §3.5.4).
 type keyMetadata struct {
 	primaryKey     string
 	requiredFields []string
@@ -364,7 +364,7 @@ type keyMetadata struct {
 }
 
 // detectKey runs primary-key auto-detection over an object item schema (SPEC
-// §4.5). anyOf/oneOf branches are examined in order; the first branch that
+// CORE §3.5). anyOf/oneOf branches are examined in order; the first branch that
 // yields a key wins.
 func (b *planBuilder) detectKey(itemsSchema Value) *keyMetadata {
 	it, ok := itemsSchema.(*Object)
@@ -388,9 +388,9 @@ func (b *planBuilder) detectKey(itemsSchema Value) *keyMetadata {
 	return b.findMetadata(itemsSchema)
 }
 
-// findMetadata reduces a candidate schema by the allOf merge (SPEC §4.5.1.1) and
+// findMetadata reduces a candidate schema by the allOf merge (CORE §3.5.1.1) and
 // checks the candidate key list against its required string/number properties
-// (SPEC §4.5.2, §4.5.3). It returns nil when no key qualifies.
+// (CORE §3.5.2, CORE §3.5.3). It returns nil when no key qualifies.
 func (b *planBuilder) findMetadata(s Value) *keyMetadata {
 	if _, ok := s.(*Object); !ok {
 		return nil
@@ -438,7 +438,7 @@ func (b *planBuilder) findMetadata(s Value) *keyMetadata {
 }
 
 // mergeAllOf reduces a schema to a single synthetic object view, unioning allOf
-// branch properties/required (SPEC §4.5.1.1). A schema without allOf is returned
+// branch properties/required (CORE §3.5.1.1). A schema without allOf is returned
 // unchanged; a leading $ref is resolved (kept unchanged on failure).
 func (b *planBuilder) mergeAllOf(s Value) Value {
 	cur := s
@@ -509,7 +509,7 @@ func (b *planBuilder) mergeAllOf(s Value) Value {
 
 // resolveRef resolves a local "#/..." JSON Pointer into the root schema by
 // walking raw (non-unescaped) "/"-split segments, matching the reference (SPEC
-// §4.3.4). A non-local or unresolvable ref returns nil (and warns for non-local).
+// CORE §3.3.4). A non-local or unresolvable ref returns nil (and warns for non-local).
 func (b *planBuilder) resolveRef(ref string) Value {
 	if !strings.HasPrefix(ref, "#/") {
 		b.warn("Unsupported reference: " + ref)
@@ -538,7 +538,7 @@ func (b *planBuilder) resolveRef(ref string) Value {
 	return cur
 }
 
-// buildTrie compiles the flat plan map into the matching trie (SPEC §5.4.5.1).
+// buildTrie compiles the flat plan map into the matching trie (GEN §4.5.1).
 // Returns nil for an empty plan.
 func (b *planBuilder) buildTrie() *PlanNode {
 	if len(b.plan) == 0 {
@@ -571,7 +571,7 @@ func (b *planBuilder) buildTrie() *PlanNode {
 	return root
 }
 
-// planKeySegments splits a plan key on "/" (SPEC §5.4.5.1). The empty key ""
+// planKeySegments splits a plan key on "/" (GEN §4.5.1). The empty key ""
 // yields no segments (terminating at the root node).
 func planKeySegments(path string) []string {
 	if path == "" {
@@ -583,7 +583,7 @@ func planKeySegments(path string) []string {
 }
 
 // isBetterPlan reports whether candidate should displace current by strategy
-// rank, primaryKey presence, then hashField count (SPEC §4.7.1–§4.7.3).
+// rank, primaryKey presence, then hashField count (CORE §3.7.1–CORE §3.7.3).
 func isBetterPlan(candidate, current *ArrayPlan) bool {
 	ra, rb := strategyRank(candidate.Strategy), strategyRank(current.Strategy)
 	if ra != rb {
@@ -610,7 +610,7 @@ func strategyRank(s Strategy) int {
 }
 
 // mergePlanMetadata folds supplemental metadata from src into dst in place (SPEC
-// §4.7.4): hashFields become the set-union (dst order first), and requiredFields
+// CORE §3.7.4): hashFields become the set-union (dst order first), and requiredFields
 // are taken from src when dst lacks them.
 func mergePlanMetadata(dst, src *ArrayPlan) {
 	if dst.HashFields == nil && src.HashFields != nil {
@@ -712,7 +712,7 @@ func truthy(v Value) bool {
 }
 
 // stableStringify produces a canonical JSON string with recursively sorted
-// object keys, used to deduplicate anyOf/oneOf/allOf branches (SPEC §4.3.6).
+// object keys, used to deduplicate anyOf/oneOf/allOf branches (CORE §3.3.6).
 // Numbers are canonicalized to their shortest f64 text. Re-encountered objects
 // (only possible with hand-built cyclic Values, never with [Decode] output) are
 // rendered as null.

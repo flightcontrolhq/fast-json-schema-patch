@@ -23,7 +23,7 @@ export interface ArrayPlan {
    * getEffectiveHashFields, the only consumers of an ArrayPlan at diff time,
    * use only primaryKey/hashFields/requiredFields). Because it references
    * into the parsed schema object graph, retaining it pinned ~2x plan memory
-   * (SPEC §4.1.1 already documents itemSchema as non-normative and MAY be
+   * (CORE §3.1.1 already documents itemSchema as non-normative and MAY be
    * omitted). `buildPlan` no longer sets this field. Kept in the exported
    * type only so 0.x consumers who read it directly do not get a type error;
    * it will always be `undefined` from `buildPlan` going forward.
@@ -44,13 +44,13 @@ export interface BuildPlanOptions {
   primaryKeyMap?: Record<string, string>
   basePath?: string
   /**
-   * F25 (SPEC §4.5.3, §4.5.5): override the ordered candidate list consulted by
+   * F25 (CORE §3.5.3, CORE §3.5.5): override the ordered candidate list consulted by
    * primary-key auto-detection. The first candidate that is a `required`
    * `string`/`number` property of the (allOf-merged) item schema is selected.
    * Defaults to `["id", "name", "port"]` when omitted. An **empty array**
    * disables auto-detection entirely (every object array falls back to `lcs`);
    * a `primaryKeyMap` entry still wins because it is applied before
-   * auto-detection and bypasses the candidate list (§4.4.3).
+   * auto-detection and bypasses the candidate list (CORE §3.4.3).
    */
   primaryKeyCandidates?: string[]
   /**
@@ -65,7 +65,7 @@ export interface BuildPlanOptions {
   onWarning?: (message: string) => void
 }
 
-/** SPEC §4.5.3 default primary-key candidate list (the default of `primaryKeyCandidates`). */
+/** CORE §3.5.3 default primary-key candidate list (the default of `primaryKeyCandidates`). */
 const DEFAULT_PRIMARY_KEY_CANDIDATES = ["id", "name", "port"]
 
 export function _resolveRef(
@@ -132,7 +132,7 @@ export function _traverseSchema(
   }
 
   // Traverse as an object whenever the shape keywords are present, regardless of
-  // whether an explicit `type: "object"` is declared (§4.3.1). JSON Schema does
+  // whether an explicit `type: "object"` is declared (CORE §3.3.1). JSON Schema does
   // not require `type` alongside `properties`/`additionalProperties` (common in
   // draft 2019/2020 schemas and anyOf branches); gating on the type keyword lost
   // every plan beneath such nodes and degraded their arrays to whole-object LCS.
@@ -161,7 +161,7 @@ export function _traverseSchema(
     )
   }
 
-  // Likewise, traverse as an array whenever `items` is present (§4.3.1).
+  // Likewise, traverse as an array whenever `items` is present (CORE §3.3.1).
   if (subSchema.items) {
     const arrayPlan: ArrayPlan = {primaryKey: null, strategy: "lcs"}
 
@@ -194,7 +194,7 @@ export function _traverseSchema(
       arrayPlan.strategy = "primaryKey"
     } else if (!isPrimitive) {
       // Resolve a leading $ref and merge `allOf` branches into a single synthetic
-      // object view (§4.5.1). Items composed with allOf — e.g. a branch that
+      // object view (CORE §3.5.1). Items composed with allOf — e.g. a branch that
       // declares a required "id" — otherwise never surface a primary key, and
       // required fields split across allOf branches are never combined, so the
       // array silently degrades to LCS. Nested allOf and $ref branches are merged
@@ -241,7 +241,7 @@ export function _traverseSchema(
           }
         }
 
-        // F25: the candidate list is configurable (§4.5.5); default when the
+        // F25: the candidate list is configurable (CORE §3.5.5); default when the
         // option is omitted. An explicit empty array iterates zero candidates,
         // disabling auto-detection so the array keeps its base strategy.
         const potentialKeys =
@@ -283,7 +283,7 @@ export function _traverseSchema(
       }
     }
 
-    // basePath must match on a path-segment boundary (§4.6.2). A raw
+    // basePath must match on a path-segment boundary (CORE §3.6.2). A raw
     // startsWith/replace wrongly captures siblings ("/env" matching "/envelope")
     // and can strip mid-segment, producing plan keys that never match at diff
     // time. Match iff docPath === basePath or docPath starts with basePath + "/",
@@ -311,11 +311,11 @@ export function _traverseSchema(
     // property registers at `${docPath}/<prop>`). But when `items` is itself an
     // array schema (array-of-arrays), the inner array MUST register at a
     // DISTINCT path — a wildcard element segment `${docPath}/*` — so its plan
-    // never overwrites the outer array's plan at the same key (§4.3.5).
+    // never overwrites the outer array's plan at the same key (CORE §3.3.5).
     // Otherwise an inner primaryKey plan clobbers the outer LCS plan and the
     // outer array (whose elements are arrays, not keyed objects) silently emits
     // no ops. Detection uses the resolved item schema and keys off the shape
-    // keyword `items` (consistent with §4.3.1), so an explicit type is not
+    // keyword `items` (consistent with CORE §3.3.1), so an explicit type is not
     // required.
     const itemsIsArray = !!(
       itemsSchema &&

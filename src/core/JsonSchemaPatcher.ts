@@ -22,7 +22,7 @@ import type { DiffOperation, JsonArray, JsonObject, JsonValue, Operation } from 
 import { escapeJsonPointer, unescapeJsonPointer } from "../utils/pathUtils";
 
 /**
- * A node in the compiled plan trie (SPEC §5.4.5). The public `Plan` is still a
+ * A node in the compiled plan trie (GEN §4.5). The public `Plan` is still a
  * flat `Map<documentPath, ArrayPlan>`; the constructor compiles it once into
  * this trie so strategy selection at diff time is *structural* — the current
  * node is threaded down the recursion instead of re-deriving and string-keying
@@ -31,8 +31,8 @@ import { escapeJsonPointer, unescapeJsonPointer } from "../utils/pathUtils";
  *
  * Each plan-key segment is either a literal property name (an exact `children`
  * edge, stored UNESCAPED so it matches raw object keys) or the wildcard `*`
- * (the `wildcard` edge — an `additionalProperties` value schema, §4.3.2, or the
- * nested-array element level, §4.3.5). `plan` is set iff a plan key terminates
+ * (the `wildcard` edge — an `additionalProperties` value schema, CORE §3.3.2, or the
+ * nested-array element level, CORE §3.3.5). `plan` is set iff a plan key terminates
  * at this node (the array registered at that path).
  */
 interface PlanTrieNode {
@@ -46,31 +46,31 @@ export class JsonSchemaPatcher {
   private readonly planIsEmpty: boolean;
   private readonly planTrie: PlanTrieNode;
   /**
-   * F11 / capability `includeOldValue` (SPEC §6.4, §10.4). When `true`
+   * F11 / capability `includeOldValue` (CORE §4.4, CONF §5). When `true`
    * (default, back-compat) every `remove`/`replace` op carries the complete
    * pre-change subtree in `oldValue`. When `false`, NO emission site attaches
    * `oldValue`, yielding strict RFC 6902-shaped ops (add/remove/replace with
    * only path/value) and measurably smaller patches on remove/replace-heavy
    * diffs. `invertPatch` still round-trips because it recovers old values from
-   * the original document, not from `oldValue` (SPEC §6.4.2, §9).
+   * the original document, not from `oldValue` (CORE §4.4.2, CORE §6).
    */
   private readonly includeOldValue: boolean;
   /**
-   * emitMoves capability (SPEC §5.8, §10.4.4). When `false` (default) output is
+   * emitMoves capability (GEN §8, CONF §5.4). When `false` (default) output is
    * byte-stable versus the pre-capability tree. When `true`, relocated
    * (deep-equal) array elements are expressed as single RFC 6902 `move` ops
    * instead of remove+add pairs, and both the `unique` and `primaryKey`
-   * strategies reconstruct `modified` ORDER EXACTLY (upgrading the §7.2
+   * strategies reconstruct `modified` ORDER EXACTLY (upgrading the CORE §7.2
    * primaryKey contract from keyed-collection to exact). Applies across LCS
    * relocations (F22), unique reorders (F23), and primaryKey order fidelity
    * (F07).
    */
   private readonly emitMoves: boolean;
   /**
-   * wholesaleReplaceFallback capability (SPEC §5.5.6 / §10.4.5, F24). When
+   * wholesaleReplaceFallback capability (GEN §9 / CONF §5.5, F24). When
    * `false` (default) output is byte-stable versus the pre-capability tree.
    * When `true`, each array diff is first generated into a local buffer as
-   * usual; if the SPEC §5.5.6.1 byte estimate of that buffer exceeds
+   * usual; if the GEN §9.2 byte estimate of that buffer exceeds
    * `JSON.stringify(modified-array).length`, the buffer is discarded and
    * replaced with a single whole-array `{op:"replace"}` (carrying `oldValue`
    * per `includeOldValue`). This caps a heavily-rewritten array's patch size
@@ -79,7 +79,7 @@ export class JsonSchemaPatcher {
    */
   private readonly wholesaleReplaceFallback: boolean;
   /**
-   * ignorePaths capability (SPEC §5.10, §10.4.6). The compiled ignore trie, or
+   * ignorePaths capability (GEN §10, CONF §5.6). The compiled ignore trie, or
    * `undefined` when no ignore paths were given (byte-stable pre-capability
    * output — every `ignoreNode?.` thread short-circuits). Object-member JSON
    * Pointers whose subtrees are treated as EQUAL: no ops at or beneath a matched
@@ -99,7 +99,7 @@ export class JsonSchemaPatcher {
     // "undefined is not an object (evaluating this.plan.size)" TypeError
     // thrown later from the planIsEmpty computation below. Any Map instance
     // is accepted, including an empty one (`new Map()`), which is the
-    // documented schemaless mode (SPEC §10.1: "schema omitted/null -> diff
+    // documented schemaless mode (CONF §2: "schema omitted/null -> diff
     // with an empty plan").
     if (!(options?.plan instanceof Map)) {
       throw new TypeError(
@@ -111,22 +111,22 @@ export class JsonSchemaPatcher {
     this.plan = options.plan;
     this.planIsEmpty = this.plan.size === 0;
     this.planTrie = this.compilePlanTrie(this.plan);
-    // Default on for back-compat (SPEC §6.4.1); opt out with `false`.
+    // Default on for back-compat (CORE §4.4.1); opt out with `false`.
     this.includeOldValue = options.includeOldValue ?? true;
-    // Default OFF (SPEC §10.4.4): byte-stable output unless explicitly enabled.
+    // Default OFF (CONF §5.4): byte-stable output unless explicitly enabled.
     this.emitMoves = options.emitMoves ?? false;
-    // Default OFF (SPEC §10.4.5): byte-stable output unless explicitly enabled.
+    // Default OFF (CONF §5.5): byte-stable output unless explicitly enabled.
     this.wholesaleReplaceFallback = options.wholesaleReplaceFallback ?? false;
-    // ignorePaths (SPEC §5.10, §10.4.6). compileIgnoreTrie validates each pointer
-    // and throws TypeError on the first invalid one (§5.10.1); an empty/absent
+    // ignorePaths (GEN §10, CONF §5.6). compileIgnoreTrie validates each pointer
+    // and throws TypeError on the first invalid one (GEN §10.1); an empty/absent
     // set compiles to `undefined` (no ignore node threaded -> byte-stable). When
-    // a trie is present, a plan primaryKey field must not be ignorable (§5.10.7).
+    // a trie is present, a plan primaryKey field must not be ignorable (GEN §10.7).
     this.ignoreTrie = compileIgnoreTrie(options.ignorePaths);
     if (this.ignoreTrie) validatePrimaryKeysNotIgnored(this.plan, this.ignoreTrie);
   }
 
   /**
-   * SPEC §5.5.6.1 (F24): a deterministic, cheap-to-compute estimate of the
+   * GEN §9.2 (F24): a deterministic, cheap-to-compute estimate of the
    * serialized size of `ops` — NOT an exact `JSON.stringify(ops).length`, but
    * pinned exactly so a reimplementation reproduces the identical cutover
    * decision. For each op: `+30` (fixed per-op overhead standing in for
@@ -147,7 +147,7 @@ export class JsonSchemaPatcher {
   }
 
   /**
-   * Compile the flat `Plan` map into a trie (SPEC §5.4.5). Each key is split on
+   * Compile the flat `Plan` map into a trie (GEN §4.5). Each key is split on
    * `/`; a `*` segment is the wildcard edge, any other segment is unescaped and
    * stored as an exact `children` edge. The empty key `""` (a root-level array
    * document) terminates at the root node itself.
@@ -181,7 +181,7 @@ export class JsonSchemaPatcher {
    * Computes an RFC 6902-style patch (with an added `oldValue` on `remove`/
    * `replace`) that transforms `original` into `modified`.
    *
-   * **JSON-only contract (SPEC §2.1.2):** `original` and `modified` MUST be
+   * **JSON-only contract (CORE §1.1.2):** `original` and `modified` MUST be
    * JSON values — the value space produced by `JSON.parse` (`null`, boolean,
    * number, string, plain object, or array). Behavior on non-JSON inputs is
    * out of scope and not fully defended against:
@@ -209,10 +209,10 @@ export class JsonSchemaPatcher {
     // stringify, path-map, formatter) from any earlier diff are treated as
     // stale. This makes a mutate-then-rediff loop recompute instead of
     // returning a cached verdict for an object that was mutated in place, while
-    // preserving memo hits WITHIN this single call (SPEC §2.4.4).
+    // preserving memo hits WITHIN this single call (CORE §1.4.4).
     bumpEpoch();
     const patches: Operation[] = [];
-    // Thread the compiled plan trie from the root (SPEC §5.4.5). An empty plan
+    // Thread the compiled plan trie from the root (GEN §4.5). An empty plan
     // threads `undefined` so every `node?.` access short-circuits with no work.
     this.diff(
       original,
@@ -221,7 +221,7 @@ export class JsonSchemaPatcher {
       patches,
       this.planIsEmpty ? undefined : this.planTrie,
       // Thread the ignore trie from the root in parallel with the plan trie
-      // (SPEC §5.10.2). `undefined` when no ignore paths were given.
+      // (GEN §10.2). `undefined` when no ignore paths were given.
       this.ignoreTrie
     );
     // F27: every emission site above only ever pushes add/remove/replace (and,
@@ -241,7 +241,7 @@ export class JsonSchemaPatcher {
     node: PlanTrieNode | undefined,
     ignoreNode: IgnoreTrieNode | undefined
   ) {
-    // ignorePaths (SPEC §5.10.4): a terminal ignore node makes this subtree
+    // ignorePaths (GEN §10.4): a terminal ignore node makes this subtree
     // EQUAL in both directions — emit nothing at or beneath it. This guards the
     // whole-subtree cases (a whole array/object/leaf reached via recursion or an
     // ignored array element `/arr/*`); per-member add/remove are guarded in
@@ -282,7 +282,7 @@ export class JsonSchemaPatcher {
       return;
     }
 
-    // SPEC §2.1.2 / F16: a non-JSON object value (Date, RegExp, Map, a class
+    // CORE §1.1.2 / F16: a non-JSON object value (Date, RegExp, Map, a class
     // instance) has no meaningful own-enumerable-key structure to walk as an
     // object member set — diffObject would see zero keys on both sides and
     // silently emit no patch even when the values differ. Treat it as an
@@ -307,7 +307,7 @@ export class JsonSchemaPatcher {
     node: PlanTrieNode | undefined,
     ignoreNode: IgnoreTrieNode | undefined
   ) {
-    // F36: SPEC §5.2.2 visitation order is "all of original's keys in
+    // F36: GEN §2.2 visitation order is "all of original's keys in
     // original insertion order, followed by keys present only in modified in
     // modified insertion order." The previous implementation built that order
     // via `new Set([...keys1, ...keys2])` (Set iteration happens to yield
@@ -321,7 +321,7 @@ export class JsonSchemaPatcher {
     const keys1 = Object.keys(obj1);
     for (let i = 0; i < keys1.length; i++) {
       const key = keys1[i] as string;
-      // ignorePaths (SPEC §5.10.3/§5.10.4): advance the ignore trie for this
+      // ignorePaths (GEN §10.3/GEN §10.4): advance the ignore trie for this
       // member; a terminal child means the member is EQUAL in both directions —
       // emit no add/remove/recursion for it (add/remove are pushed here without
       // routing through diff, so the check must be at this site).
@@ -339,7 +339,7 @@ export class JsonSchemaPatcher {
         patches.push(op);
       } else {
         // Descend the trie by RAW property key: an exact `children` edge takes
-        // precedence over the `*` wildcard edge at each level (§5.4.5). A literal
+        // precedence over the `*` wildcard edge at each level (GEN §4.5). A literal
         // numeric key (e.g. "0") is an ordinary exact edge — never confused with
         // an array index, which is handled structurally in diffArray (F33).
         const childNode = node
@@ -358,13 +358,13 @@ export class JsonSchemaPatcher {
       // (including an explicit `undefined` value, which Object.keys still
       // reports and which the pass-1 branch above resolves to a no-op diff).
       if (Object.hasOwn(obj1, key)) continue;
-      // ignorePaths (SPEC §5.10.4): a modified-only member under a terminal
+      // ignorePaths (GEN §10.4): a modified-only member under a terminal
       // ignore node emits no add.
       if (ignoreMember(ignoreNode, key)?.end) continue;
       const val2 = obj2[key];
       // val1 is implicitly undefined here (key not own-present on obj1). Only
       // an add is possible; val2 === undefined here degenerates to the
-      // original's `diff(undefined, undefined, ...)` no-op (§5.1.1).
+      // original's `diff(undefined, undefined, ...)` no-op (GEN §1.1).
       if (val2 !== undefined) {
         const newPath = `${path}/${escapeJsonPointer(key)}`;
         patches.push({ op: "add", path: newPath, value: val2 });
@@ -380,11 +380,11 @@ export class JsonSchemaPatcher {
     node: PlanTrieNode | undefined,
     ignoreNode: IgnoreTrieNode | undefined
   ) {
-    // ignorePaths (SPEC §5.10.4): an ignore entry ending at the array-element
+    // ignorePaths (GEN §10.4): an ignore entry ending at the array-element
     // level (its item node is terminal, e.g. `/arr/*`) makes EVERY element — and
     // thus the whole array — equal, in any strategy. Short-circuit to no ops.
     if (ignoreNode?.wildcard?.end) return;
-    // wholesaleReplaceFallback (SPEC §5.5.6 / §10.4.5, F24). OFF by default:
+    // wholesaleReplaceFallback (GEN §9 / CONF §5.5, F24). OFF by default:
     // dispatch straight into the caller's `patches` exactly as before — zero
     // extra allocation and byte-identical output. ON: generate into a local
     // buffer first so the estimate (and a possible discard) can be applied
@@ -393,7 +393,7 @@ export class JsonSchemaPatcher {
     // `diffArray` call — reached via granular descent or a plain nested-array
     // member — makes its own independent cutover decision).
     //
-    // ignorePaths interaction (SPEC §5.10.6): if any ignore terminal lies
+    // ignorePaths interaction (GEN §10.6): if any ignore terminal lies
     // BENEATH this array, a wholesale replace would leak ignored content into its
     // `value` — so the capability is DISABLED for that array and the ignore-
     // filtered granular stream is kept.
@@ -426,11 +426,11 @@ export class JsonSchemaPatcher {
     ignoreNode: IgnoreTrieNode | undefined
   ) {
     // The item-level ignore node: descending into an array element consumes one
-    // wildcard `*` (the array index level, SPEC §5.10.3). Every element — object,
+    // wildcard `*` (the array index level, GEN §10.3). Every element — object,
     // array, or primitive — advances the same way, so this is used both for the
     // element recursion (below) and for the ignore-filtered LCS interning.
     const itemIgnore = ignoreNode?.wildcard;
-    // Strategy is read straight off the trie node for THIS array (SPEC §5.3.1):
+    // Strategy is read straight off the trie node for THIS array (GEN §3.1):
     // O(1) pointer access, no string normalization and no per-path caches.
     const plan = node?.plan;
     const strategy = plan?.strategy || "lcs";
@@ -447,9 +447,9 @@ export class JsonSchemaPatcher {
       ) => {
         // Choose the child node for the recursed element. A nested-array element
         // (array-of-arrays) descends to the wildcard child — the inner array's
-        // plan registered at `${path}/*` (§4.3.5). An object element stays at
+        // plan registered at `${path}/*` (CORE §3.3.5). An object element stays at
         // THIS array's node, because array items recurse at the same document
-        // path (§4.3.3): the item's property plans are the node's `children`. A
+        // path (CORE §3.3.3): the item's property plans are the node's `children`. A
         // mixed-kind pair never descends (diff emits a whole replace), so the
         // node choice is immaterial there.
         const elementNode =
@@ -465,14 +465,14 @@ export class JsonSchemaPatcher {
           skipEqualityCheck || false,
           elementNode,
           // The element's ignore node is ALWAYS the array's wildcard child (the
-          // array index consumes one `*`, SPEC §5.10.3), regardless of element
+          // array index consumes one `*`, GEN §10.3), regardless of element
           // kind — unlike the plan trie, where an object element stays put.
           itemIgnore
         );
       };
     };
 
-    // primaryKey applicability gate (SPEC §5.4.3): commit to the keyed strategy
+    // primaryKey applicability gate (GEN §4.3): commit to the keyed strategy
     // only when every element of both arrays is a plain object with a unique
     // string|number key. Any violation (non-object/keyless element, or duplicate
     // key within either array) falls back to LCS below, which is exact. A
@@ -482,8 +482,8 @@ export class JsonSchemaPatcher {
       plan?.primaryKey &&
       checkPrimaryKeyApplicable(arr1, arr2, plan.primaryKey)
     ) {
-      // emitMoves (SPEC §5.8.7 / F07): reorder survivors + indexed adds for exact
-      // order fidelity, upgrading the §7.2 keyed-collection contract to §7.4.
+      // emitMoves (GEN §8.7 / F07): reorder survivors + indexed adds for exact
+      // order fidelity, upgrading the CORE §7.2 keyed-collection contract to CORE §7.4.
       if (this.emitMoves) {
         diffArrayByPrimaryKeyMoves(
           arr1,
@@ -510,8 +510,8 @@ export class JsonSchemaPatcher {
     }
 
     if (strategy === "unique" && checkArraysUnique(arr1, arr2)) {
-      // emitMoves (SPEC §5.8.6 / F23): a multiset-equal reorder becomes `move`s;
-      // a non-multiset-equal pair falls through to positional replaces (§5.6).
+      // emitMoves (GEN §8.6 / F23): a multiset-equal reorder becomes `move`s;
+      // a non-multiset-equal pair falls through to positional replaces (GEN §6).
       if (
         this.emitMoves &&
         diffArrayUniqueMoves(
@@ -539,7 +539,7 @@ export class JsonSchemaPatcher {
       plan,
       this.includeOldValue,
       this.emitMoves,
-      // ignorePaths (SPEC §5.10.5): the item-level ignore node makes the LCS
+      // ignorePaths (GEN §10.5): the item-level ignore node makes the LCS
       // interning fingerprint ignore-filtered, so two items differing only in
       // ignored fields intern equal (common / move-pairable, never remove+add).
       itemIgnore

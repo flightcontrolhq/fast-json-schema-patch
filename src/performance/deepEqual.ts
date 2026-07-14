@@ -12,7 +12,7 @@ export function getPlanFingerprint(plan?: ArrayPlan): string {
 /**
  * True if `value` is a non-null, non-array object whose prototype is
  * neither the plain `Object.prototype` nor `null` (e.g. `Date`, `RegExp`,
- * `Map`, a class instance). Per SPEC §2.1.2, non-JSON inputs are out of
+ * `Map`, a class instance). Per CORE §1.1.2, non-JSON inputs are out of
  * scope; such values are treated as opaque leaves for equality (F16)
  * instead of being walked as if they were plain JSON objects, which would
  * silently see zero own-enumerable-keys on both sides and compare equal.
@@ -44,7 +44,7 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
 
     if (arrA !== arrB) return false;
 
-    // SPEC §2.1.2 / F16: non-JSON inputs are out of scope; as a cheap guard,
+    // CORE §1.1.2 / F16: non-JSON inputs are out of scope; as a cheap guard,
     // treat opaque objects (Date, Map, RegExp, class instances, ...) as
     // leaves compared via valueOf()/=== instead of structural own-key
     // comparison. Without this, two different Dates (both with zero own
@@ -77,7 +77,7 @@ export function deepEqual(obj1: unknown, obj2: unknown): boolean {
   return Number.isNaN(obj1) && Number.isNaN(obj2);
 }
 
-// Identity-keyed memoization caches (SPEC §2.4.4). Because they key on object
+// Identity-keyed memoization caches (CORE §1.4.4). Because they key on object
 // identity they cannot see an in-place mutation of a previously-cached object,
 // so each entry records the epoch it was written in and is treated as a MISS
 // once the epoch advances. A public diff entry point bumps the epoch (see
@@ -108,13 +108,13 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   // Opaque objects (Date, Map, RegExp, class instances, ...) must not take
   // the own-key fast paths below: e.g. two different Dates both have zero own
   // enumerable keys and would otherwise compare equal. Defer to deepEqual,
-  // which treats them as leaves compared via valueOf()/=== (F16, SPEC §2.1.2).
+  // which treats them as leaves compared via valueOf()/=== (F16, CORE §1.1.2).
   if (isOpaqueObject(a) || isOpaqueObject(b)) {
     return deepEqual(a, b)
   }
 
   // Array-vs-object kind check MUST precede any own-key fast path (D1, SPEC
-  // §2.4.1/§2.4.2). An array and an object are never equal regardless of
+  // CORE §1.4.1/CORE §1.4.2). An array and an object are never equal regardless of
   // members; without this the empty-keys fast path below would treat [] === {}
   // (both have zero own keys), and — via diffArrayLCS's interning/trim path —
   // silently emit zero ops for a genuine [] -> {} change.
@@ -167,13 +167,13 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
  * F37: `effectiveHashFields` and `planFingerprint` are both invariant for a
  * given `plan` — they do not depend on the specific `obj1`/`obj2` pair being
  * compared. A caller that runs this over many pairs against the SAME plan
- * (e.g. diffArrayLCS's prefix/suffix trim, §5.5.0, which calls this once per
+ * (e.g. diffArrayLCS's prefix/suffix trim, GEN §5.0, which calls this once per
  * scanned position) MUST hoist them ONCE outside that loop and pass them in
  * here, rather than letting every call recompute a plan-fingerprint string
  * and re-run `getEffectiveHashFields`. When neither is passed (e.g.
- * StructuredDiff's one-off, non-hot comparisons — outside SPEC scope, §1.5)
+ * StructuredDiff's one-off, non-hot comparisons — outside SPEC scope, CONF §1.5)
  * this falls back to computing them from `plan`/`obj1`/`obj2`, matching the
- * old always-recompute behavior. Either way this is output-neutral (§2.4.4):
+ * old always-recompute behavior. Either way this is output-neutral (CORE §1.4.4):
  * the fields only ever gate a fast-fail hash prefilter, never the final
  * verdict, which always bottoms out at `deepEqual`.
  */

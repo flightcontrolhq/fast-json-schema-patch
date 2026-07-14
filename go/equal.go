@@ -3,11 +3,11 @@ package schemapatch
 import "math"
 
 // DeepEqual reports whether two [Value]s are equal under the sole equality
-// relation used for diffing, test ops, and oldValue validation (SPEC §2.4):
+// relation used for diffing, test ops, and oldValue validation (CORE §1.4):
 //
 //   - null, bool, string: equal by value; there is no type coercion
 //     (1 != "1", null != false, null != 0).
-//   - number: equal at IEEE-754 f64 (SPEC §2.2) — "1" == "1.0", "0" == "-0",
+//   - number: equal at IEEE-754 f64 (CORE §1.2) — "1" == "1.0", "0" == "-0",
 //     large integers that share an f64 image compare equal.
 //   - array: same length and element-wise DeepEqual, ORDER-SENSITIVE.
 //   - object: same set of member keys with DeepEqual values, member-order

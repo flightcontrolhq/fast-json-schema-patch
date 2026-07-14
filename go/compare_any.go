@@ -27,11 +27,11 @@ import (
 //     original insertion order is NOT preserved (Go maps have none). If you need a
 //     specific member order to survive into the patch, model it with a struct or
 //     diff raw bytes via [CompareJSON]/[Decode], which preserve source order
-//     (SPEC §2.2).
+//     (CORE §1.2).
 //   - Non-finite floats (NaN, +Inf, -Inf) in a float field are rejected by
 //     encoding/json, so Compare returns an error rather than emitting a number
 //     with no JSON representation — consistent with the value model's own
-//     rejection (SPEC §2.2, D6).
+//     rejection (CORE §1.2, D6).
 //
 // A non-nil error is returned when any argument fails to marshal (e.g. a NaN
 // float, or an unsupported type such as a channel or func). The returned slice is
@@ -62,7 +62,7 @@ func Compare(schema, source, target any, opts ...PatcherOption) ([]Operation, er
 // in sorted-key order (deterministic, but the source insertion order — if any —
 // is NOT preserved, unlike [Decode] on raw bytes); and non-finite floats (NaN,
 // +Inf, -Inf) are rejected by encoding/json, consistent with the value model's
-// own rejection of numbers that have no JSON representation (SPEC §2.2, D6).
+// own rejection of numbers that have no JSON representation (CORE §1.2, D6).
 func marshalJSON(label string, v any) ([]byte, error) {
 	b, err := json.Marshal(v)
 	if err != nil {

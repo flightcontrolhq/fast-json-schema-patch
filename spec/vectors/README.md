@@ -15,10 +15,10 @@ wins.
 spec/vectors/
   generate.ts     # the deterministic generator (source of truth; see "Regenerating")
   README.md       # this file
-  diff/*.json     # §10.1  diff vectors            (buildPlan + execute -> expectedPatch)
-  apply/*.json    # §10.2  apply vectors           (applyPatch -> expected | error)
-  plan/*.json     # §10.6  plan-snapshot vectors   (buildPlan -> expectedPlan)
-  invert/*.json   # §10.7  invert vectors          (invertPatch -> expectedInverse)
+  diff/*.json     # CONF §2  diff vectors            (buildPlan + execute -> expectedPatch)
+  apply/*.json    # CONF §3  apply vectors           (applyPatch -> expected | error)
+  plan/*.json     # CONF §7  plan-snapshot vectors   (buildPlan -> expectedPlan)
+  invert/*.json   # CONF §8  invert vectors          (invertPatch -> expectedInverse)
 ```
 
 Each `*.json` file is a flat **array of vector records** grouped by theme (the
@@ -44,12 +44,12 @@ derived/self-checked against the (fixed) reference like every other vector.
 
 ## Vector record formats
 
-### diff (`diff/`, SPEC §10.1)
+### diff (`diff/`, CONF §2)
 
 ```jsonc
 {
   "name": "pk-worked-example",
-  "comment": "§5.4.2: the normative worked example ...",
+  "comment": "GEN §4.2: the normative worked example ...",
   "schema": { /* JSON Schema */ },          // OMITTED when the diff runs schemaless (empty plan)
   "options": {                               // OMITTED when empty
     "primaryKeyMap":        { "/path": "key" },
@@ -64,15 +64,15 @@ derived/self-checked against the (fixed) reference like every other vector.
 ```
 
 `primaryKeyMap`, `basePath`, `primaryKeyCandidates` are **`buildPlan` options**
-(§4.2, §4.5.5); `options.capabilities` are **`JsonSchemaPatcher` constructor
-options** (§10.4). All are omitted when at their default, so a plain vector is
+(CORE §3.2, CORE §3.5.5); `options.capabilities` are **`JsonSchemaPatcher` constructor
+options** (CONF §5). All are omitted when at their default, so a plain vector is
 `{name, comment, original, modified, expectedPatch}` with an empty plan.
 
 To run a diff vector: build the plan (empty when `schema` is absent), construct
 the patcher with the given capabilities, `execute({original, modified})`, and
-compare against `expectedPatch` per the gate (§10.3, below).
+compare against `expectedPatch` per the gate (CONF §4, below).
 
-### apply (`apply/`, SPEC §10.2)
+### apply (`apply/`, CONF §3)
 
 ```jsonc
 {
@@ -91,12 +91,12 @@ Apply vectors are the only **hand-authored** oracle (the applier is the thing
 under test). The generator re-runs the reference applier against each one as a
 self-check, so a regenerated suite is also a reference-applier conformance run.
 
-### plan-snapshot (`plan/`, SPEC §10.6)
+### plan-snapshot (`plan/`, CONF §7)
 
 ```jsonc
 {
   "name": "plan-nested-arrays-distinct-paths",
-  "comment": "§4.3.5: ...",
+  "comment": "CORE §3.3.5: ...",
   "schema":  { /* JSON Schema, REQUIRED */ },
   "options": { "primaryKeyMap": {...}, "basePath": "...", "primaryKeyCandidates": [...] },  // OMITTED when empty
   "expectedPlan": [                            // sorted by `path`
@@ -108,16 +108,16 @@ self-check, so a regenerated suite is also a reference-applier conformance run.
 
 `buildPlan(schema, options)` MUST produce, for the same **set of paths**, the
 same `primaryKey`, `strategy`, `requiredFields` and `hashFields`. `itemSchema`
-(§4.1.1) is **never** compared. The entry list and both field arrays are
+(CORE §3.1.1) is **never** compared. The entry list and both field arrays are
 compared **order-insensitively** (they are authored sorted for readability).
 
-### invert (`invert/`, SPEC §10.7)
+### invert (`invert/`, CONF §8)
 
 ```jsonc
 {
   "name": "inv-move-overwrite-member",
-  "comment": "§9.2: ...",
-  "document": <JsonValue>,   // the ORIGINAL (pre-patch) document (§9.1.1); patch MUST apply cleanly to it
+  "comment": "CORE §6.2: ...",
+  "document": <JsonValue>,   // the ORIGINAL (pre-patch) document (CORE §6.1.1); patch MUST apply cleanly to it
   "patch":    [ /* Operation[] */ ],
   "expectedInverse": [ /* Operation[] that invertPatch(document, patch) MUST produce */ ]
 }
@@ -125,40 +125,40 @@ compared **order-insensitively** (they are authored sorted for readability).
 
 ## The conformance gates (normative)
 
-A vector **passes** iff its category's gate holds. These restate SPEC §10; the
+A vector **passes** iff its category's gate holds. These restate CONF; the
 spec is authoritative.
 
-- **diff (§10.3).** Both must hold:
-  1. **Round-trip (§10.3.1).** Applying `expectedPatch` sequentially (§8) to
+- **diff (CONF §4).** Both must hold:
+  1. **Round-trip (CONF §4.1).** Applying `expectedPatch` sequentially (CORE §5) to
      `original` reproduces `modified` per the strategy's round-trip contract
-     (§7): **exact** deep-equality for LCS / unique / object-only / `emitMoves`
+     (CORE §7): **exact** deep-equality for LCS / unique / object-only / `emitMoves`
      / `wholesaleReplaceFallback`; **multiset-equal** (survivors in original
      order ++ tail appends) for default-mode `primaryKey`. For `ignorePaths`
-     vectors the reconstruction is exact **modulo the ignored subtrees** (§7.6),
+     vectors the reconstruction is exact **modulo the ignored subtrees** (CORE §7.6),
      so runners skip the whole-document round-trip and rely on gate 2 plus the
      differential corpus (`spec/fuzz`).
-  2. **Structural op equality (§10.3.2).** The emitted op sequence equals
+  2. **Structural op equality (CONF §4.2).** The emitted op sequence equals
      `expectedPatch`: same length, same **ordered** sequence, each op equal by
      `op`, `path` (string), and — where present — `value` / `oldValue` / `from`
-     under deep JSON equality (§2.4.1).
-  Byte-identity of serialized JSON is **not** required (§10.3.3): number *text*,
+     under deep JSON equality (CORE §1.4.1).
+  Byte-identity of serialized JSON is **not** required (CONF §4.3): number *text*,
   object-key *order within values*, and whitespace are insignificant. Op
   **ordering in the sequence is significant.**
-- **apply (§10.2.1).** For an `error` vector, apply MUST throw `JsonPatchError`
+- **apply (CONF §3.1).** For an `error` vector, apply MUST throw `JsonPatchError`
   with `code === error.code` and `operationIndex === error.index`. For an
-  `expected` vector, the result MUST deep-equal `expected` (§2.4.1) and MUST NOT
+  `expected` vector, the result MUST deep-equal `expected` (CORE §1.4.1) and MUST NOT
   throw.
-- **plan (§10.6.1).** Path set matches; per path, `primaryKey` / `strategy` /
+- **plan (CONF §7.1).** Path set matches; per path, `primaryKey` / `strategy` /
   `requiredFields` / `hashFields` match (field arrays order-insensitively).
-- **invert (§10.7.2).** Both must hold: **(a)** `invertPatch(document, patch)`
-  is structurally equal to `expectedInverse` (same relation as §10.3.2); **(b)**
+- **invert (CONF §8.2).** Both must hold: **(a)** `invertPatch(document, patch)`
+  is structurally equal to `expectedInverse` (same relation as CONF §4.2); **(b)**
   `applyPatch(applyPatch(document, patch), expectedInverse)` deep-equals
-  `document` (§9.1.2).
+  `document` (CORE §6.1.2).
 
 A conforming generator MUST pass every default-mode diff vector; a conforming
-applier MUST pass every apply vector for the ops it supports (§10.3.4).
+applier MUST pass every apply vector for the ops it supports (CONF §4.4).
 Capability-tagged diff vectors (`options.capabilities`) are evaluated **only**
-for implementations that advertise the capability (§10.4).
+for implementations that advertise the capability (CONF §5).
 
 ## Regenerating
 
@@ -179,7 +179,7 @@ bun run spec/vectors/generate.ts
 - **Self-checking.** The generator verifies each vector as it writes it
   (round-trip for diff, double-apply identity for invert, oracle match for
   apply); a malformed vector aborts the run. A clean run is itself a conformance
-  check of the reference against §7 / §9 / §10.
+  check of the reference against CORE §7 / CORE §6 / CONF.
 
 If the reference implementation changes an **intended** output, regenerate and
 commit the vector diff alongside the code change. An **unintended** change shows
@@ -192,8 +192,8 @@ These are limits of the JSON vector medium, not of the spec. A second
 implementation must handle them out of band:
 
 1. **Object key order is load-bearing but not JSON-guaranteed.** The generator's
-   op **ordering** follows each object's **pinned member order** (§2.3.2,
-   §5.2.2): ECMAScript `[[OwnPropertyKeys]]` — **integer-like keys first in
+   op **ordering** follows each object's **pinned member order** (CORE §1.3.2,
+   GEN §2.2): ECMAScript `[[OwnPropertyKeys]]` — **integer-like keys first in
    ascending numeric order, then all remaining keys in insertion order**, where
    integer-like means a canonical decimal string for `0 … 2^32 − 2` (no leading
    zeros, no sign; `"2"` is integer-like, `"02"` is not). This is **not** pure
@@ -201,9 +201,9 @@ implementation must handle them out of band:
    `"2", "10", b, a`. The vector files preserve the authored key order, but a
    consumer whose JSON decoder does not preserve object key order (e.g. Go
    `map[string]any`) will reorder members and can emit ops in a different order,
-   failing the §10.3.2 ordering check. Read the vectors with an **order-
+   failing the CONF §4.2 ordering check. Read the vectors with an **order-
    preserving** decoder **and** re-apply the integer-like-first rule to match the
-   pinned order (§2.3.2).
+   pinned order (CORE §1.3.2).
 2. **`-0` and `1.0` are not representable in JSON text.** `-0` serializes as `0`
    and `1.0` as `1`, so the "equal number" vectors (`num-neg-zero-vs-zero-equal`,
    `num-1-vs-1.0-equal`) degenerate to `0`-vs-`0` / `1`-vs-`1` in the file. They
@@ -212,17 +212,17 @@ implementation must handle them out of band:
 3. **Integers past 2^53 encode the f64 image.** `expectedPatch` `value`/
    `oldValue` reflect the reference's f64 computation (e.g. `2^53` and `2^53+1`
    are equal → no op). A language with wider integers MUST still compare at f64
-   (§2.2.3); if it preserves number *text* when echoing values, the differing
-   text is explicitly **not** a gate failure (§10.3.3).
-4. **Structural sharing / reference identity is not a vector.** §8.7.1 copy-on-
+   (CORE §1.2.3); if it preserves number *text* when echoing values, the differing
+   text is explicitly **not** a gate failure (CONF §4.3).
+4. **Structural sharing / reference identity is not a vector.** CORE §5.7.1 copy-on-
    write sharing and `===` identity of untouched subtrees are unobservable
    across languages and are intentionally **not** asserted. The behavioral
    options (`cloneValues`/`cloneResult`) are covered only by **value** equality
-   (`apply/options.json`), per §8.7.4.
+   (`apply/options.json`), per CORE §5.7.4.
 5. **Capabilities are opt-in.** `emitMoves`, `wholesaleReplaceFallback`,
    `includeOldValue=false`, and `ignorePaths` vectors carry
    `options.capabilities`. An implementation that does not advertise a capability
-   skips its vectors (§10.4); the default suite (no `capabilities`) is mandatory.
-   `ignorePaths` **construction-time** validation errors (§5.10.1/§5.10.7) precede
+   skips its vectors (CONF §5); the default suite (no `capabilities`) is mandatory.
+   `ignorePaths` **construction-time** validation errors (GEN §10.1/GEN §10.7) precede
    any diff and are not vector-expressible — they are covered by engine unit tests
-   (§10.5.2).
+   (CONF §6.2).

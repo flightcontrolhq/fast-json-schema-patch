@@ -5,7 +5,7 @@ import "reflect"
 // ownedSet records the containers cloned during a single [ApplyPatch] (or invert
 // simulation) invocation — those the call freshly owns and may therefore mutate
 // in place. Threading it makes application copy-on-write with structural sharing
-// (SPEC §8.7.1): the first op that touches a container clones it once and marks
+// (CORE §5.7.1): the first op that touches a container clones it once and marks
 // it owned; every later op under the same subtree reuses that clone instead of
 // re-cloning from the root down. Without it, a patch of N ops under one large
 // object re-cloned that object N times.
@@ -80,40 +80,40 @@ func (s *ownedSet) own(v Value) {
 // element, which is unique per live backing array.
 func sliceID(a []Value) uintptr { return reflect.ValueOf(a).Pointer() }
 
-// ApplyOptions configures [ApplyPatch] (SPEC §8.7). All fields default to their
+// ApplyOptions configures [ApplyPatch] (CORE §5.7). All fields default to their
 // zero value (false), reproducing RFC 6902 immutable-apply semantics.
 type ApplyOptions struct {
 	// ValidateOldValues, when true, checks every remove/replace op that carries
 	// an oldValue against the current document value before applying it, failing
-	// with OLD_VALUE_MISMATCH on a mismatch (SPEC §8.4). Ops without oldValue are
-	// applied unchecked (§8.4.2).
+	// with OLD_VALUE_MISMATCH on a mismatch (CORE §5.4). Ops without oldValue are
+	// applied unchecked (CORE §5.4.2).
 	ValidateOldValues bool
 	// CloneValues, when true, deep-clones each op's value payload before
 	// insertion so the result never aliases objects owned by the patch (SPEC
-	// §8.7.2). When false, values are inserted by reference.
+	// CORE §5.7.2). When false, values are inserted by reference.
 	CloneValues bool
 	// CloneResult, when true, deep-clones the returned document so it shares no
-	// structure with the input or the patch (SPEC §8.7.3). When false, untouched
-	// subtrees are shared by reference with the input (copy-on-write, §8.7.1).
+	// structure with the input or the patch (CORE §5.7.3). When false, untouched
+	// subtrees are shared by reference with the input (copy-on-write, CORE §5.7.1).
 	CloneResult bool
 }
 
-// ApplyPatch applies patch to doc and returns the resulting document (SPEC §8).
+// ApplyPatch applies patch to doc and returns the resulting document (CORE §5).
 // It supports all six RFC 6902 ops (add, remove, replace, move, copy, test)
 // plus this library's oldValue extension (optionally validated via
-// ApplyOptions.ValidateOldValues) and "-" array-append paths (§3.5).
+// ApplyOptions.ValidateOldValues) and "-" array-append paths (CORE §2.5).
 //
-// The input doc is NEVER mutated. Application is atomic (SPEC §8.1.2): on the
+// The input doc is NEVER mutated. Application is atomic (CORE §5.1.2): on the
 // first failing op a *[PatchError] is returned (with its Code and OpIndex) and
 // the input is left untouched — the returned Value is nil. Atomicity is
 // structural: every op only ever mutates containers freshly cloned along its
-// own touched path (copy-on-write, §8.7.1), so the original nodes are only ever
+// own touched path (copy-on-write, CORE §5.7.1), so the original nodes are only ever
 // read. Values in the [Value] model are therefore immutable by discipline:
 // apply treats every input node as read-only and copies before writing.
 //
-// Ops are applied strictly in the order given (SPEC §8.1.1); they are never
+// Ops are applied strictly in the order given (CORE §5.1.1); they are never
 // reordered, batched, or deduplicated. The empty patch returns doc itself
-// (§8.7.5) unless CloneResult forces an independent copy.
+// (CORE §5.7.5) unless CloneResult forces an independent copy.
 //
 // Structural sharing matches the reference: a per-invocation cloned-container
 // set ([ownedSet]) clones each touched container at most once across the whole
@@ -137,7 +137,7 @@ func ApplyPatch(doc Value, patch []Operation, opts ApplyOptions) (Value, error) 
 
 // applyOp applies one op against root and returns the new root (or a
 // *PatchError). It is the shared core used by both [ApplyPatch] and the invert
-// simulation (SPEC §9.2). It never mutates root's original containers.
+// simulation (CORE §6.2). It never mutates root's original containers.
 func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *ownedSet) (Value, *PatchError) {
 	parts, perr := splitPathW(op.Path, op, idx)
 	if perr != nil {
@@ -153,7 +153,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *owned
 		if opts.CloneValues {
 			value = Clone(value)
 		}
-		if len(parts) == 0 { // root add replaces the whole document (§8.5.1)
+		if len(parts) == 0 { // root add replaces the whole document (CORE §5.5.1)
 			return value, nil
 		}
 		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx, owned)
@@ -175,7 +175,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *owned
 		return *rootPtr, nil
 
 	case OpRemove:
-		if len(parts) == 0 { // root remove is invalid (§8.5.2)
+		if len(parts) == 0 { // root remove is invalid (CORE §5.5.2)
 			return nil, opErr(CodeInvalidOperation, `cannot "remove" the document root`, idx, op)
 		}
 		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx, owned)
@@ -214,7 +214,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *owned
 		if opts.CloneValues {
 			value = Clone(value)
 		}
-		if len(parts) == 0 { // root replace swaps the document (§8.5.1)
+		if len(parts) == 0 { // root replace swaps the document (CORE §5.5.1)
 			return value, nil
 		}
 		rootPtr, parent, key, _, perr := resolveParent(root, parts, op, idx, owned)
@@ -276,12 +276,12 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *owned
 		if !exists {
 			return nil, opErr(CodePathUnresolvable, `"copy" source does not exist`, idx, op)
 		}
-		// Deep-clone so the result never aliases the source (SPEC §8.3.3).
+		// Deep-clone so the result never aliases the source (CORE §5.3.3).
 		copied := Clone(val)
 		return applyOp(root, &Operation{Op: OpAdd, Path: op.Path, Value: copied, HasValue: true}, idx, opts, owned)
 
 	case OpTest:
-		// D4 (SPEC §8.3/§8.3.5, RFC 6902 §4.6): `test` MUST carry `value`. An
+		// D4 (CORE §5.3/CORE §5.3.5, RFC 6902 §4.6): `test` MUST carry `value`. An
 		// ABSENT value is a tier-1 required-field failure -> INVALID_OPERATION,
 		// evaluated BEFORE the tier-3 read-side existence check. A value present
 		// as JSON null (HasValue true) is VALID and tests against null — the
@@ -306,13 +306,13 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *owned
 
 // resolveParent walks to the parent of the location addressed by parts, cloning
 // every container along the way (copy-on-write). Every intermediate segment
-// MUST already exist (SPEC §8.2.2). It returns a pointer to the (possibly-new)
+// MUST already exist (CORE §5.2.2). It returns a pointer to the (possibly-new)
 // root cell, the cloned parent container (*Object or []Value), the final
 // unescaped segment, and an assign closure that writes an updated parent back
 // into its grandparent (needed when a splice changes an array's length; for the
 // top level the closure updates the root cell, hence the pointer).
 //
-// The write-side prototype-pollution guard (SPEC §8.6.1) is enforced on every
+// The write-side prototype-pollution guard (CORE §5.6.1) is enforced on every
 // object segment traversed and on the final object segment; it does not apply
 // to array-index segments.
 func resolveParent(root Value, parts []string, op *Operation, idx int, owned *ownedSet) (rootPtr *Value, parent Value, key string, assign func(Value), err *PatchError) {
@@ -353,7 +353,7 @@ func resolveParent(root Value, parts []string, op *Operation, idx int, owned *ow
 			assignCurrent = func(v Value) { obj.Set(pk, v) }
 			current = cloned
 		default:
-			// Descending through a primitive or null (SPEC §8.2.2).
+			// Descending through a primitive or null (CORE §5.2.2).
 			return nil, nil, "", nil, opErr(CodePathUnresolvable, `path does not exist`, idx, op)
 		}
 	}
@@ -378,10 +378,10 @@ func resolveParent(root Value, parts []string, op *Operation, idx int, owned *ow
 }
 
 // getAtPath resolves parts read-side by own-property / own-index lookup (SPEC
-// §8.6): a malformed or "-" segment, an out-of-range index, or descent through
+// CORE §5.6): a malformed or "-" segment, an out-of-range index, or descent through
 // a primitive all fail existence and return (nil, false) — never an error code.
 // The prototype-pollution guard is NOT run: __proto__/constructor/prototype are
-// resolved by ordinary own-key lookup and simply miss (§8.6.1). An empty parts
+// resolved by ordinary own-key lookup and simply miss (CORE §5.6.1). An empty parts
 // list addresses the whole document.
 func getAtPath(root Value, parts []string) (Value, bool) {
 	current := root
@@ -411,7 +411,7 @@ func getAtPath(root Value, parts []string) (Value, bool) {
 
 // splitPathW splits a write-side pointer, translating a malformed pointer
 // (non-empty and not "/"-prefixed) into a *PatchError with INVALID_POINTER
-// (SPEC §8.6). Read-side callers that must map malformed pointers to
+// (CORE §5.6). Read-side callers that must map malformed pointers to
 // PATH_UNRESOLVABLE resolve via getAtPath instead.
 func splitPathW(path string, op *Operation, idx int) ([]string, *PatchError) {
 	parts, err := SplitPath(path)
@@ -422,7 +422,7 @@ func splitPathW(path string, op *Operation, idx int) ([]string, *PatchError) {
 }
 
 // parseArrayIndex validates part as an array index for a write-side op (SPEC
-// §3.6, §8.3.1). "-" returns length when allowEnd (add/move/copy destination
+// CORE §2.6, CORE §5.3.1). "-" returns length when allowEnd (add/move/copy destination
 // final) and is INVALID_POINTER otherwise. A malformed index is INVALID_POINTER;
 // a well-formed index past the op's max (length for add, length-1 otherwise), or
 // one too large to fit an int, is INDEX_OUT_OF_BOUNDS.
@@ -447,7 +447,7 @@ func parseArrayIndex(part string, length int, allowEnd bool, op *Operation, idx 
 	return n, nil
 }
 
-// checkSafeKey enforces the write-side prototype-pollution guard (SPEC §8.6.1):
+// checkSafeKey enforces the write-side prototype-pollution guard (CORE §5.6.1):
 // "__proto__" is rejected anywhere; "prototype" is rejected only when its
 // immediately preceding segment is "constructor". Standalone "constructor" and
 // standalone "prototype" remain usable. Go has no prototype chain, but the
@@ -461,7 +461,7 @@ func checkSafeKey(key, prev string, hasPrev bool, op *Operation, idx int) *Patch
 }
 
 // isProperPrefix reports whether from is a strict prefix of path — the "move a
-// node into its own descendant" condition (SPEC §8.3.3). Equal paths are not a
+// node into its own descendant" condition (CORE §5.3.3). Equal paths are not a
 // proper prefix.
 func isProperPrefix(from, path []string) bool {
 	if len(from) >= len(path) {

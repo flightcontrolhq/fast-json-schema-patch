@@ -8,17 +8,17 @@ import (
 
 // ErrMalformedPointer is returned by SplitPath for a non-empty pointer that does
 // not begin with "/". Apply-side callers translate it into a PatchError with
-// code INVALID_POINTER (SPEC §8.6); it is exposed as an errors.Is-able sentinel
+// code INVALID_POINTER (CORE §5.6); it is exposed as an errors.Is-able sentinel
 // so the pointer layer stays free of the apply error model.
 var ErrMalformedPointer = errors.New("schemapatch: malformed JSON Pointer")
 
 // AppendToken is the RFC 6901 §4 token denoting the position one past the last
 // array element. It is valid only as the final segment of an add (and, by
-// delegation, a move/copy destination); apply rejects it elsewhere (SPEC §3.5).
+// delegation, a move/copy destination); apply rejects it elsewhere (CORE §2.5).
 const AppendToken = "-"
 
 // EscapeToken escapes a single reference token for embedding in a JSON Pointer
-// (SPEC §3.2): replace "~" with "~0", THEN "/" with "~1", in that order. The
+// (CORE §2.2): replace "~" with "~0", THEN "/" with "~1", in that order. The
 // append token and array indices contain neither character and pass through
 // unchanged.
 func EscapeToken(tok string) string {
@@ -30,7 +30,7 @@ func EscapeToken(tok string) string {
 	return tok
 }
 
-// UnescapeToken reverses EscapeToken (SPEC §3.3): replace "~1" with "/", THEN
+// UnescapeToken reverses EscapeToken (CORE §2.3): replace "~1" with "/", THEN
 // "~0" with "~", in that order. The order matters: a literal "~01" decodes to
 // "~1" (the ~1 pass runs first and leaves the trailing 1, then ~0 -> ~).
 func UnescapeToken(tok string) string {
@@ -42,7 +42,7 @@ func UnescapeToken(tok string) string {
 	return tok
 }
 
-// SplitPath splits a JSON Pointer into its unescaped reference tokens (SPEC §3.4).
+// SplitPath splits a JSON Pointer into its unescaped reference tokens (CORE §2.4).
 // The empty pointer "" yields an empty (nil) slice. "/a/b" yields ["a","b"].
 // "/" (a single slash) yields [""] — the member named "". A non-empty pointer
 // that does not begin with "/" is malformed and returns ErrMalformedPointer.
@@ -62,7 +62,7 @@ func SplitPath(path string) ([]string, error) {
 }
 
 // JoinPath builds a JSON Pointer from unescaped reference tokens, escaping each
-// (SPEC §3.4). An empty token list yields "" (the root pointer); a single empty
+// (CORE §2.4). An empty token list yields "" (the root pointer); a single empty
 // token yields "/".
 func JoinPath(tokens []string) string {
 	if len(tokens) == 0 {
@@ -76,11 +76,11 @@ func JoinPath(tokens []string) string {
 	return b.String()
 }
 
-// IsAppendToken reports whether tok is the "-" append token (SPEC §3.5).
+// IsAppendToken reports whether tok is the "-" append token (CORE §2.5).
 func IsAppendToken(tok string) bool { return tok == AppendToken }
 
 // ValidArrayIndexSyntax reports whether tok is a syntactically valid array-index
-// segment per SPEC §3.6: it MUST match ^(0|[1-9][0-9]*)$ — a single "0" or a
+// segment per CORE §2.6: it MUST match ^(0|[1-9][0-9]*)$ — a single "0" or a
 // nonzero leading digit followed by more digits. Leading zeros ("01"), signs
 // ("-0", "+1"), decimals ("1.5"), the append token "-", the empty string, and
 // non-digits are all invalid. This is a pure syntax check: it does NOT bound the
@@ -104,7 +104,7 @@ func ValidArrayIndexSyntax(tok string) bool {
 	return true
 }
 
-// ParseArrayIndex validates tok as an array index (SPEC §3.6) and returns its
+// ParseArrayIndex validates tok as an array index (CORE §2.6) and returns its
 // integer value. ok is false when the syntax is invalid per
 // ValidArrayIndexSyntax, or when the value is syntactically valid but does not
 // fit in an int (an index no real array can hold). Callers that must distinguish

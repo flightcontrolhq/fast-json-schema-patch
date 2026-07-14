@@ -1,7 +1,7 @@
 [
   {
     "name": "uniq-single-replace",
-    "comment": "§5.6.1: equal-length unique arrays -> positional replace at differing index",
+    "comment": "GEN §6.1: equal-length unique arrays -> positional replace at differing index",
     "schema": {
       "type": "object",
       "properties": {
@@ -38,7 +38,7 @@
   },
   {
     "name": "uniq-multiple-replaces",
-    "comment": "§5.6.1: one replace per differing position",
+    "comment": "GEN §6.1: one replace per differing position",
     "schema": {
       "type": "object",
       "properties": {
@@ -87,7 +87,7 @@
   },
   {
     "name": "uniq-noop",
-    "comment": "§5.6.1: identical unique arrays emit nothing",
+    "comment": "GEN §6.1: identical unique arrays emit nothing",
     "schema": {
       "type": "object",
       "properties": {
@@ -117,7 +117,7 @@
   },
   {
     "name": "uniq-reorder-as-replaces",
-    "comment": "§5.6.1/§5.8.6: default mode emits a permutation as positional replaces (NOT moves)",
+    "comment": "GEN §6.1/GEN §8.6: default mode emits a permutation as positional replaces (NOT moves)",
     "schema": {
       "type": "object",
       "properties": {
@@ -160,7 +160,7 @@
   },
   {
     "name": "uniq-numbers",
-    "comment": "§4.4.2: number-typed items get the unique strategy",
+    "comment": "CORE §3.4.2: number-typed items get the unique strategy",
     "schema": {
       "type": "object",
       "properties": {
@@ -197,7 +197,7 @@
   },
   {
     "name": "uniq-booleans",
-    "comment": "§4.4.2/§5.6.1: boolean items, positional replaces",
+    "comment": "CORE §3.4.2/GEN §6.1: boolean items, positional replaces",
     "schema": {
       "type": "object",
       "properties": {
@@ -238,7 +238,7 @@
   },
   {
     "name": "uniq-unequal-length-lcs-fallback",
-    "comment": "§5.6.2: unequal lengths fail checkArraysUnique -> LCS (add)",
+    "comment": "GEN §6.2: unequal lengths fail checkArraysUnique -> LCS (add)",
     "schema": {
       "type": "object",
       "properties": {
@@ -273,7 +273,7 @@
   },
   {
     "name": "uniq-dup-in-modified-lcs-fallback",
-    "comment": "§5.4.4: duplicate in modified fails uniqueness -> LCS fallback",
+    "comment": "GEN §4.4: duplicate in modified fails uniqueness -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -308,7 +308,7 @@
   },
   {
     "name": "uniq-dup-in-original-lcs-fallback",
-    "comment": "§5.4.4: duplicate in original fails uniqueness -> LCS fallback",
+    "comment": "GEN §4.4: duplicate in original fails uniqueness -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {

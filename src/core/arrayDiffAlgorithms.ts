@@ -13,12 +13,12 @@ import { ignoreMember, type IgnoreTrieNode } from "./ignorePaths";
 
 /**
  * Canonical, key-sorted fingerprint of a JSON value (F21). Two values produce
- * the SAME string iff they are deep-equal per SPEC §2.4.1: primitives via
+ * the SAME string iff they are deep-equal per CORE §1.4.1: primitives via
  * `JSON.stringify`, arrays order-sensitively, objects with their keys sorted
- * (so §2.4.2 object-key-order-insensitivity holds). This is exact for JSON
+ * (so CORE §1.4.2 object-key-order-insensitivity holds). This is exact for JSON
  * inputs, so interning by this fingerprint needs no deepEqual confirmation.
  *
- * Non-JSON inputs are out of scope (§2.1.2). Opaque objects (Date, RegExp, Map,
+ * Non-JSON inputs are out of scope (CORE §1.1.2). Opaque objects (Date, RegExp, Map,
  * class instances — §F16) have no reliable structural form, so each distinct
  * *reference* is assigned a unique tag via `opaqueId`. This is SOUND (never a
  * false positive that would drop a real change): distinct references compare
@@ -29,7 +29,7 @@ import { ignoreMember, type IgnoreTrieNode } from "./ignorePaths";
 export function canonicalFingerprint(
   value: JsonValue,
   opaqueId: (o: object) => number,
-  // ignorePaths (SPEC §5.10.5): when present, ignored members/elements are
+  // ignorePaths (GEN §10.5): when present, ignored members/elements are
   // OMITTED from the fingerprint, so two items differing only in ignored fields
   // produce the SAME string and intern to the same id (common / move-pairable).
   // When `undefined` (no ignore paths, or none beneath here) the output is
@@ -43,7 +43,7 @@ export function canonicalFingerprint(
     return ` O${opaqueId(value as object)}`;
   }
   if (Array.isArray(value)) {
-    // Array element -> the ignore node advances through one wildcard (§5.10.3).
+    // Array element -> the ignore node advances through one wildcard (GEN §10.3).
     const elemIgnore = ignoreNode?.wildcard;
     let s = "[";
     let first = true;
@@ -62,7 +62,7 @@ export function canonicalFingerprint(
   for (let i = 0; i < keys.length; i++) {
     const k = keys[i] as string;
     const childIgnore = ignoreNode ? ignoreMember(ignoreNode, k) : undefined;
-    if (childIgnore?.end) continue; // an ignored member is omitted (§5.10.5)
+    if (childIgnore?.end) continue; // an ignored member is omitted (GEN §10.5)
     if (!first) s += ",";
     first = false;
     s += `${JSON.stringify(k)}:${canonicalFingerprint(obj[k] as JsonValue, opaqueId, childIgnore)}`;
@@ -79,7 +79,7 @@ export type ModificationCallback = (
 ) => void;
 
 /**
- * primaryKey applicability gate (SPEC §5.4.3).
+ * primaryKey applicability gate (GEN §4.3).
  *
  * Before committing to the primaryKey strategy, verify in one O(n+m) pass over
  * both arrays that:
@@ -91,7 +91,7 @@ export type ModificationCallback = (
  * diff. Without the gate, non-conforming elements are silently skipped
  * (added/removed items vanish from the patch, F05) and duplicate keys corrupt
  * the last-write-wins index so even identical arrays emit a growing patch (F06).
- * Key equality is by JSON type AND value (no coercion, §5.4.1.5): a Set
+ * Key equality is by JSON type AND value (no coercion, GEN §4.1.5): a Set
  * distinguishes numeric `1` from string `"1"` natively.
  */
 export function checkPrimaryKeyApplicable(
@@ -142,7 +142,7 @@ export function diffArrayByPrimaryKey(
   patches: Operation[],
   onModification: ModificationCallback,
   hashFields?: string[],
-  // F11 (SPEC §6.4.2): when false, removals omit `oldValue`. Additions never
+  // F11 (CORE §4.4.2): when false, removals omit `oldValue`. Additions never
   // carry one, and modifications recurse through `onModification` -> the
   // class differ, which honors the flag itself.
   includeOldValue: boolean = true
@@ -287,12 +287,12 @@ export function diffArrayByPrimaryKey(
 }
 
 /**
- * primaryKey-strategy emitMoves path (F07, SPEC §5.8.7). The caller guarantees
- * the §5.4.3 gate passed (every element an object with a unique string/number
- * key). Instead of the order-insensitive three-phase emission (§5.4.1), build
+ * primaryKey-strategy emitMoves path (F07, GEN §8.7). The caller guarantees
+ * the GEN §4.3 gate passed (every element an object with a unique string/number
+ * key). Instead of the order-insensitive three-phase emission (GEN §4.1), build
  * the key bijection and hand it to the shared staged emitter, so survivors are
  * REORDERED into `modified` order via `move`s and new keys are INDEXED adds —
- * making `applyPatch(original, p)` equal `modified` byte-exactly (§7.4).
+ * making `applyPatch(original, p)` equal `modified` byte-exactly (CORE §7.4).
  */
 export function diffArrayByPrimaryKeyMoves(
   arr1: JsonArray,
@@ -303,7 +303,7 @@ export function diffArrayByPrimaryKeyMoves(
   onModification: ModificationCallback,
   includeOldValue: boolean = true
 ): void {
-  // Phase 1: index original by key (§5.4.1.1). The gate guarantees each item is
+  // Phase 1: index original by key (GEN §4.1.1). The gate guarantees each item is
   // an object with a string|number key, so no conforming check is needed here.
   const keyToIndex = new Map<string | number, number>();
   for (let i = 0; i < arr1.length; i++) {
@@ -350,7 +350,7 @@ export function diffArrayLCS(
   arr2: JsonArray,
   path: string,
   patches: Operation[],
-  // Granular descent of collapsed `replace` pairs (§5.5.4.2 / F10): when both
+  // Granular descent of collapsed `replace` pairs (GEN §5.4.2 / F10): when both
   // sides of a collapsed replace are the same container kind (both objects, or
   // both arrays), this recurses to emit granular nested ops instead of a
   // whole-item replace. `common` entries are proven equal by interning and are
@@ -358,15 +358,15 @@ export function diffArrayLCS(
   onModification: ModificationCallback,
   hashFields?: string[],
   plan?: ArrayPlan,
-  // F11 (SPEC §6.4.2): when false, every `remove`/`replace` this function
+  // F11 (CORE §4.4.2): when false, every `remove`/`replace` this function
   // emits omits `oldValue`. Same-kind granular replacements recurse through
   // `onModification` -> the class differ, which honors the flag itself.
   includeOldValue: boolean = true,
-  // emitMoves capability (SPEC §5.8, §10.4.4): when true, the main Myers path
+  // emitMoves capability (GEN §8, CONF §5.4): when true, the main Myers path
   // emits a single RFC 6902 `move` for each relocated (deep-equal) element
   // instead of a remove+add pair (F22). Default false — byte-stable output.
   emitMoves: boolean = false,
-  // ignorePaths (SPEC §5.10.5): the item-level ignore node (the array's wildcard
+  // ignorePaths (GEN §10.5): the item-level ignore node (the array's wildcard
   // child). Threaded into the interning fingerprint so ignored members do not
   // participate in element identity. `undefined` when no ignore path lies within
   // these items — then interning is byte-identical to the pre-capability path.
@@ -384,7 +384,7 @@ export function diffArrayLCS(
 
   const prefixPath = path === "" ? "/" : path + "/";
 
-  // Empty-array fast paths (SPEC §5.5.1).
+  // Empty-array fast paths (GEN §5.1).
   if (n === 0) {
     for (let i = 0; i < m; i++) {
       patches.push({
@@ -417,7 +417,7 @@ export function diffArrayLCS(
     ? { effectiveHashFields, planFingerprint: getPlanFingerprint(plan) }
     : undefined;
 
-  // Deep-equal predicate (SPEC §2.4.1) used by the prefix/suffix trim (§5.5.0).
+  // Deep-equal predicate (CORE §1.4.1) used by the prefix/suffix trim (GEN §5.0).
   // Trimming queries each position at most once (lo and hi advance
   // monotonically), so no per-pair cache is needed here; the Myers snake uses
   // interned ids instead (below). The old n*m-capacity equalCache Map is gone
@@ -433,7 +433,7 @@ export function diffArrayLCS(
         )
       : deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
 
-  // §5.5.0 Trim step 0: maximal common prefix first, then the maximal common
+  // GEN §5.0 Trim step 0: maximal common prefix first, then the maximal common
   // suffix of the remainder. Myers then runs only on the trimmed window
   // [lo, n-hi) × [lo, m-hi); emitted indices are offset by lo. This bounds cost
   // by the edit region rather than the array length (F09) and keeps the Myers
@@ -446,7 +446,7 @@ export function diffArrayLCS(
   const wn = n - lo - hi; // original window length
   const wm = m - lo - hi; // modified window length
 
-  // Windowed fast paths (generalise §5.5.1 to the trimmed remainder).
+  // Windowed fast paths (generalise GEN §5.1 to the trimmed remainder).
   if (wn === 0 && wm === 0) return; // arrays are deep-equal
   if (wn === 0) {
     // Pure insertion window (append / prepend / interior insert): ascending
@@ -478,7 +478,7 @@ export function diffArrayLCS(
   // element is fingerprinted exactly once — O(window content) — regardless of
   // how many times Myers revisits it. All state here is call-local, so there is
   // no cross-call cache and no epoch concern (F02). Fingerprint equality is
-  // exact deep-equal for JSON inputs (§2.4), so no deepEqual confirmation is
+  // exact deep-equal for JSON inputs (CORE §1.4), so no deepEqual confirmation is
   // needed.
   const fpToId = new Map<string, number>();
   let nextId = 0;
@@ -508,7 +508,7 @@ export function diffArrayLCS(
 
   // Myers O(ND) forward pass over the trimmed window. Window coordinates
   // x∈[0,wn], y∈[0,wm] map to array indices (lo + x, lo + y); the pinned
-  // tie-breaks (§5.5.2) therefore apply to the window.
+  // tie-breaks (GEN §5.2) therefore apply to the window.
   const max = wn + wm;
   const offset = max;
   const bufSize = 2 * max + 1;
@@ -653,7 +653,7 @@ export function diffArrayLCS(
     }
   }
 
-  // emitMoves capability (SPEC §5.8.4 / F22). Reconstruct the full original↔
+  // emitMoves capability (GEN §8.4 / F22). Reconstruct the full original↔
   // modified bijection from the (collapsed) script plus the trimmed prefix/
   // suffix, pair leftover removes with equal-valued leftover adds into
   // relocations (by interned id — exact deep-equal, never pairing non-identical
@@ -742,19 +742,19 @@ export function diffArrayLCS(
 
   // Apply operations and generate patches. currentIndex starts at lo: the
   // trimmed common prefix occupies output indices 0..lo-1 unchanged. Window
-  // coordinates ai/bi are offset by lo when fetching values (§5.5.5).
+  // coordinates ai/bi are offset by lo when fetching values (GEN §5.5).
   let currentIndex = lo;
 
   for (const operation of optimizedScript) {
     switch (operation.op) {
       case "common": {
         // A `common` entry means idsA[ai] === idsB[bi], i.e. the elements are
-        // proven deep-equal by interning (§2.4). The old code still called
+        // proven deep-equal by interning (CORE §1.4). The old code still called
         // onModification here, which re-ran a full deep-equal that could only
         // return "equal" and emit nothing — dead re-verification, up to a
         // second (or, with a plan, third) full structural walk per element on
         // mostly-unchanged arrays (F20). It is deleted. `onModification` IS used
-        // for the granular descent of collapsed `replace` pairs (§5.5.4.2 / F10,
+        // for the granular descent of collapsed `replace` pairs (GEN §5.4.2 / F10,
         // the `replace` case below); do NOT route common entries through it —
         // they are already proven deep-equal by interning.
         currentIndex++;
@@ -763,15 +763,15 @@ export function diffArrayLCS(
       case "replace": {
         const v1 = arr1[lo + (operation.ai as number)] as JsonValue;
         const v2 = arr2[lo + (operation.bi as number)] as JsonValue;
-        // §5.5.4.2 Granular descent (F10). If both sides are the same container
+        // GEN §5.4.2 Granular descent (F10). If both sides are the same container
         // kind — both plain objects, or both arrays — recurse via onModification
         // with skipEqualityCheck=true (exactly the diffArrayByPrimaryKey
         // modification path) to emit granular nested ops at this index instead of
         // a whole-item replace carrying full value + oldValue. The callback
         // (index.ts) picks the correct trie node for the recursion: an object
         // element stays at THIS array's node (item property plans are its
-        // children, §4.3.3); an array element descends to the wildcard child
-        // (the nested array's plan at `${path}/*`, §4.3.5). Primitives and
+        // children, CORE §3.3.3); an array element descends to the wildcard child
+        // (the nested array's plan at `${path}/*`, CORE §3.3.5). Primitives and
         // mismatched-kind pairs (object vs array) keep the whole-item replace.
         const bothObjects =
           v1 !== null &&
@@ -817,11 +817,11 @@ export function diffArrayLCS(
 }
 
 /**
- * `unique` strategy (SPEC §5.6): per-index positional replaces, nothing else.
+ * `unique` strategy (GEN §6): per-index positional replaces, nothing else.
  *
  * F38: the caller's ONLY call site gates this strategy on
  * `strategy === "unique" && checkArraysUnique(arr1, arr2)` (index.ts), and
- * `checkArraysUnique` requires `arr1.length === arr2.length` (§5.4.4). Under
+ * `checkArraysUnique` requires `arr1.length === arr2.length` (GEN §4.4). Under
  * that equal-length gate, a HEAD-era removal/addition phase built on top of
  * Phase 1's positional replace loop was provably unreachable: a removal
  * required `arr1[i] === arr2[i]` (position untouched by Phase 1) AND
@@ -834,7 +834,7 @@ export function diffArrayLCS(
  * always executed for zero effect on the emitted ops. Deleted; behavior is
  * unchanged (proven by the existing test suite, none of which exercised the
  * dead phases since they cannot fire behind this gate). Set-diff / move
- * semantics for `unique` remain unspecified (§5.6.2) — an unequal-length pair
+ * semantics for `unique` remain unspecified (GEN §6.2) — an unequal-length pair
  * never reaches this function.
  */
 export function diffArrayUnique(
@@ -842,10 +842,10 @@ export function diffArrayUnique(
   arr2: JsonArray,
   path: string,
   patches: Operation[],
-  // F11 (SPEC §6.4.2): when false, `replace` ops omit `oldValue`.
+  // F11 (CORE §4.4.2): when false, `replace` ops omit `oldValue`.
   includeOldValue: boolean = true
 ) {
-  const n = arr1.length; // === arr2.length under the equal-length gate (§5.4.4)
+  const n = arr1.length; // === arr2.length under the equal-length gate (GEN §4.4)
   const pathPrefix = path + "/";
 
   for (let i = 0; i < n; i++) {
@@ -860,12 +860,12 @@ export function diffArrayUnique(
 }
 
 /**
- * unique-strategy emitMoves path (F23, SPEC §5.8.6). The caller guarantees the
- * §5.4.4 gate passed (equal length, no duplicates in either side — so values are
+ * unique-strategy emitMoves path (F23, GEN §8.6). The caller guarantees the
+ * GEN §4.4 gate passed (equal length, no duplicates in either side — so values are
  * primitives that form a bijection candidate by value). If the two arrays are
  * **multiset-equal** (a pure permutation), emit the reorder as `move`s via the
  * shared staged emitter and return `true`. Otherwise return `false` so the
- * caller keeps the §5.6 positional-replace emission (moves buy nothing when the
+ * caller keeps the GEN §6 positional-replace emission (moves buy nothing when the
  * value sets differ). All matched pairs are `changed:false` (equal values), so
  * `onModification` is never invoked here.
  */

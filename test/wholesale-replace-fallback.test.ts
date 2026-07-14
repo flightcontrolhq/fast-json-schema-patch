@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test"
 import { JsonSchemaPatcher, applyPatch, buildPlan } from "../src/index"
 import type { JsonValue, Operation } from "../src/types"
 
-// wholesaleReplaceFallback capability (SPEC §5.5.6 / §10.4.5, F24). Default
+// wholesaleReplaceFallback capability (GEN §9 / CONF §5.5, F24). Default
 // OFF: output is byte-identical to omitting the option. ON: a per-array byte
-// estimate (§5.5.6.1) decides whether the granular op stream for THAT array is
+// estimate (GEN §9.2) decides whether the granular op stream for THAT array is
 // discarded in favor of a single whole-array `replace` (carrying `oldValue`
 // per `includeOldValue`). This file pins the audit's repro shape (a complete
 // rewrite of a 12-item, no-common-elements array) as the trigger case, and
@@ -131,7 +131,7 @@ describe("wholesaleReplaceFallback capability (F24)", () => {
   })
 
   test("small diffs on a schemaless (no-plan) array never trigger the fallback", () => {
-    // Large enough that the per-op estimate overhead (§5.5.6.1, ~30B) is
+    // Large enough that the per-op estimate overhead (GEN §9.2, ~30B) is
     // dwarfed by the array's own serialized size — a tiny array with a
     // one-element diff is a separate, legitimate trigger case (the fixed
     // per-op overhead can exceed a handful of small primitives).

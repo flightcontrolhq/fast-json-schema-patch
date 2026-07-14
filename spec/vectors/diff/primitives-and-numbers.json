@@ -1,7 +1,7 @@
 [
   {
     "name": "num-1-vs-1.0-equal",
-    "comment": "§2.2.2: 1 and 1.0 are equal at f64 -> no ops",
+    "comment": "CORE §1.2.2: 1 and 1.0 are equal at f64 -> no ops",
     "original": {
       "a": 1
     },
@@ -12,7 +12,7 @@
   },
   {
     "name": "num-neg-zero-vs-zero-equal",
-    "comment": "§2.2.2: -0 and 0 are equal -> no ops (JSON serialises -0 as 0)",
+    "comment": "CORE §1.2.2: -0 and 0 are equal -> no ops (JSON serialises -0 as 0)",
     "original": {
       "a": 0
     },
@@ -23,7 +23,7 @@
   },
   {
     "name": "num-2pow53-collapse-equal",
-    "comment": "§2.2.2: 2^53 and 2^53+1 share one f64 image -> equal, no ops",
+    "comment": "CORE §1.2.2: 2^53 and 2^53+1 share one f64 image -> equal, no ops",
     "original": {
       "a": 9007199254740992
     },
@@ -34,7 +34,7 @@
   },
   {
     "name": "num-2pow53-distinct-replace",
-    "comment": "§2.2.2: 2^53 vs 2^53+2 are distinct f64 -> replace",
+    "comment": "CORE §1.2.2: 2^53 vs 2^53+2 are distinct f64 -> replace",
     "original": {
       "a": 9007199254740992
     },
@@ -52,7 +52,7 @@
   },
   {
     "name": "num-large-int-replace",
-    "comment": "§2.2.3: large-int replace carries value/oldValue verbatim",
+    "comment": "CORE §1.2.3: large-int replace carries value/oldValue verbatim",
     "original": {
       "a": 9007199254740992
     },
@@ -70,7 +70,7 @@
   },
   {
     "name": "num-simple-replace",
-    "comment": "§5.1.4: primitive number replace",
+    "comment": "GEN §1.4: primitive number replace",
     "original": {
       "a": 1
     },
@@ -88,7 +88,7 @@
   },
   {
     "name": "null-to-absent-remove",
-    "comment": "§2.4.3: null != absent; dropping a null member is a remove with oldValue:null",
+    "comment": "CORE §1.4.3: null != absent; dropping a null member is a remove with oldValue:null",
     "original": {
       "a": null
     },
@@ -103,7 +103,7 @@
   },
   {
     "name": "absent-to-null-add",
-    "comment": "§2.4.3: adding a null member is an add with value:null",
+    "comment": "CORE §1.4.3: adding a null member is an add with value:null",
     "original": {},
     "modified": {
       "a": null
@@ -118,7 +118,7 @@
   },
   {
     "name": "null-to-value-replace",
-    "comment": "§5.1.4: null -> number is a primitive replace, oldValue null",
+    "comment": "GEN §1.4: null -> number is a primitive replace, oldValue null",
     "original": {
       "a": null
     },
@@ -136,7 +136,7 @@
   },
   {
     "name": "value-to-null-replace",
-    "comment": "§5.1.4: number -> null is a primitive replace",
+    "comment": "GEN §1.4: number -> null is a primitive replace",
     "original": {
       "a": 5
     },
@@ -154,7 +154,7 @@
   },
   {
     "name": "num-vs-string-no-coercion",
-    "comment": "§2.4.3: 1 != \"1\"; type change is a replace",
+    "comment": "CORE §1.4.3: 1 != \"1\"; type change is a replace",
     "original": {
       "a": 1
     },
@@ -172,7 +172,7 @@
   },
   {
     "name": "bool-vs-num-no-coercion",
-    "comment": "§2.4.3: true != 1; replace",
+    "comment": "CORE §1.4.3: true != 1; replace",
     "original": {
       "a": true
     },
@@ -190,7 +190,7 @@
   },
   {
     "name": "string-replace",
-    "comment": "§5.1.4: string replace",
+    "comment": "GEN §1.4: string replace",
     "original": {
       "a": "x"
     },
@@ -208,7 +208,7 @@
   },
   {
     "name": "kind-object-to-array-replace",
-    "comment": "§5.1.4: object vs array is a whole replace, never a structural merge",
+    "comment": "GEN §1.4: object vs array is a whole replace, never a structural merge",
     "original": {
       "a": {
         "x": 1
@@ -234,7 +234,7 @@
   },
   {
     "name": "kind-array-to-object-replace",
-    "comment": "§5.1.4: array vs object is a whole replace",
+    "comment": "GEN §1.4: array vs object is a whole replace",
     "original": {
       "a": [
         1
@@ -260,7 +260,7 @@
   },
   {
     "name": "kind-array-to-primitive-replace",
-    "comment": "§5.1.4: array vs primitive is a whole replace",
+    "comment": "GEN §1.4: array vs primitive is a whole replace",
     "original": {
       "a": [
         1
@@ -282,7 +282,7 @@
   },
   {
     "name": "root-primitive-replace",
-    "comment": "§5.1.4: root-level primitive change replaces at path ''",
+    "comment": "GEN §1.4: root-level primitive change replaces at path ''",
     "original": 1,
     "modified": 2,
     "expectedPatch": [
@@ -296,7 +296,7 @@
   },
   {
     "name": "root-null-to-object-replace",
-    "comment": "§5.1.4: root null vs object is a whole replace at ''",
+    "comment": "GEN §1.4: root null vs object is a whole replace at ''",
     "original": null,
     "modified": {
       "a": 1

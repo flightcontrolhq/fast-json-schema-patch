@@ -59,13 +59,13 @@ function fail(message: string, code: PatchErrorCode, op: Operation | undefined, 
 }
 
 /**
- * Tier-1 required-field gate (SPEC §8.3.5, RFC 6902 §4.6, D4). `value` is a
+ * Tier-1 required-field gate (CORE §5.3.5, RFC 6902 §4.6, D4). `value` is a
  * REQUIRED member of add/replace AND `test` — a `test` with no `value` is
  * malformed, NOT a comparison against `undefined`/`null`. `from` is required on
  * move/copy. Presence is decided by the member being present in the op object
  * (`"value" in op`), so `{op:"test",path:"/a",value:null}` is VALID (tests
  * against null) while an ABSENT `value` is INVALID_OPERATION. This is tier 1 in
- * the §8.3.5 precedence order: it MUST fire before the tier-2 pointer-syntax
+ * the CORE §5.3.5 precedence order: it MUST fire before the tier-2 pointer-syntax
  * gate and the tier-3 read-side existence check, so a `test` missing `value` is
  * INVALID_OPERATION even when its path also does not exist or is malformed.
  */
@@ -82,7 +82,7 @@ function assertRequiredFields(op: Operation, opIndex: number): void {
 }
 
 /**
- * Whole-pointer syntax gate (RFC 6901 §3, SPEC §3.7, D2). A JSON Pointer is
+ * Whole-pointer syntax gate (RFC 6901 §3, CORE §2.7, D2). A JSON Pointer is
  * either the empty string (the root) or a string that BEGINS with "/". A
  * non-empty pointer without a leading "/" is a syntax error and MUST be
  * rejected with INVALID_POINTER before any resolution — it MUST NOT alias to
@@ -254,7 +254,7 @@ function applyOperation(
   cloned: WeakSet<object>,
   options: ApplyPatchOptions,
 ): JsonValue {
-  // §8.3.5 error precedence: tier 1 (missing required field) precedes tier 2
+  // CORE §5.3.5 error precedence: tier 1 (missing required field) precedes tier 2
   // (pointer/index syntax) precedes tier 3 (existence). Required-field checks
   // therefore run BEFORE the pointer-syntax gate.
   assertRequiredFields(op, opIndex)

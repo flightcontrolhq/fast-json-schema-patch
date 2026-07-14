@@ -18,9 +18,9 @@ import (
 // For every record this test:
 //  1. builds the same plan from the referenced schema + options,
 //  2. diffs original→modified with the same capability toggles,
-//  3. asserts its patch is STRUCTURALLY EQUAL to tsPatch (§10.3.2), and
+//  3. asserts its patch is STRUCTURALLY EQUAL to tsPatch (CONF §4.2), and
 //  4. applies ITS OWN patch to original and asserts the result deep-equals
-//     tsApplied (§8.7.4) — and that apply never mutated the input.
+//     tsApplied (CORE §5.7.4) — and that apply never mutated the input.
 //
 // Zero mismatches are required. A divergence is a bug in the Go port, a bug in
 // the TS reference, or a spec hole — investigate, do not paper over.
@@ -147,7 +147,7 @@ func runFuzzRecord(t *testing.T, rec *fuzzRecord, loadSchema func(string) (Value
 	}
 	got := patcher.Execute(original, modified)
 
-	// (1) Structural op equality against the TS reference patch (§10.3.2).
+	// (1) Structural op equality against the TS reference patch (CONF §4.2).
 	want := decodeExpectedPatch(t, rec.TSPatch)
 	assertOpsEqual(t, got, want)
 	if t.Failed() {
@@ -155,7 +155,7 @@ func runFuzzRecord(t *testing.T, rec *fuzzRecord, loadSchema func(string) (Value
 	}
 
 	// (2) Apply the Go patch to a snapshot of original; the input must not
-	// mutate, and the result must deep-equal the reference's tsApplied (§8.7.4).
+	// mutate, and the result must deep-equal the reference's tsApplied (CORE §5.7.4).
 	before := Clone(original)
 	applied, err := ApplyPatch(original, got, ApplyOptions{})
 	if err != nil {

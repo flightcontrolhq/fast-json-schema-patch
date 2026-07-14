@@ -126,7 +126,7 @@ func encodeValue(buf *bytes.Buffer, v Value) error {
 	case string:
 		encodeString(buf, x)
 	case Number:
-		// Backstop grammar gate (SPEC §2.2): even though every ingress
+		// Backstop grammar gate (CORE §1.2): even though every ingress
 		// ([Decode]/[ParseNumber]/[NewNumber]/[FromAny]) validates, Encode
 		// re-checks so a malformed literal can never reach the wire — an empty
 		// text, or a hand-built non-finite, fails here rather than emitting
@@ -283,7 +283,7 @@ func FromAny(v any) (Value, error) {
 }
 
 // numberFromFloat converts a Go float to a [Number], rejecting the non-finite
-// values (NaN, +Inf, -Inf) that have no JSON representation (SPEC §2.2). bitSize
+// values (NaN, +Inf, -Inf) that have no JSON representation (CORE §1.2). bitSize
 // (32 or 64) controls the shortest-round-trip formatting so a float32 does not
 // gain spurious f64 precision digits.
 func numberFromFloat(f float64, bitSize int) (Value, error) {

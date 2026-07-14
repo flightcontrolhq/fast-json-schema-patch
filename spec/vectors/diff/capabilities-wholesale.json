@@ -1,7 +1,7 @@
 [
   {
     "name": "wrf-estimate-equals-threshold-keeps-granular",
-    "comment": "§5.9.3: estimate(43) == threshold(43); strict > false, so the granular replace is KEPT",
+    "comment": "GEN §9.3: estimate(43) == threshold(43); strict > false, so the granular replace is KEPT",
     "schema": {
       "type": "object",
       "properties": {
@@ -43,7 +43,7 @@
   },
   {
     "name": "wrf-estimate-exceeds-by-one-goes-wholesale",
-    "comment": "§5.9.3: same shape, one unchanged element 1 byte shorter -> threshold(42) < estimate(43) -> WHOLESALE replace of /a",
+    "comment": "GEN §9.3: same shape, one unchanged element 1 byte shorter -> threshold(42) < estimate(43) -> WHOLESALE replace of /a",
     "schema": {
       "type": "object",
       "properties": {
@@ -89,7 +89,7 @@
   },
   {
     "name": "wrf-full-rewrite-triggers",
-    "comment": "§5.9.3: a no-common-element full rewrite (8 granular ops) exceeds the array size -> one whole-array replace",
+    "comment": "GEN §9.3: a no-common-element full rewrite (8 granular ops) exceeds the array size -> one whole-array replace",
     "schema": {
       "type": "object",
       "properties": {
@@ -218,7 +218,7 @@
   },
   {
     "name": "wrf-full-rewrite-no-oldvalue",
-    "comment": "§10.4.5: the wholesale replace itself honors includeOldValue=false (no oldValue)",
+    "comment": "CONF §5.5: the wholesale replace itself honors includeOldValue=false (no oldValue)",
     "schema": {
       "type": "object",
       "properties": {
@@ -326,7 +326,7 @@
   },
   {
     "name": "wrf-off-default-is-granular",
-    "comment": "§5.9: with the capability OFF, the same rewrite stays a granular op stream (byte-stability baseline)",
+    "comment": "GEN §9: with the capability OFF, the same rewrite stays a granular op stream (byte-stability baseline)",
     "schema": {
       "type": "object",
       "properties": {
@@ -468,7 +468,7 @@
   },
   {
     "name": "wrf-small-diff-keeps-granular",
-    "comment": "§5.9.3: a one-field change in a 6-item array stays far under threshold -> granular kept",
+    "comment": "GEN §9.3: a one-field change in a 6-item array stays far under threshold -> granular kept",
     "schema": {
       "type": "object",
       "properties": {
@@ -575,7 +575,7 @@
   },
   {
     "name": "wrf-nested-inner-triggers-outer-keeps",
-    "comment": "§5.9.1 bottom-up: the inner array crosses its own threshold and goes wholesale while the outer array keeps granular descent",
+    "comment": "GEN §9.1 bottom-up: the inner array crosses its own threshold and goes wholesale while the outer array keeps granular descent",
     "schema": {
       "type": "object",
       "properties": {

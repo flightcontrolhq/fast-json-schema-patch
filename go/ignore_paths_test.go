@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-// ignore_paths_test.go covers the ignorePaths capability (SPEC §5.10, §10.4.6),
-// including the construction-time validation errors (§5.10.1/§5.10.7) that the
-// diff vector wire format cannot express (§10.5.2), plus happy-path and
+// ignore_paths_test.go covers the ignorePaths capability (GEN §10, CONF §5.6),
+// including the construction-time validation errors (GEN §10.1/GEN §10.7) that the
+// diff vector wire format cannot express (CONF §6.2), plus happy-path and
 // interaction semantics — mirroring test/ignore-paths.test.ts.
 
 func ignoreDiff(t *testing.T, schema string, ignore []string, opts []PatcherOption, orig, mod string) []Operation {
@@ -81,7 +81,7 @@ func TestIgnorePathsAccepts(t *testing.T) {
 
 func TestIgnorePathsPrimaryKeyUnderAdditionalProps(t *testing.T) {
 	// A primaryKey under an additionalProperties (*) plan path must still be
-	// caught (SPEC §5.10.7): plan key "/*", ignore "/envA/*/id".
+	// caught (GEN §10.7): plan key "/*", ignore "/envA/*/id".
 	schema := `{"type":"object","additionalProperties":{"type":"array","items":{"type":"object","required":["id"],"properties":{"id":{"type":"string"}}}}}`
 	plan, err := BuildPlan(mustDecode(t, schema), BuildPlanOptions{})
 	if err != nil {
@@ -182,7 +182,7 @@ func TestIgnorePathsWholesaleDisabled(t *testing.T) {
 }
 
 func TestIgnorePathsByteStable(t *testing.T) {
-	// An empty ignore set must be byte-identical to no option (SPEC §5.10.2).
+	// An empty ignore set must be byte-identical to no option (GEN §10.2).
 	orig := `{"meta":{"ts":1,"n":"a"},"arr":[{"id":"x","v":1}]}`
 	mod := `{"meta":{"ts":2,"n":"b"},"arr":[{"id":"x","v":2}]}`
 	base, err := NewPatcher(Plan{})

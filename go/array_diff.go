@@ -6,16 +6,16 @@ import (
 )
 
 // modCallback recurses a matched element pair back through the differ, threading
-// the element's plan-trie node (SPEC §5.4.5.2). skipEqualityCheck mirrors the
+// the element's plan-trie node (GEN §4.5.2). skipEqualityCheck mirrors the
 // reference onModification contract: every real call site passes true (the pair
 // is already known to differ), so the differ recurses unconditionally.
 type modCallback func(oldVal, newVal Value, path string, patches *[]Operation, skipEqualityCheck bool)
 
 // primaryKeyID returns a type-tagged identity string for a primaryKey value and
-// whether v is an admissible key (SPEC §5.4.1.5). Keys are compared by JSON type
+// whether v is an admissible key (GEN §4.1.5). Keys are compared by JSON type
 // AND value with no coercion: a numeric key and a string key never collide
 // (the "s:"/"n:" tag keeps 1 distinct from "1"), while numeric keys compare at
-// f64 (§2.4.3) so 1 and 1.0 are the same key. Only strings and numbers are
+// f64 (CORE §1.4.3) so 1 and 1.0 are the same key. Only strings and numbers are
 // admissible; null/bool/array/object return ok=false.
 func primaryKeyID(v Value) (string, bool) {
 	switch x := v.(type) {
@@ -34,11 +34,11 @@ func primaryKeyID(v Value) (string, bool) {
 	}
 }
 
-// checkPrimaryKeyApplicable is the primaryKey applicability gate (SPEC §5.4.3).
+// checkPrimaryKeyApplicable is the primaryKey applicability gate (GEN §4.3).
 // In one O(n+m) pass it verifies (a) every element of both arrays is an object
 // whose value at primaryKey is a string or number (present, non-null), and (b)
 // there are no duplicate key values within either array. If either check fails,
-// the caller MUST fall back to LCS (§5.5) for this diff. A primaryKeyMap override
+// the caller MUST fall back to LCS (GEN §5) for this diff. A primaryKeyMap override
 // selects the strategy but does NOT bypass this gate.
 func checkPrimaryKeyApplicable(arr1, arr2 []Value, primaryKey string) bool {
 	check := func(arr []Value) bool {
@@ -67,10 +67,10 @@ func checkPrimaryKeyApplicable(arr1, arr2 []Value, primaryKey string) bool {
 }
 
 // diffArrayByPrimaryKey emits the normative three-phase primaryKey diff (SPEC
-// §5.4.1): field-level modifications at ORIGINAL indices (in modified scan
+// GEN §4.1): field-level modifications at ORIGINAL indices (in modified scan
 // order), then removals in descending original index, then "/-" appends in
-// modified appearance order. The caller guarantees the §5.4.3 gate passed. The
-// hashFields prefilter (§5.4.6) is non-normative and output-neutral, so this
+// modified appearance order. The caller guarantees the GEN §4.3 gate passed. The
+// hashFields prefilter (GEN §4.6) is non-normative and output-neutral, so this
 // implementation takes the simple exact deep-equal path.
 func (p *Patcher) diffArrayByPrimaryKey(arr1, arr2 []Value, primaryKey, path string, patches *[]Operation, onMod modCallback) {
 	prefix := path + "/"
@@ -132,18 +132,18 @@ func (p *Patcher) diffArrayByPrimaryKey(arr1, arr2 []Value, primaryKey, path str
 		removals = append(removals, p.removeOp(prefix+strconv.Itoa(idx), arr1[idx]))
 	}
 
-	// Concatenation order (§5.4.1.4): modifications ++ removals ++ additions.
+	// Concatenation order (GEN §4.1.4): modifications ++ removals ++ additions.
 	*patches = append(*patches, mods...)
 	*patches = append(*patches, removals...)
 	*patches = append(*patches, adds...)
 }
 
-// diffArrayByPrimaryKeyMoves is the primaryKey emitMoves path (SPEC §5.8.7). The
-// caller guarantees the §5.4.3 gate passed. Instead of the order-insensitive
+// diffArrayByPrimaryKeyMoves is the primaryKey emitMoves path (GEN §8.7). The
+// caller guarantees the GEN §4.3 gate passed. Instead of the order-insensitive
 // three-phase emission it builds the key bijection and hands it to the shared
 // staged emitter, so survivors are REORDERED into modified order via moves and
 // new keys are INDEXED adds — making apply(original, patch) equal modified
-// byte-exactly (§7.4).
+// byte-exactly (CORE §7.4).
 func (p *Patcher) diffArrayByPrimaryKeyMoves(arr1, arr2 []Value, primaryKey, path string, patches *[]Operation, onMod modCallback) {
 	keyToIndex := make(map[string]int, len(arr1))
 	for i, item := range arr1 {
@@ -181,8 +181,8 @@ func (p *Patcher) diffArrayByPrimaryKeyMoves(arr1, arr2 []Value, primaryKey, pat
 	p.emitArrayMovesPatch(arr1, arr2, path, patches, matched, pureDeletes, pureInserts, onMod)
 }
 
-// diffArrayUnique is the unique strategy (SPEC §5.6): equal-length positional
-// replaces, nothing else. The caller's gate (§5.4.4) guarantees equal lengths,
+// diffArrayUnique is the unique strategy (GEN §6): equal-length positional
+// replaces, nothing else. The caller's gate (GEN §4.4) guarantees equal lengths,
 // so no adds or removes are emitted.
 func (p *Patcher) diffArrayUnique(arr1, arr2 []Value, path string, patches *[]Operation) {
 	prefix := path + "/"
@@ -193,11 +193,11 @@ func (p *Patcher) diffArrayUnique(arr1, arr2 []Value, path string, patches *[]Op
 	}
 }
 
-// diffArrayUniqueMoves is the unique emitMoves path (SPEC §5.8.6). The caller
-// guarantees the §5.4.4 gate passed. If the two arrays are multiset-equal (a
+// diffArrayUniqueMoves is the unique emitMoves path (GEN §8.6). The caller
+// guarantees the GEN §4.4 gate passed. If the two arrays are multiset-equal (a
 // pure permutation) it emits the reorder as moves via the shared staged emitter
 // and returns true; otherwise it emits nothing and returns false so the caller
-// keeps the §5.6 positional-replace emission.
+// keeps the GEN §6 positional-replace emission.
 func (p *Patcher) diffArrayUniqueMoves(arr1, arr2 []Value, path string, patches *[]Operation, onMod modCallback) bool {
 	idxOf := make(map[string]int, len(arr2))
 	for i, v := range arr2 {
@@ -215,7 +215,7 @@ func (p *Patcher) diffArrayUniqueMoves(arr1, arr2 []Value, path string, patches 
 	return true
 }
 
-// checkArraysUnique is the gate for the unique strategy (SPEC §5.4.4): true iff
+// checkArraysUnique is the gate for the unique strategy (GEN §4.4): true iff
 // the arrays have equal length and neither contains two deep-equal elements.
 func checkArraysUnique(arr1, arr2 []Value) bool {
 	if len(arr1) != len(arr2) {
@@ -253,11 +253,11 @@ type scriptEntry struct {
 	bi   int
 }
 
-// diffArrayLCS is the LCS strategy (SPEC §5.5): normative prefix/suffix trimming
-// (§5.5.0), banded Myers with the pinned tie-breaks and V-init (§5.5.2),
-// backtrack (§5.5.3), adjacent remove+add collapse and granular descent
-// (§5.5.4), then index-correct emission (§5.5.5). With emitMoves on it builds the
-// bijection and defers to the shared staged emitter (§5.8.5).
+// diffArrayLCS is the LCS strategy (GEN §5): normative prefix/suffix trimming
+// (GEN §5.0), banded Myers with the pinned tie-breaks and V-init (GEN §5.2),
+// backtrack (GEN §5.3), adjacent remove+add collapse and granular descent
+// (GEN §5.4), then index-correct emission (GEN §5.5). With emitMoves on it builds the
+// bijection and defers to the shared staged emitter (GEN §8.5).
 func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Operation, onMod modCallback, itemIgnore *ignoreNode) {
 	n := len(arr1)
 	m := len(arr2)
@@ -267,7 +267,7 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 		prefixPath = path + "/"
 	}
 
-	// Empty-array fast paths (§5.5.1).
+	// Empty-array fast paths (GEN §5.1).
 	if n == 0 {
 		for i := 0; i < m; i++ {
 			*patches = append(*patches, p.addOp(prefixPath+strconv.Itoa(i), arr2[i]))
@@ -281,7 +281,7 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 		return
 	}
 
-	// §5.5.0 Trim step 0: maximal common prefix first, then the maximal common
+	// GEN §5.0 Trim step 0: maximal common prefix first, then the maximal common
 	// suffix of the remainder, using the same deep-equal predicate as the snake.
 	lo := 0
 	for lo < n && lo < m && DeepEqual(arr1[lo], arr2[lo]) {
@@ -295,7 +295,7 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 	wn := n - lo - hi // original window length
 	wm := m - lo - hi // modified window length
 
-	// Windowed fast paths (§5.5.0.3).
+	// Windowed fast paths (GEN §5.0.3).
 	if wn == 0 && wm == 0 {
 		return // arrays are deep-equal
 	}
@@ -313,12 +313,12 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 	}
 
 	// Intern the window elements to integer ids via a canonical, key-sorted
-	// fingerprint shared across BOTH arrays (§5.5.2). Equal fingerprint <=>
+	// fingerprint shared across BOTH arrays (GEN §5.2). Equal fingerprint <=>
 	// deep-equal for JSON inputs, so the Myers snake compares ids in O(1). All
 	// state is call-local.
 	fpToID := make(map[string]int)
 	intern := func(v Value) int {
-		// ignorePaths (SPEC §5.10.5): the fingerprint is ignore-filtered so items
+		// ignorePaths (GEN §10.5): the fingerprint is ignore-filtered so items
 		// differing only in ignored fields intern equal. itemIgnore==nil delegates
 		// to stableStringify (byte-identical to the pre-capability path).
 		fp := ignoreFingerprint(v, itemIgnore)
@@ -338,7 +338,7 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 		idsB[i] = intern(arr2[lo+i])
 	}
 
-	// Myers O(ND) forward pass over the trimmed window (§5.5.2). Window
+	// Myers O(ND) forward pass over the trimmed window (GEN §5.2). Window
 	// coordinates x in [0,wn], y in [0,wm] map to array indices (lo+x, lo+y).
 	max := wn + wm
 	offset := max
@@ -409,7 +409,7 @@ outer:
 		return
 	}
 
-	// Backtracking to build the edit script in window coordinates (§5.5.3).
+	// Backtracking to build the edit script in window coordinates (GEN §5.3).
 	var script []scriptEntry
 	x := wn
 	y := wm
@@ -461,7 +461,7 @@ outer:
 		script[l], script[r] = script[r], script[l]
 	}
 
-	// Collapse adjacent remove+add into replace (§5.5.4.1).
+	// Collapse adjacent remove+add into replace (GEN §5.4.1).
 	opt := make([]scriptEntry, 0, len(script))
 	for i := 0; i < len(script); i++ {
 		cur := script[i]
@@ -473,7 +473,7 @@ outer:
 		}
 	}
 
-	// emitMoves capability (§5.8.5): reconstruct the full bijection from the
+	// emitMoves capability (GEN §8.5): reconstruct the full bijection from the
 	// collapsed script plus the trimmed prefix/suffix, pair leftover removes with
 	// equal-id leftover adds into relocations, and defer to the staged emitter.
 	if p.emitMoves {
@@ -534,7 +534,7 @@ outer:
 		return
 	}
 
-	// Emission from the script (§5.5.5). currentIndex starts at lo: the trimmed
+	// Emission from the script (GEN §5.5). currentIndex starts at lo: the trimmed
 	// common prefix occupies output indices 0..lo-1 unchanged.
 	currentIndex := lo
 	for _, e := range opt {
@@ -544,7 +544,7 @@ outer:
 		case kindReplace:
 			v1 := arr1[lo+e.ai]
 			v2 := arr2[lo+e.bi]
-			// §5.5.4.2 granular descent: same-kind pairs recurse; primitives and
+			// GEN §5.4.2 granular descent: same-kind pairs recurse; primitives and
 			// mismatched-kind pairs stay a whole-item replace.
 			if sameContainerKind(v1, v2) {
 				onMod(v1, v2, prefixPath+strconv.Itoa(currentIndex), patches, true)

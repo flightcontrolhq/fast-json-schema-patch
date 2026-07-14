@@ -2,7 +2,7 @@ import type { JsonArray, JsonValue, Operation } from "../types";
 import type { ModificationCallback } from "./arrayDiffAlgorithms";
 
 /**
- * The `emitMoves` capability (SPEC §10.4.4). All three strategies share one
+ * The `emitMoves` capability (CONF §5.4). All three strategies share one
  * machinery: given a bijection between surviving `original` indices and their
  * `modified` target indices, plus pure deletes/inserts, reproduce `modified`
  * EXACTLY (order and duplicates) as a sequence of RFC 6902 ops in which every
@@ -12,14 +12,14 @@ import type { ModificationCallback } from "./arrayDiffAlgorithms";
 
 /**
  * Longest strictly-increasing subsequence of `seq`, returned as the set of
- * indices INTO `seq` that participate (SPEC §5.8.2). `seq` is always a
+ * indices INTO `seq` that participate (GEN §8.2). `seq` is always a
  * permutation of `0..S-1` here (distinct values), so "strictly increasing"
  * is unambiguous and `lower_bound` and `upper_bound` coincide.
  *
  * Deterministic and Go-reproducible: canonical patience-sorting with a
  * `lower_bound` binary search over the `tails` array plus predecessor-link
  * reconstruction from the last-appended tail. This fixes ONE specific LIS when
- * several have equal length — the pinned tie-break of §5.8.2 — so a conforming
+ * several have equal length — the pinned tie-break of GEN §8.2 — so a conforming
  * reimplementation emits byte-identical moves.
  */
 export function lisIndices(seq: ArrayLike<number>): number[] {
@@ -56,8 +56,8 @@ export function lisIndices(seq: ArrayLike<number>): number[] {
 /**
  * Emit the `move` ops that reorder a length-`S` array — whose element at source
  * position `p` must end at target rank `seq[p]` (a permutation of `0..S-1`) —
- * into target-rank order (SPEC §5.8.3). Elements whose source positions form the
- * LIS of `seq` (§5.8.2) are the fixed skeleton and NEVER move; every other
+ * into target-rank order (GEN §8.3). Elements whose source positions form the
+ * LIS of `seq` (GEN §8.2) are the fixed skeleton and NEVER move; every other
  * element is relocated by exactly one `move`, processed **right-to-left**
  * (highest target rank first) so each is placed immediately before the
  * already-final element to its right (insert-before semantics). No-op moves
@@ -109,7 +109,7 @@ export interface MatchedPair {
 }
 
 /**
- * Staged move-emitter shared by all three `emitMoves` strategies (SPEC §5.8.1).
+ * Staged move-emitter shared by all three `emitMoves` strategies (GEN §8.1).
  * Given a bijection `matched` between a subset of `original` indices and a
  * subset of `modified` indices, the leftover `pureDeletes` (original indices
  * with no match) and `pureInserts` (modified indices with no match), emit ops
@@ -119,18 +119,18 @@ export interface MatchedPair {
  *      valid as higher ones are spliced out). After this the array holds the
  *      survivors in original relative order.
  *   2. **moves** — reorder the survivors into `modified` order via
- *      `computeMoves` (§5.8.3); indices are in the survivors-only coordinate
+ *      `computeMoves` (GEN §8.3); indices are in the survivors-only coordinate
  *      space of this moment.
  *   3. **inserts** — `pureInserts` in ASCENDING target index, each an INDEXED
  *      `add` (never `/-`) at its final `modified` position; ascending order
  *      keeps every earlier position already final.
  *   4. **replaces** — modified survivors (`changed === true`) in ASCENDING
- *      target index; same-kind pairs recurse for granular descent (§5.5.4.2),
+ *      target index; same-kind pairs recurse for granular descent (GEN §5.4.2),
  *      otherwise a whole-item `replace`. The array is at full `modified` length
  *      here, so each target index is final.
  *
  * `move` ops never carry `value`/`oldValue`. `remove`/`replace` honor
- * `includeOldValue` (§6.4.2).
+ * `includeOldValue` (CORE §4.4.2).
  */
 export function emitArrayMovesPatch(
   arr1: JsonArray,
@@ -186,7 +186,7 @@ export function emitArrayMovesPatch(
   }
 
   // Stage 4: modifications at final target indices, ascending. Same-kind pairs
-  // recurse (granular descent, §5.5.4.2); otherwise whole-item replace.
+  // recurse (granular descent, GEN §5.4.2); otherwise whole-item replace.
   const changed = matched
     .filter((mm) => mm.changed)
     .sort((a, b) => a.tgt - b.tgt);

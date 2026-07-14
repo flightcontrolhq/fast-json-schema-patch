@@ -47,14 +47,14 @@ independent implementations (e.g. a port to another language) produce byte-ident
 
 **Any change that alters diff, apply, or invert semantics — new capability, changed default,
 bug fix that changes emitted output, new array strategy, etc. — MUST update `SPEC.md` and its
-conformance vectors (§10: diff/apply/invert vector formats and the pass/fail gate) in the
+conformance vectors (CONF: diff/apply/invert vector formats and the pass/fail gate) in the
 *same* PR as the behavior change.** A behavior change without a corresponding spec/vector update
 will be asked to add one before merge. Pure refactors, performance work, and packaging/tooling
-changes that provably do not change output (see `SPEC.md` §2.4, output-neutrality) don't need a
+changes that provably do not change output (see `SPEC.md` CORE §1.4, output-neutrality) don't need a
 spec update, but say so explicitly in the PR description and show how you verified byte-identical
 output (e.g. a snapshot diff or a byte-stability test).
 
-**The vector-first rule applies to *both* engines.** `SPEC.md` §10's vectors are the shared,
+**The vector-first rule applies to *both* engines.** `SPEC.md` CONF's vectors are the shared,
 language-neutral oracle, and the Go engine in [`go/`](./go) is verified against the very same
 `spec/vectors` (plus the differential-fuzz corpus in `spec/fuzz`). A semantic change lands the
 spec + vector update first; the TypeScript reference (`src/`) and the Go port (`go/`) both follow

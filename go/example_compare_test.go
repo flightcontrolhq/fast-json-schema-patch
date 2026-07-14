@@ -24,7 +24,7 @@ type Deployment struct {
 }
 
 // ExampleCompare diffs two typed Go structs. The schema marks each container's
-// `name` as required, so the containers slice is matched by key (SPEC §4.5): a
+// `name` as required, so the containers slice is matched by key (CORE §3.5): a
 // reordering with one image bump collapses to a single replace, instead of the
 // two positional rewrites a schemaless diff would emit.
 func ExampleCompare() {

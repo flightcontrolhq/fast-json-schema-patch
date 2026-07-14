@@ -9,7 +9,7 @@ import (
 )
 
 // ignoreNode is one node of the compiled ignore trie for the ignorePaths
-// capability (SPEC §5.10). It mirrors [PlanNode]: a "*" segment is the wildcard
+// capability (GEN §10). It mirrors [PlanNode]: a "*" segment is the wildcard
 // edge, any other segment is an UNESCAPED exact child edge; end marks a node
 // where an ignore pointer terminates ("ignored here"). The differ threads a node
 // down its recursion in parallel with the plan trie; a nil node means "nothing
@@ -23,10 +23,10 @@ type ignoreNode struct {
 }
 
 // terminal reports whether this node ends an ignore pointer (the subtree here is
-// EQUAL in both directions, SPEC §5.10.4). Nil-safe.
+// EQUAL in both directions, GEN §10.4). Nil-safe.
 func (n *ignoreNode) terminal() bool { return n != nil && n.end }
 
-// member advances the trie for an object member key (SPEC §5.10.3): the exact
+// member advances the trie for an object member key (GEN §10.3): the exact
 // child edge if present, else the wildcard, else nil. Exact edges take
 // precedence at every level. Nil-safe.
 func (n *ignoreNode) member(key string) *ignoreNode {
@@ -39,7 +39,7 @@ func (n *ignoreNode) member(key string) *ignoreNode {
 	return n.wildcard
 }
 
-// item advances the trie for an ARRAY element (SPEC §5.10.3): the array index
+// item advances the trie for an ARRAY element (GEN §10.3): the array index
 // level is represented by a single "*", so every element — object, array, or
 // primitive — advances through the wildcard edge. Nil-safe.
 func (n *ignoreNode) item() *ignoreNode {
@@ -50,8 +50,8 @@ func (n *ignoreNode) item() *ignoreNode {
 }
 
 // isIgnoreIndexSegment reports whether an unescaped ignore-pointer segment is a
-// canonical array index (SPEC §2.3.2 — "0" or a nonzero digit run, value in
-// 0..2^32-2). Such a segment (or "-") is rejected at construction (§5.10.1): an
+// canonical array index (CORE §1.3.2 — "0" or a nonzero digit run, value in
+// 0..2^32-2). Such a segment (or "-") is rejected at construction (GEN §10.1): an
 // array level is matched only by "*". A merely numeric-looking segment that is
 // not a canonical in-range index (leading zero, or > 2^32-2) is a legal
 // object-member name (§F33) and is accepted.
@@ -64,7 +64,7 @@ func isIgnoreIndexSegment(seg string) bool {
 }
 
 // compileIgnoreTrie validates an ignorePaths set and compiles it into an ignore
-// trie (SPEC §5.10.1/§5.10.2). It returns (nil, nil) for an empty/absent set
+// trie (GEN §10.1/GEN §10.2). It returns (nil, nil) for an empty/absent set
 // (threads no node). It returns a non-nil error on the first invalid pointer: a
 // non-"/"-leading or empty/root pointer, or any segment that is a canonical
 // array index or "-".
@@ -75,10 +75,10 @@ func compileIgnoreTrie(paths []string) (*ignoreNode, error) {
 	root := &ignoreNode{}
 	for _, path := range paths {
 		if path == "" {
-			return nil, fmt.Errorf(`schemapatch: ignorePaths: the empty/root pointer "" is not an object-member location (SPEC §5.10.1)`)
+			return nil, fmt.Errorf(`schemapatch: ignorePaths: the empty/root pointer "" is not an object-member location (GEN §10.1)`)
 		}
 		if path[0] != '/' {
-			return nil, fmt.Errorf(`schemapatch: ignorePaths: pointer %q must begin with "/" (SPEC §5.10.1)`, path)
+			return nil, fmt.Errorf(`schemapatch: ignorePaths: pointer %q must begin with "/" (GEN §10.1)`, path)
 		}
 		node := root
 		for _, rawSeg := range strings.Split(path[1:], "/") {
@@ -91,7 +91,7 @@ func compileIgnoreTrie(paths []string) (*ignoreNode, error) {
 			}
 			seg := UnescapeToken(rawSeg)
 			if seg == "-" || isIgnoreIndexSegment(seg) {
-				return nil, fmt.Errorf(`schemapatch: ignorePaths: pointer %q contains an array-index (or "-") segment %q; ignore pointers address object members only — use "*" for an array level (SPEC §5.10.1)`, path, seg)
+				return nil, fmt.Errorf(`schemapatch: ignorePaths: pointer %q contains an array-index (or "-") segment %q; ignore pointers address object members only — use "*" for an array level (GEN §10.1)`, path, seg)
 			}
 			if node.children == nil {
 				node.children = make(map[string]*ignoreNode)
@@ -109,7 +109,7 @@ func compileIgnoreTrie(paths []string) (*ignoreNode, error) {
 }
 
 // ignoreSubtreeHasTerminal reports whether the subtree rooted at n contains ANY
-// ignore terminal (SPEC §5.10.6). It disables wholesaleReplaceFallback for an
+// ignore terminal (GEN §10.6). It disables wholesaleReplaceFallback for an
 // array with an ignore path beneath it, so ignored content never leaks through a
 // whole-array replace of an ancestor. Nil-safe.
 func ignoreSubtreeHasTerminal(n *ignoreNode) bool {
@@ -130,7 +130,7 @@ func ignoreSubtreeHasTerminal(n *ignoreNode) bool {
 	return false
 }
 
-// validatePrimaryKeysNotIgnored enforces SPEC §5.10.7: a plan's primaryKey field
+// validatePrimaryKeysNotIgnored enforces GEN §10.7: a plan's primaryKey field
 // MUST NOT be ignorable. It returns a non-nil error when any array plan's
 // key-field location (P / "*" / key) is at or beneath an ignore terminal — the
 // field itself, the whole item (P/*), or the whole array (P).
@@ -144,7 +144,7 @@ func validatePrimaryKeysNotIgnored(plan Plan, root *ignoreNode) error {
 			if display == "" {
 				display = "/"
 			}
-			return fmt.Errorf("schemapatch: ignorePaths: an ignore entry covers the primaryKey field %q of the array plan at %q — a primaryKey field must not be ignorable (SPEC §5.10.7)", ap.PrimaryKey, display)
+			return fmt.Errorf("schemapatch: ignorePaths: an ignore entry covers the primaryKey field %q of the array plan at %q — a primaryKey field must not be ignorable (GEN §10.7)", ap.PrimaryKey, display)
 		}
 	}
 	return nil
@@ -152,7 +152,7 @@ func validatePrimaryKeysNotIgnored(plan Plan, root *ignoreNode) error {
 
 // ignoreCoversKeyField walks a plan key P (segs) through the ignore trie, then
 // consumes the array-element wildcard and the key member, reporting whether the
-// key-field location is at or beneath an ignore terminal (SPEC §5.10.7). A
+// key-field location is at or beneath an ignore terminal (GEN §10.7). A
 // literal P segment follows exact-child-else-wildcard; a "*" P segment explores
 // both exact children and the wildcard (either may match at diff time).
 func ignoreCoversKeyField(node *ignoreNode, segs []string, i int, key string) bool {
@@ -195,7 +195,7 @@ func ignoreCoversKeyField(node *ignoreNode, segs []string, i int, key string) bo
 }
 
 // ignoreFingerprint returns a canonical, key-sorted fingerprint of v that OMITS
-// members/elements ignored under ig (SPEC §5.10.5), so two items differing only
+// members/elements ignored under ig (GEN §10.5), so two items differing only
 // in ignored fields intern to the same id (common / move-pairable, never
 // remove+add). When ig is nil it delegates to [stableStringify], producing
 // byte-identical output to the pre-capability interning path.

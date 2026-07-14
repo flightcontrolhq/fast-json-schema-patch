@@ -1,7 +1,7 @@
 [
   {
     "name": "plan-primaryKey-id",
-    "comment": "§4.5.3: default candidate 'id' selected; requiredFields/hashFields populated",
+    "comment": "CORE §3.5.3: default candidate 'id' selected; requiredFields/hashFields populated",
     "schema": {
       "type": "object",
       "properties": {
@@ -40,7 +40,7 @@
   },
   {
     "name": "plan-primaryKey-name",
-    "comment": "§4.5.3: 'name' is a default candidate",
+    "comment": "CORE §3.5.3: 'name' is a default candidate",
     "schema": {
       "type": "object",
       "properties": {
@@ -79,7 +79,7 @@
   },
   {
     "name": "plan-primaryKey-numeric-id",
-    "comment": "§4.5.3: a number-typed id still qualifies",
+    "comment": "CORE §3.5.3: a number-typed id still qualifies",
     "schema": {
       "type": "object",
       "properties": {
@@ -118,7 +118,7 @@
   },
   {
     "name": "plan-unique-primitive-items",
-    "comment": "§4.4.2: string item schema -> unique strategy, no primaryKey",
+    "comment": "CORE §3.4.2: string item schema -> unique strategy, no primaryKey",
     "schema": {
       "type": "object",
       "properties": {
@@ -142,7 +142,7 @@
   },
   {
     "name": "plan-lcs-plain-objects",
-    "comment": "§4.4.1: object items with no candidate key -> lcs",
+    "comment": "CORE §3.4.1: object items with no candidate key -> lcs",
     "schema": {
       "type": "object",
       "properties": {
@@ -171,7 +171,7 @@
   },
   {
     "name": "plan-allOf-merge-key",
-    "comment": "§4.5.1.1: a key declared only in an allOf branch is detected",
+    "comment": "CORE §3.5.1.1: a key declared only in an allOf branch is detected",
     "schema": {
       "type": "object",
       "properties": {
@@ -219,7 +219,7 @@
   },
   {
     "name": "plan-anyOf-first-branch-key",
-    "comment": "§4.5.1: anyOf branches examined in order; first branch yielding a key wins",
+    "comment": "CORE §3.5.1: anyOf branches examined in order; first branch yielding a key wins",
     "schema": {
       "type": "object",
       "properties": {
@@ -267,7 +267,7 @@
   },
   {
     "name": "plan-oneOf-branch-key",
-    "comment": "§4.5.1: oneOf branch order; the keyed branch supplies the primaryKey",
+    "comment": "CORE §3.5.1: oneOf branch order; the keyed branch supplies the primaryKey",
     "schema": {
       "type": "object",
       "properties": {
@@ -315,7 +315,7 @@
   },
   {
     "name": "plan-additionalProperties-wildcard-at-depth",
-    "comment": "§4.3.2: additionalProperties registers a /envs/* wildcard array plan",
+    "comment": "CORE §3.3.2: additionalProperties registers a /envs/* wildcard array plan",
     "schema": {
       "type": "object",
       "properties": {
@@ -357,7 +357,7 @@
   },
   {
     "name": "plan-additionalProperties-top-level",
-    "comment": "§4.3.2: a top-level additionalProperties array -> /* plan",
+    "comment": "CORE §3.3.2: a top-level additionalProperties array -> /* plan",
     "schema": {
       "type": "object",
       "additionalProperties": {
@@ -394,7 +394,7 @@
   },
   {
     "name": "plan-nested-arrays-distinct-paths",
-    "comment": "§4.3.5: array-of-arrays gives outer /matrix (lcs) and inner /matrix/* (keyed) distinct paths",
+    "comment": "CORE §3.3.5: array-of-arrays gives outer /matrix (lcs) and inner /matrix/* (keyed) distinct paths",
     "schema": {
       "type": "object",
       "properties": {
@@ -443,7 +443,7 @@
   },
   {
     "name": "plan-nested-keyed-arrays",
-    "comment": "§4.3.3: keyed array within keyed array -> /groups and /groups/members",
+    "comment": "CORE §3.3.3: keyed array within keyed array -> /groups and /groups/members",
     "schema": {
       "type": "object",
       "properties": {
@@ -507,7 +507,7 @@
   },
   {
     "name": "plan-typeless-node-traversed",
-    "comment": "§4.3.1: nodes with properties/items but no `type` are still traversed",
+    "comment": "CORE §3.3.1: nodes with properties/items but no `type` are still traversed",
     "schema": {
       "properties": {
         "list": {
@@ -544,7 +544,7 @@
   },
   {
     "name": "plan-hashFields-multiple-required",
-    "comment": "§4.5.4: hashFields = required string/number fields (sorted, order-insensitive compare)",
+    "comment": "CORE §3.5.4: hashFields = required string/number fields (sorted, order-insensitive compare)",
     "schema": {
       "type": "object",
       "properties": {
@@ -592,7 +592,7 @@
   },
   {
     "name": "plan-hashFields-excludes-non-primitive",
-    "comment": "§4.5.4: a required object-typed field is in requiredFields but NOT hashFields",
+    "comment": "CORE §3.5.4: a required object-typed field is in requiredFields but NOT hashFields",
     "schema": {
       "type": "object",
       "properties": {
@@ -633,7 +633,7 @@
   },
   {
     "name": "plan-root-level-array",
-    "comment": "§5.4.5.1: a root array schema registers at path '' (empty key)",
+    "comment": "GEN §4.5.1: a root array schema registers at path '' (empty key)",
     "schema": {
       "type": "array",
       "items": {
@@ -664,7 +664,7 @@
   },
   {
     "name": "plan-basePath-relativized",
-    "comment": "§4.6.2: basePath '/config' relativizes the key to '/servers'",
+    "comment": "CORE §3.6.2: basePath '/config' relativizes the key to '/servers'",
     "schema": {
       "type": "object",
       "properties": {
@@ -711,7 +711,7 @@
   },
   {
     "name": "plan-primaryKeyMap-override",
-    "comment": "§4.4.3: primaryKeyMap sets primaryKey+strategy without auto-detect (no requiredFields/hashFields)",
+    "comment": "CORE §3.4.3: primaryKeyMap sets primaryKey+strategy without auto-detect (no requiredFields/hashFields)",
     "schema": {
       "type": "object",
       "properties": {
@@ -748,7 +748,7 @@
   },
   {
     "name": "plan-primaryKeyCandidates-override-sku",
-    "comment": "§4.5.5: candidate list ['sku'] selects a non-default key",
+    "comment": "CORE §3.5.5: candidate list ['sku'] selects a non-default key",
     "schema": {
       "type": "object",
       "properties": {
@@ -792,7 +792,7 @@
   },
   {
     "name": "plan-primaryKeyCandidates-empty-disables",
-    "comment": "§4.5.5: empty candidate list -> no auto-detected key, base lcs strategy",
+    "comment": "CORE §3.5.5: empty candidate list -> no auto-detected key, base lcs strategy",
     "schema": {
       "type": "object",
       "properties": {

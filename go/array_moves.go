@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// The emitMoves capability (SPEC §5.8, §10.4.4). All three array strategies
+// The emitMoves capability (GEN §8, CONF §5.4). All three array strategies
 // share one machinery: given a bijection between surviving original indices and
 // their modified target indices, plus pure deletes/inserts, reproduce modified
 // EXACTLY (order and duplicates) as a sequence of RFC 6902 ops in which every
@@ -13,7 +13,7 @@ import (
 // pair (F22/F23/F07). Default output (capability off) is unaffected.
 
 // MatchedPair is a surviving original element and where it lands in modified
-// (SPEC §5.8.1). Changed is true iff original[Src] is NOT deep-equal to
+// (GEN §8.1). Changed is true iff original[Src] is NOT deep-equal to
 // modified[Tgt] (a modification rather than a pure relocation).
 type MatchedPair struct {
 	Src     int
@@ -22,7 +22,7 @@ type MatchedPair struct {
 }
 
 // lisIndices returns the indices INTO seq that form a longest strictly-increasing
-// subsequence (SPEC §5.8.2). seq is always a permutation of 0..S-1 here (distinct
+// subsequence (GEN §8.2). seq is always a permutation of 0..S-1 here (distinct
 // values), so "strictly increasing" is unambiguous and lower_bound and
 // upper_bound coincide. This is the pinned canonical patience-sort with a
 // lower_bound binary search over tails plus predecessor-link reconstruction from
@@ -83,8 +83,8 @@ type moveOp struct {
 
 // computeMoves emits the move ops that reorder a length-S array — whose element
 // at source position p must end at target rank seq[p] (a permutation of 0..S-1)
-// — into target-rank order (SPEC §5.8.3). Elements whose source positions form
-// the LIS of seq (§5.8.2) are the fixed skeleton and NEVER move; every other
+// — into target-rank order (GEN §8.3). Elements whose source positions form
+// the LIS of seq (GEN §8.2) are the fixed skeleton and NEVER move; every other
 // element is relocated by exactly one move, processed right-to-left (highest
 // target rank first) so each is placed immediately before the already-final
 // element to its right (insert-before semantics). No-op moves (from == to) are
@@ -140,7 +140,7 @@ func indexOfInt(s []int, v int) int {
 }
 
 // emitArrayMovesPatch is the staged move-emitter shared by all three emitMoves
-// strategies (SPEC §5.8.1, §5.8.4). Given a bijection matched between a subset
+// strategies (GEN §8.1, GEN §8.4). Given a bijection matched between a subset
 // of original indices and a subset of modified indices, the leftover pureDeletes
 // (original indices with no match) and pureInserts (modified indices with no
 // match), emit ops that transform original into modified EXACTLY, in four pinned
@@ -194,7 +194,7 @@ func (p *Patcher) emitArrayMovesPatch(arr1, arr2 []Value, path string, patches *
 	}
 
 	// Stage 4: modifications at final target indices, ascending. Same-kind pairs
-	// recurse (granular descent, §5.5.4.2); otherwise whole-item replace.
+	// recurse (granular descent, GEN §5.4.2); otherwise whole-item replace.
 	var changed []MatchedPair
 	for _, mp := range matched {
 		if mp.Changed {

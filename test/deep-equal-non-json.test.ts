@@ -11,7 +11,7 @@ import { applyPatch, buildPlan, JsonSchemaPatcher } from "../src/index";
 // any array-vs-object kind check, so deepEqualMemo([], {}) wrongly returned true
 // while the base deepEqual correctly returned false. Because diffArrayLCS interns
 // window elements through the memoised comparator, {x:[[],{}]} -> {x:[{},[]]}
-// then silently emitted ZERO ops. SPEC §2.4.1/§2.4.2: [] is never equal to {}.
+// then silently emitted ZERO ops. CORE §1.4.1/CORE §1.4.2: [] is never equal to {}.
 describe("D1 array-vs-object kind check precedes any empty-keys fast path", () => {
   test("deepEqualMemo([], {}) is false (was the probe's silent true)", () => {
     expect(deepEqualMemo([], {})).toBe(false);
@@ -42,7 +42,7 @@ describe("D1 array-vs-object kind check precedes any empty-keys fast path", () =
   });
 });
 
-// F16: Non-JSON inputs are documented as out of scope (SPEC §2.1.2), but a
+// F16: Non-JSON inputs are documented as out of scope (CORE §1.1.2), but a
 // cheap guard prevents the worst silent-data-loss failure mode: two
 // different `Date`s (or other class instances) both have zero *own*
 // enumerable keys, so the plain own-key comparison used for objects treated

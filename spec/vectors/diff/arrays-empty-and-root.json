@@ -1,7 +1,7 @@
 [
   {
     "name": "arr-empty-to-populated-nested",
-    "comment": "§5.5.1: empty original -> ascending adds at concrete indices",
+    "comment": "GEN §5.1: empty original -> ascending adds at concrete indices",
     "original": {
       "a": []
     },
@@ -32,7 +32,7 @@
   },
   {
     "name": "arr-populated-to-empty-nested",
-    "comment": "§5.5.1: empty modified -> DESCENDING removes, each with oldValue",
+    "comment": "GEN §5.1: empty modified -> DESCENDING removes, each with oldValue",
     "original": {
       "a": [
         1,
@@ -63,7 +63,7 @@
   },
   {
     "name": "arr-both-empty-noop",
-    "comment": "§5.5.0.3: wn=wm=0 -> no ops",
+    "comment": "GEN §5.0.3: wn=wm=0 -> no ops",
     "original": {
       "a": []
     },
@@ -74,7 +74,7 @@
   },
   {
     "name": "arr-root-empty-to-populated",
-    "comment": "§5.5: root array uses prefix '/' before the index (/0,/1)",
+    "comment": "GEN §5: root array uses prefix '/' before the index (/0,/1)",
     "original": [],
     "modified": [
       1,
@@ -95,7 +95,7 @@
   },
   {
     "name": "arr-root-populated-to-empty",
-    "comment": "§5.5.1: root array cleared, descending removes at /2,/1,/0",
+    "comment": "GEN §5.1: root array cleared, descending removes at /2,/1,/0",
     "original": [
       1,
       2,
@@ -122,7 +122,7 @@
   },
   {
     "name": "arr-root-modify-middle",
-    "comment": "§5.5: root array element replace",
+    "comment": "GEN §5: root array element replace",
     "original": [
       1,
       2,
@@ -144,7 +144,7 @@
   },
   {
     "name": "arr-root-append",
-    "comment": "§5.5.0.3: pure append at root",
+    "comment": "GEN §5.0.3: pure append at root",
     "original": [
       1,
       2
@@ -164,7 +164,7 @@
   },
   {
     "name": "arr-root-prepend",
-    "comment": "§5.5.0.3: pure prepend at root (interior insert at index 0)",
+    "comment": "GEN §5.0.3: pure prepend at root (interior insert at index 0)",
     "original": [
       2,
       3
@@ -184,7 +184,7 @@
   },
   {
     "name": "arr-nested-empty-add-first",
-    "comment": "§5.5.1: first element added to an empty nested array",
+    "comment": "GEN §5.1: first element added to an empty nested array",
     "original": {
       "a": []
     },
@@ -203,7 +203,7 @@
   },
   {
     "name": "arr-with-nulls-replace",
-    "comment": "§2.4.3/§5.5: null array elements compare by value",
+    "comment": "CORE §1.4.3/GEN §5: null array elements compare by value",
     "original": [
       null,
       1
@@ -223,7 +223,7 @@
   },
   {
     "name": "arr-root-to-primitive-replace",
-    "comment": "§5.1.4: root array vs primitive is a whole replace at ''",
+    "comment": "GEN §1.4: root array vs primitive is a whole replace at ''",
     "original": [
       1,
       2
@@ -243,7 +243,7 @@
   },
   {
     "name": "arr-root-null-to-array-replace",
-    "comment": "§5.1.4: root null vs array is a whole replace at ''",
+    "comment": "GEN §1.4: root null vs array is a whole replace at ''",
     "original": null,
     "modified": [
       1,

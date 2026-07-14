@@ -4,13 +4,13 @@ import type {JsonObject, JsonValue} from "../types"
  * Resolves a JSON Pointer path to get a value from an object.
  * Handles JSON Pointer escaping (~0 for ~, ~1 for /).
  *
- * D3 (spec-v1-rc external-review defect round, SPEC §2.4.4): this previously
+ * D3 (spec-v1-rc external-review defect round, CORE §1.4.4): this previously
  * memoised results in a module-level `Map<path, WeakMap<obj, value>>` keyed on
  * object identity and NEVER epoch-scoped, so after an in-place mutation of a
  * cached document it returned the stale pre-mutation value (probe:
  * getValueByPath(doc,"/a")===1, then doc.a=999, then still 1). Unlike the
  * equality caches (deepEqual.ts, F02) this cache was not on any SPEC hot path —
- * its only callers are the StructuredDiff aggregator (out of SPEC scope, §1.5)
+ * its only callers are the StructuredDiff aggregator (out of SPEC scope, CONF §1.5)
  * and DiffFormatter's `-` resolution, both resolving short prefixes a couple of
  * times per execute. A micro-bench of an epoch-scoped variant vs no cache on
  * that exact pattern showed the cache as dead weight once made correct

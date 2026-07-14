@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// diffVector mirrors the §10.1 diff vector format. schema is kept raw so it can
+// diffVector mirrors the CONF §2 diff vector format. schema is kept raw so it can
 // be decoded with the order-preserving [Decode] that BuildPlan consumes; the
 // documents and expected patch are likewise decoded through the value model so
 // number text and member order survive.
@@ -121,13 +121,13 @@ func runDiffVector(t *testing.T, vec diffVector) {
 	}
 	got := patcher.Execute(original, modified)
 
-	// (b) Structural op equality (§10.3.2).
+	// (b) Structural op equality (CONF §4.2).
 	want := decodeExpectedPatch(t, vec.ExpectedPatch)
 	assertOpsEqual(t, got, want)
 }
 
 // decodeExpectedPatch parses the expectedPatch array into the value model so op
-// fields (value/oldValue) can be compared under deep JSON equality (§10.3.2).
+// fields (value/oldValue) can be compared under deep JSON equality (CONF §4.2).
 func decodeExpectedPatch(t *testing.T, raw json.RawMessage) []expectedOp {
 	t.Helper()
 	v, err := Decode(raw)
@@ -179,7 +179,7 @@ type expectedOp struct {
 	hasOldValue bool
 }
 
-// assertOpsEqual checks structural op equality (§10.3.2): same length, same
+// assertOpsEqual checks structural op equality (CONF §4.2): same length, same
 // ordered sequence, each op equal by op, path, and (where present) from/value/
 // oldValue under deep JSON equality.
 func assertOpsEqual(t *testing.T, got []Operation, want []expectedOp) {

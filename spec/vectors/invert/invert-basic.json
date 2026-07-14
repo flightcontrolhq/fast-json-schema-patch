@@ -1,7 +1,7 @@
 [
   {
     "name": "inv-add-new-member",
-    "comment": "§9.2: add of a new object member inverts to remove",
+    "comment": "CORE §6.2: add of a new object member inverts to remove",
     "document": {
       "a": 1
     },
@@ -22,7 +22,7 @@
   },
   {
     "name": "inv-add-new-array-index",
-    "comment": "§9.2: add at a new array index inverts to remove at that index",
+    "comment": "CORE §6.2: add at a new array index inverts to remove at that index",
     "document": [
       1,
       2
@@ -44,7 +44,7 @@
   },
   {
     "name": "inv-add-append-dash",
-    "comment": "§9.1.1/§9.2: /- append inverts to remove at the resolved concrete index",
+    "comment": "CORE §6.1.1/CORE §6.2: /- append inverts to remove at the resolved concrete index",
     "document": [
       1,
       2
@@ -66,7 +66,7 @@
   },
   {
     "name": "inv-add-overwrite-member",
-    "comment": "§9.2: add OVERWRITING an existing member inverts to replace restoring the pre-op value",
+    "comment": "CORE §6.2: add OVERWRITING an existing member inverts to replace restoring the pre-op value",
     "document": {
       "a": 1
     },
@@ -88,7 +88,7 @@
   },
   {
     "name": "inv-remove-member-no-oldvalue",
-    "comment": "§9.2: remove (no oldValue) inverts to add with the value recovered from the document",
+    "comment": "CORE §6.2: remove (no oldValue) inverts to add with the value recovered from the document",
     "document": {
       "a": 1,
       "b": 2
@@ -109,7 +109,7 @@
   },
   {
     "name": "inv-remove-array-element",
-    "comment": "§9.2: array remove inverts to add restoring the spliced element",
+    "comment": "CORE §6.2: array remove inverts to add restoring the spliced element",
     "document": [
       1,
       2,
@@ -131,7 +131,7 @@
   },
   {
     "name": "inv-remove-subtree-no-oldvalue",
-    "comment": "§9.1.1: a whole-subtree remove is recovered from the document even without oldValue",
+    "comment": "CORE §6.1.1: a whole-subtree remove is recovered from the document even without oldValue",
     "document": {
       "a": {
         "deep": [
@@ -162,7 +162,7 @@
   },
   {
     "name": "inv-replace-member",
-    "comment": "§9.2: replace inverts to replace restoring the pre-op value",
+    "comment": "CORE §6.2: replace inverts to replace restoring the pre-op value",
     "document": {
       "a": 1
     },
@@ -184,7 +184,7 @@
   },
   {
     "name": "inv-replace-array-element",
-    "comment": "§9.2: array replace inverts to replace at the same index",
+    "comment": "CORE §6.2: array replace inverts to replace at the same index",
     "document": [
       1,
       2
@@ -207,7 +207,7 @@
   },
   {
     "name": "inv-replace-with-oldvalue-present",
-    "comment": "§9.2.2: oldValue is sufficient but not necessary; inverse recovered from the document",
+    "comment": "CORE §6.2.2: oldValue is sufficient but not necessary; inverse recovered from the document",
     "document": {
       "a": {
         "x": 1
@@ -236,7 +236,7 @@
   },
   {
     "name": "inv-root-add-replaces-document",
-    "comment": "§8.5.1/§9.2: add at '' replaces the whole document; inverts to replace '' restoring the root",
+    "comment": "CORE §5.5.1/CORE §6.2: add at '' replaces the whole document; inverts to replace '' restoring the root",
     "document": {
       "a": 1
     },
@@ -264,7 +264,7 @@
   },
   {
     "name": "inv-root-replace",
-    "comment": "§9.2: replace at '' inverts to replace '' with the pre-op root",
+    "comment": "CORE §6.2: replace at '' inverts to replace '' with the pre-op root",
     "document": [
       1,
       2
@@ -290,7 +290,7 @@
   },
   {
     "name": "inv-add-nested-member",
-    "comment": "§9.2: nested add inverts to nested remove",
+    "comment": "CORE §6.2: nested add inverts to nested remove",
     "document": {
       "a": {}
     },

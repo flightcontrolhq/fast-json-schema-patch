@@ -1,7 +1,7 @@
 [
   {
     "name": "ip-object-member-ignored-noop",
-    "comment": "§5.10.4: an ignored object member changing alone yields NO ops",
+    "comment": "GEN §10.4: an ignored object member changing alone yields NO ops",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -25,7 +25,7 @@
   },
   {
     "name": "ip-object-member-real-change-survives",
-    "comment": "§5.10.4: a real sibling change survives while the ignored member is suppressed",
+    "comment": "GEN §10.4: a real sibling change survives while the ignored member is suppressed",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -56,7 +56,7 @@
   },
   {
     "name": "ip-real-change-no-ignored-drift-exact",
-    "comment": "§7.6: with the ignored field unchanged, reconstruction is exact",
+    "comment": "CORE §7.6: with the ignored field unchanged, reconstruction is exact",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -87,7 +87,7 @@
   },
   {
     "name": "ip-wildcard-any-member-at-level",
-    "comment": "§5.10.3: a `/*/ts` wildcard ignores `ts` under any top-level member",
+    "comment": "GEN §10.3: a `/*/ts` wildcard ignores `ts` under any top-level member",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -124,7 +124,7 @@
   },
   {
     "name": "ip-modified-only-ignored-member-not-added",
-    "comment": "§5.10.4: a modified-only ignored member emits no add",
+    "comment": "GEN §10.4: a modified-only ignored member emits no add",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -144,7 +144,7 @@
   },
   {
     "name": "ip-whole-array-ignored-noop",
-    "comment": "§5.10.4: ignoring `/arr` treats the whole array as equal -> no ops",
+    "comment": "GEN §10.4: ignoring `/arr` treats the whole array as equal -> no ops",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -169,7 +169,7 @@
   },
   {
     "name": "ip-every-element-ignored-noop",
-    "comment": "§5.10.4: `/arr/*` ignores every element (item node terminal) -> no ops",
+    "comment": "GEN §10.4: `/arr/*` ignores every element (item node terminal) -> no ops",
     "options": {
       "capabilities": {
         "ignorePaths": [
@@ -198,7 +198,7 @@
   },
   {
     "name": "ip-lcs-ignored-field-only-noop",
-    "comment": "§5.10.5: LCS items differing only in an ignored field intern equal -> no ops",
+    "comment": "GEN §10.5: LCS items differing only in an ignored field intern equal -> no ops",
     "schema": {
       "type": "object",
       "properties": {
@@ -253,7 +253,7 @@
   },
   {
     "name": "ip-lcs-real-and-ignored-mixed",
-    "comment": "§5.10.5: a real field change descends granularly; ignored drift is dropped",
+    "comment": "GEN §10.5: a real field change descends granularly; ignored drift is dropped",
     "schema": {
       "type": "object",
       "properties": {
@@ -307,7 +307,7 @@
   },
   {
     "name": "ip-pk-wildcard-under-keyed-items",
-    "comment": "§5.10.3: `/users/*/updatedAt` ignores updatedAt in each keyed item",
+    "comment": "GEN §10.3: `/users/*/updatedAt` ignores updatedAt in each keyed item",
     "schema": {
       "type": "object",
       "properties": {
@@ -372,7 +372,7 @@
   },
   {
     "name": "ip-pk-real-field-survives-ignored-drift",
-    "comment": "§5.10.3/§5.10.5: a keyed item's real field change survives while updatedAt drifts",
+    "comment": "GEN §10.3/GEN §10.5: a keyed item's real field change survives while updatedAt drifts",
     "schema": {
       "type": "object",
       "properties": {
@@ -434,7 +434,7 @@
   },
   {
     "name": "ip-unique-coexists-with-unrelated-ignore",
-    "comment": "§5.10: an unrelated ignore leaves a unique array's positional replaces intact",
+    "comment": "GEN §10: an unrelated ignore leaves a unique array's positional replaces intact",
     "schema": {
       "type": "object",
       "properties": {
@@ -490,7 +490,7 @@
   },
   {
     "name": "ip-emitmoves-move-pairing-with-drift",
-    "comment": "§5.10.5: under emitMoves, a relocated item whose ignored field drifted is ONE move, not remove+add",
+    "comment": "GEN §10.5: under emitMoves, a relocated item whose ignored field drifted is ONE move, not remove+add",
     "schema": {
       "type": "object",
       "properties": {
@@ -552,7 +552,7 @@
   },
   {
     "name": "ip-wholesale-disabled-by-ignore-beneath",
-    "comment": "§5.10.6: wholesaleReplaceFallback is DISABLED for an array with an ignore path beneath it (no leaked ignored content)",
+    "comment": "GEN §10.6: wholesaleReplaceFallback is DISABLED for an array with an ignore path beneath it (no leaked ignored content)",
     "schema": {
       "type": "object",
       "properties": {

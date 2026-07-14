@@ -1,7 +1,7 @@
 [
   {
     "name": "sel-additionalProperties-at-depth",
-    "comment": "§5.4.5.3: a /envs/* wildcard plan matches a concrete /envs/prod keyed array",
+    "comment": "GEN §4.5.3: a /envs/* wildcard plan matches a concrete /envs/prod keyed array",
     "schema": {
       "type": "object",
       "properties": {
@@ -58,7 +58,7 @@
   },
   {
     "name": "sel-additionalProperties-top-level",
-    "comment": "§5.4.5.3: a TOP-LEVEL /* plan matches a root object's member array /foo",
+    "comment": "GEN §4.5.3: a TOP-LEVEL /* plan matches a root object's member array /foo",
     "schema": {
       "type": "object",
       "additionalProperties": {
@@ -106,7 +106,7 @@
   },
   {
     "name": "sel-allOf-merged-primary-key",
-    "comment": "§4.5.1.1: a primaryKey declared only in an allOf branch is detected",
+    "comment": "CORE §3.5.1.1: a primaryKey declared only in an allOf branch is detected",
     "schema": {
       "type": "object",
       "properties": {
@@ -165,7 +165,7 @@
   },
   {
     "name": "sel-typeless-schema-node",
-    "comment": "§4.3.1: nodes with properties/items but no `type` are still traversed -> keyed",
+    "comment": "CORE §3.3.1: nodes with properties/items but no `type` are still traversed -> keyed",
     "schema": {
       "properties": {
         "list": {
@@ -221,7 +221,7 @@
   },
   {
     "name": "sel-basePath-relativized",
-    "comment": "§4.6.2: basePath '/config' relativizes the plan key to '/servers'; diffing the subtree matches",
+    "comment": "CORE §3.6.2: basePath '/config' relativizes the plan key to '/servers'; diffing the subtree matches",
     "schema": {
       "type": "object",
       "properties": {
@@ -279,7 +279,7 @@
   },
   {
     "name": "sel-primaryKeyCandidates-override",
-    "comment": "§4.5.5: primaryKeyCandidates ['sku'] selects a key the default list would miss",
+    "comment": "CORE §3.5.5: primaryKeyCandidates ['sku'] selects a key the default list would miss",
     "schema": {
       "type": "object",
       "properties": {
@@ -334,7 +334,7 @@
   },
   {
     "name": "sel-primaryKeyCandidates-default-misses-sku",
-    "comment": "§4.5.5: without the option, 'sku' is not a default candidate -> LCS",
+    "comment": "CORE §3.5.5: without the option, 'sku' is not a default candidate -> LCS",
     "schema": {
       "type": "object",
       "properties": {
@@ -384,7 +384,7 @@
   },
   {
     "name": "sel-primaryKeyCandidates-empty-disables",
-    "comment": "§4.5.5: empty candidate list disables auto-detection even with a required id -> LCS",
+    "comment": "CORE §3.5.5: empty candidate list disables auto-detection even with a required id -> LCS",
     "schema": {
       "type": "object",
       "properties": {
@@ -445,7 +445,7 @@
   },
   {
     "name": "sel-name-candidate-default",
-    "comment": "§4.5.3: 'name' is a default candidate and is selected when required string",
+    "comment": "CORE §3.5.3: 'name' is a default candidate and is selected when required string",
     "schema": {
       "type": "object",
       "properties": {
@@ -495,7 +495,7 @@
   },
   {
     "name": "sel-nested-array-of-arrays-wildcard",
-    "comment": "§4.3.5/§5.4.5.2: outer array-of-arrays is LCS; inner /matrix/* keyed plan applies on descent",
+    "comment": "CORE §3.3.5/GEN §4.5.2: outer array-of-arrays is LCS; inner /matrix/* keyed plan applies on descent",
     "schema": {
       "type": "object",
       "properties": {
@@ -552,7 +552,7 @@
   },
   {
     "name": "sel-exact-beats-wildcard",
-    "comment": "§5.4.5.2: an exact property edge (/special keyed) wins over additionalProperties (wildcard lcs)",
+    "comment": "GEN §4.5.2: an exact property edge (/special keyed) wins over additionalProperties (wildcard lcs)",
     "schema": {
       "type": "object",
       "properties": {
@@ -613,7 +613,7 @@
   },
   {
     "name": "sel-wildcard-sibling-is-lcs",
-    "comment": "§5.4.5.2: a non-special member routes to the wildcard (plain) plan -> LCS",
+    "comment": "GEN §4.5.2: a non-special member routes to the wildcard (plain) plan -> LCS",
     "schema": {
       "type": "object",
       "properties": {

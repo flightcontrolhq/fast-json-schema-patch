@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// invertVector mirrors the §10.7 invert vector format.
+// invertVector mirrors the CONF §8 invert vector format.
 type invertVector struct {
 	Name            string          `json:"name"`
 	Comment         string          `json:"comment"`
@@ -74,14 +74,14 @@ func runInvertVector(t *testing.T, vec invertVector) {
 		t.Errorf("invert mutated the input document")
 	}
 
-	// Clause (a): structural inverse equality (§10.7.2a).
+	// Clause (a): structural inverse equality (CONF §8.2a).
 	want := decodeExpectedPatch(t, vec.ExpectedInverse)
 	assertOpsEqual(t, got, want)
 
-	// Clause (b): double-apply identity (§10.7.2b) — apply(apply(D,patch),inverse) == D.
+	// Clause (b): double-apply identity (CONF §8.2b) — apply(apply(D,patch),inverse) == D.
 	forward, err := ApplyPatch(document, patch, ApplyOptions{})
 	if err != nil {
-		t.Fatalf("forward apply (vector must apply cleanly, §10.7.1): %v", err)
+		t.Fatalf("forward apply (vector must apply cleanly, CONF §8.1): %v", err)
 	}
 	roundtrip, err := ApplyPatch(forward, got, ApplyOptions{})
 	if err != nil {

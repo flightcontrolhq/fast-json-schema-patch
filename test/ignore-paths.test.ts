@@ -1,8 +1,8 @@
 /**
- * test/ignore-paths.test.ts — the `ignorePaths` capability (SPEC §5.10, §10.4.6).
+ * test/ignore-paths.test.ts — the `ignorePaths` capability (GEN §10, CONF §5.6).
  *
- * Covers the construction-time validation errors (§5.10.1/§5.10.7 — not
- * expressible as diff/apply vectors, §10.5.2) plus the happy-path and
+ * Covers the construction-time validation errors (GEN §10.1/GEN §10.7 — not
+ * expressible as diff/apply vectors, CONF §6.2) plus the happy-path and
  * interaction semantics in both directions.
  */
 import { describe, expect, test } from "bun:test";
@@ -51,7 +51,7 @@ const PK_USERS = {
   },
 };
 
-describe("ignorePaths validation (SPEC §5.10.1)", () => {
+describe("ignorePaths validation (GEN §10.1)", () => {
   test("rejects a canonical array-index segment", () => {
     expect(() => new JsonSchemaPatcher({ plan: EMPTY(), ignorePaths: ["/users/0/id"] })).toThrow(
       TypeError,
@@ -80,7 +80,7 @@ describe("ignorePaths validation (SPEC §5.10.1)", () => {
   });
 });
 
-describe("ignorePaths primaryKey guard (SPEC §5.10.7)", () => {
+describe("ignorePaths primaryKey guard (GEN §10.7)", () => {
   test("rejects ignoring the primaryKey field itself", () => {
     const plan = buildPlan({ schema: PK_USERS });
     expect(() => new JsonSchemaPatcher({ plan, ignorePaths: ["/users/*/id"] })).toThrow(TypeError);
@@ -142,7 +142,7 @@ describe("ignorePaths happy paths", () => {
   });
 });
 
-describe("ignorePaths under keyed arrays (SPEC §5.10.3)", () => {
+describe("ignorePaths under keyed arrays (GEN §10.3)", () => {
   test("primaryKey: ignored-field-only change -> []", () => {
     const ops = diff(
       { planObj: PK_USERS, ignorePaths: ["/users/*/updatedAt"] },
@@ -161,7 +161,7 @@ describe("ignorePaths under keyed arrays (SPEC §5.10.3)", () => {
   });
 });
 
-describe("ignorePaths under LCS (SPEC §5.10.5)", () => {
+describe("ignorePaths under LCS (GEN §10.5)", () => {
   test("ignored-field-only change -> []", () => {
     expect(
       diff({ ignorePaths: ["/items/*/ts"] }, { items: [{ v: 1, ts: 1 }, { v: 2, ts: 1 }] }, { items: [{ v: 1, ts: 9 }, { v: 2, ts: 1 }] }),
@@ -179,7 +179,7 @@ describe("ignorePaths under LCS (SPEC §5.10.5)", () => {
   });
 });
 
-describe("ignorePaths x wholesaleReplaceFallback (SPEC §5.10.6)", () => {
+describe("ignorePaths x wholesaleReplaceFallback (GEN §10.6)", () => {
   const RW = {
     type: "object",
     properties: {
@@ -202,7 +202,7 @@ describe("ignorePaths x wholesaleReplaceFallback (SPEC §5.10.6)", () => {
   });
 });
 
-describe("ignorePaths byte-stability (SPEC §5.10.2)", () => {
+describe("ignorePaths byte-stability (GEN §10.2)", () => {
   test("absent ignorePaths is byte-identical to the pre-capability output", () => {
     const orig = { meta: { ts: 1, n: "a" }, arr: [{ id: "x", v: 1 }] };
     const mod = { meta: { ts: 2, n: "b" }, arr: [{ id: "x", v: 2 }] };

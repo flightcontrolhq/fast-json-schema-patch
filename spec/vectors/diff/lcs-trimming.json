@@ -1,7 +1,7 @@
 [
   {
     "name": "lcs-all-equal-noop",
-    "comment": "§5.5.0.3: identical arrays trim to empty window -> no ops",
+    "comment": "GEN §5.0.3: identical arrays trim to empty window -> no ops",
     "original": [
       1,
       2,
@@ -18,7 +18,7 @@
   },
   {
     "name": "lcs-pure-append",
-    "comment": "§5.5.0.3: prefix trims all common; window is pure insertion",
+    "comment": "GEN §5.0.3: prefix trims all common; window is pure insertion",
     "original": [
       1,
       2,
@@ -46,7 +46,7 @@
   },
   {
     "name": "lcs-pure-prepend",
-    "comment": "§5.5.0.3: suffix trims all common; inserts at head",
+    "comment": "GEN §5.0.3: suffix trims all common; inserts at head",
     "original": [
       3,
       4,
@@ -74,7 +74,7 @@
   },
   {
     "name": "lcs-pure-truncate-tail",
-    "comment": "§5.5.0.3: wm=0 window -> descending removes at the tail",
+    "comment": "GEN §5.0.3: wm=0 window -> descending removes at the tail",
     "original": [
       1,
       2,
@@ -102,7 +102,7 @@
   },
   {
     "name": "lcs-pure-truncate-head",
-    "comment": "§5.5.0.3: suffix-trim leaves a head-only removal window",
+    "comment": "GEN §5.0.3: suffix-trim leaves a head-only removal window",
     "original": [
       1,
       2,
@@ -130,7 +130,7 @@
   },
   {
     "name": "lcs-interior-insert",
-    "comment": "§5.5.0: prefix+suffix trim isolate an interior insertion",
+    "comment": "GEN §5.0: prefix+suffix trim isolate an interior insertion",
     "original": [
       1,
       4
@@ -156,7 +156,7 @@
   },
   {
     "name": "lcs-interior-remove",
-    "comment": "§5.5.0: prefix+suffix trim isolate an interior deletion",
+    "comment": "GEN §5.0: prefix+suffix trim isolate an interior deletion",
     "original": [
       1,
       2,
@@ -182,7 +182,7 @@
   },
   {
     "name": "lcs-abab-to-aa",
-    "comment": "§5.5.0.1 pinned: [a,b,a]->[a,a] fixes prefix a (lo=1) then suffix a (hi=1) -> single remove at index 1",
+    "comment": "GEN §5.0.1 pinned: [a,b,a]->[a,a] fixes prefix a (lo=1) then suffix a (hi=1) -> single remove at index 1",
     "original": [
       "a",
       "b",
@@ -202,7 +202,7 @@
   },
   {
     "name": "lcs-prefix-and-suffix-trim",
-    "comment": "§5.5.0.1: shared ends trimmed, only the middle primitive replaces",
+    "comment": "GEN §5.0.1: shared ends trimmed, only the middle primitive replaces",
     "original": [
       "a",
       "X",
@@ -224,7 +224,7 @@
   },
   {
     "name": "lcs-replace-in-middle",
-    "comment": "§5.5.4: single interior primitive replace",
+    "comment": "GEN §5.4: single interior primitive replace",
     "original": [
       1,
       2,
@@ -250,7 +250,7 @@
   },
   {
     "name": "lcs-swap-adjacent",
-    "comment": "§5.5.2: adjacent swap has no common window element; Myers picks the pinned shortest script",
+    "comment": "GEN §5.2: adjacent swap has no common window element; Myers picks the pinned shortest script",
     "original": [
       1,
       2
@@ -274,7 +274,7 @@
   },
   {
     "name": "lcs-full-reversal",
-    "comment": "§5.5.2: full reversal exercises the Myers tie-break",
+    "comment": "GEN §5.2: full reversal exercises the Myers tie-break",
     "original": [
       1,
       2,
@@ -310,7 +310,7 @@
   },
   {
     "name": "lcs-mixed-add-remove",
-    "comment": "§5.5.5: interleaved insertions and deletions in one window",
+    "comment": "GEN §5.5: interleaved insertions and deletions in one window",
     "original": [
       "a",
       "b",
@@ -340,7 +340,7 @@
   },
   {
     "name": "lcs-duplicates-preserved",
-    "comment": "§7.1.1: LCS reconstructs duplicates exactly",
+    "comment": "CORE §7.1.1: LCS reconstructs duplicates exactly",
     "original": [
       1,
       1,

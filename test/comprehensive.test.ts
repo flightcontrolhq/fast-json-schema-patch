@@ -489,7 +489,7 @@ describe("nested arrays-of-arrays (F04)", () => {
 
   it("compiles the inner array into the matrix node's wildcard trie edge", () => {
     // The path-string getPlanForPath lookup was replaced by a compiled plan
-    // trie threaded structurally through the recursion (SPEC §5.4.5). The inner
+    // trie threaded structurally through the recursion (GEN §4.5). The inner
     // array's `/matrix/*` plan is reachable as the wildcard child of the matrix
     // node — the structural equivalent of the old element-wildcard lookup, and
     // the node a nested-array element (array-of-arrays) descends to at diff time.
@@ -528,7 +528,7 @@ describe("nested arrays-of-arrays (F04)", () => {
 });
 
 describe("structural plan-trie matching (F18/F33)", () => {
-  // A reorder of a primaryKey-keyed array is a 0-op diff (§7.2 keyed-collection
+  // A reorder of a primaryKey-keyed array is a 0-op diff (CORE §7.2 keyed-collection
   // semantics); under `lcs`/`unique` the same reorder emits ops. So "reorder ==
   // 0 ops" is a clean proof that the primaryKey plan was actually reached.
   const keyedItems = {
@@ -800,9 +800,9 @@ describe("buildPlan > ArrayPlan metadata", () => {
     // getEffectiveHashFields use only primaryKey/hashFields/requiredFields)
     // and retaining it pinned the resolved schema graph in memory for the
     // plan's lifetime (~2x plan memory). buildPlan still resolves the $ref
-    // internally to run primary-key auto-detection (§4.5) correctly — that
+    // internally to run primary-key auto-detection (CORE §3.5) correctly — that
     // behavior is unchanged and asserted below — it just no longer stores
-    // the resolved schema onto the plan. SPEC §4.1.1 already documents
+    // the resolved schema onto the plan. CORE §3.1.1 already documents
     // itemSchema as non-normative and MAY be omitted, so this is valid.
     const schema = {
       definitions: {
@@ -2555,11 +2555,11 @@ describe("Array diffing strategies", () => {
 
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-      // §5.5.4.2 granular descent (F10): whenever the LCS window collapses a
+      // GEN §5.4.2 granular descent (F10): whenever the LCS window collapses a
       // remove+add into a replace of two same-kind objects, the differ recurses
       // and emits FIELD-level ops (paths like `/items/N/<field>`) instead of a
       // whole-item object replace. The exact Myers alignment is generator-
-      // defined (§1.3), so assert the granular *shape* rather than one alignment:
+      // defined (CONF §1.3), so assert the granular *shape* rather than one alignment:
       // at least one field-level replace is emitted...
       expect(
         patches.some((p) => /^\/items\/\d+\/[^/]+$/.test(p.path))
@@ -2594,7 +2594,7 @@ describe("Array diffing strategies", () => {
     });
   });
 
-  describe("LCS common prefix/suffix trimming (§5.5.0, F09)", () => {
+  describe("LCS common prefix/suffix trimming (GEN §5.0, F09)", () => {
     const lcsPatcher = () =>
       new JsonSchemaPatcher({
         plan: new Map([
@@ -2658,7 +2658,7 @@ describe("Array diffing strategies", () => {
     });
 
     test("prefix is trimmed before suffix ([a,b,a] -> [a,a])", () => {
-      // Deterministic per §5.5.0.1: prefix 'a' (lo=1) then suffix 'a' (hi=1),
+      // Deterministic per GEN §5.0.1: prefix 'a' (lo=1) then suffix 'a' (hi=1),
       // leaving window [b] -> [] and a single remove at the prefix boundary.
       const patches = roundtrips(["a", "b", "a"], ["a", "a"]);
       expect(patches).toEqual([
@@ -2690,7 +2690,7 @@ describe("Array diffing strategies", () => {
     });
 
     test("object elements with reordered keys are common, not changed (F21 canonical fingerprint)", () => {
-      // §2.4.2: object equality is key-order-insensitive. Canonical (key-sorted)
+      // CORE §1.4.2: object equality is key-order-insensitive. Canonical (key-sorted)
       // interning must treat these as identical -> zero ops.
       const a = [
         { id: 1, name: "x", tags: ["p", "q"] },
@@ -2705,9 +2705,9 @@ describe("Array diffing strategies", () => {
     });
 
     test("f64-equal numbers intern equal (1 vs 1.0), array order-sensitive", () => {
-      // 1 and 1.0 are the same f64 (§2.2) -> same fingerprint -> common.
+      // 1 and 1.0 are the same f64 (CORE §1.2) -> same fingerprint -> common.
       expect(roundtrips([1, 2, 3], [1.0, 2.0, 3.0])).toHaveLength(0);
-      // But array order matters (§2.4.2): [1,2] != [2,1] within an element.
+      // But array order matters (CORE §1.4.2): [1,2] != [2,1] within an element.
       const patches = roundtrips([{ v: [1, 2] }], [{ v: [2, 1] }]);
       expect(patches.length).toBeGreaterThan(0);
     });
@@ -2718,7 +2718,7 @@ describe("Array diffing strategies", () => {
       const b = a.map((o, i) => (i === 150 ? mk(150, 99999) : o));
       const patches = roundtrips(a, b);
       // Only element 150 changed; the interned run trims to a 1-element window.
-      // §5.5.4.2 granular descent (F10): the collapsed replace pair are both
+      // GEN §5.4.2 granular descent (F10): the collapsed replace pair are both
       // plain objects, so the differ recurses into the item and emits a
       // field-level op for the single changed field (`val`) rather than a
       // whole-item replace carrying the full new object + oldValue.
@@ -2750,7 +2750,7 @@ describe("Array diffing strategies", () => {
     });
   });
 
-  describe("LCS granular descent into changed items (§5.5.4.2, F10)", () => {
+  describe("LCS granular descent into changed items (GEN §5.4.2, F10)", () => {
     const lcsPatcher = () =>
       new JsonSchemaPatcher({
         plan: new Map([
@@ -3015,7 +3015,7 @@ describe("Array diffing strategies", () => {
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
       // These arrays are not unique (booleans repeat), so the strategy falls
-      // back to LCS. With common prefix/suffix trimming (§5.5.0) the trimmed
+      // back to LCS. With common prefix/suffix trimming (GEN §5.0) the trimmed
       // window is [false,true] -> [true,false]; Myers emits a 2-op script.
       // (Before trimming the same edit distance produced add at /flags/3; the
       // add now lands at /flags/2 — still 2 ops, still an exact round-trip.)
@@ -3202,7 +3202,7 @@ describe("Array diffing strategies", () => {
   });
 });
 
-describe("primaryKey applicability gate (SPEC §5.4.3, F05/F06)", () => {
+describe("primaryKey applicability gate (GEN §4.3, F05/F06)", () => {
   const keyedSchema = {
     type: "object",
     properties: {

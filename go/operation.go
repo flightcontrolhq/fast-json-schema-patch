@@ -7,7 +7,7 @@ type Op string
 
 // The RFC 6902 operation kinds plus the ops apply accepts. The generator emits
 // only add/remove/replace by default, and move under the emitMoves capability
-// (SPEC §6.1); copy and test are accepted by apply but never emitted.
+// (CORE §4.1); copy and test are accepted by apply but never emitted.
 const (
 	OpAdd     Op = "add"
 	OpRemove  Op = "remove"
@@ -17,10 +17,10 @@ const (
 	OpTest    Op = "test"
 )
 
-// Operation is a single patch operation (SPEC §6.1). Presence of the optional
+// Operation is a single patch operation (CORE §4.1). Presence of the optional
 // fields is tracked explicitly so that an ABSENT field is distinguishable from a
 // field present with a JSON null — a distinction that matters for conformance
-// vectors and for oldValue validation (SPEC §8.4):
+// vectors and for oldValue validation (CORE §5.4):
 //
 //   - HasFrom marks From as present (From is a JSON Pointer; "" is a valid,
 //     present value — the root pointer).

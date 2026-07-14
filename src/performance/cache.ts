@@ -3,7 +3,7 @@ import type {JsonValue, PathMap} from "../types"
 import {getEpoch} from "./epoch"
 
 // These caches key on object identity, so they cannot detect an in-place
-// mutation of a previously-cached object. Per SPEC §2.4.4 they MUST be
+// mutation of a previously-cached object. Per CORE §1.4.4 they MUST be
 // output-neutral: a cache MUST NOT return a stale result after an input is
 // mutated between diffs. Each entry therefore records the epoch it was written
 // in and is treated as a MISS once the epoch advances; a public diff entry

@@ -106,7 +106,7 @@ type deployment struct {
 
 func TestCompare_SchemaDrivenKeyedDiff(t *testing.T) {
 	// `name` is required on container items, so the containers array auto-detects
-	// the primaryKey strategy (default candidates include "name", §4.5): a
+	// the primaryKey strategy (default candidates include "name", CORE §3.5): a
 	// reordering plus an image bump is matched by key, not by position.
 	schema := json.RawMessage(`{
 		"type": "object",

@@ -1,7 +1,7 @@
 [
   {
     "name": "a1-add-object-member",
-    "comment": "RFC 6902 A.1: add an object member (§8.3)",
+    "comment": "RFC 6902 A.1: add an object member (CORE §5.3)",
     "doc": {
       "foo": "bar"
     },
@@ -19,7 +19,7 @@
   },
   {
     "name": "a2-add-array-element",
-    "comment": "RFC 6902 A.2: insert into an array, shifting (§8.3)",
+    "comment": "RFC 6902 A.2: insert into an array, shifting (CORE §5.3)",
     "doc": {
       "foo": [
         "bar",
@@ -102,7 +102,7 @@
   },
   {
     "name": "a6-move-value",
-    "comment": "RFC 6902 A.6: move a value between objects (§8.3)",
+    "comment": "RFC 6902 A.6: move a value between objects (CORE §5.3)",
     "doc": {
       "foo": {
         "bar": "baz",
@@ -249,7 +249,7 @@
   },
   {
     "name": "a12-add-to-nonexistent-target",
-    "comment": "RFC 6902 A.12: add through a missing intermediate -> PATH_UNRESOLVABLE (§8.2.2)",
+    "comment": "RFC 6902 A.12: add through a missing intermediate -> PATH_UNRESOLVABLE (CORE §5.2.2)",
     "doc": {
       "foo": "bar"
     },
@@ -267,7 +267,7 @@
   },
   {
     "name": "a14-escape-ordering",
-    "comment": "RFC 6902 A.14: '/~01' decodes ~1->/ then ~0->~ = key '~1' (§3.3)",
+    "comment": "RFC 6902 A.14: '/~01' decodes ~1->/ then ~0->~ = key '~1' (CORE §2.3)",
     "doc": {
       "/": 9,
       "~1": 10
@@ -286,7 +286,7 @@
   },
   {
     "name": "a15-compare-string-vs-number",
-    "comment": "RFC 6902 A.15: 10 != \"10\"; test with no coercion fails (§2.4.3)",
+    "comment": "RFC 6902 A.15: 10 != \"10\"; test with no coercion fails (CORE §1.4.3)",
     "doc": {
       "/": 9,
       "~1": 10
@@ -305,7 +305,7 @@
   },
   {
     "name": "a16-add-array-value-at-dash",
-    "comment": "RFC 6902 A.16: add an array VALUE at /- appends the whole value (§3.5)",
+    "comment": "RFC 6902 A.16: add an array VALUE at /- appends the whole value (CORE §2.5)",
     "doc": {
       "foo": [
         "bar"

@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-// planVector mirrors the §10.6 plan-snapshot vector format. The schema is kept
+// planVector mirrors the CONF §7 plan-snapshot vector format. The schema is kept
 // raw so it can be decoded with the order-preserving [Decode] that BuildPlan
 // consumes; options are plain JSON.
 type planVector struct {
@@ -83,7 +83,7 @@ func TestPlanConformanceVectors(t *testing.T) {
 }
 
 // assertPlanEquals compares a built plan against the expected snapshot per
-// §10.6.1: the set of paths must match, and per path the primaryKey, strategy,
+// CONF §7.1: the set of paths must match, and per path the primaryKey, strategy,
 // and (order-insensitively) requiredFields and hashFields must match.
 func assertPlanEquals(t *testing.T, plan Plan, expected []expectedArrayPlan) {
 	t.Helper()
@@ -116,7 +116,7 @@ func assertPlanEquals(t *testing.T, plan Plan, expected []expectedArrayPlan) {
 }
 
 // sameStringSet compares two string slices order-insensitively, treating nil and
-// [] as equal (§10.6: [] when absent).
+// [] as equal (CONF §7: [] when absent).
 func sameStringSet(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

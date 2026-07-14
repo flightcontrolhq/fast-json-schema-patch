@@ -1,7 +1,7 @@
 [
   {
     "name": "gran-object-item-field-change",
-    "comment": "§5.5.4.2: collapsed object<->object replace recurses to a field-level op",
+    "comment": "GEN §5.4.2: collapsed object<->object replace recurses to a field-level op",
     "original": [
       {
         "x": 1,
@@ -25,7 +25,7 @@
   },
   {
     "name": "gran-nested-array-in-item",
-    "comment": "§5.5.4.2: recurse into item then into its nested array (LCS)",
+    "comment": "GEN §5.4.2: recurse into item then into its nested array (LCS)",
     "original": [
       {
         "list": [
@@ -53,7 +53,7 @@
   },
   {
     "name": "gran-primitive-stays-whole",
-    "comment": "§5.5.4.2: a primitive collapsed pair stays a whole-item replace",
+    "comment": "GEN §5.4.2: a primitive collapsed pair stays a whole-item replace",
     "original": [
       1
     ],
@@ -71,7 +71,7 @@
   },
   {
     "name": "gran-kind-mismatch-stays-whole",
-    "comment": "§5.5.4.2: object vs array (mismatched kind) stays a whole-item replace, no descent",
+    "comment": "GEN §5.4.2: object vs array (mismatched kind) stays a whole-item replace, no descent",
     "original": [
       {
         "x": 1
@@ -97,7 +97,7 @@
   },
   {
     "name": "gran-arrays-of-arrays",
-    "comment": "§5.5.4.2: both-array collapsed pair recurses (array-of-arrays via default LCS)",
+    "comment": "GEN §5.4.2: both-array collapsed pair recurses (array-of-arrays via default LCS)",
     "original": [
       [
         1,
@@ -129,7 +129,7 @@
   },
   {
     "name": "gran-object-add-in-item",
-    "comment": "§5.5.4.2: descent yields an add inside a changed item",
+    "comment": "GEN §5.4.2: descent yields an add inside a changed item",
     "original": [
       {
         "a": 1
@@ -151,7 +151,7 @@
   },
   {
     "name": "gran-object-remove-in-item",
-    "comment": "§5.5.4.2: descent yields a remove inside a changed item",
+    "comment": "GEN §5.4.2: descent yields a remove inside a changed item",
     "original": [
       {
         "a": 1,
@@ -173,7 +173,7 @@
   },
   {
     "name": "gran-deep-nested-descent",
-    "comment": "§5.5.4.2: descent recurses arbitrarily deep",
+    "comment": "GEN §5.4.2: descent recurses arbitrarily deep",
     "original": [
       {
         "o": {
@@ -199,7 +199,7 @@
   },
   {
     "name": "gran-changed-and-appended",
-    "comment": "§5.5.4.2 + §5.5.5: item 0 descends granularly, item 1 is a fresh add",
+    "comment": "GEN §5.4.2 + GEN §5.5: item 0 descends granularly, item 1 is a fresh add",
     "original": [
       {
         "x": 1
@@ -231,7 +231,7 @@
   },
   {
     "name": "gran-nested-array-add-in-item",
-    "comment": "§5.5.4.2: descent into item then add into its nested array",
+    "comment": "GEN §5.4.2: descent into item then add into its nested array",
     "original": [
       {
         "arr": [
@@ -257,7 +257,7 @@
   },
   {
     "name": "gran-two-items-first-changed",
-    "comment": "§5.5.4.2: only the differing item descends; the equal one is trimmed",
+    "comment": "GEN §5.4.2: only the differing item descends; the equal one is trimmed",
     "original": [
       {
         "x": 1

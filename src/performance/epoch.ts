@@ -3,7 +3,7 @@
  *
  * Identity-keyed memoization caches (see `deepEqual.ts`, `cache.ts`) key on
  * object identity and therefore cannot detect an in-place mutation of a
- * previously-cached object. Per SPEC §2.4.4 caches MUST be output-neutral: a
+ * previously-cached object. Per CORE §1.4.4 caches MUST be output-neutral: a
  * cache MUST NOT return a stale verdict after an input is mutated between diffs.
  *
  * To satisfy that contract while keeping the intra-call memoization benefit (the

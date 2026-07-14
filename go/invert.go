@@ -2,23 +2,23 @@ package schemapatch
 
 import "strconv"
 
-// InvertPatch returns the inverse of patch relative to doc (SPEC §9).
+// InvertPatch returns the inverse of patch relative to doc (CORE §6).
 //
-// doc MUST be the ORIGINAL (pre-patch) document (SPEC §9.1.1): it is required to
+// doc MUST be the ORIGINAL (pre-patch) document (CORE §6.1.1): it is required to
 // resolve "/-" append paths to concrete indices, to recover removed/replaced
 // values when oldValue is absent, and to restore values overwritten by
-// add/move/copy onto an existing member. The guarantee (§9.1.2) is that
+// add/move/copy onto an existing member. The guarantee (CORE §6.1.2) is that
 // ApplyPatch(ApplyPatch(doc, patch), InvertPatch(doc, patch)) deep-equals doc
 // for any doc on which patch applies cleanly.
 //
-// Inversion is forward-simulated (SPEC §9.2): each op's inverse is computed
+// Inversion is forward-simulated (CORE §6.2): each op's inverse is computed
 // against the correct pre-op state (a copy of doc advanced op-by-op), the
 // inverses are collected, then the list is reversed. doc is never mutated (the
 // simulation uses copy-on-write, sharing [applyOp] with ApplyPatch).
 //
 // Errors: a remove/replace whose forward target does not exist in the simulated
 // document yields PATH_UNRESOLVABLE; an unknown op or a move/copy missing "from"
-// yields INVALID_OPERATION (SPEC §9.2.1). The error is a *[PatchError].
+// yields INVALID_OPERATION (CORE §6.2.1). The error is a *[PatchError].
 func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 	inverse := make([]Operation, 0, len(patch))
 	root := doc
@@ -63,7 +63,7 @@ func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 			_, parentIsArray := parentVal.([]Value)
 			// A move onto an existing OBJECT member overwrites it; the inverse
 			// must also restore that value. Push the restore before the
-			// move-back so it survives the final reversal (SPEC §9.2).
+			// move-back so it survives the final reversal (CORE §6.2).
 			if destExists && !parentIsArray {
 				inverse = append(inverse, Operation{Op: OpAdd, Path: op.Path, Value: destVal, HasValue: true})
 			}
@@ -71,11 +71,11 @@ func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 
 		case OpCopy:
 			// copy inserts without a value field of its own, so its inverse
-			// carries no oldValue (HasValue=false, SPEC §9.2).
+			// carries no oldValue (HasValue=false, CORE §6.2).
 			inverse = append(inverse, invertInsertion(root, op.Path, parts, false, nil))
 
 		case OpTest:
-			inverse = append(inverse, *op) // passed through unchanged (SPEC §9.2)
+			inverse = append(inverse, *op) // passed through unchanged (CORE §6.2)
 
 		default:
 			return nil, opErr(CodeInvalidOperation, `unknown operation "`+string(op.Op)+`"`, i, op)
@@ -95,7 +95,7 @@ func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 }
 
 // invertInsertion computes the inverse of an insertion (add, or copy) at path
-// (SPEC §9.2). At the root it restores the whole document. On an array it always
+// (CORE §6.2). At the root it restores the whole document. On an array it always
 // inverts to a remove (arrays insert, never overwrite), resolving "/-" to the
 // concrete pre-op index. On an object it inverts to a remove for a new member,
 // or a replace restoring the pre-op value for an overwritten member. hasValue /
@@ -103,7 +103,7 @@ func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 // carries no oldValue.
 func invertInsertion(root Value, path string, parts []string, hasValue bool, value Value) Operation {
 	if len(parts) == 0 {
-		// add/replace at root replaces the whole document (SPEC §8.5.1).
+		// add/replace at root replaces the whole document (CORE §5.5.1).
 		return Operation{Op: OpReplace, Path: "", Value: root, HasValue: true, OldValue: value, HasOldValue: hasValue}
 	}
 
@@ -132,7 +132,7 @@ func replaceInverse(path string, preValue Value, hasValue bool, value Value) Ope
 	return Operation{Op: OpReplace, Path: path, Value: preValue, HasValue: true, OldValue: value, HasOldValue: hasValue}
 }
 
-// reverseOps reverses ops in place (SPEC §9.2: collect then reverse).
+// reverseOps reverses ops in place (CORE §6.2: collect then reverse).
 func reverseOps(ops []Operation) {
 	for i, j := 0, len(ops)-1; i < j; i, j = i+1, j-1 {
 		ops[i], ops[j] = ops[j], ops[i]

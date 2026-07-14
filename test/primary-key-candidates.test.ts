@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { buildPlan } from "../src/index"
 import type { JSONSchema } from "../src/core/buildPlan"
 
-// F25 / capability `primaryKeyCandidates` (SPEC §4.5.3, §4.5.5, §10.4.3).
+// F25 / capability `primaryKeyCandidates` (CORE §3.5.3, CORE §3.5.5, CONF §5.3).
 
 const arraySchema = (
   itemProps: Record<string, { type: string }>,

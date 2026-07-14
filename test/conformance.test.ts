@@ -1,30 +1,30 @@
 /**
  * test/conformance.test.ts — runs every vector under spec/vectors/{diff,apply,plan,invert}/*.json
- * against the TypeScript reference implementation, gated exactly as SPEC.md §10 defines.
+ * against the TypeScript reference implementation, gated exactly as CONF defines.
  *
  * This suite is the executable counterpart to spec/vectors/README.md: a Go (or any other
- * language) implementer should be able to read SPEC.md §10 + spec/vectors/README.md and
+ * language) implementer should be able to read CONF + spec/vectors/README.md and
  * reproduce every assertion made here without reading this file. Conversely, if this file
  * asserts something spec/vectors/README.md does not document, that is a spec gap to fix, not
  * a private test detail.
  *
  * Gates implemented (SPEC.md references):
- *   diff   §10.1/§10.3   buildPlan + JsonSchemaPatcher.execute -> structural op equality (a)
+ *   diff   CONF §2/CONF §4   buildPlan + JsonSchemaPatcher.execute -> structural op equality (a)
  *                         AND the strategy's round-trip contract (b)
- *   apply  §10.2/§10.2.1 applyPatch -> expected value, or JsonPatchError{code, operationIndex}
- *   plan   §10.6/§10.6.1 buildPlan -> path-set + per-path {primaryKey,strategy,requiredFields,
+ *   apply  CONF §3/CONF §3.1 applyPatch -> expected value, or JsonPatchError{code, operationIndex}
+ *   plan   CONF §7/CONF §7.1 buildPlan -> path-set + per-path {primaryKey,strategy,requiredFields,
  *                         hashFields} match (field arrays order-insensitive)
- *   invert §10.7/§10.7.2 invertPatch -> structural equality (a) AND double-apply identity (b)
+ *   invert CONF §8/CONF §8.2 invertPatch -> structural equality (a) AND double-apply identity (b)
  *
- * Round-trip contract selection (§10.3.1) is NOT carried in the vector wire format (see
+ * Round-trip contract selection (CONF §4.1) is NOT carried in the vector wire format (see
  * spec/vectors/README.md "Vector record formats" — a diff record has no `roundtrip` field;
  * spec/vectors/generate.ts's internal `DiffSpec.roundtrip` is a generation-time self-check
  * that is deliberately not persisted). This suite re-derives which contract applies the same
- * way §10.3.1 defines it: exact reconstruction is tried first (it satisfies BOTH the exact and
+ * way CONF §4.1 defines it: exact reconstruction is tried first (it satisfies BOTH the exact and
  * the multiset contract, since exact implies multiset), and the weaker multiset contract is
  * accepted ONLY as a fallback, and only when justified — i.e. only when the vector's own plan
  * (built from its `schema`/`options`) contains a `primaryKey`-strategy path and `emitMoves` is
- * not enabled (§10.4.4 upgrades primaryKey to an exact contract under `emitMoves`). See
+ * not enabled (CONF §5.4 upgrades primaryKey to an exact contract under `emitMoves`). See
  * `checkRoundTrip` below.
  */
 import { describe, expect, test } from "bun:test";
@@ -41,7 +41,7 @@ import {
 import type { JsonValue, Operation } from "../src/types";
 
 // ---------------------------------------------------------------------------
-// JSON-value equality helpers (§2.4.1), and the §10.3.1 multiset canonicalizer.
+// JSON-value equality helpers (CORE §1.4.1), and the CONF §4.1 multiset canonicalizer.
 // Deliberately independent of the reference's memoised deepEqual (that's part
 // of what's under test) — mirrors spec/vectors/generate.ts exactly so this
 // suite and the generator's own self-checks agree on what "equal" means.
@@ -73,7 +73,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
 	return false;
 }
 
-/** Recursively sort arrays (by canonical JSON) and object keys — the §10.3.1
+/** Recursively sort arrays (by canonical JSON) and object keys — the CONF §4.1
  *  "multiset-equal with canonical survivor+append order" comparator, used only
  *  as the fallback contract for primaryKey (non-move) diffs. */
 function canonSort(v: JsonValue): JsonValue {
@@ -101,13 +101,13 @@ function hasPrimaryKeyStrategy(plan: Plan): boolean {
 }
 
 /**
- * §10.3.1 round-trip gate. `applied` is the result of applying the ops under
+ * CONF §4.1 round-trip gate. `applied` is the result of applying the ops under
  * test (already asserted structurally equal to `expectedPatch`) to `original`.
  * Exact reconstruction is checked first and, if it holds, always satisfies the
  * gate (exact => multiset). Only if exact fails do we fall back to the
  * multiset contract, and only when the vector's plan justifies it (a
  * primaryKey-strategy path exists and `emitMoves` is not enabled, per
- * §10.4.4) — otherwise this is a genuine round-trip failure.
+ * CONF §5.4) — otherwise this is a genuine round-trip failure.
  */
 function checkRoundTrip(
 	vectorName: string,
@@ -120,9 +120,9 @@ function checkRoundTrip(
 	const multisetJustified = hasPrimaryKeyStrategy(plan) && !emitMovesEnabled;
 	if (!multisetJustified) {
 		throw new Error(
-			`${vectorName}: round-trip failed exact reconstruction (§7) and the vector's plan shows ` +
+			`${vectorName}: round-trip failed exact reconstruction (CORE §7) and the vector's plan shows ` +
 				`no primaryKey (non-emitMoves) strategy to justify falling back to the multiset contract ` +
-				`(§10.3.1). applied=${JSON.stringify(applied)}\nmodified=${JSON.stringify(modified)}`,
+				`(CONF §4.1). applied=${JSON.stringify(applied)}\nmodified=${JSON.stringify(modified)}`,
 		);
 	}
 	expect(canonSort(applied)).toEqual(canonSort(modified));
@@ -243,9 +243,9 @@ assertUniqueNames(planVectors, "plan");
 assertUniqueNames(invertVectors, "invert");
 
 // ---------------------------------------------------------------------------
-// diff vectors (§10.1, §10.3)
+// diff vectors (CONF §2, CONF §4)
 // ---------------------------------------------------------------------------
-describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
+describe("conformance: diff vectors (CONF §2/CONF §4)", () => {
 	test("vector suite is non-empty", () => {
 		expect(diffVectors.length).toBeGreaterThan(0);
 	});
@@ -275,10 +275,10 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 				modified: vector.modified,
 			});
 
-			// (b) §10.3.2 structural op equality: same length, same ORDERED op
+			// (b) CONF §4.2 structural op equality: same length, same ORDERED op
 			// sequence, each op equal by op/path/value/oldValue/from under deep
 			// JSON equality. bun's toEqual is exactly this: recursive structural
-			// equality that is key-order-insensitive on objects (matches §10.3.3,
+			// equality that is key-order-insensitive on objects (matches CONF §4.3,
 			// "object key order within values is insignificant") and index-order-
 			// sensitive on arrays (matches "op ordering in the sequence IS
 			// significant").
@@ -286,8 +286,8 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 				vector.expectedPatch as unknown as typeof actualPatch,
 			);
 
-			// (a) §10.3.1 round-trip, per the strategy's contract (§7). ignorePaths
-			// vectors reconstruct `modified` only MODULO the ignored subtrees (§7.6),
+			// (a) CONF §4.1 round-trip, per the strategy's contract (CORE §7). ignorePaths
+			// vectors reconstruct `modified` only MODULO the ignored subtrees (CORE §7.6),
 			// so the whole-document round-trip gate does not apply — structural op
 			// equality above is the gate, and apply is cross-checked by the
 			// differential corpus (spec/fuzz). Skip when ignorePaths is in effect.
@@ -306,9 +306,9 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// apply vectors (§10.2, §10.2.1)
+// apply vectors (CONF §3, CONF §3.1)
 // ---------------------------------------------------------------------------
-describe("conformance: apply vectors (SPEC §10.2/§10.2.1)", () => {
+describe("conformance: apply vectors (CONF §3/CONF §3.1)", () => {
 	test("vector suite is non-empty", () => {
 		expect(applyVectors.length).toBeGreaterThan(0);
 	});
@@ -351,7 +351,7 @@ describe("conformance: apply vectors (SPEC §10.2/§10.2.1)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// plan-snapshot vectors (§10.6, §10.6.1)
+// plan-snapshot vectors (CONF §7, CONF §7.1)
 // ---------------------------------------------------------------------------
 function sortFields(fields: string[]): string[] {
 	return [...fields].sort();
@@ -368,7 +368,7 @@ function normalizePlanEntries(
 		.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
-describe("conformance: plan-snapshot vectors (SPEC §10.6/§10.6.1)", () => {
+describe("conformance: plan-snapshot vectors (CONF §7/CONF §7.1)", () => {
 	test("vector suite is non-empty", () => {
 		expect(planVectors.length).toBeGreaterThan(0);
 	});
@@ -392,7 +392,7 @@ describe("conformance: plan-snapshot vectors (SPEC §10.6/§10.6.1)", () => {
 				}),
 			);
 
-			// §10.6.1: path set matches, and per path primaryKey/strategy/
+			// CONF §7.1: path set matches, and per path primaryKey/strategy/
 			// requiredFields/hashFields match; both the entry list and the two
 			// field arrays are order-insensitive (sort before compare).
 			expect(normalizePlanEntries(actual)).toEqual(
@@ -403,9 +403,9 @@ describe("conformance: plan-snapshot vectors (SPEC §10.6/§10.6.1)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// invert vectors (§10.7, §10.7.2)
+// invert vectors (CONF §8, CONF §8.2)
 // ---------------------------------------------------------------------------
-describe("conformance: invert vectors (SPEC §10.7/§10.7.2)", () => {
+describe("conformance: invert vectors (CONF §8/CONF §8.2)", () => {
 	test("vector suite is non-empty", () => {
 		expect(invertVectors.length).toBeGreaterThan(0);
 	});
@@ -414,12 +414,12 @@ describe("conformance: invert vectors (SPEC §10.7/§10.7.2)", () => {
 		test(vector.name, () => {
 			const actualInverse = invertPatch(vector.document, vector.patch);
 
-			// (a) §10.7.2(a): structural inverse equality, same relation as §10.3.2.
+			// (a) CONF §8.2(a): structural inverse equality, same relation as CONF §4.2.
 			expect(actualInverse).toEqual(
 				vector.expectedInverse as unknown as typeof actualInverse,
 			);
 
-			// (b) §10.7.2(b): double-apply identity, using expectedInverse exactly
+			// (b) CONF §8.2(b): double-apply identity, using expectedInverse exactly
 			// as the spec text states (applyPatch(applyPatch(document, patch), expectedInverse)).
 			const forward = applyPatch(vector.document, vector.patch);
 			const back = applyPatch(forward, vector.expectedInverse);

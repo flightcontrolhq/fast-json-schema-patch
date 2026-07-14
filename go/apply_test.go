@@ -27,7 +27,7 @@ func TestApplyEmptyPatchReturnsSameReference(t *testing.T) {
 	if err != nil {
 		t.Fatalf("apply: %v", err)
 	}
-	// §8.7.5: empty patch in immutable mode returns the same reference.
+	// CORE §5.7.5: empty patch in immutable mode returns the same reference.
 	gm, dm := got.(*Object), doc.(*Object)
 	if gm != dm {
 		t.Errorf("empty patch did not return the same document reference")
@@ -122,7 +122,7 @@ func TestApplyErrorSentinels(t *testing.T) {
 	}
 }
 
-// TestApplyTestRequiresValue pins D4 (SPEC §8.3/§8.3.5, RFC 6902 §4.6): `test`
+// TestApplyTestRequiresValue pins D4 (CORE §5.3/CORE §5.3.5, RFC 6902 §4.6): `test`
 // MUST carry a `value` member. An ABSENT value is INVALID_OPERATION at tier 1
 // (before the read-side existence check); a value present as JSON null is VALID
 // and tests against null. The Go applier previously omitted this check, so a

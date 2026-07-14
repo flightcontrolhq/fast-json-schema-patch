@@ -1,7 +1,7 @@
 [
   {
     "name": "prec-missing-field-before-pointer",
-    "comment": "§8.3.5(1 before 2): add missing value AND a malformed index -> INVALID_OPERATION, not INVALID_POINTER",
+    "comment": "CORE §5.3.5(1 before 2): add missing value AND a malformed index -> INVALID_OPERATION, not INVALID_POINTER",
     "doc": [
       1
     ],
@@ -18,7 +18,7 @@
   },
   {
     "name": "prec-pointer-before-existence",
-    "comment": "§8.3.5(2 before 3): a malformed array index outranks the target being out of range -> INVALID_POINTER",
+    "comment": "CORE §5.3.5(2 before 3): a malformed array index outranks the target being out of range -> INVALID_POINTER",
     "doc": [
       1
     ],
@@ -36,7 +36,7 @@
   },
   {
     "name": "prec-unsafe-key-before-existence",
-    "comment": "§8.3.5(2 before 3): the UNSAFE_KEY guard is a pointer-stage check, ahead of existence",
+    "comment": "CORE §5.3.5(2 before 3): the UNSAFE_KEY guard is a pointer-stage check, ahead of existence",
     "doc": {
       "a": 1
     },
@@ -54,7 +54,7 @@
   },
   {
     "name": "prec-existence-before-value",
-    "comment": "§8.3.5(3 before 4): a nonexistent target outranks OLD_VALUE_MISMATCH -> PATH_UNRESOLVABLE",
+    "comment": "CORE §5.3.5(3 before 4): a nonexistent target outranks OLD_VALUE_MISMATCH -> PATH_UNRESOLVABLE",
     "doc": {
       "a": 1
     },
@@ -76,7 +76,7 @@
   },
   {
     "name": "prec-index-bounds-before-value",
-    "comment": "§8.3.5(2/3 before 4): an out-of-range index outranks the value check",
+    "comment": "CORE §5.3.5(2/3 before 4): an out-of-range index outranks the value check",
     "doc": [
       1
     ],
@@ -98,7 +98,7 @@
   },
   {
     "name": "prec-later-op-index-reported",
-    "comment": "§8.6.2: operationIndex is the 0-based index of the FAILING op",
+    "comment": "CORE §5.6.2: operationIndex is the 0-based index of the FAILING op",
     "doc": {
       "a": 1
     },

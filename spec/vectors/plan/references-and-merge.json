@@ -1,7 +1,7 @@
 [
   {
     "name": "plan-merge-anyOf-ranking",
-    "comment": "§4.7.1: same /list reached via two anyOf branches; primaryKey(3) outranks lcs(1)",
+    "comment": "CORE §3.7.1: same /list reached via two anyOf branches; primaryKey(3) outranks lcs(1)",
     "schema": {
       "type": "object",
       "anyOf": [
@@ -56,7 +56,7 @@
   },
   {
     "name": "plan-local-ref-resolved",
-    "comment": "§4.3.4: a local #/$defs/item $ref is resolved -> keyed plan",
+    "comment": "CORE §3.3.4: a local #/$defs/item $ref is resolved -> keyed plan",
     "schema": {
       "$defs": {
         "item": {
@@ -97,7 +97,7 @@
   },
   {
     "name": "plan-non-local-ref-skipped",
-    "comment": "§4.3.4: a non-local $ref is unresolvable; the array falls back to lcs (no key)",
+    "comment": "CORE §3.3.4: a non-local $ref is unresolvable; the array falls back to lcs (no key)",
     "schema": {
       "type": "object",
       "properties": {

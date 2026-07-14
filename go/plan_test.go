@@ -20,7 +20,7 @@ func mustPlan(t *testing.T, schemaJSON string, opts BuildPlanOptions) Plan {
 }
 
 func TestBuildPlanTypelessNodeTraversed(t *testing.T) {
-	// SPEC §4.3.1: a node with properties/items but no `type` is still traversed.
+	// CORE §3.3.1: a node with properties/items but no `type` is still traversed.
 	plan := mustPlan(t, `{
 		"properties": {
 			"list": { "items": {
@@ -41,7 +41,7 @@ func TestBuildPlanTypelessNodeTraversed(t *testing.T) {
 }
 
 func TestBuildPlanNestedArraysDistinctPaths(t *testing.T) {
-	// SPEC §4.3.5: array-of-arrays yields distinct outer (lcs) and inner (keyed)
+	// CORE §3.3.5: array-of-arrays yields distinct outer (lcs) and inner (keyed)
 	// plans that do not clobber each other.
 	plan := mustPlan(t, `{
 		"properties": {
@@ -70,7 +70,7 @@ func TestBuildPlanNestedArraysDistinctPaths(t *testing.T) {
 }
 
 func TestBuildPlanNonLocalRefWarns(t *testing.T) {
-	// SPEC §4.3.4: a non-local $ref is unresolvable, routed through OnWarning.
+	// CORE §3.3.4: a non-local $ref is unresolvable, routed through OnWarning.
 	var warnings []string
 	plan := mustPlan(t, `{
 		"properties": {
@@ -85,7 +85,7 @@ func TestBuildPlanNonLocalRefWarns(t *testing.T) {
 	// The same unresolvable ref is probed at several call sites (items-$ref
 	// resolution, mergeAllOf, and the items traversal), so it may warn more than
 	// once; each warning MUST carry the same unsupported-reference message. This
-	// mirrors the reference (multiplicity is unspecified by §4.3.4).
+	// mirrors the reference (multiplicity is unspecified by CORE §3.3.4).
 	if len(warnings) == 0 {
 		t.Error("expected at least one unsupported-reference warning")
 	}
@@ -97,7 +97,7 @@ func TestBuildPlanNonLocalRefWarns(t *testing.T) {
 }
 
 func TestBuildPlanRefCycleSafe(t *testing.T) {
-	// SPEC §4.3: a self-referential $ref must terminate. `node.children` is an
+	// CORE §3.3: a self-referential $ref must terminate. `node.children` is an
 	// array of `node`, so traversal would loop without the visited guard.
 	plan := mustPlan(t, `{
 		"$defs": {
@@ -122,7 +122,7 @@ func TestBuildPlanRefCycleSafe(t *testing.T) {
 }
 
 func TestBuildPlanAnyOfBranchDedup(t *testing.T) {
-	// SPEC §4.3.6: identical branches within one keyword are traversed once.
+	// CORE §3.3.6: identical branches within one keyword are traversed once.
 	// Two identical anyOf branches on the item schema must not corrupt the plan.
 	plan := mustPlan(t, `{
 		"properties": {
@@ -141,7 +141,7 @@ func TestBuildPlanAnyOfBranchDedup(t *testing.T) {
 }
 
 func TestPlanTrieExactBeatsWildcard(t *testing.T) {
-	// SPEC §5.4.5.2: an exact child edge takes precedence over the wildcard edge.
+	// GEN §4.5.2: an exact child edge takes precedence over the wildcard edge.
 	// A schema with both a named `id` array property and additionalProperties
 	// arrays produces `/id` (exact) and `/*` (wildcard) plans.
 	plan := mustPlan(t, `{
@@ -174,7 +174,7 @@ func TestPlanTrieExactBeatsWildcard(t *testing.T) {
 }
 
 func TestPlanTrieRootLevelArray(t *testing.T) {
-	// SPEC §5.4.5.1: a root array schema registers at the empty key and its plan
+	// GEN §4.5.1: a root array schema registers at the empty key and its plan
 	// lives on the trie root node itself.
 	plan := mustPlan(t, `{
 		"type": "array",
@@ -187,7 +187,7 @@ func TestPlanTrieRootLevelArray(t *testing.T) {
 }
 
 func TestPlanTrieNestedWildcardDepth(t *testing.T) {
-	// SPEC §5.4.5.2: a wildcard plan is reachable at depth; thread member then
+	// GEN §4.5.2: a wildcard plan is reachable at depth; thread member then
 	// wildcard for `/envs/*`.
 	plan := mustPlan(t, `{
 		"properties": {
@@ -209,7 +209,7 @@ func TestPlanTrieNestedWildcardDepth(t *testing.T) {
 }
 
 func TestBuildPlanEmptyIsNilRoot(t *testing.T) {
-	// SPEC §5.4.5.2: an empty plan threads no node.
+	// GEN §4.5.2: an empty plan threads no node.
 	plan := mustPlan(t, `{"type": "object", "properties": {"a": {"type": "string"}}}`, BuildPlanOptions{})
 	if plan.Len() != 0 {
 		t.Fatalf("expected empty plan, got %v", plan.Paths())
@@ -224,7 +224,7 @@ func TestBuildPlanEmptyIsNilRoot(t *testing.T) {
 }
 
 func TestBuildPlanBasePathSegmentBoundary(t *testing.T) {
-	// SPEC §4.6.2: basePath matches on a segment boundary; a sibling prefix
+	// CORE §3.6.2: basePath matches on a segment boundary; a sibling prefix
 	// (/env vs /envelope) must NOT be captured, and matched keys are relativized.
 	plan := mustPlan(t, `{
 		"type": "object",
@@ -257,7 +257,7 @@ func TestBuildPlanBasePathSegmentBoundary(t *testing.T) {
 }
 
 func TestBuildPlanPrimaryKeyMapOverrideNoMetadata(t *testing.T) {
-	// SPEC §4.4.3: override sets key+strategy without requiredFields/hashFields.
+	// CORE §3.4.3: override sets key+strategy without requiredFields/hashFields.
 	plan := mustPlan(t, `{
 		"properties": {
 			"items": { "type": "array", "items": {
@@ -279,7 +279,7 @@ func TestBuildPlanPrimaryKeyMapOverrideNoMetadata(t *testing.T) {
 }
 
 func TestBuildPlanHashFieldsOrderFollowsRequired(t *testing.T) {
-	// SPEC §4.5.4: hashFields are the required string/number fields in required
+	// CORE §3.5.4: hashFields are the required string/number fields in required
 	// order, excluding non-primitive required fields.
 	plan := mustPlan(t, `{
 		"properties": {

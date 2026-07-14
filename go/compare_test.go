@@ -107,7 +107,7 @@ func TestCompareJSON_InvalidJSON(t *testing.T) {
 
 func TestCompareJSON_NumberTextPreserved(t *testing.T) {
 	// A large integer literal survives the decode→diff→encode round-trip
-	// byte-faithfully (SPEC §2.2) even though comparison is at f64.
+	// byte-faithfully (CORE §1.2) even though comparison is at f64.
 	ops, err := CompareJSON(nil,
 		[]byte(`{"n":1}`),
 		[]byte(`{"n":10000000000000000001}`))

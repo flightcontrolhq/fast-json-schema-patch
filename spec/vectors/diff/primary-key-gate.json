@@ -1,7 +1,7 @@
 [
   {
     "name": "gate-non-object-element",
-    "comment": "§10.5.1(a): a non-object array element fails the gate -> LCS fallback",
+    "comment": "CONF §6.1(a): a non-object array element fails the gate -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -59,7 +59,7 @@
   },
   {
     "name": "gate-non-object-both-numbers",
-    "comment": "§10.5.1(a): all-primitive arrays under a keyed schema fall back to LCS",
+    "comment": "CONF §6.1(a): all-primitive arrays under a keyed schema fall back to LCS",
     "schema": {
       "type": "object",
       "properties": {
@@ -105,7 +105,7 @@
   },
   {
     "name": "gate-missing-key",
-    "comment": "§10.5.1(b): an element whose primaryKey is absent -> LCS fallback",
+    "comment": "CONF §6.1(b): an element whose primaryKey is absent -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -159,7 +159,7 @@
   },
   {
     "name": "gate-null-key",
-    "comment": "§10.5.1(b): a null primaryKey value -> LCS fallback",
+    "comment": "CONF §6.1(b): a null primaryKey value -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -209,7 +209,7 @@
   },
   {
     "name": "gate-non-string-number-key",
-    "comment": "§10.5.1(b): a boolean primaryKey value (not string/number) -> LCS fallback",
+    "comment": "CONF §6.1(b): a boolean primaryKey value (not string/number) -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -259,7 +259,7 @@
   },
   {
     "name": "gate-duplicate-in-original",
-    "comment": "§10.5.1(c): duplicate key within ORIGINAL -> LCS fallback",
+    "comment": "CONF §6.1(c): duplicate key within ORIGINAL -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -321,7 +321,7 @@
   },
   {
     "name": "gate-duplicate-in-modified",
-    "comment": "§10.5.1(c): duplicate key within MODIFIED -> LCS fallback",
+    "comment": "CONF §6.1(c): duplicate key within MODIFIED -> LCS fallback",
     "schema": {
       "type": "object",
       "properties": {
@@ -377,7 +377,7 @@
   },
   {
     "name": "gate-override-does-not-bypass",
-    "comment": "§5.4.3/§10.5.1: a primaryKeyMap override does NOT bypass the gate; duplicate keys still fall back to LCS",
+    "comment": "GEN §4.3/CONF §6.1: a primaryKeyMap override does NOT bypass the gate; duplicate keys still fall back to LCS",
     "schema": {
       "type": "object",
       "properties": {

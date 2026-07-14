@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// roundTrip asserts the §9.1.2 identity: apply(apply(D,patch),invert(D,patch))
+// roundTrip asserts the CORE §6.1.2 identity: apply(apply(D,patch),invert(D,patch))
 // deep-equals D.
 func roundTrip(t *testing.T, doc string, ops []Operation) {
 	t.Helper()
@@ -27,7 +27,7 @@ func roundTrip(t *testing.T, doc string, ops []Operation) {
 	}
 }
 
-// TestInvertRoundTripWithoutOldValue proves §9.2.2 / §10.4.2: invert recovers
+// TestInvertRoundTripWithoutOldValue proves CORE §6.2.2 / CONF §5.2: invert recovers
 // pre-change values from the ORIGINAL document, so a patch generated with
 // includeOldValue=false (no oldValue on any op) still round-trips.
 func TestInvertRoundTripWithoutOldValue(t *testing.T) {
@@ -47,7 +47,7 @@ func TestInvertRoundTripWithoutOldValue(t *testing.T) {
 }
 
 // TestInvertRoundTripGeneratedPrimaryKey exercises a real keyed patch (mods,
-// removals, /- appends) through invert (SPEC §7.3).
+// removals, /- appends) through invert (CORE §7.3).
 func TestInvertRoundTripGeneratedPrimaryKey(t *testing.T) {
 	schema := `{"type":"object","properties":{"users":{"type":"array","items":{"type":"object","required":["id"],"properties":{"id":{"type":"string"},"name":{"type":"string"}}}}}}`
 	plan, err := BuildPlan(mustDecode(t, schema), BuildPlanOptions{})

@@ -1,7 +1,7 @@
 [
   {
     "name": "inv-seq-add-then-replace",
-    "comment": "§9.2: each inverse computed against the correct pre-op state, then reversed",
+    "comment": "CORE §6.2: each inverse computed against the correct pre-op state, then reversed",
     "document": {
       "a": 1
     },
@@ -33,7 +33,7 @@
   },
   {
     "name": "inv-seq-remove-then-readd-same-path",
-    "comment": "§9.2: remove then add at the same path; intermediate state distinguishes the inverses",
+    "comment": "CORE §6.2: remove then add at the same path; intermediate state distinguishes the inverses",
     "document": {
       "a": 1
     },
@@ -63,7 +63,7 @@
   },
   {
     "name": "inv-seq-two-array-removes",
-    "comment": "§9.2: two removes; inverses reversed reconstruct the original array",
+    "comment": "CORE §6.2: two removes; inverses reversed reconstruct the original array",
     "document": [
       10,
       20,
@@ -94,7 +94,7 @@
   },
   {
     "name": "inv-seq-non-trailing-dash-interleave",
-    "comment": "§9.2.2: a /- append resolved mid-sequence, then a subsequent index op, inverts correctly",
+    "comment": "CORE §6.2.2: a /- append resolved mid-sequence, then a subsequent index op, inverts correctly",
     "document": [
       10,
       20
@@ -127,7 +127,7 @@
   },
   {
     "name": "inv-seq-add-remove-replace-mixed",
-    "comment": "§9.2: mixed op sequence inverts as the reversed per-op inverses",
+    "comment": "CORE §6.2: mixed op sequence inverts as the reversed per-op inverses",
     "document": {
       "a": 1,
       "b": 2
@@ -169,7 +169,7 @@
   },
   {
     "name": "inv-seq-move-then-modify",
-    "comment": "§9.2: move then edit the moved subtree; simulation tracks the live state",
+    "comment": "CORE §6.2: move then edit the moved subtree; simulation tracks the live state",
     "document": {
       "a": {
         "x": 1
@@ -204,7 +204,7 @@
   },
   {
     "name": "inv-seq-with-test-passthrough",
-    "comment": "§9.2: a test op is passed through unchanged in the inverse",
+    "comment": "CORE §6.2: a test op is passed through unchanged in the inverse",
     "document": {
       "a": 1
     },
@@ -236,7 +236,7 @@
   },
   {
     "name": "inv-seq-build-nested-object",
-    "comment": "§9.2: building a nested object step by step inverts to staged removes",
+    "comment": "CORE §6.2: building a nested object step by step inverts to staged removes",
     "document": {},
     "patch": [
       {
@@ -275,7 +275,7 @@
   },
   {
     "name": "inv-seq-generated-primaryKey-patch",
-    "comment": "§7.3/§9: a real generated keyed patch (mods ++ removals ++ /- appends) round-trips through invert",
+    "comment": "CORE §7.3/CORE §6: a real generated keyed patch (mods ++ removals ++ /- appends) round-trips through invert",
     "document": {
       "users": [
         {

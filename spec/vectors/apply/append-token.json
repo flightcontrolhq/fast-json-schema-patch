@@ -1,7 +1,7 @@
 [
   {
     "name": "dash-add-nested-array",
-    "comment": "§3.5: add at /- appends to a nested array",
+    "comment": "CORE §2.5: add at /- appends to a nested array",
     "doc": {
       "a": [
         1
@@ -23,7 +23,7 @@
   },
   {
     "name": "dash-add-root-array",
-    "comment": "§3.5/§6.2.1: add at /- appends at the array root",
+    "comment": "CORE §2.5/CORE §4.2.1: add at /- appends at the array root",
     "doc": [
       1
     ],
@@ -41,7 +41,7 @@
   },
   {
     "name": "dash-add-into-empty-array",
-    "comment": "§3.5: /- on an empty array lands at index 0",
+    "comment": "CORE §2.5: /- on an empty array lands at index 0",
     "doc": {
       "a": []
     },
@@ -60,7 +60,7 @@
   },
   {
     "name": "dash-remove-invalid-pointer",
-    "comment": "§3.5: '-' final on remove (write-side) -> INVALID_POINTER",
+    "comment": "CORE §2.5: '-' final on remove (write-side) -> INVALID_POINTER",
     "doc": [
       1
     ],
@@ -77,7 +77,7 @@
   },
   {
     "name": "dash-replace-invalid-pointer",
-    "comment": "§3.5: '-' final on replace (write-side) -> INVALID_POINTER",
+    "comment": "CORE §2.5: '-' final on replace (write-side) -> INVALID_POINTER",
     "doc": [
       1
     ],
@@ -95,7 +95,7 @@
   },
   {
     "name": "dash-test-read-side-unresolvable",
-    "comment": "§3.5/§8.3.1: '-' final on test (read-side) fails own-index resolution -> PATH_UNRESOLVABLE",
+    "comment": "CORE §2.5/CORE §5.3.1: '-' final on test (read-side) fails own-index resolution -> PATH_UNRESOLVABLE",
     "doc": [
       1
     ],
@@ -113,7 +113,7 @@
   },
   {
     "name": "dash-move-source-read-side-unresolvable",
-    "comment": "§3.5: '-' as a move SOURCE final (read-side) -> PATH_UNRESOLVABLE",
+    "comment": "CORE §2.5: '-' as a move SOURCE final (read-side) -> PATH_UNRESOLVABLE",
     "doc": {
       "a": [
         1
@@ -134,7 +134,7 @@
   },
   {
     "name": "dash-move-dest-appends",
-    "comment": "§3.5/§8.3: '-' as a move DESTINATION appends",
+    "comment": "CORE §2.5/CORE §5.3: '-' as a move DESTINATION appends",
     "doc": {
       "a": [
         1
@@ -157,7 +157,7 @@
   },
   {
     "name": "dash-copy-dest-appends",
-    "comment": "§3.5/§8.3: '-' as a copy DESTINATION appends a clone",
+    "comment": "CORE §2.5/CORE §5.3: '-' as a copy DESTINATION appends a clone",
     "doc": {
       "a": [
         1
@@ -181,7 +181,7 @@
   },
   {
     "name": "dash-non-final-invalid-pointer",
-    "comment": "§3.5: '-' in a NON-final segment (write-side) -> INVALID_POINTER",
+    "comment": "CORE §2.5: '-' in a NON-final segment (write-side) -> INVALID_POINTER",
     "doc": {
       "a": [
         [

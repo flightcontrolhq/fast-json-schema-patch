@@ -1,7 +1,7 @@
 [
   {
     "name": "idx-add-at-length-appends",
-    "comment": "§8.3.1: add index == length appends",
+    "comment": "CORE §5.3.1: add index == length appends",
     "doc": [
       1,
       2
@@ -21,7 +21,7 @@
   },
   {
     "name": "idx-add-beyond-length",
-    "comment": "§8.3.1: add index > length -> INDEX_OUT_OF_BOUNDS",
+    "comment": "CORE §5.3.1: add index > length -> INDEX_OUT_OF_BOUNDS",
     "doc": [
       1
     ],
@@ -39,7 +39,7 @@
   },
   {
     "name": "idx-replace-at-length",
-    "comment": "§8.3.1: replace requires index < length",
+    "comment": "CORE §5.3.1: replace requires index < length",
     "doc": [
       1,
       2
@@ -58,7 +58,7 @@
   },
   {
     "name": "idx-remove-at-length",
-    "comment": "§8.3.1: remove requires index < length",
+    "comment": "CORE §5.3.1: remove requires index < length",
     "doc": [
       1,
       2
@@ -76,7 +76,7 @@
   },
   {
     "name": "idx-leading-zero-invalid",
-    "comment": "§3.6: '01' is not a valid index (write-side) -> INVALID_POINTER",
+    "comment": "CORE §2.6: '01' is not a valid index (write-side) -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -95,7 +95,7 @@
   },
   {
     "name": "idx-plus-sign-invalid",
-    "comment": "§3.6: '+1' is not a valid index -> INVALID_POINTER",
+    "comment": "CORE §2.6: '+1' is not a valid index -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -114,7 +114,7 @@
   },
   {
     "name": "idx-decimal-invalid",
-    "comment": "§3.6: '1.5' is not a valid index -> INVALID_POINTER",
+    "comment": "CORE §2.6: '1.5' is not a valid index -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -133,7 +133,7 @@
   },
   {
     "name": "idx-negative-invalid",
-    "comment": "§3.6: '-1' is a signed (malformed) index, not the '-' token -> INVALID_POINTER",
+    "comment": "CORE §2.6: '-1' is a signed (malformed) index, not the '-' token -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -152,7 +152,7 @@
   },
   {
     "name": "idx-test-oob-read-side",
-    "comment": "§8.3.1: a test at an out-of-range index fails existence -> PATH_UNRESOLVABLE",
+    "comment": "CORE §5.3.1: a test at an out-of-range index fails existence -> PATH_UNRESOLVABLE",
     "doc": [
       1
     ],
@@ -170,7 +170,7 @@
   },
   {
     "name": "idx-test-leading-zero-read-side",
-    "comment": "§3.6: a malformed index on read-side (test) -> PATH_UNRESOLVABLE, not INVALID_POINTER",
+    "comment": "CORE §2.6: a malformed index on read-side (test) -> PATH_UNRESOLVABLE, not INVALID_POINTER",
     "doc": [
       1,
       2
@@ -189,7 +189,7 @@
   },
   {
     "name": "idx-numeric-key-on-object",
-    "comment": "§8.2.3: a decimal-digit segment against an OBJECT is a member key, not an index",
+    "comment": "CORE §5.2.3: a decimal-digit segment against an OBJECT is a member key, not an index",
     "doc": {
       "0": "x"
     },
@@ -206,7 +206,7 @@
   },
   {
     "name": "idx-add-index-0-empty-array",
-    "comment": "§8.3.1: add /0 to an empty array is index == length (append)",
+    "comment": "CORE §5.3.1: add /0 to an empty array is index == length (append)",
     "doc": [],
     "patch": [
       {

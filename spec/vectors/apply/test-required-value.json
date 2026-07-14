@@ -1,7 +1,7 @@
 [
   {
     "name": "test-missing-value-null-target-invalid",
-    "comment": "§8.3/§8.3.5 (D4): {op:test,path:/a} on {a:null} with NO `value` -> INVALID_OPERATION (tier 1), NOT a pass treating absent value as null (Go's bug) and NOT TEST_FAILED (TS's bug)",
+    "comment": "CORE §5.3/CORE §5.3.5 (D4): {op:test,path:/a} on {a:null} with NO `value` -> INVALID_OPERATION (tier 1), NOT a pass treating absent value as null (Go's bug) and NOT TEST_FAILED (TS's bug)",
     "doc": {
       "a": null
     },
@@ -18,7 +18,7 @@
   },
   {
     "name": "test-missing-value-present-target-invalid",
-    "comment": "§8.3/§8.3.5 (D4): {op:test,path:/a} on {a:1} with NO `value` -> INVALID_OPERATION at tier 1, before any value comparison",
+    "comment": "CORE §5.3/CORE §5.3.5 (D4): {op:test,path:/a} on {a:1} with NO `value` -> INVALID_OPERATION at tier 1, before any value comparison",
     "doc": {
       "a": 1
     },
@@ -35,7 +35,7 @@
   },
   {
     "name": "test-missing-value-absent-target-invalid",
-    "comment": "§8.3.5 (D4): missing `value` (tier 1) precedes read-side non-existence (tier 3) -> INVALID_OPERATION, not PATH_UNRESOLVABLE",
+    "comment": "CORE §5.3.5 (D4): missing `value` (tier 1) precedes read-side non-existence (tier 3) -> INVALID_OPERATION, not PATH_UNRESOLVABLE",
     "doc": {
       "a": 1
     },

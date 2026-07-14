@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test"
 import { JsonSchemaPatcher, applyPatch, buildPlan, invertPatch } from "../src/index"
 import type { JsonValue, Operation } from "../src/types"
 
-// F11 / capability `includeOldValue` (SPEC §6.4.2, §10.4). Default-on behavior
+// F11 / capability `includeOldValue` (CORE §4.4.2, CONF §5). Default-on behavior
 // is covered exhaustively by the rest of the suite (which asserts oldValue on
 // every remove/replace); this file pins the OPT-OUT surface: no op carries
 // oldValue when the option is off, default mode is unchanged, and invertPatch

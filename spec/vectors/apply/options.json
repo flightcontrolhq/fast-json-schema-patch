@@ -1,7 +1,7 @@
 [
   {
     "name": "opt-clone-values-value-equal",
-    "comment": "§8.7.2: cloneValues yields the same document value (aliasing only differs)",
+    "comment": "CORE §5.7.2: cloneValues yields the same document value (aliasing only differs)",
     "doc": {},
     "patch": [
       {
@@ -23,7 +23,7 @@
   },
   {
     "name": "opt-clone-result-value-equal",
-    "comment": "§8.7.3: cloneResult yields the same document value (independent copy)",
+    "comment": "CORE §5.7.3: cloneResult yields the same document value (independent copy)",
     "doc": {
       "a": {
         "x": 1
@@ -47,7 +47,7 @@
   },
   {
     "name": "opt-clone-result-empty-patch",
-    "comment": "§8.7.5/§8.7.3: empty patch under cloneResult still returns the document value",
+    "comment": "CORE §5.7.5/CORE §5.7.3: empty patch under cloneResult still returns the document value",
     "doc": {
       "a": 1
     },

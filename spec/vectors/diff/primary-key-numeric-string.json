@@ -1,7 +1,7 @@
 [
   {
     "name": "pk-numeric-to-string-key-is-distinct-item",
-    "comment": "§5.4.1.5: numeric key 1 and string key \"1\" are distinct (no coercion) — the numeric-keyed item is removed and the string-keyed item appended, never matched as an in-place edit",
+    "comment": "GEN §4.1.5: numeric key 1 and string key \"1\" are distinct (no coercion) — the numeric-keyed item is removed and the string-keyed item appended, never matched as an in-place edit",
     "schema": {
       "type": "object",
       "properties": {
@@ -61,7 +61,7 @@
   },
   {
     "name": "pk-numeric-and-string-key-coexist-reorder-noop",
-    "comment": "§5.4.1.5/§7.2.3: numeric 1 and string \"1\" coexist as distinct keys; a pure reorder of the two deep-equal-content items is order-insensitive under the default contract -> zero ops",
+    "comment": "GEN §4.1.5/CORE §7.2.3: numeric 1 and string \"1\" coexist as distinct keys; a pure reorder of the two deep-equal-content items is order-insensitive under the default contract -> zero ops",
     "schema": {
       "type": "object",
       "properties": {
@@ -112,7 +112,7 @@
   },
   {
     "name": "pk-numeric-key-f64-equal-differing-literal-modifies-in-place",
-    "comment": "§2.2/§5.4.1.5: primary keys 1 and 1.0 are equal at f64 -> the SAME key; the matched item's changed field is a granular in-place modification, NOT remove+add (a text-keyed impl would wrongly split them)",
+    "comment": "CORE §1.2/GEN §4.1.5: primary keys 1 and 1.0 are equal at f64 -> the SAME key; the matched item's changed field is a granular in-place modification, NOT remove+add (a text-keyed impl would wrongly split them)",
     "schema": {
       "type": "object",
       "properties": {

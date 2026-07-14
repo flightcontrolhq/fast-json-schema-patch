@@ -2,34 +2,34 @@ package schemapatch
 
 import "fmt"
 
-// ErrorCode identifies the reason a patch operation failed (SPEC §8.6).
+// ErrorCode identifies the reason a patch operation failed (CORE §5.6).
 type ErrorCode string
 
-// The complete set of failure codes (SPEC §8.6). These string values are the
+// The complete set of failure codes (CORE §5.6). These string values are the
 // normative codes carried by conformance vectors and MUST match exactly.
 const (
 	// CodeInvalidPointer is a malformed pointer on WRITE-side resolution: "-" on
-	// a remove/replace final or any non-final segment (SPEC §3.5), or a
-	// leading-zero/sign/decimal array index (SPEC §3.6).
+	// a remove/replace final or any non-final segment (CORE §2.5), or a
+	// leading-zero/sign/decimal array index (CORE §2.6).
 	CodeInvalidPointer ErrorCode = "INVALID_POINTER"
 	// CodePathUnresolvable is a target or intermediate segment that does not
-	// exist (SPEC §8.2.2), including a malformed or "-" segment met during
+	// exist (CORE §5.2.2), including a malformed or "-" segment met during
 	// READ-side resolution (test, move/copy source) and a read-side
-	// __proto__/constructor/prototype segment (SPEC §8.6.1).
+	// __proto__/constructor/prototype segment (CORE §5.6.1).
 	CodePathUnresolvable ErrorCode = "PATH_UNRESOLVABLE"
-	// CodeIndexOutOfBounds is an array index out of range for the op (SPEC §8.3.1).
+	// CodeIndexOutOfBounds is an array index out of range for the op (CORE §5.3.1).
 	CodeIndexOutOfBounds ErrorCode = "INDEX_OUT_OF_BOUNDS"
-	// CodeTestFailed is a test op value mismatch (SPEC §8.3).
+	// CodeTestFailed is a test op value mismatch (CORE §5.3).
 	CodeTestFailed ErrorCode = "TEST_FAILED"
 	// CodeOldValueMismatch is a validateOldValues failure: the document value
-	// differs from op.oldValue (SPEC §8.4).
+	// differs from op.oldValue (CORE §5.4).
 	CodeOldValueMismatch ErrorCode = "OLD_VALUE_MISMATCH"
 	// CodeInvalidOperation is an unknown op, a missing required field
 	// (value/from), a remove at the document root, or a move into own child
-	// (SPEC §8.6).
+	// (CORE §5.6).
 	CodeInvalidOperation ErrorCode = "INVALID_OPERATION"
 	// CodeUnsafeKey is the prototype-pollution guard tripping on a write-side
-	// __proto__/constructor.prototype segment (SPEC §8.6.1).
+	// __proto__/constructor.prototype segment (CORE §5.6.1).
 	CodeUnsafeKey ErrorCode = "UNSAFE_KEY"
 )
 
@@ -47,7 +47,7 @@ var (
 )
 
 // PatchError is returned by apply/invert when an operation fails. It mirrors the
-// reference JsonPatchError (SPEC §8.6): Code is the failure category, OpIndex is
+// reference JsonPatchError (CORE §5.6): Code is the failure category, OpIndex is
 // the 0-based index of the failing op within the patch, and Op is the failing
 // operation (nil when the failure is not attributable to a specific op).
 type PatchError struct {

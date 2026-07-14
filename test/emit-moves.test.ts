@@ -4,11 +4,11 @@ import { computeMoves, lisIndices } from "../src/core/arrayMoves";
 import { JsonSchemaPatcher, applyPatch, buildPlan } from "../src/index";
 import type { JsonValue, Operation } from "../src/types";
 
-// emitMoves capability (SPEC §5.8, §10.4.4). This file pins the OPT-IN surface:
+// emitMoves capability (GEN §8, CONF §5.4). This file pins the OPT-IN surface:
 // default output is byte-identical (capability off), relocated elements become
 // single `move` ops, and every strategy round-trips `modified` EXACTLY through
 // BOTH the repo applier and fast-json-patch. F22 (this file's LCS section) plus
-// F23/F07 (unique/primaryKey sections) share one machinery (§5.8).
+// F23/F07 (unique/primaryKey sections) share one machinery (GEN §8).
 
 const stableStringify = (v: unknown): string => JSON.stringify(v);
 
@@ -30,7 +30,7 @@ function assertRoundTrip(
   expect(stableStringify(fjp)).toBe(stableStringify(expected));
 }
 
-describe("emitMoves — pure move machinery (SPEC §5.8.2/§5.8.3)", () => {
+describe("emitMoves — pure move machinery (GEN §8.2/GEN §8.3)", () => {
   test("lisIndices: canonical patience-sorting LIS", () => {
     expect(lisIndices([])).toEqual([]);
     expect(lisIndices([0, 1, 2, 3])).toEqual([0, 1, 2, 3]);
@@ -57,7 +57,7 @@ describe("emitMoves — pure move machinery (SPEC §5.8.2/§5.8.3)", () => {
   });
 });
 
-describe("emitMoves default-off byte-stability (SPEC §10.4.4)", () => {
+describe("emitMoves default-off byte-stability (CONF §5.4)", () => {
   const cases: Array<{ original: JsonValue; modified: JsonValue }> = [
     { original: [1, 2, 3, 4, 5], modified: [5, 1, 2, 3, 4] },
     {
@@ -78,7 +78,7 @@ describe("emitMoves default-off byte-stability (SPEC §10.4.4)", () => {
   }
 });
 
-describe("emitMoves LCS relocations (F22, SPEC §5.8.5)", () => {
+describe("emitMoves LCS relocations (F22, GEN §8.5)", () => {
   test("relocated ~596B item is ONE move, not remove+add", () => {
     const big = (i: number) => ({
       id: `item${i}`,
@@ -201,7 +201,7 @@ describe("emitMoves LCS relocations (F22, SPEC §5.8.5)", () => {
   });
 });
 
-describe("emitMoves unique reorders (F23, SPEC §5.8.6)", () => {
+describe("emitMoves unique reorders (F23, GEN §8.6)", () => {
   const uniqueSchema = {
     type: "object",
     properties: { tags: { type: "array", items: { type: "string" } } },
@@ -289,7 +289,7 @@ describe("emitMoves unique reorders (F23, SPEC §5.8.6)", () => {
   });
 });
 
-describe("emitMoves primaryKey order fidelity (F07, SPEC §5.8.7)", () => {
+describe("emitMoves primaryKey order fidelity (F07, GEN §8.7)", () => {
   const keyedSchema = {
     type: "object",
     properties: {
@@ -312,7 +312,7 @@ describe("emitMoves primaryKey order fidelity (F07, SPEC §5.8.7)", () => {
   });
 
   test("default-off keeps the order-insensitive keyed-collection contract", () => {
-    // A pure reorder emits ZERO ops off (SPEC §7.2.3); the applied result is a
+    // A pure reorder emits ZERO ops off (CORE §7.2.3); the applied result is a
     // permutation of modified, NOT byte-equal.
     const original = {
       users: [
@@ -411,7 +411,7 @@ describe("emitMoves primaryKey order fidelity (F07, SPEC §5.8.7)", () => {
   });
 
   test("gate-failing arrays fall back to LCS moves (still exact)", () => {
-    // A keyless element trips the §5.4.3 gate -> LCS fallback (§5.8.5).
+    // A keyless element trips the GEN §4.3 gate -> LCS fallback (GEN §8.5).
     const original = { users: [{ id: "a", v: 1 }, { v: 2 }] };
     const modified = { users: [{ v: 2 }, { id: "a", v: 1 }] };
     const on = new JsonSchemaPatcher({

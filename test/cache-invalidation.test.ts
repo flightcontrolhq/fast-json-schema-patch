@@ -5,7 +5,7 @@ import type { Operation } from "../src/types";
 
 // F02: module-level identity-keyed memoization caches (eqCache / schemaEqCache
 // in deepEqual.ts, jsonStringCache / pathMapCache / formatterCache in cache.ts)
-// must be output-neutral (SPEC §2.4.4): a cache MUST NOT return a stale verdict
+// must be output-neutral (CORE §1.4.4): a cache MUST NOT return a stale verdict
 // after an input is mutated in place between diffs. Before the epoch fix, a
 // diff -> mutate-in-place -> re-diff loop silently dropped the mutation.
 

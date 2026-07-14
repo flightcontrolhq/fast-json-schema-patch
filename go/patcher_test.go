@@ -42,7 +42,7 @@ func TestExecuteObjectBasics(t *testing.T) {
 }
 
 // TestEcmaKeyOrderReordering proves the object diff visits keys in ECMAScript
-// [[OwnPropertyKeys]] order (§2.3.2) even when the DECODED insertion order is
+// [[OwnPropertyKeys]] order (CORE §1.3.2) even when the DECODED insertion order is
 // different — the conformance vectors are authored pre-ordered by JS, so this is
 // the case they cannot exercise.
 func TestEcmaKeyOrderReordering(t *testing.T) {
@@ -101,7 +101,7 @@ func TestArrayIndexKey(t *testing.T) {
 	}
 }
 
-// TestJSNumberString pins the ECMAScript number formatting used by the §5.9 byte
+// TestJSNumberString pins the ECMAScript number formatting used by the GEN §9 byte
 // accounting, including the exponent thresholds that differ from Go's strconv.
 func TestJSNumberString(t *testing.T) {
 	tests := []struct {
@@ -156,7 +156,7 @@ func TestLCSRootArrayPrefix(t *testing.T) {
 }
 
 func TestLCSGranularDescent(t *testing.T) {
-	// A collapsed same-kind object replace recurses into field-level ops (§5.5.4.2).
+	// A collapsed same-kind object replace recurses into field-level ops (GEN §5.4.2).
 	got := diffJSON(t, Plan{}, `[{"x":1}]`, `[{"x":2}]`)
 	want := `[{"op":"replace","path":"/0/x","value":2,"oldValue":1}]`
 	if got != want {
@@ -178,7 +178,7 @@ func planForKey(t *testing.T, schema string) Plan {
 func TestPrimaryKeyThreePhase(t *testing.T) {
 	schema := `{"type":"array","items":{"type":"object","required":["id"],"properties":{"id":{"type":"string"},"name":{"type":"string"}}}}`
 	plan := planForKey(t, schema)
-	// Worked example (§5.4.2): mod at original index, removal descending, appends.
+	// Worked example (GEN §4.2): mod at original index, removal descending, appends.
 	a := `[{"id":"a","name":"A"},{"id":"b","name":"B"},{"id":"c","name":"C"}]`
 	b := `[{"id":"c","name":"C2"},{"id":"a","name":"A"},{"id":"d","name":"D"},{"id":"e","name":"E"}]`
 	want := `[` +
@@ -236,7 +236,7 @@ func TestDefaultOptionsIncludeOldValue(t *testing.T) {
 }
 
 func TestKindMismatchWholeReplace(t *testing.T) {
-	// object vs array at the same path is a whole replace, never a merge (§5.1.4).
+	// object vs array at the same path is a whole replace, never a merge (GEN §1.4).
 	got := diffJSON(t, Plan{}, `{"a":{"x":1}}`, `{"a":[1]}`)
 	want := `[{"op":"replace","path":"/a","value":[1],"oldValue":{"x":1}}]`
 	if got != want {

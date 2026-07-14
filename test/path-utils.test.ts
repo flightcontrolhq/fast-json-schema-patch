@@ -183,7 +183,7 @@ describe("getValueByPath", () => {
     expect(getValueByPath(doc, "/list/-")).toBeUndefined()
   })
 
-  // D3 (spec-v1-rc external-review defect round, SPEC §2.4.4): getValueByPath
+  // D3 (spec-v1-rc external-review defect round, CORE §1.4.4): getValueByPath
   // memoised results keyed on object identity without any epoch scope, so a
   // resolve -> mutate-in-place -> resolve loop returned the STALE pre-mutation
   // value (probe: read "/a" as 1, set doc.a = 999, then read "/a" again and

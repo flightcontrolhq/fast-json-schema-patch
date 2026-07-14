@@ -16,10 +16,10 @@
 //   - *[Object]      for JSON objects (member order preserved, O(1) key lookup)
 //
 // Objects preserve member iteration order because the diff generator's output is
-// order-sensitive (SPEC §2.3); equality and apply are order-insensitive over
-// object members (SPEC §2.4.2). Numbers retain their source text so large
+// order-sensitive (CORE §1.3); equality and apply are order-insensitive over
+// object members (CORE §1.4.2). Numbers retain their source text so large
 // integers round-trip byte-faithfully through a patch even though all equality
-// and comparison happens at IEEE-754 f64 semantics (SPEC §2.2).
+// and comparison happens at IEEE-754 f64 semantics (CORE §1.2).
 package schemapatch
 
 import (
@@ -33,10 +33,10 @@ import (
 type Value = any
 
 // Number is a JSON number that preserves its original literal text. All equality
-// and ordering is defined at IEEE-754 double precision (SPEC §2.2): two Numbers
+// and ordering is defined at IEEE-754 double precision (CORE §1.2): two Numbers
 // whose texts differ but whose f64 images match (e.g. "1" and "1.0", "0" and
 // "-0", "10" and "1e1") are equal. The text is retained only so that echoing a
-// value into a patch round-trips faithfully (SPEC §2.2.3); it never affects
+// value into a patch round-trips faithfully (CORE §1.2.3); it never affects
 // equality.
 type Number struct {
 	text string

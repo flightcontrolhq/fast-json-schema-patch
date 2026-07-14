@@ -1,7 +1,7 @@
 [
   {
     "name": "ptr-slash-key-replace",
-    "comment": "§3.2: object key containing '/' escapes to ~1 in the pointer",
+    "comment": "CORE §2.2: object key containing '/' escapes to ~1 in the pointer",
     "original": {
       "a/b": 1
     },
@@ -19,7 +19,7 @@
   },
   {
     "name": "ptr-tilde-key-replace",
-    "comment": "§3.2: object key containing '~' escapes to ~0",
+    "comment": "CORE §2.2: object key containing '~' escapes to ~0",
     "original": {
       "a~b": 1
     },
@@ -37,7 +37,7 @@
   },
   {
     "name": "ptr-tilde1-lookalike-key",
-    "comment": "§3.2: key literally 'a~1b' escapes ~ FIRST then / -> 'a~01b' (order matters)",
+    "comment": "CORE §2.2: key literally 'a~1b' escapes ~ FIRST then / -> 'a~01b' (order matters)",
     "original": {
       "a~1b": 1
     },
@@ -55,7 +55,7 @@
   },
   {
     "name": "ptr-empty-string-key",
-    "comment": "§3.2: the empty string is a valid key; pointer '/' addresses member ''",
+    "comment": "CORE §2.2: the empty string is a valid key; pointer '/' addresses member ''",
     "original": {
       "": 1
     },
@@ -73,7 +73,7 @@
   },
   {
     "name": "ptr-nested-slash-key",
-    "comment": "§3.2: escaping applies at each segment; /x/a~1b",
+    "comment": "CORE §2.2: escaping applies at each segment; /x/a~1b",
     "original": {
       "x": {
         "a/b": 1
@@ -95,7 +95,7 @@
   },
   {
     "name": "ptr-add-slash-key",
-    "comment": "§3.2/§5.2.3: add op path escapes the new key",
+    "comment": "CORE §2.2/GEN §2.3: add op path escapes the new key",
     "original": {},
     "modified": {
       "c/d": 5
@@ -110,7 +110,7 @@
   },
   {
     "name": "ptr-remove-tilde-key",
-    "comment": "§3.2/§5.2.3: remove op path escapes the removed key",
+    "comment": "CORE §2.2/GEN §2.3: remove op path escapes the removed key",
     "original": {
       "e~f": 7
     },
@@ -125,7 +125,7 @@
   },
   {
     "name": "ptr-both-escapes-key",
-    "comment": "§3.2: '~/' escapes to '~0~1' (~ before /)",
+    "comment": "CORE §2.2: '~/' escapes to '~0~1' (~ before /)",
     "original": {
       "~/": 1
     },
@@ -143,7 +143,7 @@
   },
   {
     "name": "ptr-unicode-key",
-    "comment": "§3.2: non-ASCII keys pass through unescaped (only ~ and / are escaped)",
+    "comment": "CORE §2.2: non-ASCII keys pass through unescaped (only ~ and / are escaped)",
     "original": {
       "café": 1
     },
@@ -161,7 +161,7 @@
   },
   {
     "name": "ptr-emoji-key",
-    "comment": "§3.2: astral-plane key passes through unescaped",
+    "comment": "CORE §2.2: astral-plane key passes through unescaped",
     "original": {
       "🔑": 1
     },
@@ -179,7 +179,7 @@
   },
   {
     "name": "ptr-numeric-string-object-key",
-    "comment": "§8.2.3: a decimal-digit key on an OBJECT is an ordinary member key, not an index",
+    "comment": "CORE §5.2.3: a decimal-digit key on an OBJECT is an ordinary member key, not an index",
     "original": {
       "0": 1,
       "10": "x"
@@ -199,7 +199,7 @@
   },
   {
     "name": "ptr-slash-inside-array-item-object",
-    "comment": "§3.2: escaping still applies inside array-item object diffs",
+    "comment": "CORE §2.2: escaping still applies inside array-item object diffs",
     "original": [
       {
         "p/q": 1

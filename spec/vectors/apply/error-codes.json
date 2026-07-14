@@ -1,7 +1,7 @@
 [
   {
     "name": "err-invalid-pointer-remove-dash",
-    "comment": "§8.6/§3.5: '-' final on a remove (write-side) -> INVALID_POINTER",
+    "comment": "CORE §5.6/CORE §2.5: '-' final on a remove (write-side) -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -19,7 +19,7 @@
   },
   {
     "name": "err-invalid-pointer-leading-zero",
-    "comment": "§3.6: a leading-zero array index on write-side -> INVALID_POINTER",
+    "comment": "CORE §2.6: a leading-zero array index on write-side -> INVALID_POINTER",
     "doc": [
       1,
       2
@@ -38,7 +38,7 @@
   },
   {
     "name": "err-path-unresolvable-missing-member",
-    "comment": "§8.2.2: replace of a nonexistent member -> PATH_UNRESOLVABLE",
+    "comment": "CORE §5.2.2: replace of a nonexistent member -> PATH_UNRESOLVABLE",
     "doc": {
       "a": 1
     },
@@ -56,7 +56,7 @@
   },
   {
     "name": "err-path-unresolvable-missing-intermediate",
-    "comment": "§8.2.2: descending through a missing intermediate -> PATH_UNRESOLVABLE",
+    "comment": "CORE §5.2.2: descending through a missing intermediate -> PATH_UNRESOLVABLE",
     "doc": {
       "a": 1
     },
@@ -74,7 +74,7 @@
   },
   {
     "name": "err-index-out-of-bounds-replace",
-    "comment": "§8.3.1: replace index >= length -> INDEX_OUT_OF_BOUNDS",
+    "comment": "CORE §5.3.1: replace index >= length -> INDEX_OUT_OF_BOUNDS",
     "doc": [
       1,
       2
@@ -93,7 +93,7 @@
   },
   {
     "name": "err-index-out-of-bounds-add",
-    "comment": "§8.3.1: add index > length -> INDEX_OUT_OF_BOUNDS",
+    "comment": "CORE §5.3.1: add index > length -> INDEX_OUT_OF_BOUNDS",
     "doc": [
       1
     ],
@@ -111,7 +111,7 @@
   },
   {
     "name": "err-test-failed",
-    "comment": "§8.3: test value mismatch -> TEST_FAILED",
+    "comment": "CORE §5.3: test value mismatch -> TEST_FAILED",
     "doc": {
       "a": 1
     },
@@ -129,7 +129,7 @@
   },
   {
     "name": "err-old-value-mismatch",
-    "comment": "§8.4: validateOldValues with a stale oldValue -> OLD_VALUE_MISMATCH",
+    "comment": "CORE §5.4: validateOldValues with a stale oldValue -> OLD_VALUE_MISMATCH",
     "doc": {
       "a": 1
     },
@@ -151,7 +151,7 @@
   },
   {
     "name": "err-invalid-operation-unknown-op",
-    "comment": "§8.6: an unknown op -> INVALID_OPERATION",
+    "comment": "CORE §5.6: an unknown op -> INVALID_OPERATION",
     "doc": {
       "a": 1
     },
@@ -168,7 +168,7 @@
   },
   {
     "name": "err-invalid-operation-missing-value",
-    "comment": "§8.3.5: add missing `value` -> INVALID_OPERATION",
+    "comment": "CORE §5.3.5: add missing `value` -> INVALID_OPERATION",
     "doc": {
       "a": 1
     },
@@ -185,7 +185,7 @@
   },
   {
     "name": "err-invalid-operation-missing-from",
-    "comment": "§8.3.5: move missing `from` -> INVALID_OPERATION",
+    "comment": "CORE §5.3.5: move missing `from` -> INVALID_OPERATION",
     "doc": {
       "a": 1
     },
@@ -202,7 +202,7 @@
   },
   {
     "name": "err-invalid-operation-remove-root",
-    "comment": "§8.5.2: remove at '' -> INVALID_OPERATION",
+    "comment": "CORE §5.5.2: remove at '' -> INVALID_OPERATION",
     "doc": {
       "a": 1
     },
@@ -219,7 +219,7 @@
   },
   {
     "name": "err-invalid-operation-move-into-child",
-    "comment": "§8.3.3: move where `from` is a proper prefix of `path` -> INVALID_OPERATION",
+    "comment": "CORE §5.3.3: move where `from` is a proper prefix of `path` -> INVALID_OPERATION",
     "doc": {
       "a": {
         "b": 1
@@ -239,7 +239,7 @@
   },
   {
     "name": "err-unsafe-key-proto",
-    "comment": "§8.6.1: a __proto__ write-side segment -> UNSAFE_KEY",
+    "comment": "CORE §5.6.1: a __proto__ write-side segment -> UNSAFE_KEY",
     "doc": {
       "a": 1
     },

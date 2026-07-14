@@ -1,7 +1,7 @@
 [
   {
     "name": "em-lcs-relocation-primitive",
-    "comment": "§5.8.5: a relocated deep-equal element becomes a single move (front->back)",
+    "comment": "GEN §8.5: a relocated deep-equal element becomes a single move (front->back)",
     "options": {
       "capabilities": {
         "emitMoves": true
@@ -29,7 +29,7 @@
   },
   {
     "name": "em-lcs-relocation-object",
-    "comment": "§5.8.5: an object element relocated intact becomes a move (no value/oldValue)",
+    "comment": "GEN §8.5: an object element relocated intact becomes a move (no value/oldValue)",
     "options": {
       "capabilities": {
         "emitMoves": true
@@ -73,7 +73,7 @@
   },
   {
     "name": "em-lcs-non-relocation-stays-replace",
-    "comment": "§5.8.5: a changed (non-identical) element is NOT a move; stays a replace",
+    "comment": "GEN §8.5: a changed (non-identical) element is NOT a move; stays a replace",
     "options": {
       "capabilities": {
         "emitMoves": true
@@ -98,7 +98,7 @@
   },
   {
     "name": "em-unique-rotation",
-    "comment": "§5.8.6: a multiset-equal unique reorder collapses to moves (5 replaces -> moves)",
+    "comment": "GEN §8.6: a multiset-equal unique reorder collapses to moves (5 replaces -> moves)",
     "schema": {
       "type": "object",
       "properties": {
@@ -143,7 +143,7 @@
   },
   {
     "name": "em-unique-non-multiset-keeps-replaces",
-    "comment": "§5.8.6: a non-permutation unique diff keeps §5.6 positional replaces",
+    "comment": "GEN §8.6: a non-permutation unique diff keeps GEN §6 positional replaces",
     "schema": {
       "type": "object",
       "properties": {
@@ -185,7 +185,7 @@
   },
   {
     "name": "em-primaryKey-reorder-exact",
-    "comment": "§5.8.7: primaryKey survivors reordered via moves -> exact order (upgrades §7.2 to §7.4)",
+    "comment": "GEN §8.7: primaryKey survivors reordered via moves -> exact order (upgrades CORE §7.2 to CORE §7.4)",
     "schema": {
       "type": "object",
       "properties": {
@@ -255,7 +255,7 @@
   },
   {
     "name": "em-primaryKey-reorder-and-modify",
-    "comment": "§5.8.7: reordered survivors plus a field change, exact order",
+    "comment": "GEN §8.7: reordered survivors plus a field change, exact order",
     "schema": {
       "type": "object",
       "properties": {
@@ -336,7 +336,7 @@
   },
   {
     "name": "em-primaryKey-indexed-add",
-    "comment": "§5.8.7: a new key is an INDEXED add at its modified position (never /-)",
+    "comment": "GEN §8.7: a new key is an INDEXED add at its modified position (never /-)",
     "schema": {
       "type": "object",
       "properties": {
@@ -410,7 +410,7 @@
   },
   {
     "name": "em-primaryKey-full-mixed",
-    "comment": "§5.8.7: reorder + modify + add + remove together reconstruct modified exactly",
+    "comment": "GEN §8.7: reorder + modify + add + remove together reconstruct modified exactly",
     "schema": {
       "type": "object",
       "properties": {
@@ -514,7 +514,7 @@
   },
   {
     "name": "em-primaryKey-duplicate-content-distinct-keys",
-    "comment": "§5.8.7: items with duplicate non-key content but distinct keys reorder exactly",
+    "comment": "GEN §8.7: items with duplicate non-key content but distinct keys reorder exactly",
     "schema": {
       "type": "object",
       "properties": {
@@ -589,7 +589,7 @@
   },
   {
     "name": "em-compose-with-include-old-value-false",
-    "comment": "§10.4.4: emitMoves composes with includeOldValue=false (moves already carry none; replaces drop oldValue)",
+    "comment": "CONF §5.4: emitMoves composes with includeOldValue=false (moves already carry none; replaces drop oldValue)",
     "schema": {
       "type": "object",
       "properties": {
@@ -665,7 +665,7 @@
   },
   {
     "name": "em-gate-failure-uses-lcs-moves",
-    "comment": "§5.8.7: a gate-failing keyed array falls back to LCS, which under emitMoves uses §5.8.5",
+    "comment": "GEN §8.7: a gate-failing keyed array falls back to LCS, which under emitMoves uses GEN §8.5",
     "schema": {
       "type": "object",
       "properties": {
