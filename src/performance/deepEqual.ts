@@ -153,13 +153,27 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
 
 /**
  * Schema-aware deep equality that prioritizes comparison of significant fields first
- * Uses plan information to optimize equality checks
+ * Uses plan information to optimize equality checks.
+ *
+ * F37: `effectiveHashFields` and `planFingerprint` are both invariant for a
+ * given `plan` — they do not depend on the specific `obj1`/`obj2` pair being
+ * compared. A caller that runs this over many pairs against the SAME plan
+ * (e.g. diffArrayLCS's prefix/suffix trim, §5.5.0, which calls this once per
+ * scanned position) MUST hoist them ONCE outside that loop and pass them in
+ * here, rather than letting every call recompute a plan-fingerprint string
+ * and re-run `getEffectiveHashFields`. When neither is passed (e.g.
+ * StructuredDiff's one-off, non-hot comparisons — outside SPEC scope, §1.5)
+ * this falls back to computing them from `plan`/`obj1`/`obj2`, matching the
+ * old always-recompute behavior. Either way this is output-neutral (§2.4.4):
+ * the fields only ever gate a fast-fail hash prefilter, never the final
+ * verdict, which always bottoms out at `deepEqual`.
  */
 export function deepEqualSchemaAware(
   obj1: unknown,
   obj2: unknown,
   plan?: ArrayPlan,
   hotFields?: string[],
+  precomputed?: { effectiveHashFields: string[]; planFingerprint: string },
 ): boolean {
   if (obj1 === obj2) return true
   if (obj1 == null || obj2 == null) return obj1 === obj2
@@ -174,8 +188,12 @@ export function deepEqualSchemaAware(
   const a = obj1 as JsonObject
   const b = obj2 as JsonObject
 
-  // Use plan-derived hash fields for faster pre-filtering
-  const effectiveHashFields = getEffectiveHashFields(plan, obj1, obj2, hotFields)
+  // Use plan-derived hash fields for faster pre-filtering. Prefer the
+  // caller-hoisted value; only fall back to a fresh (possibly O(k^2)
+  // obj1/obj2-inferring, see getEffectiveHashFields) computation when the
+  // caller didn't hoist one.
+  const effectiveHashFields =
+    precomputed?.effectiveHashFields ?? getEffectiveHashFields(plan, obj1, obj2, hotFields)
 
   // Enhanced hash-based pre-filtering with plan information
   if (effectiveHashFields.length > 0 && !Array.isArray(a) && !Array.isArray(b)) {
@@ -190,7 +208,7 @@ export function deepEqualSchemaAware(
   }
 
   // Schema-aware memoization cache with plan fingerprint
-  const planFingerprint = getPlanFingerprint(plan)
+  const planFingerprint = precomputed?.planFingerprint ?? getPlanFingerprint(plan)
 
   const epoch = getEpoch()
   let planCache = schemaEqCache.get(a)

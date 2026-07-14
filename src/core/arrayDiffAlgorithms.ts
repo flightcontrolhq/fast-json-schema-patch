@@ -3,6 +3,7 @@ import {
   deepEqual,
   deepEqualMemo,
   deepEqualSchemaAware,
+  getPlanFingerprint,
   isOpaqueObject,
 } from "../performance/deepEqual";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
@@ -123,15 +124,26 @@ export function diffArrayByPrimaryKey(
   path: string,
   patches: Operation[],
   onModification: ModificationCallback,
-  hashFields?: string[],
-  plan?: ArrayPlan
+  hashFields?: string[]
 ) {
-  const effectiveHashFields = getEffectiveHashFields(
-    plan,
-    undefined,
-    undefined,
-    hashFields || []
-  );
+  // F37: this used to also accept a `plan` 8th argument, but the only real
+  // caller (index.ts's diffArray) never passed one, making the
+  // deepEqualSchemaAware branch below permanently unreachable — and even if
+  // wired, it would buy nothing here: buildPlan's auto-detected primaryKey is
+  // always itself a required string/number field, so it is always included
+  // in `hashFields` (metadata.hashFields is built by scanning `required` for
+  // primitive fields BEFORE the candidate-key loop selects one of them,
+  // buildPlan.ts), and a `primaryKeyMap` override sets neither `hashFields`
+  // nor `requiredFields`. So the only way to reach this function with empty
+  // `hashFields` is the override path, where deepEqualSchemaAware's
+  // requiredFields/primaryKey early-exits are no-ops (both fields are
+  // undefined) and it falls straight through to the same `deepEqual(a, b)`
+  // the plain branch below already performs — just via a heavier
+  // WeakMap-cache-and-fingerprint path for zero benefit, since matched items
+  // are already known-equal on `primaryKey` from the Phase 2 lookup itself.
+  // Deleted rather than wired; deepEqualSchemaAware's real hot-path caller is
+  // diffArrayLCS's prefix/suffix trim (see below).
+  const effectiveHashFields = hashFields && hashFields.length > 0 ? hashFields : [];
   const hashFieldsLength = effectiveHashFields.length;
   const hasHashFields = hashFieldsLength > 0;
 
@@ -204,13 +216,6 @@ export function diffArrayByPrimaryKey(
         if (!needsDiff && oldItem !== newItem) {
           needsDiff = !deepEqual(oldItem, newItem);
         }
-      } else if (plan) {
-        needsDiff = !deepEqualSchemaAware(
-          oldItem,
-          newItem,
-          plan,
-          effectiveHashFields
-        );
       } else {
         // Reference equality first (fastest path)
         needsDiff = oldItem !== newItem && !deepEqual(oldItem, newItem);
@@ -309,6 +314,19 @@ export function diffArrayLCS(
     return;
   }
 
+  // F37: hoist the plan fingerprint ONCE for this whole array diff (it is a
+  // pure function of `plan`, invariant across every position the trim below
+  // queries) instead of letting deepEqualSchemaAware rebuild the fingerprint
+  // string on every call. Paired with `effectiveHashFields` (already hoisted
+  // above), this removes deepEqualSchemaAware's per-call
+  // getEffectiveHashFields/getPlanFingerprint recomputation from the one
+  // real hot per-pair loop that reaches it (the prefix/suffix trim scans up
+  // to O(n) positions sequentially for a long common run — the library's
+  // primary "mostly-unchanged array" use case, F20).
+  const schemaAwarePrecomputed = plan
+    ? { effectiveHashFields, planFingerprint: getPlanFingerprint(plan) }
+    : undefined;
+
   // Deep-equal predicate (SPEC §2.4.1) used by the prefix/suffix trim (§5.5.0).
   // Trimming queries each position at most once (lo and hi advance
   // monotonically), so no per-pair cache is needed here; the Myers snake uses
@@ -316,7 +334,13 @@ export function diffArrayLCS(
   // (F34) along with its collision-prone key (F21).
   const deepEqualAt = (x: number, y: number): boolean =>
     plan
-      ? deepEqualSchemaAware(arr1[x], arr2[y], plan, effectiveHashFields)
+      ? deepEqualSchemaAware(
+          arr1[x],
+          arr2[y],
+          plan,
+          effectiveHashFields,
+          schemaAwarePrecomputed
+        )
       : deepEqualMemo(arr1[x], arr2[y], effectiveHashFields);
 
   // §5.5.0 Trim step 0: maximal common prefix first, then the maximal common
