@@ -701,9 +701,10 @@ requires **equal lengths**. Let `prefix = path + "/"`.
 `5.6.1` **Normative behavior: positional replaces.** For each index `i` in `0..length-1`, if
 `original[i]` is not deep-equal to `modified[i]`, emit
 `{ op: "replace", path: prefix + i, value: modified[i], oldValue: original[i] }`. Because the gate
-guarantees equal lengths, no adds or removes are emitted. (The reference contains removal/addition
-phases; under the equal-length gate they are provably unreachable. spec-v1 defines `unique` solely
-as equal-length positional replacement.)
+guarantees equal lengths, no adds or removes are emitted. spec-v1 defines `unique` solely as
+equal-length positional replacement (F38: a HEAD-era removal/addition phase built atop this loop was
+provably unreachable behind the equal-length gate and has been deleted from the reference
+implementation — this **is** the whole function now, not a fallback path).
 
 `5.6.2` **Unequal lengths fall back to `lcs`** (§5.4.4 gate fails → §5.5). Set-diff / move
 semantics for `unique` are **not** specified in spec-v1.

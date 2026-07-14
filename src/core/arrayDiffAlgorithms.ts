@@ -795,113 +795,46 @@ export function diffArrayLCS(
   }
 }
 
+/**
+ * `unique` strategy (SPEC §5.6): per-index positional replaces, nothing else.
+ *
+ * F38: the caller's ONLY call site gates this strategy on
+ * `strategy === "unique" && checkArraysUnique(arr1, arr2)` (index.ts), and
+ * `checkArraysUnique` requires `arr1.length === arr2.length` (§5.4.4). Under
+ * that equal-length gate, a HEAD-era removal/addition phase built on top of
+ * Phase 1's positional replace loop was provably unreachable: a removal
+ * required `arr1[i] === arr2[i]` (position untouched by Phase 1) AND
+ * `!arr2Map.has(arr1[i])` (value absent from `arr2`) — a contradiction, since
+ * `arr1[i] === arr2[i]` is itself a member of `arr2` at index `i`
+ * (symmetrically for additions against `arr1Map`). So every element of both
+ * arrays was always classified by Phase 1 alone (replace if positions
+ * differ, no-op otherwise), and the `arr1Map`/`arr2Map`/`replacedItems`
+ * bookkeeping, the two Map builds, and the removal/addition scans (~60 lines)
+ * always executed for zero effect on the emitted ops. Deleted; behavior is
+ * unchanged (proven by the existing test suite, none of which exercised the
+ * dead phases since they cannot fire behind this gate). Set-diff / move
+ * semantics for `unique` remain unspecified (§5.6.2) — an unequal-length pair
+ * never reaches this function.
+ */
 export function diffArrayUnique(
   arr1: JsonArray,
   arr2: JsonArray,
   path: string,
   patches: Operation[],
-  // F11 (SPEC §6.4.2): when false, `remove`/`replace` ops omit `oldValue`.
+  // F11 (SPEC §6.4.2): when false, `replace` ops omit `oldValue`.
   includeOldValue: boolean = true
 ) {
-  const n = arr1.length;
-  const m = arr2.length;
+  const n = arr1.length; // === arr2.length under the equal-length gate (§5.4.4)
   const pathPrefix = path + "/";
 
-  const patches_temp: Operation[] = [];
-
-  if (n === 0 && m === 0) return;
-  if (n === 0) {
-    // All additions
-    for (let i = 0; i < m; i++) {
-      patches_temp.push({ op: "add", path: pathPrefix + "-", value: arr2[i] });
-    }
-    for (let i = 0; i < patches_temp.length; i++) {
-      patches.push(patches_temp[i] as Operation);
-    }
-    return;
-  }
-  if (m === 0) {
-    // All removals (descending order)
-    for (let i = n - 1; i >= 0; i--) {
-      const op: Operation = { op: "remove", path: pathPrefix + i };
-      if (includeOldValue) op.oldValue = arr1[i];
-      patches_temp.push(op);
-    }
-    for (let i = 0; i < patches_temp.length; i++) {
-      patches.push(patches_temp[i] as Operation);
-    }
-    return;
-  }
-
-  // Use Map for O(1) lookups instead of Set for complex logic
-  const arr1Map = new Map<JsonValue, number>();
-  const arr2Map = new Map<JsonValue, number>();
-
-  // Single pass to build both maps
   for (let i = 0; i < n; i++) {
-    arr1Map.set(arr1[i] as JsonValue, i);
-  }
-  for (let i = 0; i < m; i++) {
-    arr2Map.set(arr2[i] as JsonValue, i);
-  }
-
-  const minLength = Math.min(n, m);
-  const replacedItems = new Set<JsonValue>();
-
-  // Phase 1: Handle replacements in common indices - O(min(n,m))
-  for (let i = 0; i < minLength; i++) {
     const val1 = arr1[i];
     const val2 = arr2[i];
-
     if (val1 !== val2) {
       const op: Operation = { op: "replace", path: pathPrefix + i, value: val2 };
       if (includeOldValue) op.oldValue = val1;
-      patches_temp.push(op);
-      replacedItems.add(val2 as JsonValue);
+      patches.push(op);
     }
-  }
-
-  // Phase 2: Handle removals - O(n)
-  // Collect removal indices first, then sort
-  const removalIndices: number[] = [];
-
-  for (let i = n - 1; i >= 0; i--) {
-    const item = arr1[i];
-
-    // Skip if this position was replaced or item exists in arr2
-    if (i < minLength && arr1[i] !== arr2[i]) {
-      continue;
-    }
-
-    if (!arr2Map.has(item as JsonValue)) {
-      removalIndices.push(i);
-    }
-  }
-
-  // Add removal patches (already in descending order)
-  for (const index of removalIndices) {
-    const op: Operation = { op: "remove", path: pathPrefix + index };
-    if (includeOldValue) op.oldValue = arr1[index];
-    patches_temp.push(op);
-  }
-
-  // Phase 3: Handle additions - O(m)
-  for (let i = 0; i < m; i++) {
-    const item = arr2[i];
-
-    // Skip if this was a replacement
-    if (i < minLength && arr1[i] !== arr2[i]) {
-      continue;
-    }
-
-    if (!arr1Map.has(item as JsonValue)) {
-      patches_temp.push({ op: "add", path: pathPrefix + "-", value: item });
-    }
-  }
-
-  // Plain loop rather than spread push to avoid RangeError on large arrays (F13).
-  for (let i = 0; i < patches_temp.length; i++) {
-    patches.push(patches_temp[i] as Operation);
   }
 }
 
