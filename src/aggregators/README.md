@@ -12,6 +12,10 @@ When comparing two JSON documents, especially those with arrays of objects, chan
 
 - It operates on a specific array within the JSON document, identified by a `pathPrefix`.
 - It uses a primary key from the schema (`plan`) to identify unique objects within the array.
+- Its entry point is `execute(config)`, where `config` (a `StructuredDiffConfig`) carries
+  `pathPrefix`, `original`, `modified`, and an optional pre-computed `patches` array (from
+  `JsonSchemaPatcher.execute()`); when `patches` is omitted, `StructuredDiff` generates it
+  itself via an internal `JsonSchemaPatcher`.
 - It separates patches into two categories:
   - **Parent Patches**: Changes that apply to the document outside of the specified array.
   - **Child Patches**: Changes that apply to items within the array. These are further grouped by the item's unique ID.
@@ -30,19 +34,19 @@ Once patches are grouped by `StructuredDiff`, `DiffFormatter` is responsible for
 
 ## Processing Flow
 
-The following diagram illustrates how raw JSON patches are processed to produce aggregated and formatted diffs. The process starts with the original and new JSON documents and a list of patches. `StructuredDiff` orchestrates the process, using `DiffFormatter` to generate the final output.
+The following diagram illustrates how raw JSON patches are processed to produce aggregated and formatted diffs. The process starts with the original and new JSON documents and an optional pre-computed list of patches. `StructuredDiff` orchestrates the process, using `DiffFormatter` to generate the final output.
 
 ```mermaid
 graph TD
     subgraph "Inputs"
         A[Original JSON Doc]
         B[New JSON Doc]
-        C[Raw JSON Patches]
+        C["Raw JSON Patches (optional — computed via JsonSchemaPatcher if omitted)"]
         P[Schema Plan]
     end
 
     subgraph "StructuredDiff"
-        PA_Entry("aggregate(patches, config)")
+        PA_Entry("execute(config)")
         PA_Group["1.Separate Parent vs. Child Patches <br/> based on 'pathPrefix' in config"]
         PA_ChildGroup["2.Group Child Patches <br/> by item primary key using 'plan'"]
         PA_Results["4.Assemble Final Result"]

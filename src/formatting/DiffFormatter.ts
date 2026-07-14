@@ -1,7 +1,7 @@
 import type {ArrayPlan} from "../core/buildPlan"
 import {cachedBuildPathMap, cachedJsonStringify} from "../performance/cache"
 import {getPlanFingerprint} from "../performance/deepEqual"
-import {fastHash} from "../performance/fashHash"
+import {fastHash} from "../performance/fastHash"
 import type {
   DiffLine,
   FormattedDiffLines,

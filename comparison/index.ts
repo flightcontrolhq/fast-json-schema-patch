@@ -32,6 +32,14 @@ import {
 import { generateComprehensiveReport, generateFormattedDiffReport } from "./visualization";
 import { exportMetricsToCSV, exportFormattedDiffMetricsToCSV } from "./csv-export";
 
+// F41: pin faker's RNG so every faker-based scenario (cloud-config,
+// e-commerce) generates the same documents/modifications across runs —
+// reproducible benchmark numbers instead of run-to-run noise from a random
+// seed. Change the constant to intentionally sample a different corpus.
+const FAKER_SEED = 20240521;
+faker.seed(FAKER_SEED);
+console.log(chalk.dim(`🎲 faker seed: ${FAKER_SEED}`));
+
 const diffpatcher = jsondiffpatch.create({
   objectHash: (obj: any) => {
     return obj.id || obj.postId || obj.name;

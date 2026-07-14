@@ -64,24 +64,6 @@ private readonly operationFactories = {
 }
 ```
 
-### 5. **Batch Path Lookups**
-
-Instead of individual `getPlanForPath` calls, batch related lookups:
-
-```typescript
-private batchGetPlans(paths: string[]): Map<string, ArrayPlan | undefined> {
-  const results = new Map()
-  const uncachedPaths = paths.filter(p => !this.planLookupCache.has(p))
-
-  // Process uncached paths in batch to reduce Map lookups
-  for (const path of uncachedPaths) {
-    // ... existing logic but batched
-  }
-
-  return results
-}
-```
-
 ## Time Complexity Improvements
 
 ### 1. **O(1) Type Dispatch**
@@ -114,36 +96,15 @@ private validateStructure(obj: JsonValue, plan?: ArrayPlan): boolean {
 }
 ```
 
-### 3. **Reduce Set Operations**
-
-The current `allKeys = new Set([...keys1, ...keys2])` is O(n). For objects with known schemas, pre-compute expected key sets:
-
-```typescript
-// In buildPlan phase, pre-compute this
-interface ObjectPlan {
-  expectedKeys: Set<string>; // All possible keys from schema
-  requiredKeys: Set<string>; // Required keys only
-}
-```
-
 ## Missing Logical Optimizations
 
-### 1. **Schema-aware Equality**
-
-The build plan knows which fields are hash fields, but this isn't used optimally in `refine()`. Should check hash fields first before deep equality.
-
-### 2. **Structural Shortcuts**
+### 1. **Structural Shortcuts**
 
 With a fixed JSON schema, you know the maximum nesting depth and can pre-allocate patch arrays or use iterative instead of recursive approaches for deep objects.
-
-### 3. **Plan Inheritance**
-
-Child paths could inherit parent plans more efficiently rather than doing full path lookups each time.
 
 ## Implementation Priority
 
 1. **High Priority**: Schema-based type maps, path operation optimization, schema-guided diffing
-2. **Medium Priority**: Monomorphic operations, batch lookups, type dispatch
-3. **Low Priority**: Set operation optimization, schema-aware equality
+2. **Medium Priority**: Monomorphic operations, type dispatch
 
 The biggest wins would come from leveraging the schema information more aggressively for type dispatch and structural validation, plus reducing the string operations in path handling.

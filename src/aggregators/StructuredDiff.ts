@@ -2,7 +2,7 @@ import type { ArrayPlan, Plan } from "../core/buildPlan";
 import { cachedJsonStringify, getCachedFormatter } from "../performance/cache";
 import { deepEqualSchemaAware } from "../performance/deepEqual";
 import { bumpEpoch } from "../performance/epoch";
-import { fastHash } from "../performance/fashHash";
+import { fastHash } from "../performance/fastHash";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type {
   FormattedChildDiff,

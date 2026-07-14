@@ -5,7 +5,7 @@ import {
   JsonSchemaPatcher,
 } from "../src/index";
 import { deepEqual } from "../src/performance/deepEqual";
-import { fastHash } from "../src/performance/fashHash";
+import { fastHash } from "../src/performance/fastHash";
 import { _resolveRef } from "../src/core/buildPlan";
 import { _traverseSchema } from "../src/core/buildPlan";
 import type { DiffOperation, Operation } from "../src/types";

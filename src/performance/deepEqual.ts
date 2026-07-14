@@ -1,7 +1,7 @@
 import type {ArrayPlan} from "../core/buildPlan"
 import type {JsonObject} from "../types"
 import {getEpoch} from "./epoch"
-import {fastHash} from "./fashHash"
+import {fastHash} from "./fastHash"
 import {getEffectiveHashFields} from "./getEffectiveHashFields"
 
 export function getPlanFingerprint(plan?: ArrayPlan): string {
