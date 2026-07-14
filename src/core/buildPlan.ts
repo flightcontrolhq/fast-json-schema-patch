@@ -53,15 +53,32 @@ export interface BuildPlanOptions {
    * auto-detection and bypasses the candidate list (§4.4.3).
    */
   primaryKeyCandidates?: string[]
+  /**
+   * F32: called instead of writing to `console.warn` when schema traversal
+   * hits a `$ref` it cannot resolve. Only local same-document references
+   * (`$ref` starting with `#/`) are ever resolved — a `$ref` pointing outside
+   * the document (a relative/absolute URL, or any string not starting with
+   * `#/`) always triggers this callback and is treated as unresolvable (the
+   * branch is skipped; traversal continues elsewhere). Omit to stay silent
+   * (the default — no warnings are printed unless a handler is supplied).
+   */
+  onWarning?: (message: string) => void
 }
 
 /** SPEC §4.5.3 default primary-key candidate list (the default of `primaryKeyCandidates`). */
 const DEFAULT_PRIMARY_KEY_CANDIDATES = ["id", "name", "port"]
 
-export function _resolveRef(ref: string, schema: Schema): JSONSchema | null {
+export function _resolveRef(
+  ref: string,
+  schema: Schema,
+  onWarning?: (message: string) => void,
+): JSONSchema | null {
   if (!ref.startsWith("#/")) {
-    // We only support local references for now.
-    console.warn(`Unsupported reference: ${ref}`)
+    // We only support local '#/' references. Anything else (a relative/
+    // absolute URL, or a document-scoped ref not rooted at '#/') is reported
+    // via onWarning (F32) instead of console.warn and treated as
+    // unresolvable.
+    onWarning?.(`Unsupported reference: ${ref}`)
     return null
   }
   const path = ref.substring(2).split("/")
@@ -89,7 +106,7 @@ export function _traverseSchema(
   visited.add(subSchema)
 
   if (subSchema.$ref) {
-    const resolved = _resolveRef(subSchema.$ref, schema)
+    const resolved = _resolveRef(subSchema.$ref, schema, options?.onWarning)
     if (resolved) {
       // Note: We don't change the docPath when resolving a ref
       _traverseSchema(resolved, docPath, plan, schema, visited, options)
@@ -150,7 +167,7 @@ export function _traverseSchema(
 
     let itemsSchema = subSchema.items
     if (itemsSchema.$ref) {
-      itemsSchema = _resolveRef(itemsSchema.$ref, schema) || itemsSchema
+      itemsSchema = _resolveRef(itemsSchema.$ref, schema, options?.onWarning) || itemsSchema
     }
 
     // F19: itemsSchema is resolved and used locally below (primitive check,
@@ -185,7 +202,7 @@ export function _traverseSchema(
       const mergeAllOf = (s: JSONSchema): JSONSchema => {
         let cur = s
         if (cur?.$ref) {
-          const resolved = _resolveRef(cur.$ref, schema)
+          const resolved = _resolveRef(cur.$ref, schema, options?.onWarning)
           if (!resolved) return cur
           cur = resolved
         }

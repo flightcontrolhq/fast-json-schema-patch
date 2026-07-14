@@ -6,6 +6,10 @@ export { buildPlan } from "./core/buildPlan";
 export { StructuredDiff } from "./aggregators/StructuredDiff";
 export { applyPatch, invertPatch, toRfc6902, JsonPatchError } from "./apply/applyPatch";
 export type { ApplyPatchOptions, PatchErrorCode } from "./apply/applyPatch";
+// F32: register a handler for the one internal warning cache.ts can hit
+// (a JSON parse failure while building a path map for formatting/diffLines).
+// Silent by default.
+export { setWarningHandler } from "./performance/cache";
 
 export type {
   StructuredDiffConfig,

@@ -31,6 +31,24 @@ const formatterCache = new WeakMap<
   WeakMap<object, {epoch: number; value: unknown}>
 >()
 
+// F32: `cachedBuildPathMap`'s parse-failure fallback used to write straight
+// to `console.error`. Threading an `onWarning` option down to it would touch
+// every public call chain that reaches it (JsonSchemaPatcher -> StructuredDiff
+// -> DiffFormatter -> cache.ts) for a single internal fallback path, so this
+// is a module-level hook instead. `undefined` (the default — no handler ever
+// registered) means silent: the fallback still returns `{}` either way.
+let warningHandler: ((message: string) => void) | undefined
+
+/**
+ * Register (or clear, by passing `undefined`) a callback invoked in place of
+ * `console.error` when `cachedBuildPathMap` fails to parse a document's own
+ * `JSON.stringify` output (not expected in normal operation, but defended
+ * against rather than left to throw).
+ */
+export function setWarningHandler(handler: ((message: string) => void) | undefined): void {
+  warningHandler = handler
+}
+
 /**
  * Cached version of JSON.stringify with 2-space indentation
  */
@@ -67,7 +85,7 @@ export function cachedBuildPathMap(obj: JsonValue): PathMap {
     const {pointers} = parse(jsonText)
     pathMap = pointers as unknown as PathMap
   } catch (error) {
-    console.error("Error building path map:", error)
+    warningHandler?.(`Error building path map: ${error}`)
     pathMap = {}
   }
 

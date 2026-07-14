@@ -1784,15 +1784,23 @@ describe("_resolveRef function", () => {
 
   test("should handle invalid reference format", () => {
     const schema = { type: "object" };
-    const consoleWarnSpy = spyOn(console, "warn").mockImplementation(() => {});
 
+    // F32: no console.warn side effect by default (onWarning omitted).
+    const consoleWarnSpy = spyOn(console, "warn").mockImplementation(() => {});
     const result = _resolveRef("http://example.com/schema", schema);
     expect(result).toBeNull();
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      "Unsupported reference: http://example.com/schema"
-    );
-
+    expect(consoleWarnSpy).not.toHaveBeenCalled();
     consoleWarnSpy.mockRestore();
+
+    // An onWarning callback receives the unresolved-reference message instead.
+    const messages: string[] = [];
+    const resultWithHandler = _resolveRef(
+      "http://example.com/schema",
+      schema,
+      (message) => messages.push(message)
+    );
+    expect(resultWithHandler).toBeNull();
+    expect(messages).toEqual(["Unsupported reference: http://example.com/schema"]);
   });
 
   test("should handle reference to non-existent path", () => {
