@@ -1,0 +1,17 @@
+[project]
+name = "schema-json-patch-analysis"
+version = "0.1.0"
+description = "Benchmark analysis notebook for schema-json-patch (TS + Go engines vs competitors)"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "jupyter>=1.1",
+    "nbconvert>=7.16",
+    "nbformat>=5.10",
+]
+
+# Regeneration (from repo root):
+#   1. bun run comparison/corpora/... (seeded corpora, see analysis/README.md)
+#   2. bun run bench:ts   &&   bun run bench:go     # writes analysis/results/*.json
+#   3. cd analysis && uv run jupyter nbconvert --to notebook --execute --inplace benchmark_visualization.ipynb
