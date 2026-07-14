@@ -55,7 +55,7 @@ derived/self-checked against the (fixed) reference like every other vector.
     "primaryKeyMap":        { "/path": "key" },
     "basePath":             "/config",
     "primaryKeyCandidates": ["sku"],
-    "capabilities": { "includeOldValue": false, "emitMoves": true, "wholesaleReplaceFallback": true }
+    "capabilities": { "includeOldValue": false, "emitMoves": true, "wholesaleReplaceFallback": true, "ignorePaths": ["/users/*/updatedAt"] }
   },
   "original": <JsonValue>,
   "modified": <JsonValue>,
@@ -133,7 +133,10 @@ spec is authoritative.
      `original` reproduces `modified` per the strategy's round-trip contract
      (§7): **exact** deep-equality for LCS / unique / object-only / `emitMoves`
      / `wholesaleReplaceFallback`; **multiset-equal** (survivors in original
-     order ++ tail appends) for default-mode `primaryKey`.
+     order ++ tail appends) for default-mode `primaryKey`. For `ignorePaths`
+     vectors the reconstruction is exact **modulo the ignored subtrees** (§7.6),
+     so runners skip the whole-document round-trip and rely on gate 2 plus the
+     differential corpus (`spec/fuzz`).
   2. **Structural op equality (§10.3.2).** The emitted op sequence equals
      `expectedPatch`: same length, same **ordered** sequence, each op equal by
      `op`, `path` (string), and — where present — `value` / `oldValue` / `from`
@@ -216,7 +219,10 @@ implementation must handle them out of band:
    across languages and are intentionally **not** asserted. The behavioral
    options (`cloneValues`/`cloneResult`) are covered only by **value** equality
    (`apply/options.json`), per §8.7.4.
-5. **Capabilities are opt-in.** `emitMoves`, `wholesaleReplaceFallback`, and
-   `includeOldValue=false` vectors carry `options.capabilities`. An
-   implementation that does not advertise a capability skips its vectors (§10.4);
-   the default suite (no `capabilities`) is mandatory.
+5. **Capabilities are opt-in.** `emitMoves`, `wholesaleReplaceFallback`,
+   `includeOldValue=false`, and `ignorePaths` vectors carry
+   `options.capabilities`. An implementation that does not advertise a capability
+   skips its vectors (§10.4); the default suite (no `capabilities`) is mandatory.
+   `ignorePaths` **construction-time** validation errors (§5.10.1/§5.10.7) precede
+   any diff and are not vector-expressible — they are covered by engine unit tests
+   (§10.5.2).

@@ -207,11 +207,12 @@ Creates a plan for optimizing JSON patch generation based on a JSON schema.
 ### `JsonSchemaPatcher`
 The main class for generating patches.
 
-**`new JsonSchemaPatcher({ plan, includeOldValue?, emitMoves?, wholesaleReplaceFallback? })`**
+**`new JsonSchemaPatcher({ plan, includeOldValue?, emitMoves?, wholesaleReplaceFallback?, ignorePaths? })`**
 - `plan`: A `Plan` object created by `buildPlan` that describes your data structure and desired diffing strategies.
 - `includeOldValue` (optional, default `true`): When `false`, omits the non-standard `oldValue` field from every `remove`/`replace` op, producing smaller, strict RFC 6902-shaped patches. `invertPatch` still works without `oldValue` present, since it recovers prior values from the original document you pass it.
 - `emitMoves` (optional, default `false`): When `true`, a relocated (unchanged) array element is expressed as a single RFC 6902 `move` instead of a remove+add pair, across all three array strategies (`lcs`, `unique`, `primaryKey`). Also upgrades the `unique` and `primaryKey` strategies to reconstruct the modified array's order exactly (see the note on the `primaryKey` strategy below).
 - `wholesaleReplaceFallback` (optional, default `false`): When `true`, caps a heavily-rewritten array's patch size — if the estimated size of one array's granular ops would exceed the array's own serialized size, the differ emits a single whole-array `replace` instead. Applies independently to every array, including nested ones; small/typical diffs are unaffected.
+- `ignorePaths` (optional, default none): A list of object-member JSON Pointers whose subtrees are treated as **equal** — no ops are emitted at or beneath them, in any strategy. Use `*` for an array level, e.g. `["/users/*/updatedAt", "/meta/revision"]` ignores every user's `updatedAt` and the top-level `meta.revision`. Two items differing only in ignored fields collapse to nothing (or a single `move` under `emitMoves`) rather than a remove+add. An invalid pointer (an array-index or `-` segment, a rootless pointer, or one that would ignore a `primaryKey` field) throws a `TypeError` at construction.
 
 **`patcher.execute({original, modified})`**
 - `original`: The original document to compare from.
