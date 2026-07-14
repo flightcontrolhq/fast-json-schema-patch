@@ -20,6 +20,7 @@ type diffAdapter struct {
 	id, label, kind string
 	requiresSchema  bool // emitMoves is only meaningful for a planned (schema) case
 	hasApplier      bool // a round-trip applier exists (ours = own applier, others = evanphx)
+	verifyCanonical bool // judge round-trip order-insensitively (Compare re-marshals, sorting keys)
 
 	// produce yields the patch as canonical RFC 6902 JSON bytes, its op count, and
 	// — for our own engine only — the native []Operation (so our applier times its
@@ -51,17 +52,39 @@ func mustPatcher(plan sp.Plan, opts ...sp.PatcherOption) *sp.Patcher {
 	return p
 }
 
+// casePatcherOpts collects the per-case generator capability toggles our engine
+// must honour — currently the ignorePaths capability (GEN §10) — merged with any
+// static extras (e.g. EmitMoves). Competitors have no such vocabulary; that is the
+// comparison.
+func casePatcherOpts(c *CorpusCase, extra ...sp.PatcherOption) []sp.PatcherOption {
+	opts := append([]sp.PatcherOption(nil), extra...)
+	if len(c.Options.IgnorePaths) > 0 {
+		opts = append(opts, sp.IgnorePaths(c.Options.IgnorePaths...))
+	}
+	return opts
+}
+
+// compareSchemaArg returns the schema argument for the Compare(any) front door:
+// the schema's canonical JSON as a json.RawMessage, or nil for a schemaless case
+// (Compare then diffs schemalessly, exactly as the "ours" row does).
+func compareSchemaArg(c *CorpusCase) any {
+	if c.SchemaBytes == nil {
+		return nil
+	}
+	return json.RawMessage(c.SchemaBytes)
+}
+
 func newDiffAdapters() []diffAdapter {
 	// --- our engine, default capabilities ---------------------------------------
 	ours := diffAdapter{
 		id: "ours", label: "ours (Go engine, default)", kind: "schema-aware", hasApplier: true,
 		produce: func(c *CorpusCase) ([]byte, int, []sp.Operation, error) {
-			ops := mustPatcher(c.buildPlan()).Execute(c.Original, c.Modified)
+			ops := mustPatcher(c.buildPlan(), casePatcherOpts(c)...).Execute(c.Original, c.Modified)
 			pb, err := json.Marshal(ops)
 			return pb, len(ops), ops, err
 		},
 		diffFn: func(c *CorpusCase) func() {
-			return func() { mustPatcher(c.buildPlan()).Execute(c.Original, c.Modified) }
+			return func() { mustPatcher(c.buildPlan(), casePatcherOpts(c)...).Execute(c.Original, c.Modified) }
 		},
 		decodeFn: func(c *CorpusCase) func() {
 			return func() { _, _ = sp.Decode(c.OriginalBytes); _, _ = sp.Decode(c.ModifiedBytes) }
@@ -70,7 +93,7 @@ func newDiffAdapters() []diffAdapter {
 			return func() {
 				o, _ := sp.Decode(c.OriginalBytes)
 				m, _ := sp.Decode(c.ModifiedBytes)
-				ops := mustPatcher(c.buildPlan()).Execute(o, m)
+				ops := mustPatcher(c.buildPlan(), casePatcherOpts(c)...).Execute(o, m)
 				_, _ = json.Marshal(ops)
 			}
 		},
@@ -87,13 +110,13 @@ func newDiffAdapters() []diffAdapter {
 		id: "ours-moves", label: "ours (Go engine, emitMoves)", kind: "schema-aware",
 		requiresSchema: true, hasApplier: true,
 		produce: func(c *CorpusCase) ([]byte, int, []sp.Operation, error) {
-			ops := mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
+			ops := mustPatcher(c.buildPlan(), casePatcherOpts(c, sp.EmitMoves(true))...).Execute(c.Original, c.Modified)
 			pb, err := json.Marshal(ops)
 			return pb, len(ops), ops, err
 		},
 		diffFn: func(c *CorpusCase) func() {
 			return func() {
-				mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
+				mustPatcher(c.buildPlan(), casePatcherOpts(c, sp.EmitMoves(true))...).Execute(c.Original, c.Modified)
 			}
 		},
 		decodeFn: func(c *CorpusCase) func() {
@@ -103,7 +126,47 @@ func newDiffAdapters() []diffAdapter {
 			return func() {
 				o, _ := sp.Decode(c.OriginalBytes)
 				m, _ := sp.Decode(c.ModifiedBytes)
-				ops := mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(o, m)
+				ops := mustPatcher(c.buildPlan(), casePatcherOpts(c, sp.EmitMoves(true))...).Execute(o, m)
+				_, _ = json.Marshal(ops)
+			}
+		},
+		applyVerify: func(c *CorpusCase, _ []byte, ourOps []sp.Operation) (sp.Value, error) {
+			return sp.ApplyPatch(c.Original, ourOps, sp.ApplyOptions{})
+		},
+		applyFn: func(c *CorpusCase, _ []byte, ourOps []sp.Operation) func() {
+			return func() { _, _ = sp.ApplyPatch(c.Original, ourOps, sp.ApplyOptions{}) }
+		},
+	}
+
+	// --- our engine via the Compare(any) typed-entry front door -------------------
+	// The ergonomic API a Go caller holding typed structs/maps actually uses: it
+	// json.Marshals schema+source+target on the way in, decodes with the ordered
+	// value model, builds the plan, and runs Execute. Timed ALONGSIDE the pre-parsed
+	// "ours" row so the marshal-included cost of the convenience entry point is
+	// visible (this is what a wI2L/jsondiff-style `Compare(a, b)` caller pays). Its
+	// re-marshal sorts object keys, so it is verified order-insensitively
+	// (verifyCanonical) — correctness of the underlying diff is already pinned by the
+	// "ours" row; this row exists for the timing.
+	oursCompare := diffAdapter{
+		id: "ours-compare", label: "ours (Go engine, Compare(any))", kind: "schema-aware",
+		hasApplier: true, verifyCanonical: true,
+		produce: func(c *CorpusCase) ([]byte, int, []sp.Operation, error) {
+			ops, err := sp.Compare(compareSchemaArg(c), c.OriginalAny, c.ModifiedAny, casePatcherOpts(c)...)
+			if err != nil {
+				return nil, 0, nil, err
+			}
+			pb, err := json.Marshal(ops)
+			return pb, len(ops), ops, err
+		},
+		diffFn: func(c *CorpusCase) func() {
+			return func() {
+				_, _ = sp.Compare(compareSchemaArg(c), c.OriginalAny, c.ModifiedAny, casePatcherOpts(c)...)
+			}
+		},
+		decodeFn: nil, // the marshal step is INSIDE Compare; there is no separate pre-parse
+		e2eFn: func(c *CorpusCase) func() {
+			return func() {
+				ops, _ := sp.Compare(compareSchemaArg(c), c.OriginalAny, c.ModifiedAny, casePatcherOpts(c)...)
 				_, _ = json.Marshal(ops)
 			}
 		},
@@ -218,7 +281,7 @@ func newDiffAdapters() []diffAdapter {
 		},
 	}
 
-	return []diffAdapter{ours, oursMoves, jsondiff, snorwin, mattbaird}
+	return []diffAdapter{ours, oursMoves, oursCompare, jsondiff, snorwin, mattbaird}
 }
 
 // applyAdapter is an apply-only competitor. Both appliers race on the IDENTICAL

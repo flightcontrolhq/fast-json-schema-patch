@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"sort"
+	"strings"
 
 	evan "github.com/evanphx/json-patch/v5"
 	sp "github.com/flightcontrolhq/fast-json-schema-patch/go"
@@ -31,11 +32,84 @@ const (
 // reconstructs reports whether `applied` matches the case's `modified` under the
 // case's round-trip contract: byte-exact serialization for "exact", order-
 // normalized canonical form for "multiset".
+//
+// ignorePaths cases (CORE §7.6): apply(original, patch) equals modified
+// EVERYWHERE except at or beneath a matched ignore location, where it retains
+// original's value. Such a case is therefore compared MODULO the ignored subtrees
+// — both sides have the ignored members stripped before comparison — so a
+// schema-aware engine that (correctly) emitted no op for a volatile field is not
+// judged CORRUPT, and a generic engine that DID rewrite it still passes (both
+// agree off the ignored projection). Parity with the TS runner's reconstructs().
 func (c *CorpusCase) reconstructs(applied sp.Value) bool {
-	if c.Roundtrip == "exact" {
-		return bytes.Equal(mustEncode(applied), c.ModifiedBytes)
+	return c.reconstructsMode(applied, c.Roundtrip == "multiset")
+}
+
+// reconstructsMode is reconstructs with an explicit canonical (order-insensitive)
+// flag. The Compare(any) typed-entry adapter re-marshals its inputs through
+// encoding/json, which sorts object keys, so it is verified canonically regardless
+// of the case's declared contract (its correctness is already pinned by the
+// pre-parsed "ours" row; this row measures the marshal-included path's cost).
+func (c *CorpusCase) reconstructsMode(applied sp.Value, canonical bool) bool {
+	got, exp := applied, c.Modified
+	if len(c.Options.IgnorePaths) > 0 {
+		got = stripIgnored(sp.Clone(got), c.Options.IgnorePaths)
+		exp = stripIgnored(sp.Clone(exp), c.Options.IgnorePaths)
 	}
-	return bytes.Equal(mustEncode(canonSort(applied)), mustEncode(canonSort(c.Modified)))
+	if canonical {
+		return bytes.Equal(mustEncode(canonSort(got)), mustEncode(canonSort(exp)))
+	}
+	return bytes.Equal(mustEncode(got), mustEncode(exp))
+}
+
+// stripIgnored deletes the subtrees addressed by `pointers` from v (mutating it).
+// Segment rules mirror GEN §10.3: a `*` segment matches every array element or
+// every object member at that level; any other segment is an exact object-member
+// key (unescaped per RFC 6901). Every corpus ignore pointer terminates on a
+// literal member name, so the terminal is always an object-member delete.
+func stripIgnored(v sp.Value, pointers []string) sp.Value {
+	for _, ptr := range pointers {
+		raw := strings.Split(ptr, "/")
+		segs := make([]string, 0, len(raw))
+		for _, s := range raw[1:] { // raw[0] is the empty string before the leading '/'
+			s = strings.ReplaceAll(s, "~1", "/")
+			s = strings.ReplaceAll(s, "~0", "~")
+			segs = append(segs, s)
+		}
+		delSeg(v, segs)
+	}
+	return v
+}
+
+func delSeg(node sp.Value, segs []string) {
+	if len(segs) == 0 {
+		return
+	}
+	seg, rest := segs[0], segs[1:]
+	if len(rest) == 0 {
+		if o, ok := node.(*sp.Object); ok {
+			o.Delete(seg)
+		}
+		return
+	}
+	if seg == "*" {
+		switch t := node.(type) {
+		case []sp.Value:
+			for _, el := range t {
+				delSeg(el, rest)
+			}
+		case *sp.Object:
+			for _, k := range t.Keys() {
+				val, _ := t.Get(k)
+				delSeg(val, rest)
+			}
+		}
+		return
+	}
+	if o, ok := node.(*sp.Object); ok {
+		if child, present := o.Get(seg); present {
+			delSeg(child, rest)
+		}
+	}
 }
 
 // canonSort recursively sorts arrays by their encoded form and sorts object keys,

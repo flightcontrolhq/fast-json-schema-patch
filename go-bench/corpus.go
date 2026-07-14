@@ -52,6 +52,11 @@ type CorpusCase struct {
 	// case carries no schema (every array then falls to the LCS strategy).
 	Schema  sp.Value
 	Options PlanOptions
+
+	// SchemaBytes is the canonical JSON encoding of Schema (nil when schemaless),
+	// used by the Compare(any) typed-entry adapter, which takes the schema as a
+	// json.RawMessage rather than the ordered Value model.
+	SchemaBytes []byte
 }
 
 // PlanOptions is the case's plan configuration, lifted from the case JSON's
@@ -61,6 +66,10 @@ type PlanOptions struct {
 	BasePath             string
 	HasBasePath          bool
 	PrimaryKeyCandidates []string
+	// IgnorePaths is the ignorePaths generator capability (GEN §10), passed to the
+	// Patcher (not BuildPlan). Round-trip verdicts for a case carrying it are
+	// evaluated MODULO the ignored subtrees (CORE §7.6; see reconstructs).
+	IgnorePaths []string
 }
 
 func loadManifest(corporaDir string) (Manifest, []byte, error) {
@@ -117,6 +126,7 @@ func loadCase(corporaDir, relFile string) (*CorpusCase, error) {
 
 	if sch, present := obj.Get("schema"); present && sch != nil {
 		c.Schema = sch
+		c.SchemaBytes = mustEncode(sch)
 	}
 	if optsV, present := obj.Get("options"); present && optsV != nil {
 		if optsObj, ok := optsV.(*sp.Object); ok {
@@ -151,6 +161,15 @@ func parsePlanOptions(o *sp.Object) PlanOptions {
 			for _, e := range arr {
 				if s, ok := e.(string); ok {
 					po.PrimaryKeyCandidates = append(po.PrimaryKeyCandidates, s)
+				}
+			}
+		}
+	}
+	if ig, present := o.Get("ignorePaths"); present {
+		if arr, ok := ig.([]sp.Value); ok {
+			for _, e := range arr {
+				if s, ok := e.(string); ok {
+					po.IgnorePaths = append(po.IgnorePaths, s)
 				}
 			}
 		}

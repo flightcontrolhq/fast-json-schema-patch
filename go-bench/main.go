@@ -110,11 +110,15 @@ func measureDiff(a diffAdapter, c *CorpusCase) LibResult {
 	// Round-trip verdict.
 	if a.hasApplier {
 		applied, err := applyVerifySafe(a, c, pb, ourOps)
+		reconstructed := c.reconstructs(applied)
+		if a.verifyCanonical {
+			reconstructed = c.reconstructsMode(applied, true)
+		}
 		switch {
 		case err != nil:
 			res.Verdict = VerdictCorrupt
 			res.VerdictDetail = "patch unappliable: " + err.Error()
-		case c.reconstructs(applied):
+		case reconstructed:
 			res.Verdict = VerdictPass
 			if c.Roundtrip == "multiset" {
 				res.VerdictDetail = "multiset-canonical"
