@@ -1,8 +1,8 @@
 # fast-json-schema-patch — Normative Specification
 
-**Spec version:** `spec-v1-draft`
-**Status:** Draft. Finalized as `spec-v1` after the compactness phase (see §1.3).
-**Reference implementation:** the TypeScript package in this repository (branch `feat/deep-dive-overhaul`).
+**Spec version:** `spec-v1`
+**Status:** Final. Finalized 2026-07-14 (see §1.3).
+**Reference implementation:** the TypeScript package in this repository, `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`).
 
 ---
 
@@ -28,16 +28,18 @@ consumer), and authors of conformance vectors.
 
 ### 1.3 Spec versioning and stability
 
-- This is `spec-v1-draft`. Section numbers (e.g. `5.3.2`) are stable citation anchors;
-  vectors and implementations SHOULD cite them.
-- `spec-v1` is finalized after the **compactness phase** (the phase that lands granular LCS
-  descent, §5.5.4). Until then, sections marked *(draft-pending)* MAY change.
-- **Normative vs. buggy HEAD.** This spec describes the *intended* post-bugfix semantics, not
-  the behavior of any particular commit. Several behaviors specified here (primaryKey
-  fallback §5.4.3, nested-array plan paths §4.3.5, `basePath` segment matching §4.6.2,
-  schema traversal without explicit `type` §4.3.1, granular LCS descent §5.5.4) are landed in
-  the P1 / compactness phases *after* this spec. The spec is the contract those fixes
-  implement; where a phase is pending, the section is marked *(draft-pending)*.
+- This is `spec-v1`, finalized **2026-07-14** against reference implementation
+  `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`). Section numbers
+  (e.g. `5.3.2`) are stable citation anchors; vectors and implementations SHOULD cite them.
+- `spec-v1` was finalized after the P1–P4 phases landed (correctness, performance,
+  compactness, packaging). Every section the draft marked *(draft-pending)* is now landed in
+  the reference implementation and reads as normative; Appendix A records each landed fix
+  with its section for provenance.
+- **Normative vs. pre-audit HEAD.** This spec describes the semantics of the finalized
+  reference implementation. Several behaviors specified here were bug-fixes over the
+  pre-audit HEAD (primaryKey fallback §5.4.3, nested-array plan paths §4.3.5, `basePath`
+  segment matching §4.6.2, schema traversal without explicit `type` §4.3.1, granular LCS
+  descent §5.5.4); all are now landed. Appendix A is the contract-vs-pre-audit-HEAD summary.
 - **Patch-format stability.** The patch wire format (§6) is the cross-language compatibility
   surface. Within a major spec version, the set of emitted op kinds, the guaranteed per-op
   fields (§6.3), and the pointer-escaping rules (§3) are stable. Consumers MAY rely on them.
@@ -163,7 +165,9 @@ segment**, and as the final segment of a `remove`, `replace`, or `test`, or as a
 **source** final segment. On the **write side** (`remove`/`replace` finals and any non-final
 segment) rejection is `INVALID_POINTER`; on the **read side** (`test` finals and `move`/`copy`
 **source** finals) `-` fails own-index resolution and surfaces as `PATH_UNRESOLVABLE` (§3.6, §8.6).
-(An OPTIONAL non-RFC "remove last" extension is reserved but not part of spec-v1; §10.4.)
+(An OPTIONAL non-RFC "remove last" extension is **deferred to a future spec version** and is
+not part of spec-v1: the reference implementation does not implement it and the §10.4 capability
+registry does not list it. See Appendix A, *Deferred to a future spec version*.)
 
 `3.6` **Array-index syntax.** An array-index segment MUST match `^(0|[1-9][0-9]*)$`: a single `0`,
 or a nonzero digit followed by digits. Leading zeros (`01`), signs (`-0`, `+1`), decimals
@@ -219,11 +223,11 @@ escaped document path. A `visited` set of schema-node object identities guards a
 cycles: a node currently on the traversal stack is not re-entered; it is removed from the set when
 its subtree completes (so the same shared subschema may be reached again via a different path).
 
-`4.3.1` *(draft-pending — P1 fix F40)* A schema node is traversed as an **object** when it has
-`properties` or `additionalProperties`, and as an **array** when it has `items`, **regardless of
-whether an explicit `type` keyword is present**. (The reference at HEAD gates on
-`type === "object"` / `type === "array"` and MUST be updated to key off the shape keywords; a
-node with `properties` but no `type` currently yields no plan and its arrays degrade to `lcs`.)
+`4.3.1` A schema node is traversed as an **object** when it has `properties` or
+`additionalProperties`, and as an **array** when it has `items`, **regardless of whether an
+explicit `type` keyword is present**. (Landed, P1 fix F40. Pre-audit HEAD gated on
+`type === "object"` / `type === "array"`, so a node with `properties` but no `type` yielded no
+plan and its arrays degraded to `lcs`; the reference now keys off the shape keywords.)
 
 `4.3.2` **Object node.** For each member `key` in `properties`, recurse into
 `properties[key]` at path `parentPath + "/" + escape(key)`. If `additionalProperties` is a schema
@@ -242,13 +246,13 @@ fall back to `lcs`). Resolving a `$ref` does **not** change the document path. I
 SHOULD route the "unsupported reference" notice through a caller-suppressible channel rather than
 writing to stdout/stderr unconditionally.
 
-`4.3.5` *(draft-pending — P1 fix F04)* **Nested arrays (array-of-arrays).** When an array's
-`items` is itself an array schema, the inner array MUST be registered at a **distinct** document
-path (a wildcard element segment is appended, e.g. `parentPath + "/*"`), so the inner plan never
-overwrites the outer array's plan at the same key. (At HEAD, `items` is traversed at the same
-path, so an inner primaryKey plan clobbers the outer `lcs` plan and the outer array — whose
-elements are arrays, not keyed objects — silently produces no ops. The fix gives each array
-nesting level its own plan path and teaches the diff-time lookup, §5.4.5, about the extra level.)
+`4.3.5` **Nested arrays (array-of-arrays).** When an array's `items` is itself an array schema,
+the inner array MUST be registered at a **distinct** document path (a wildcard element segment is
+appended, e.g. `parentPath + "/*"`), so the inner plan never overwrites the outer array's plan at
+the same key. (Landed, P1 fix F04. At pre-audit HEAD, `items` was traversed at the same path, so
+an inner primaryKey plan clobbered the outer `lcs` plan and the outer array — whose elements are
+arrays, not keyed objects — silently produced no ops. The fix gives each array nesting level its
+own plan path and the diff-time lookup, §5.4.5, resolves the extra level.)
 
 `4.3.6` **`anyOf` / `oneOf` / `allOf`.** For each of these keywords present on a node, traverse
 every branch schema at the **current** path. Branches are **de-duplicated by structural
@@ -287,7 +291,7 @@ or `"boolean"`, set `strategy = "unique"`. (A primitive item array is a candidat
 Each candidate schema (a branch, or `itemsSchema` itself) is first reduced to a synthetic object
 view by the **`allOf` merge** (§4.5.1.1) before §4.5.2/§4.5.3 run against it.
 
-`4.5.1.1` *(draft-pending — P1 fix F35)* **`allOf` merge.** Reduce a candidate schema `s` to a
+`4.5.1.1` **`allOf` merge.** (Landed, P1 fix F35.) Reduce a candidate schema `s` to a
 single object view, `mergeAllOf(s)`:
 
 1. If `s` has a `$ref`, resolve it (§4.3.4); if resolution fails, `s` is used unchanged (no merge).
@@ -297,7 +301,7 @@ single object view, `mergeAllOf(s)`:
    `properties`, later branches overriding earlier ones on a key collision (base first, then
    branches in array order); `required` is the **set-union** of the node's own `required` with each
    branch's merged `required`. Nested `allOf` and a branch's leading `$ref` are handled by the
-   recursion. (At HEAD `allOf` was skipped entirely, so a `primaryKey` — or required fields —
+   recursion. (At pre-audit HEAD `allOf` was skipped entirely, so a `primaryKey` — or required fields —
    declared only inside an `allOf` branch was never found and the array degraded to its base
    strategy. This merge makes such schemas surface a key. `allOf` merging applies inside `anyOf`/
    `oneOf` branches too, since each branch is passed through `mergeAllOf`.)
@@ -319,7 +323,7 @@ whose `properties[f].type` is `"string"` or `"number"` (built by iterating `requ
 order; §5.4.4 uses these only as a prefilter). If no key is found, the plan keeps its base
 strategy from §4.4.1/§4.4.2.
 
-`4.5.5` *(draft-pending — F25)* The candidate list `["id","name","port"]` is the **DEFAULT** of
+`4.5.5` (Landed, F25.) The candidate list `["id","name","port"]` is the **DEFAULT** of
 the `primaryKeyCandidates` build-plan option (§10.4, capability registry). Passing an ordered list
 replaces the default wholesale (no merge); passing `[]` disables auto-detection. `primaryKeyMap`
 takes precedence over any candidate list (§4.5.3). Because `name` and `port` are commonly
@@ -331,13 +335,13 @@ primaryKey strategy (§7.2) — a known compactness cost, not an error; overridi
 
 `4.6.1` When `basePath` is absent, plan keys are the full document paths from the root.
 
-`4.6.2` *(draft-pending — P1 fix F14)* When `basePath` is set, only array paths **at or under**
+`4.6.2` (Landed, P1 fix F14.) When `basePath` is set, only array paths **at or under**
 `basePath` on a **segment boundary** are registered, and their keys are **relativized** by
 stripping the `basePath` prefix. Formally, a path `P` is in-base iff `P === basePath` **or**
-`P` starts with `basePath + "/"`; the registered key is `P.slice(basePath.length)`. (The
-reference at HEAD uses `startsWith(basePath)` + string `replace`, which wrongly matches sibling
-prefixes — `/env` captures `/envelope` — and can strip mid-segment, producing keys that never
-match at diff time. The fix uses segment-boundary matching and length-based slicing.) Traversal
+`P` starts with `basePath + "/"`; the registered key is `P.slice(basePath.length)`. (Pre-audit
+HEAD used `startsWith(basePath)` + string `replace`, which wrongly matched sibling prefixes —
+`/env` capturing `/envelope` — and could strip mid-segment, producing keys that never matched at
+diff time. The reference now uses segment-boundary matching and length-based slicing.) Traversal
 still descends through non-matching prefixes so nested in-base arrays are reachable.
 
 ### 4.7 Strategy ranking and plan merge
@@ -486,7 +490,7 @@ order:
 {op:"add",     path:"/users/-", value:{id:"e",name:"E"}}
 ```
 
-#### 5.4.3 Applicability gate and fallback *(draft-pending — P1 fixes F05/F06)*
+#### 5.4.3 Applicability gate and fallback *(landed — P1 fixes F05/F06)*
 
 Before committing to the primaryKey strategy, the differ MUST verify, in one `O(n+m)` pass over
 both arrays, that:
@@ -495,10 +499,10 @@ both arrays, that:
   number** (present, non-null); **and**
 - **(b)** there are **no duplicate** key values within `original` and none within `modified`.
 
-If either check fails, the array **MUST fall back to `lcs` (§5.5)** for this diff. (At HEAD,
-neither check is performed: non-conforming elements are silently skipped — added/removed items
-vanish from the patch — and duplicate keys corrupt the index, so even identical arrays can emit a
-growing patch. The gate makes both cases well-defined via `lcs`, which is exact.) A
+If either check fails, the array **MUST fall back to `lcs` (§5.5)** for this diff. (At pre-audit
+HEAD, neither check was performed: non-conforming elements were silently skipped — added/removed
+items vanished from the patch — and duplicate keys corrupted the index, so even identical arrays
+could emit a growing patch. The gate makes both cases well-defined via `lcs`, which is exact.) A
 `primaryKeyMap` override (§4.4.3) selects the strategy but does **not** bypass this gate; a
 gate-failing array still falls back to `lcs`.
 
@@ -510,14 +514,14 @@ element references over primitive arrays; because `unique` is only assigned to p
 schemas, reference-set uniqueness coincides with deep-equal uniqueness for the values it sees.)
 If the check fails, the array falls back to `lcs`.
 
-#### 5.4.5 Plan lookup by structural trie matching *(matching algorithm — normative for strategy selection)* *(draft-pending — P2 fixes F18/F33)*
+#### 5.4.5 Plan lookup by structural trie matching *(matching algorithm — normative for strategy selection)* *(landed — P2 fixes F18/F33)*
 
 The `Plan` map (§4.1) is **compiled once** into a **trie** and matched **structurally** by
 threading the current trie node down the diff recursion — no concrete path string is ever
-normalized or looked up, and no per-path caches are kept. (The reference at HEAD instead re-derived
+normalized or looked up, and no per-path caches are kept. (Pre-audit HEAD instead re-derived
 a concrete path per array and probed the flat map with exact / index-normalized / single-trailing-
-wildcard string keys, which grew four unbounded per-instance caches, §F18, mis-routed numeric
-object keys via index-normalization, §F33, and could not reach a wildcard plan at arbitrary depth
+wildcard string keys, which grew four unbounded per-instance caches, F18, mis-routed numeric
+object keys via index-normalization, F33, and could not reach a wildcard plan at arbitrary depth
 or at the top level. The trie makes all four issues structural.)
 
 `5.4.5.1` **Trie construction.** Each plan key is split on `/` into segments (the empty key `""`
@@ -670,8 +674,8 @@ mismatched container kind (object vs array), it stays a **whole-item** `{ op: "r
 value: modified[bi], oldValue: original[ai] }`. The recursion reuses the ordinary `diff` dispatch,
 so nested plans apply: an object element recurses at the array's own plan node (item property plans
 are its children, §4.3.3); an array element recurses into the nested-array wildcard plan at
-`${path}/*` (§4.3.5). This is the one LCS behavior that changed between `spec-v1-draft` (whole-item
-replace always) and `spec-v1`.
+`${path}/*` (§4.3.5). This descent (F10) is the one LCS behavior that changed during the
+compactness phase; before it, a whole-item replace was always emitted for a collapsed pair.
 
 #### 5.5.5 Emission from the script
 
@@ -822,7 +826,7 @@ element, where `tgt` is the (unique) index of `original[src]`'s value in `modifi
 and `pureInserts` are empty; §5.8.4 emits pure `move`s (stages 1/3/4 empty). If the arrays are
 **not** multiset-equal, the strategy keeps the §5.6 positional-replace emission unchanged (moves buy
 nothing there and would cost a remove+add per differing element). Equal-length + unique + multiset-
-equal is exactly the reorder case §5.6 handled as `N` positional replaces at HEAD.
+equal is exactly the reorder case §5.6 emits as `N` positional replaces by default (`emitMoves` off).
 
 `5.8.7` **primaryKey mapping (F07).** With `emitMoves` on, the primaryKey strategy (§5.4), under the
 same applicability gate (§5.4.3), replaces its three-phase emission (§5.4.1) with the bijection:
@@ -890,17 +894,25 @@ An emitted operation is a JSON object:
 
 ```
 Operation = {
-  op:       "add" | "remove" | "replace"    // the generator emits ONLY these three
+  op:       "add" | "remove" | "replace" | "move"  // "move" ONLY under emitMoves (§5.8, §6.1.1)
   path:     JSONPointer                      // always present
-  value?:   JsonValue                        // present on add and replace
+  value?:   JsonValue                        // present on add and replace (never on move)
   oldValue?: JsonValue                       // this library's extension; see §6.4
-  from?:    JSONPointer                      // NEVER emitted by the generator
+  from?:    JSONPointer                      // ONLY on emitted `move` ops under emitMoves (§6.1.1)
 }
 ```
 
-`6.1.1` The **generator** (`execute`) emits only `add`, `remove`, and `replace`. The wider RFC
-6902 op set (`move`, `copy`, `test`) and `from` are **accepted by apply** (§8) for third-party
-patches but are never produced by diffing.
+`6.1.1` **In the default capability mode** (`emitMoves` off), the **generator** (`execute`) emits
+only `add`, `remove`, and `replace`, and never emits `from`. The remaining RFC 6902 ops (`copy`,
+`test`) and `from` are **accepted by apply** (§8) for third-party patches but are not produced by
+diffing in this mode.
+
+**Carve-out — `emitMoves` (§5.8).** When the OPTIONAL `emitMoves` capability is enabled (§5.8,
+§10.4.4), the generator **additionally emits `move` ops**, each carrying a `from` pointer and no
+`value`/`oldValue` (§5.8.4). This is the only path by which `execute` produces a `move` op or a
+`from` field. With `emitMoves` off — the default, and the only mode the spec-v1 conformance
+vectors cover (§10.4) — the "add/remove/replace only, never `from`" guarantee holds exactly.
+`copy` and `test` are never emitted in either mode.
 
 ### 6.2 RFC 6902 conformance
 
@@ -926,6 +938,11 @@ indices** for all adds, including empty-source additions (`/0`, `/1`, …; §5.5
 `remove`/`replace` above hold under the **default** `includeOldValue = true` (SPEC §6.4, capability
 registry §10.4). Under the opt-out `includeOldValue = false`, `oldValue` is present on **no** op;
 `add` never carries it in either mode. The `path`/`value` cells are unaffected.
+
+`6.3.3` **`move` ops are capability-governed.** The table above is the default-mode op set. Under
+the OPTIONAL `emitMoves` capability (§5.8, §10.4.4) the generator also emits `move` ops; a `move`
+carries `path` and `from` and **no** `value`/`oldValue` (§5.8.4, §6.1.1). No `move` op is emitted
+with `emitMoves` off.
 
 ### 6.4 `oldValue` extension
 
@@ -1015,7 +1032,7 @@ applier and fast-json-patch; every trial reproduced `modified` exactly.
 
 ### 7.5 `wholesaleReplaceFallback`: size-capped reconstruction
 
-`7.5.1` With `wholesaleReplaceFallback` on (§5.5.6, §10.4.5), an array whose granular op stream is
+`7.5.1` With `wholesaleReplaceFallback` on (§5.9, §10.4.5), an array whose granular op stream is
 discarded for size reasons is instead reconstructed by a single whole-array `replace`, which is
 trivially exact (§7.1-style) regardless of which strategy would otherwise have applied. The
 capability changes **only** the op stream for oversized arrays; it never changes the reconstructed
@@ -1248,8 +1265,7 @@ An apply vector is a JSON record:
 
 `10.2.1` For an `error` vector, apply MUST throw `JsonPatchError` with the given `code` and
 `operationIndex === index`. For an `expected` vector, the result MUST deep-equal `expected`
-(§2.4.1) and MUST NOT throw. Invert vectors MAY reuse this shape by asserting the double-apply
-identity (§9.1.2).
+(§2.4.1) and MUST NOT throw. Invert round-trips have their own dedicated vector format (§10.7).
 
 ### 10.3 The conformance gate (normative)
 
@@ -1287,10 +1303,9 @@ capabilities.
 
 `10.4.1` **Granular LCS descent (§5.5.4.2) is NOT a capability** — it is normative default
 behavior in `spec-v1`, landed in the compactness phase (F10). It is always on; there is no flag to
-disable it. Any `spec-v1-draft` vector that asserted a whole-item replace for a same-kind
-(object↔object or array↔array) changed LCS element is **re-baselined** to the granular nested ops
-that descent now emits; vectors for primitive or mismatched-kind replacements are unchanged (those
-stay whole-item, §5.5.4.2).
+disable it. `spec-v1` conformance vectors are generated from this finalized behavior: a same-kind
+(object↔object or array↔array) changed LCS element yields the granular nested ops descent emits,
+while primitive or mismatched-kind replacements stay whole-item (§5.5.4.2).
 
 `10.4.2` **`includeOldValue` (F11).** Surfaced as the `JsonSchemaPatcher` constructor option
 `includeOldValue?: boolean`, **default `true`** (back-compat: identical, byte-for-byte, to the
@@ -1390,25 +1405,102 @@ the `expectedPlan` array is authored sorted by `path` for readability. This form
 derivation — including §4.1.1 (which fields are output-relevant) and §4.7.4 (metadata merge /
 `hashFields`) — directly falsifiable.
 
+### 10.7 Invert vector format (normative)
+
+To make §9 inversion falsifiable independently of the diff generator, an **invert vector** is a
+JSON record:
+
+```
+{
+  "name":            string,          // unique id
+  "comment":         string,          // optional human note / spec citation
+  "document":        JsonValue,       // the ORIGINAL (pre-patch) document (§9.1.1)
+  "patch":           Operation[],     // the forward patch to invert
+  "expectedInverse": Operation[]      // the op list invertPatch(document, patch) MUST produce
+}
+```
+
+`10.7.1` `document` is the **ORIGINAL** (pre-patch) document, exactly as §9.1.1 requires: it is
+the document `patch` was generated from (and applies cleanly to), and `invertPatch` resolves `/-`
+append paths to concrete indices and recovers overwritten/removed values against it (§9.1.1,
+§9.2). `patch` MUST apply cleanly to `document` (§9.1.2); a `patch` that does not is not a valid
+invert vector.
+
+`10.7.2` **Conformance rule.** An invert vector **passes** iff **both** hold:
+
+- **(a) Structural inverse equality.** `invertPatch(document, patch)` is **structurally equal** to
+  `expectedInverse` — same length and the same ordered sequence of ops, each op equal by `op`,
+  `path` (as a string), and — where present — `value`/`oldValue`/`from` under deep JSON equality
+  (§2.4.1). This is the identical structural op-equality relation the diff gate uses (§10.3.2),
+  and it pins the exact inverse op sequence §9.2 defines (forward-simulated, then reversed).
+- **(b) Double-apply identity.** `applyPatch(applyPatch(document, patch), expectedInverse)`
+  **deep-equals `document`** (§2.4.1), evaluated through the reference apply semantics (§8) under
+  strict sequential application (§8.1). This is the round-trip guarantee of §9.1.2 / §7.3.1.
+
+`10.7.3` Both clauses are REQUIRED and use the same terminology as §9: clause (a) pins the exact
+inverse op list `invertPatch` produces (the ordering and per-op fields of §9.2), while clause (b)
+is the semantic round-trip `invertPatch` guarantees against the forward-applied state (§9.1.2).
+Because the inverse is computed against the ORIGINAL `document` (§9.1.1), clause (b) is asserted
+against that same `document`, not against an arbitrary document that merely deep-equals it up to
+array order (§9.1.2).
+
 ---
 
-## Appendix A. Summary of draft-pending fixes (contract vs. HEAD)
+## Appendix A. Summary of spec-v1 fixes (contract vs. pre-audit HEAD)
 
-These sections specify the intended post-bugfix semantics; the listed phase lands them.
+`spec-v1` was finalized 2026-07-14 against reference implementation v0.4.0 after the P1–P4
+phases. Every section below specifies the finalized (post-bugfix) semantics and is **landed** in
+the reference; the "pre-audit HEAD" column records the behavior each fix replaced.
 
-| § | behavior specified | HEAD state | phase |
-|---|--------------------|------------|-------|
-| 4.3.1 | traverse nodes with `properties`/`items` even without `type` | gates on explicit `type` | P1 (F40) |
-| 4.3.5 | nested arrays get distinct plan paths | inner plan clobbers outer at same key | P1 (F04) |
-| 4.5.1 | `allOf` item branches merged (union `properties`+`required`) for primary-key detection | `allOf` skipped; a key declared only in an `allOf` branch is not found | P1 (F35) |
-| 4.6.2 | `basePath` matches on segment boundary, slices by length | `startsWith`+`replace`, mid-segment bugs | P1 (F14) |
-| 5.4.3 | primaryKey gate + `lcs` fallback (non-conforming elements, duplicate keys) | silently skips / corrupts | P1 (F05/F06) |
+**Normative behavioral fixes (a Go implementer MUST reproduce these):**
+
+| § | behavior specified | pre-audit HEAD state | phase (finding) |
+|---|--------------------|----------------------|-----------------|
+| 2.1.2 | `Date`/`RegExp`/`Map`/class instances treated as opaque equality leaves | host-dependent / could recurse into non-JSON | P1 (F16) |
+| 2.4.4 | memoization/identity caches are output-neutral (no stale verdict after input mutation) | identity-keyed caches could leak a stale verdict across mutated inputs | P1 (F02) |
+| 4.1.1 | `itemSchema` is non-normative and no longer populated by `buildPlan` | write-only `itemSchema` pinned ~2x plan memory | P2 (F19) |
+| 4.3.1 | traverse nodes with `properties`/`items` even without `type` | gated on explicit `type` | P1 (F40) |
+| 4.3.4 | unsupported-`$ref` notice routed through caller-suppressible `onWarning` | wrote to `console.warn` unconditionally | P4 (F32) |
+| 4.3.5 | nested arrays get distinct plan paths (`${path}/*`) | inner plan clobbered outer at same key | P1 (F04) |
+| 4.5.1 | `allOf` item branches merged (union `properties`+`required`) for primary-key detection | `allOf` skipped; a key declared only in an `allOf` branch was not found | P1 (F35) |
+| 4.5.5 | `primaryKeyCandidates` overrides the auto-detection list; `[]` disables it | candidate list hardcoded `["id","name","port"]` | P3 (F25) |
+| 4.6.2 | `basePath` matches on segment boundary, slices by length | `startsWith`+`replace`, sibling-prefix / mid-segment bugs | P1 (F14) |
+| 5.2.2 | union-key visitation as two passes (output-equivalent to `Set` union) | `Set`-union allocation per object | P2 (F36) |
+| 5.4.3 | primaryKey gate + `lcs` fallback (non-conforming elements, duplicate keys) | silently skipped / corrupted the index | P1 (F05/F06) |
 | 5.4.5 | structural trie matching: wildcard reachable at **any** depth incl top-level `/*`; numeric object keys route by construction; no per-path caches | flat string lookup (exact / index-normalize / single trailing `*`) with four unbounded per-instance caches | P2 (F18/F33) |
-| 5.5.4.2 | granular LCS descent into same-kind changed items | whole-item replace always | compactness (F10) — **landed** |
+| 5.5.0 | common prefix/suffix trim before Myers (normative step 0) | no trim; Myers ran on the whole array | P2 (F09) |
+| 5.5.4.2 | granular LCS descent into same-kind changed items | whole-item replace always | P3 (F10) |
+| 5.6 | `unique` is equal-length positional replaces only | dead removal/addition phase behind the equal-length gate | P3 (F38) |
+| 5.8 | `emitMoves` capability: LCS relocations, `unique`/`primaryKey` exact-order via `move`s | no move emission; primaryKey order-insensitive only | P3 (F22/F23/F07) |
+| 5.9 | `wholesaleReplaceFallback` capability: size-capped whole-array replace | none | P3 (F24) |
+| 6.1.1 | `emitMoves` carve-out: generator emits `move`/`from` only under the capability | spec claimed generator never emits `move`/`from` | P3 (spec finalization) |
+| 6.4.2 | `includeOldValue` capability suppresses `oldValue` | `oldValue` always emitted | P3 (F11) |
 
-All other sections describe behavior already present at HEAD (verified by probing: pointer
+**Output-neutral performance fixes (§2.4.4-governed; MUST NOT change any emitted patch):** the
+Myers V-band-only storage (§5.5.2, F08), window-element interning to integer ids (§5.5.2,
+F21/F34), skipping re-verification of proven-equal common elements (§5.5.2/§5.5.5, F20), per-diff
+hoisting of plan fingerprint/hash fields (F37), loop-based emission of large op groups (F13), and
+plan-trie compilation (§5.4.5, F18) are all invisible to the wire format and need no separate
+reproduction — a conforming implementation may use any output-neutral equivalent.
+
+**Non-spec fixes (outside this document's scope, §1.5):** the `DiffOperation` type surface (F27),
+plan validation in the `JsonSchemaPatcher` constructor (F42), the aggregator remove-fallback index
+regex (F17), and packaging / CI / docs / test-hygiene work (F28, F30, F31, F39, F41) do not affect
+diff, patch, apply, invert, or plan semantics and are not tabulated individually.
+
+All other sections describe behavior already present before the audit (verified by probing: pointer
 escaping in object diff, root-array-to-empty removals with `oldValue`, collision-free LCS cache
 key, prototype-pollution guard, error codes, invert round-trip).
+
+### Deferred to a future spec version
+
+- **"Remove last" array extension (§3.5).** An OPTIONAL non-RFC token to remove the final array
+  element without naming its index is **not part of spec-v1**: it is unimplemented in the reference
+  and absent from the §10.4 capability registry. It is deferred to a future spec version, where it
+  would need its own pointer-syntax rule (§3.5) and apply semantics (§8.3).
+- **`unique` set-diff / move semantics (§5.6.2, Appendix B.2).** spec-v1 leaves the unequal-length
+  `unique` case as an `lcs` fallback and does not define set-difference or move semantics for the
+  `unique` strategy; a future version MAY specify them.
 
 ## Appendix B. Known pinned limitations (reproduce for conformance)
 
