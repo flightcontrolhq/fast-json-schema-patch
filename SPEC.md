@@ -281,14 +281,29 @@ or `"boolean"`, set `strategy = "unique"`. (A primitive item array is a candidat
 `4.5.1` Auto-detection runs over an **object item schema**. Resolve the candidate schema:
 
 - If `itemsSchema` has `anyOf` or `oneOf`, examine each branch **in array order** and use the
-  first branch that yields a primary key (§4.5.3). (`allOf` branches are **not** merged for
-  detection at HEAD; a `primaryKey` declared only inside an `allOf` branch is not found and the
-  array degrades to its base strategy. Merging `allOf` is a possible later enhancement, not
-  required for spec-v1.)
+  first branch that yields a primary key (§4.5.3).
 - Otherwise examine `itemsSchema` directly.
 
-`4.5.2` For a candidate schema `s`: resolve a leading `$ref` (§4.3.4); require `s.type ===
-"object"` **and** `s.properties` present, else no key. Let `required = new Set(s.required || [])`.
+Each candidate schema (a branch, or `itemsSchema` itself) is first reduced to a synthetic object
+view by the **`allOf` merge** (§4.5.1.1) before §4.5.2/§4.5.3 run against it.
+
+`4.5.1.1` *(draft-pending — P1 fix F35)* **`allOf` merge.** Reduce a candidate schema `s` to a
+single object view, `mergeAllOf(s)`:
+
+1. If `s` has a `$ref`, resolve it (§4.3.4); if resolution fails, `s` is used unchanged (no merge).
+2. If the (resolved) node has **no** `allOf`, it is returned unchanged.
+3. Otherwise a synthetic view `{ type: "object", properties, required }` is built: `properties` is
+   the union of the node's own `properties` with each `allOf` branch's **recursively merged** view
+   `properties`, later branches overriding earlier ones on a key collision (base first, then
+   branches in array order); `required` is the **set-union** of the node's own `required` with each
+   branch's merged `required`. Nested `allOf` and a branch's leading `$ref` are handled by the
+   recursion. (At HEAD `allOf` was skipped entirely, so a `primaryKey` — or required fields —
+   declared only inside an `allOf` branch was never found and the array degraded to its base
+   strategy. This merge makes such schemas surface a key. `allOf` merging applies inside `anyOf`/
+   `oneOf` branches too, since each branch is passed through `mergeAllOf`.)
+
+`4.5.2` For the merged candidate view `s` (§4.5.1.1): require `s.type === "object"` **and**
+`s.properties` present, else no key. Let `required = new Set(s.required || [])`.
 
 `4.5.3` **Candidate key list.** Check the ordered list **`["id", "name", "port"]`** (§4.5.5). For
 each candidate `key` in order: if `required.has(key)` **and** `properties[key].type` is `"string"`
@@ -1121,6 +1136,7 @@ These sections specify the intended post-bugfix semantics; the listed phase land
 |---|--------------------|------------|-------|
 | 4.3.1 | traverse nodes with `properties`/`items` even without `type` | gates on explicit `type` | P1 (F40) |
 | 4.3.5 | nested arrays get distinct plan paths | inner plan clobbers outer at same key | P1 (F04) |
+| 4.5.1 | `allOf` item branches merged (union `properties`+`required`) for primary-key detection | `allOf` skipped; a key declared only in an `allOf` branch is not found | P1 (F35) |
 | 4.6.2 | `basePath` matches on segment boundary, slices by length | `startsWith`+`replace`, mid-segment bugs | P1 (F14) |
 | 5.4.3 | primaryKey gate + `lcs` fallback (non-conforming elements, duplicate keys) | silently skips / corrupts | P1 (F05/F06) |
 | 5.4.5 | structural trie matching: wildcard reachable at **any** depth incl top-level `/*`; numeric object keys route by construction; no per-path caches | flat string lookup (exact / index-normalize / single trailing `*`) with four unbounded per-instance caches | P2 (F18/F33) |
@@ -1136,8 +1152,7 @@ key, prototype-pollution guard, error codes, invert round-trip).
   (`additionalProperties`/nested-array-element) edge in the compiled plan trie, because `buildPlan`
   emits both as the segment `*`; the wildcard interpretation wins (§5.4.5.1). This is a pinned edge
   case, not latitude. *(Former B.1/B.2/B.5 — deeper/​top-level `/*` unreachable and numeric-object-
-  key mis-routing — are **resolved** by structural trie matching, §5.4.5, P2 fixes F18/F33.)*
+  key mis-routing — are **resolved** by structural trie matching, §5.4.5, P2 fixes F18/F33; former
+  B.3 — `allOf` not merged — is **resolved** by §4.5.1, P1 fix F35.)*
 - **B.2** `unique` set-diff/move semantics are unspecified in spec-v1; unequal lengths fall back to
   LCS (§5.6.2).
-- **B.3** `allOf` item schemas are not merged for primary-key detection; a key declared only in an
-  `allOf` branch is not found (§4.5.1).
