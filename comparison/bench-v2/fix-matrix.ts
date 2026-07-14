@@ -134,7 +134,7 @@ const repros: Repro[] = [
     id: "root-array-to-empty",
     finding: "apply/root",
     title: "Root array cleared to [] emits an unappliable patch",
-    spec: "§8.2 (root pointer)",
+    spec: "CORE §5.2 (root pointer)",
     category: "correctness",
     expectation:
       "OLD emits `remove '/'` ops that throw on apply; NEW emits descending index removes that reconstruct [].",
@@ -152,7 +152,7 @@ const repros: Repro[] = [
     id: "slash-in-key-sibling-corruption",
     finding: "F-pointer",
     title: "'/' in an object key silently corrupts a sibling on apply",
-    spec: "§8.2.3 (RFC 6901 ~1 escaping)",
+    spec: "CORE §2.2 (RFC 6901 ~1 escaping)",
     category: "correctness",
     expectation:
       "OLD emits unescaped path `/a/b`, which apply routes into the sibling object `a.b`; NEW escapes to `/a~1b`.",
@@ -169,7 +169,7 @@ const repros: Repro[] = [
     id: "duplicate-primary-key-mutation",
     finding: "F05/F06",
     title: "Duplicate primaryKey mutates an UNCHANGED array",
-    spec: "§5.4.3 (uniqueness gate)",
+    spec: "GEN §4.3 (uniqueness gate)",
     category: "correctness",
     expectation:
       "With two items sharing a key and original===modified, OLD emits spurious ops; NEW gates the strategy off and emits nothing.",
@@ -185,7 +185,7 @@ const repros: Repro[] = [
     id: "keyless-item-silent-drop",
     finding: "F05",
     title: "Keyless item added to a keyed array is silently dropped",
-    spec: "§5.4.3 (applicability gate -> LCS fallback)",
+    spec: "GEN §4.3 (applicability gate -> LCS fallback)",
     category: "correctness",
     expectation:
       "OLD skips the key-less element (empty patch, add lost); NEW falls back to LCS and round-trips.",
@@ -202,7 +202,7 @@ const repros: Repro[] = [
     id: "date-silent-equality",
     finding: "F16",
     title: "Two different Dates compare equal (silent data loss)",
-    spec: "§2.1.2 (non-JSON opaque leaves)",
+    spec: "CORE §1.1.2 (non-JSON opaque leaves)",
     category: "correctness",
     expectation:
       "Both Dates have zero own keys, so OLD's own-key compare treats them equal (empty patch); NEW compares them as opaque leaves.",
@@ -221,7 +221,7 @@ const repros: Repro[] = [
     id: "mutate-then-rediff-staleness",
     finding: "F02",
     title: "Mutate-in-place then re-diff returns a stale (empty) verdict",
-    spec: "§2.4.4 (output-neutral memoisation)",
+    spec: "CORE §1.4.4 (output-neutral memoisation)",
     category: "correctness",
     expectation:
       "A field mutated in place outside the hash-prefilter set is missed on the second diff by OLD's stale equality cache; NEW's caches are epoch-invalidated.",
@@ -278,7 +278,7 @@ const repros: Repro[] = [
     id: "basepath-segment-boundary",
     finding: "plan/basePath",
     title: "basePath prefix-match captures a sibling and corrupts the plan key",
-    spec: "§4.6.2 (segment-boundary matching)",
+    spec: "CORE §3.6.2 (segment-boundary matching)",
     category: "correctness",
     expectation:
       "basePath '/env' string-prefix-matches sibling '/envelope/stamps', stripped mid-segment to the unmatchable key 'elope/stamps'; NEW matches on a segment boundary.",
@@ -339,7 +339,7 @@ const repros: Repro[] = [
     id: "structured-diff-digit-regex",
     finding: "F17",
     title: "StructuredDiff remove-fallback `\\d` regex cooked to literal 'd'",
-    spec: "§6 (StructuredDiff aggregation)",
+    spec: "CONF §1.5 (StructuredDiff aggregation — non-spec)",
     category: "correctness",
     expectation:
       "The index-extraction regex was built in an untagged template where `\\d` becomes 'd', so numeric indices never matched. NEW's extractIndexAfterPrefix rejects literal-'d' paths and extracts real indices; v0.4.0 has no such helper to compare against.",
@@ -382,7 +382,7 @@ const repros: Repro[] = [
     id: "spread-push-rangeerror",
     finding: "F13",
     title: "Clearing a huge keyed array RangeErrors via `push(...ops)`",
-    spec: "§5.4 (op emission)",
+    spec: "GEN §4 (op emission)",
     category: "crash",
     expectation:
       "OLD emits removals with `patches.push(...removalPatches)`; past the runtime arg cap this throws an uncatchable RangeError. NEW emits with a loop. Run in a fresh subprocess.",
@@ -413,7 +413,7 @@ const repros: Repro[] = [
     id: "lcs-65536-cliff",
     finding: "F21/F34",
     title: "70k single-edit at the exact 65,536 interning cliff",
-    spec: "§5.5 (interned LCS)",
+    spec: "GEN §5 (interned LCS)",
     category: "regression-guard",
     expectation:
       "NEW's interned-LCS packs window elements to integer ids; the edit at index 65,536 sits on the old 16-bit packing boundary. NEW is proven correct here (regression guard). Published v0.4.0 also passes (its LCS predates the interning rewrite).",
