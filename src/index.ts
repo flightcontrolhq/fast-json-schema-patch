@@ -74,11 +74,24 @@ export class JsonSchemaPatcher {
    * (F07).
    */
   private readonly emitMoves: boolean;
+  /**
+   * wholesaleReplaceFallback capability (SPEC §5.5.6 / §10.4.5, F24). When
+   * `false` (default) output is byte-stable versus the pre-capability tree.
+   * When `true`, each array diff is first generated into a local buffer as
+   * usual; if the SPEC §5.5.6.1 byte estimate of that buffer exceeds
+   * `JSON.stringify(modified-array).length`, the buffer is discarded and
+   * replaced with a single whole-array `{op:"replace"}` (carrying `oldValue`
+   * per `includeOldValue`). This caps a heavily-rewritten array's patch size
+   * at roughly the new array's own serialized size instead of letting a
+   * granular op stream exceed it.
+   */
+  private readonly wholesaleReplaceFallback: boolean;
 
   constructor(options: {
     plan: Plan;
     includeOldValue?: boolean;
     emitMoves?: boolean;
+    wholesaleReplaceFallback?: boolean;
   }) {
     // F42: fail fast with an actionable message instead of a cryptic
     // "undefined is not an object (evaluating this.plan.size)" TypeError
@@ -100,6 +113,29 @@ export class JsonSchemaPatcher {
     this.includeOldValue = options.includeOldValue ?? true;
     // Default OFF (SPEC §10.4.4): byte-stable output unless explicitly enabled.
     this.emitMoves = options.emitMoves ?? false;
+    // Default OFF (SPEC §10.4.5): byte-stable output unless explicitly enabled.
+    this.wholesaleReplaceFallback = options.wholesaleReplaceFallback ?? false;
+  }
+
+  /**
+   * SPEC §5.5.6.1 (F24): a deterministic, cheap-to-compute estimate of the
+   * serialized size of `ops` — NOT an exact `JSON.stringify(ops).length`, but
+   * pinned exactly so a reimplementation reproduces the identical cutover
+   * decision. For each op: `+30` (fixed per-op overhead standing in for
+   * `{"op":"...","path":"..."}` structure) plus `JSON.stringify(op.value).length`
+   * when `value` is present, plus `JSON.stringify(op.oldValue).length` when
+   * `oldValue` is present. `move` ops (no `value`/`oldValue`) contribute only
+   * the 30B overhead.
+   */
+  private static estimatePatchBytes(ops: Operation[]): number {
+    let total = 0;
+    for (let i = 0; i < ops.length; i++) {
+      const op = ops[i] as Operation;
+      total += 30;
+      if (op.value !== undefined) total += JSON.stringify(op.value).length;
+      if (op.oldValue !== undefined) total += JSON.stringify(op.oldValue).length;
+    }
+    return total;
   }
 
   /**
@@ -302,6 +338,38 @@ export class JsonSchemaPatcher {
   }
 
   private diffArray(
+    arr1: JsonArray,
+    arr2: JsonArray,
+    path: string,
+    patches: Operation[],
+    node: PlanTrieNode | undefined
+  ) {
+    // wholesaleReplaceFallback (SPEC §5.5.6 / §10.4.5, F24). OFF by default:
+    // dispatch straight into the caller's `patches` exactly as before — zero
+    // extra allocation and byte-identical output. ON: generate into a local
+    // buffer first so the estimate (and a possible discard) can be applied
+    // before anything reaches the shared `patches` array. This applies
+    // per-array, including recursively to nested arrays (each nested
+    // `diffArray` call — reached via granular descent or a plain nested-array
+    // member — makes its own independent cutover decision).
+    if (!this.wholesaleReplaceFallback) {
+      this.dispatchArrayStrategy(arr1, arr2, path, patches, node);
+      return;
+    }
+    const local: Operation[] = [];
+    this.dispatchArrayStrategy(arr1, arr2, path, local, node);
+    const estimate = JsonSchemaPatcher.estimatePatchBytes(local);
+    const wholesaleThreshold = JSON.stringify(arr2).length;
+    if (estimate > wholesaleThreshold) {
+      const op: Operation = { op: "replace", path, value: arr2 };
+      if (this.includeOldValue) op.oldValue = arr1;
+      patches.push(op);
+      return;
+    }
+    for (let i = 0; i < local.length; i++) patches.push(local[i] as Operation);
+  }
+
+  private dispatchArrayStrategy(
     arr1: JsonArray,
     arr2: JsonArray,
     path: string,

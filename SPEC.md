@@ -833,6 +833,52 @@ their `modified` position (never `/-`), making `applyPatch(original, p)` equal `
 **byte-exactly** (order included). This upgrades §7.2 to §7.4 for this array. The gate still governs:
 non-conforming / duplicate-key arrays fall back to `lcs`, which under `emitMoves` uses §5.8.5.
 
+### 5.9 `wholesaleReplaceFallback` capability (normative when enabled)
+
+`wholesaleReplaceFallback` is an **OPTIONAL** capability (default **off**, §10.4.5). When **off**,
+array diffing is exactly §5.4–§5.8 and output is byte-stable versus the pre-capability tree. When
+**on**, it is evaluated **per array, at every array-diff call site** (the top-level array of a diff
+and, independently, every nested array reached through granular descent, §5.5.4.2 / §5.8.4 stage 4) —
+**after** the array's strategy (§5.4/§5.6/§5.5, composing with `emitMoves` §5.8 if also on) has
+produced its op list for that array:
+
+`5.9.1` **Nesting order (bottom-up).** Because granular descent recurses through the ordinary `diff`
+dispatch, a nested array is itself a `diffArray` call site and makes its **own** independent
+cutover decision — using only the ops it itself would emit and its own array's serialized size —
+**before** whatever it emits (its granular ops, or its own single wholesale replace) becomes part
+of its parent array's op list. The parent's cutover decision is then made over its own op list,
+which may already contain a child's wholesale replace.
+
+`5.9.2` **Byte estimate (pinned).** For an array's produced op list `ops`, the estimate is:
+
+```
+estimate = sum over op in ops of:
+    30                                              // fixed per-op overhead
+  + (op.value    !== undefined ? len(JSON.stringify(op.value))    : 0)
+  + (op.oldValue !== undefined ? len(JSON.stringify(op.oldValue)) : 0)
+```
+
+This is a **cheap, deterministic stand-in** for the serialized patch size — NOT
+`len(JSON.stringify(ops))` — pinned exactly (including the `30` constant) so a reimplementation
+reaches the identical cutover decision on the identical input. `move` ops (no `value`/`oldValue`)
+contribute only the 30B overhead.
+
+`5.9.3` **Threshold and cutover.** Let `threshold = len(JSON.stringify(modified))` (the array's own
+serialized size). If `estimate > threshold`, **discard** the array's op list entirely and emit
+instead a single `{ op: "replace", path, value: modified, oldValue: original }` (`oldValue` present
+iff `includeOldValue`, §6.4.2) at the array's own path. Otherwise emit the array's op list
+unchanged. The comparison is **strict `>`** — a tie keeps the granular ops.
+
+`5.9.4` **Determinism.** §5.9.2–§5.9.3 depend only on the op list a supported strategy/capability
+combination would otherwise produce and on `JSON.stringify` of the array values, both of which are
+themselves normatively pinned elsewhere in this spec (§5.4–§5.8, §2.2) — so the cutover decision is
+fully deterministic and Go-reproducible given a conforming `JSON.stringify`-equivalent serializer
+(same number/string encoding, §2.2–§2.3; key order does not affect the byte **count**).
+
+`5.9.5` This capability is orthogonal to strategy selection (§4.7) and to `emitMoves`/
+`includeOldValue`: it never changes *which* strategy runs, only whether that strategy's output (or
+`emitMoves`'s, if also on) is kept or replaced wholesale for a given array.
+
 ---
 
 ## 6. Patch format
@@ -965,6 +1011,15 @@ express the same reconstruction (fewer, smaller ops), never the reconstructed do
 `7.4.3` Verified by exhaustive small-permutation enumeration and >1M randomized bijection trials
 (deletes + inserts + changes + reorders, with duplicate values) against **both** the reference
 applier and fast-json-patch; every trial reproduced `modified` exactly.
+
+### 7.5 `wholesaleReplaceFallback`: size-capped reconstruction
+
+`7.5.1` With `wholesaleReplaceFallback` on (§5.5.6, §10.4.5), an array whose granular op stream is
+discarded for size reasons is instead reconstructed by a single whole-array `replace`, which is
+trivially exact (§7.1-style) regardless of which strategy would otherwise have applied. The
+capability changes **only** the op stream for oversized arrays; it never changes the reconstructed
+document, and composes with `emitMoves`/`includeOldValue` (the estimate is computed on whatever
+those capabilities would otherwise emit).
 
 ---
 
@@ -1226,7 +1281,7 @@ capabilities.
 |------------|---------|--------|--------|
 | `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§10.4.2) | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
 | `emitMoves` | off | OPTIONAL — **landed** (§10.4.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (§5.8) |
-| `wholesaleReplaceFallback` | off | OPTIONAL (reserved) | emit a single container `replace` when the granular patch would exceed the container's own serialized size |
+| `wholesaleReplaceFallback` | off | OPTIONAL — **landed** (§10.4.5) | emit a single container `replace` when the granular patch would exceed the container's own serialized size (§5.9) |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§10.4.3) | override the auto-detection candidate list (§4.5.5) |
 
 `10.4.1` **Granular LCS descent (§5.5.4.2) is NOT a capability** — it is normative default
@@ -1274,6 +1329,20 @@ so every object array keeps its base strategy (`lcs`/`unique`). A `primaryKeyMap
 before auto-detection and bypasses the candidate list, so it wins under any list, empty included
 (§4.5.3). Only strategy **selection** is affected; the diff/apply algorithms and every emitted op
 are unchanged given the resulting plan.
+
+`10.4.5` **`wholesaleReplaceFallback` (F24).** Surfaced as the `JsonSchemaPatcher` constructor
+option `wholesaleReplaceFallback?: boolean`, **default `false`** (byte-for-byte identical to the
+pre-capability output). When `true`, every array-diff call site (§5.9) buffers its would-be op list,
+applies the pinned byte estimate (§5.9.2), and — if the estimate exceeds the array's own serialized
+size (§5.9.3) — discards it in favor of a single whole-array `replace`. Measured on the audit's
+12-item/~7.2 KB complete-rewrite repro shape (every element's LCS-comparable fields differ, so
+Myers finds no common elements and the granular stream is a full remove-all + add-all): the
+`includeOldValue:false` granular stream is well over 2x the array's own bytes, while the wholesale
+replace is capped at exactly the new array's bytes (plus the fixed op envelope); the decision is
+strict — a small diff's estimate (typically a few touched fields) stays far under the whole array's
+own size and never triggers. Composes with `emitMoves` (the estimate is computed on the
+moves-emitted stream, §5.9.5) and with `includeOldValue` (governs whether the wholesale replace
+itself carries `oldValue`, and is folded into the estimate for the discarded stream via §5.9.2).
 
 ### 10.5 Vector provenance
 
