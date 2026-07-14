@@ -4,6 +4,7 @@ import {
   diffArrayByPrimaryKey,
   diffArrayLCS,
   diffArrayUnique,
+  diffArrayUniqueMoves,
   type ModificationCallback,
 } from "./core/arrayDiffAlgorithms";
 import type { ArrayPlan, Plan } from "./core/buildPlan";
@@ -368,6 +369,21 @@ export class JsonSchemaPatcher {
     }
 
     if (strategy === "unique" && checkArraysUnique(arr1, arr2)) {
+      // emitMoves (SPEC §5.8.6 / F23): a multiset-equal reorder becomes `move`s;
+      // a non-multiset-equal pair falls through to positional replaces (§5.6).
+      if (
+        this.emitMoves &&
+        diffArrayUniqueMoves(
+          arr1,
+          arr2,
+          path,
+          patches,
+          createModificationCallback([]),
+          this.includeOldValue
+        )
+      ) {
+        return;
+      }
       diffArrayUnique(arr1, arr2, path, patches, this.includeOldValue);
       return;
     }

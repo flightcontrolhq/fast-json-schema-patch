@@ -846,6 +846,51 @@ export function diffArrayUnique(
   }
 }
 
+/**
+ * unique-strategy emitMoves path (F23, SPEC §5.8.6). The caller guarantees the
+ * §5.4.4 gate passed (equal length, no duplicates in either side — so values are
+ * primitives that form a bijection candidate by value). If the two arrays are
+ * **multiset-equal** (a pure permutation), emit the reorder as `move`s via the
+ * shared staged emitter and return `true`. Otherwise return `false` so the
+ * caller keeps the §5.6 positional-replace emission (moves buy nothing when the
+ * value sets differ). All matched pairs are `changed:false` (equal values), so
+ * `onModification` is never invoked here.
+ */
+export function diffArrayUniqueMoves(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  path: string,
+  patches: Operation[],
+  onModification: ModificationCallback,
+  includeOldValue: boolean = true
+): boolean {
+  // Values are primitives (unique strategy is only assigned to primitive item
+  // schemas), so the raw value is a sound Map key that distinguishes 1 from "1".
+  const idxOf = new Map<JsonValue, number>();
+  for (let i = 0; i < arr2.length; i++) idxOf.set(arr2[i] as JsonValue, i);
+
+  const matched: MatchedPair[] = new Array(arr1.length);
+  for (let i = 0; i < arr1.length; i++) {
+    const tgt = idxOf.get(arr1[i] as JsonValue);
+    // A missing value means the sets differ -> not a pure permutation.
+    if (tgt === undefined) return false;
+    matched[i] = { src: i, tgt, changed: false };
+  }
+
+  emitArrayMovesPatch(
+    arr1,
+    arr2,
+    path,
+    patches,
+    matched,
+    [],
+    [],
+    onModification,
+    includeOldValue
+  );
+  return true;
+}
+
 export function checkArraysUnique(arr1: JsonArray, arr2: JsonArray): boolean {
   const len1 = arr1.length;
   const len2 = arr2.length;

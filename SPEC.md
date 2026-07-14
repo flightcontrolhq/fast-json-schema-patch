@@ -706,6 +706,11 @@ as equal-length positional replacement.)
 `5.6.2` **Unequal lengths fall back to `lcs`** (§5.4.4 gate fails → §5.5). Set-diff / move
 semantics for `unique` are **not** specified in spec-v1.
 
+`5.6.3` **`emitMoves` (§5.8.6).** With the optional `emitMoves` capability on, a **multiset-equal**
+(pure-permutation) unique array is emitted as `move`s instead of positional replaces (a 50-element
+rotation drops from 50 replaces to one move); a non-multiset-equal pair keeps the §5.6.1 positional
+replaces. Default output (capability off) is unchanged.
+
 ### 5.7 Emission-order guarantees (normative)
 
 `5.7.1` Ops are emitted in **document order** and are correct **only under strict sequential

@@ -200,3 +200,91 @@ describe("emitMoves LCS relocations (F22, SPEC §5.8.5)", () => {
     }
   });
 });
+
+describe("emitMoves unique reorders (F23, SPEC §5.8.6)", () => {
+  const uniqueSchema = {
+    type: "object",
+    properties: { tags: { type: "array", items: { type: "string" } } },
+  };
+  const plan = () => buildPlan({ schema: uniqueSchema });
+
+  test("plan assigns the unique strategy", () => {
+    expect(plan().get("/tags")?.strategy).toBe("unique");
+  });
+
+  test("50-element rotation is ONE move, not 50 replaces", () => {
+    const tags = Array.from({ length: 50 }, (_, i) => `s${i}`);
+    const original = { tags };
+    const modified = { tags: [...tags.slice(1), tags[0]!] };
+
+    const off = new JsonSchemaPatcher({ plan: plan() }).execute({
+      original,
+      modified,
+    });
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+
+    // Default: 50 positional replaces. emitMoves: a single move.
+    expect(off.filter((o) => o.op === "replace").length).toBe(50);
+    expect(on.filter((o) => o.op === "move").length).toBe(1);
+    expect(on.length).toBe(1);
+    expect(JSON.stringify(on).length).toBeLessThan(
+      JSON.stringify(off).length / 10
+    );
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("non-multiset-equal unique arrays keep positional replaces", () => {
+    // Same length, unique, but value sets differ -> not a pure permutation.
+    const original = { tags: ["a", "b", "c"] };
+    const modified = { tags: ["a", "z", "c"] };
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    expect(on).toEqual([
+      { op: "replace", path: "/tags/1", value: "z", oldValue: "b" },
+    ]);
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("default-off unique output is byte-stable", () => {
+    const original = { tags: ["a", "b", "c", "d", "e"] };
+    const modified = { tags: ["e", "a", "b", "c", "d"] };
+    const omitted = new JsonSchemaPatcher({ plan: plan() }).execute({
+      original,
+      modified,
+    });
+    const explicitFalse = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: false,
+    }).execute({ original, modified });
+    expect(stableStringify(omitted)).toBe(stableStringify(explicitFalse));
+  });
+
+  test("randomized unique-permutation fuzz round-trips through both appliers", () => {
+    let seed = 999;
+    const rnd = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    for (let iter = 0; iter < 2000; iter++) {
+      const n = 1 + Math.floor(rnd() * 12);
+      const base = Array.from({ length: n }, (_, i) => `v${i}`);
+      const shuffled = [...base];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(rnd() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+      }
+      const original = { tags: base };
+      const modified = { tags: shuffled };
+      const on = new JsonSchemaPatcher({
+        plan: plan(),
+        emitMoves: true,
+      }).execute({ original, modified });
+      assertRoundTrip(original, on, modified);
+    }
+  });
+});
