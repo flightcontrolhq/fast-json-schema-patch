@@ -183,12 +183,18 @@ These are limits of the JSON vector medium, not of the spec. A second
 implementation must handle them out of band:
 
 1. **Object key order is load-bearing but not JSON-guaranteed.** The generator's
-   op **ordering** depends on `original`/`modified` object-member insertion
-   order (§2.3, §5.2.2). The vector files preserve the authored key order, but a
+   op **ordering** follows each object's **pinned member order** (§2.3.2,
+   §5.2.2): ECMAScript `[[OwnPropertyKeys]]` — **integer-like keys first in
+   ascending numeric order, then all remaining keys in insertion order**, where
+   integer-like means a canonical decimal string for `0 … 2^32 − 2` (no leading
+   zeros, no sign; `"2"` is integer-like, `"02"` is not). This is **not** pure
+   insertion order: an object authored `{b, "10", "2", a}` is visited as
+   `"2", "10", b, a`. The vector files preserve the authored key order, but a
    consumer whose JSON decoder does not preserve object key order (e.g. Go
    `map[string]any`) will reorder members and can emit ops in a different order,
    failing the §10.3.2 ordering check. Read the vectors with an **order-
-   preserving** decoder (§2.3.2).
+   preserving** decoder **and** re-apply the integer-like-first rule to match the
+   pinned order (§2.3.2).
 2. **`-0` and `1.0` are not representable in JSON text.** `-0` serializes as `0`
    and `1.0` as `1`, so the "equal number" vectors (`num-neg-zero-vs-zero-equal`,
    `num-1-vs-1.0-equal`) degenerate to `0`-vs-`0` / `1`-vs-`1` in the file. They

@@ -1,0 +1,82 @@
+[
+  {
+    "name": "keyorder-integer-like-ascending-first",
+    "comment": "§2.3.2/§5.2.2: object keys {b,\"10\",\"2\",a} all changed — pinned [[OwnPropertyKeys]] order emits integer-like keys ascending (/2,/10) BEFORE the remaining keys in insertion order (/b,/a); pure insertion order (/b,/10,/2,/a) fails §10.3.2",
+    "original": {
+      "2": 1,
+      "10": 1,
+      "b": 1,
+      "a": 1
+    },
+    "modified": {
+      "2": 2,
+      "10": 2,
+      "b": 2,
+      "a": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/2",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "replace",
+        "path": "/10",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "keyorder-modified-only-integer-like",
+    "comment": "§5.2.2: original keys {b,\"5\"} visit as /5,/b (integer-like first); modified-only keys {\"3\",z} then visit as /3,/z (integer-like first) — two passes each in pinned order",
+    "original": {
+      "5": 1,
+      "b": 1
+    },
+    "modified": {
+      "3": 9,
+      "5": 2,
+      "b": 2,
+      "z": 9
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/5",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/3",
+        "value": 9
+      },
+      {
+        "op": "add",
+        "path": "/z",
+        "value": 9
+      }
+    ]
+  }
+]

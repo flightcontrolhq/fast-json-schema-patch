@@ -713,6 +713,14 @@ const PK_ID_ANY = { type: "object", properties: { users: { type: "array", items:
 D("primary-key-numeric-string", { name: "pk-numeric-to-string-key-is-distinct-item", comment: "§5.4.1.5: numeric key 1 and string key \"1\" are distinct (no coercion) — the numeric-keyed item is removed and the string-keyed item appended, never matched as an in-place edit", schema: PK_ID_ANY, planOpts: { primaryKeyMap: { "/users": "id" } }, original: { users: [{ id: 1, name: "A" }] }, modified: { users: [{ id: "1", name: "A" }] }, roundtrip: "multiset" });
 D("primary-key-numeric-string", { name: "pk-numeric-and-string-key-coexist-reorder-noop", comment: "§5.4.1.5/§7.2.3: numeric 1 and string \"1\" coexist as distinct keys; a pure reorder of the two deep-equal-content items is order-insensitive under the default contract -> zero ops", schema: PK_ID_ANY, planOpts: { primaryKeyMap: { "/users": "id" } }, original: { users: [{ id: 1, name: "X" }, { id: "1", name: "X" }] }, modified: { users: [{ id: "1", name: "X" }, { id: 1, name: "X" }] }, roundtrip: "multiset" });
 
+// --- diff/key-order: §2.3.2/§5.2.2 pinned member order — integer-like keys ascending FIRST, then insertion order ---
+// Keys authored OUT of numeric order and interleaved with string keys. A pure-insertion-order
+// implementation would emit /b,/10,/2,/a and FAIL the §10.3.2 ordering check; the pinned order is
+// integer-like ascending (/2,/10) then remaining keys in insertion order (/b,/a).
+D("key-order", { name: "keyorder-integer-like-ascending-first", comment: "§2.3.2/§5.2.2: object keys {b,\"10\",\"2\",a} all changed — pinned [[OwnPropertyKeys]] order emits integer-like keys ascending (/2,/10) BEFORE the remaining keys in insertion order (/b,/a); pure insertion order (/b,/10,/2,/a) fails §10.3.2", schema: null, original: { b: 1, "10": 1, "2": 1, a: 1 }, modified: { b: 2, "10": 2, "2": 2, a: 2 } });
+// modified-only integer-like keys also obey the pinned order within the second pass.
+D("key-order", { name: "keyorder-modified-only-integer-like", comment: "§5.2.2: original keys {b,\"5\"} visit as /5,/b (integer-like first); modified-only keys {\"3\",z} then visit as /3,/z (integer-like first) — two passes each in pinned order", schema: null, original: { b: 1, "5": 1 }, modified: { b: 2, "5": 2, "3": 9, z: 9 } });
+
 //<<THEMES>>
 
 // ===========================================================================

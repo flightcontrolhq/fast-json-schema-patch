@@ -103,15 +103,24 @@ regardless of source text.
 
 ### 2.3 Object key order
 
-`2.3.1` Object member **insertion order** is significant to the *generator only*: it fixes the
+`2.3.1` Object member **iteration order** is significant to the *generator only*: it fixes the
 order in which object members are visited and therefore the order in which per-member ops are
 emitted (§5.2.3, §5.7). It is **not** significant to *equality* (§2.4.2) nor to *apply* (§8).
 
-`2.3.2` The reference uses JavaScript own-key insertion order (`Object.keys`). A conforming
-generator MUST reproduce this order. Because a plain hash map (e.g. Go `map[string]any`) does not
-preserve insertion order, a conforming generator implemented in such a language **MUST** use an
-order-preserving JSON representation (an ordered decoder, or a parallel key-order slice) for the
-documents it diffs. Apply/invert (§8, §9) do not depend on key order.
+`2.3.2` **Pinned member order (normative).** The reference visits an object's members in
+ECMAScript `[[OwnPropertyKeys]]` order — equivalently `Object.keys` — which is **not** pure
+insertion order: **all integer-like keys first, in ascending numeric order, followed by every
+remaining key in insertion order.** A key is **integer-like** iff it is the *canonical* decimal
+string of an array index in the range `0 … 2^32 − 2`; canonical means the exact string `ToString`
+would produce — no leading zeros (`"0"` itself is integer-like, `"02"` is not), no sign (`"+2"`,
+`"-0"` are not), and no other numeric form (`"2.0"`, `"1e1"`, `" 2"` are not). Thus `"2"` and
+`"10"` are integer-like and sort ahead of, and numerically among, each other (`"2"` before
+`"10"`), while `"b"`, `"02"`, `"-1"`, and `"3.5"` are ordinary keys kept in insertion order after
+all integer-like keys. A conforming generator MUST reproduce this order. Because a plain hash map
+(e.g. Go `map[string]any`) preserves **neither** insertion order **nor** the integer-like-first
+rule, a conforming generator implemented in such a language **MUST** reconstruct both: read the
+document with an order-preserving decoder to recover insertion order, then apply the
+integer-like-ascending-first reordering above. Apply/invert (§8, §9) do not depend on key order.
 
 ### 2.4 Equality
 
@@ -400,12 +409,15 @@ out with no differing leaf.
 is an own member with a non-`undefined` value.
 
 `5.2.2` **Key visitation order.** Visit the union of `original`'s keys and `modified`'s keys as:
-**all of `original`'s keys in `original` insertion order, followed by the keys present only in
-`modified` in `modified` insertion order.** (The reference implements this as two passes —
-`original`'s own keys, then `modified`'s own keys skipping any already own-present on `original`
-— which is output-equivalent to, but allocates less than, forming
-`new Set([...keys(original), ...keys(modified)])` and iterating it; F36.) A conforming generator
-MUST reproduce this visitation order (§2.3.2).
+**all of `original`'s keys in `original`'s pinned member order (§2.3.2), followed by the keys
+present only in `modified` in `modified`'s pinned member order (§2.3.2).** Because the pinned
+order places integer-like keys ascending-first, this means the integer-like keys of `original`
+(ascending) precede its ordinary keys (insertion order), and likewise for the `modified`-only
+keys. (The reference implements this as two passes — `Object.keys(original)`, then
+`Object.keys(modified)` skipping any already own-present on `original` — each of which yields
+`[[OwnPropertyKeys]]` order natively; this is output-equivalent to, but allocates less than,
+forming `new Set([...keys(original), ...keys(modified)])` and iterating it; F36.) A conforming
+generator MUST reproduce this visitation order (§2.3.2).
 
 `5.2.3` For each visited `key`, let `childPath = path + "/" + escape(key)` (§3.2):
 
