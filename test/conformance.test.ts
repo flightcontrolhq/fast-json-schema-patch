@@ -54,7 +54,6 @@ import type { JsonValue, Operation } from "../src/types";
 // The engine agent MUST delete each name below in the SAME commit that fixes
 // the corresponding defect, turning the skip into a live assertion.
 const KNOWN_FAILING = new Set<string>([
-	"kindmismatch-empty-array-vs-empty-object-not-equal", // D1
 	"ptr-replace-no-leading-slash-invalid", // D2
 	"ptr-add-no-leading-slash-invalid", // D2
 	"ptr-move-from-no-leading-slash-invalid", // D2

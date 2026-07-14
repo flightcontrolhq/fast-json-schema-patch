@@ -1,6 +1,46 @@
 import { describe, test, expect } from "bun:test";
-import { deepEqual, deepEqualMemo } from "../src/performance/deepEqual";
-import { buildPlan, JsonSchemaPatcher } from "../src/index";
+import {
+  deepEqual,
+  deepEqualMemo,
+  deepEqualSchemaAware,
+} from "../src/performance/deepEqual";
+import { applyPatch, buildPlan, JsonSchemaPatcher } from "../src/index";
+
+// D1 (spec-v1-rc external-review defect round): deepEqualMemo had an empty-keys
+// fast path (`keysA.length === 0 && keysB.length === 0 -> true`) that ran BEFORE
+// any array-vs-object kind check, so deepEqualMemo([], {}) wrongly returned true
+// while the base deepEqual correctly returned false. Because diffArrayLCS interns
+// window elements through the memoised comparator, {x:[[],{}]} -> {x:[{},[]]}
+// then silently emitted ZERO ops. SPEC §2.4.1/§2.4.2: [] is never equal to {}.
+describe("D1 array-vs-object kind check precedes any empty-keys fast path", () => {
+  test("deepEqualMemo([], {}) is false (was the probe's silent true)", () => {
+    expect(deepEqualMemo([], {})).toBe(false);
+    expect(deepEqualMemo({}, [])).toBe(false);
+  });
+
+  test("deepEqualMemo still equates two empty objects and two empty arrays", () => {
+    expect(deepEqualMemo({}, {})).toBe(true);
+    expect(deepEqualMemo([], [])).toBe(true);
+  });
+
+  test("deepEqualSchemaAware never took the empty fast path, but stays correct", () => {
+    expect(deepEqualSchemaAware([], {})).toBe(false);
+    expect(deepEqualSchemaAware({}, [])).toBe(false);
+    expect(deepEqualSchemaAware({}, {})).toBe(true);
+    expect(deepEqualSchemaAware([], [])).toBe(true);
+  });
+
+  test("end-to-end LCS swap {x:[[],{}]} -> {x:[{},[]]} emits ops, not zero", () => {
+    const patcher = new JsonSchemaPatcher({ plan: new Map() });
+    const patch = patcher.execute({
+      original: { x: [[], {}] },
+      modified: { x: [{}, []] },
+    });
+    expect(patch.length).toBeGreaterThan(0);
+    // Applying the emitted patch must reconstruct the modified document.
+    expect(applyPatch({ x: [[], {}] }, patch)).toEqual({ x: [{}, []] });
+  });
+});
 
 // F16: Non-JSON inputs are documented as out of scope (SPEC §2.1.2), but a
 // cheap guard prevents the worst silent-data-loss failure mode: two

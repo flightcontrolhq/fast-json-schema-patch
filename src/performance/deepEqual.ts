@@ -113,6 +113,15 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
     return deepEqual(a, b)
   }
 
+  // Array-vs-object kind check MUST precede any own-key fast path (D1, SPEC
+  // §2.4.1/§2.4.2). An array and an object are never equal regardless of
+  // members; without this the empty-keys fast path below would treat [] === {}
+  // (both have zero own keys), and — via diffArrayLCS's interning/trim path —
+  // silently emit zero ops for a genuine [] -> {} change.
+  const aArr = Array.isArray(a)
+  const bArr = Array.isArray(b)
+  if (aArr !== bArr) return false
+
   // Fast path for empty objects
   const keysA = Object.keys(a)
   const keysB = Object.keys(b)
@@ -120,7 +129,7 @@ export function deepEqualMemo(obj1: unknown, obj2: unknown, hotFields: string[] 
   if (keysA.length !== keysB.length) return false
 
   // Skip expensive hashing for very simple objects (≤ 3 keys)
-  const shouldHash = hotFields.length > 0 && !Array.isArray(a) && !Array.isArray(b) && keysA.length > 3
+  const shouldHash = hotFields.length > 0 && !aArr && !bArr && keysA.length > 3
   
   if (shouldHash) {
     // Only hash if object is complex enough to benefit
