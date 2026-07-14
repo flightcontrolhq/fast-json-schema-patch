@@ -59,6 +59,29 @@ function fail(message: string, code: PatchErrorCode, op: Operation | undefined, 
 }
 
 /**
+ * Tier-1 required-field gate (SPEC §8.3.5, RFC 6902 §4.6, D4). `value` is a
+ * REQUIRED member of add/replace AND `test` — a `test` with no `value` is
+ * malformed, NOT a comparison against `undefined`/`null`. `from` is required on
+ * move/copy. Presence is decided by the member being present in the op object
+ * (`"value" in op`), so `{op:"test",path:"/a",value:null}` is VALID (tests
+ * against null) while an ABSENT `value` is INVALID_OPERATION. This is tier 1 in
+ * the §8.3.5 precedence order: it MUST fire before the tier-2 pointer-syntax
+ * gate and the tier-3 read-side existence check, so a `test` missing `value` is
+ * INVALID_OPERATION even when its path also does not exist or is malformed.
+ */
+function assertRequiredFields(op: Operation, opIndex: number): void {
+  if (op.op === "add" || op.op === "replace" || op.op === "test") {
+    if (!("value" in op)) {
+      fail(`"${op.op}" operation is missing "value"`, "INVALID_OPERATION", op, opIndex)
+    }
+  } else if (op.op === "move" || op.op === "copy") {
+    if (op.from === undefined) {
+      fail(`"${op.op}" operation is missing "from"`, "INVALID_OPERATION", op, opIndex)
+    }
+  }
+}
+
+/**
  * Whole-pointer syntax gate (RFC 6901 §3, SPEC §3.7, D2). A JSON Pointer is
  * either the empty string (the root) or a string that BEGINS with "/". A
  * non-empty pointer without a leading "/" is a syntax error and MUST be
@@ -231,12 +254,15 @@ function applyOperation(
   cloned: WeakSet<object>,
   options: ApplyPatchOptions,
 ): JsonValue {
+  // §8.3.5 error precedence: tier 1 (missing required field) precedes tier 2
+  // (pointer/index syntax) precedes tier 3 (existence). Required-field checks
+  // therefore run BEFORE the pointer-syntax gate.
+  assertRequiredFields(op, opIndex)
   assertValidPointer(op.path, op, opIndex)
   const parts = splitPath(op.path)
 
   switch (op.op) {
     case "add": {
-      if (!("value" in op)) fail(`"add" operation is missing "value"`, "INVALID_OPERATION", op, opIndex)
       const value = options.cloneValues ? deepCloneValue(op.value as JsonValue) : (op.value as JsonValue)
       if (parts.length === 0) return value
 
@@ -273,7 +299,6 @@ function applyOperation(
     }
 
     case "replace": {
-      if (!("value" in op)) fail(`"replace" operation is missing "value"`, "INVALID_OPERATION", op, opIndex)
       const value = options.cloneValues ? deepCloneValue(op.value as JsonValue) : (op.value as JsonValue)
       if (parts.length === 0) return value
 
@@ -297,24 +322,26 @@ function applyOperation(
     }
 
     case "move": {
-      if (op.from === undefined) fail(`"move" operation is missing "from"`, "INVALID_OPERATION", op, opIndex)
-      assertValidPointer(op.from, op, opIndex)
-      const fromParts = splitPath(op.from)
+      // `from` presence enforced by assertRequiredFields (tier 1) above.
+      const from = op.from as string
+      assertValidPointer(from, op, opIndex)
+      const fromParts = splitPath(from)
       if (fromParts.length < parts.length && fromParts.every((part, i) => part === parts[i])) {
-        fail(`"move" cannot move "${op.from}" into its own child "${op.path}"`, "INVALID_OPERATION", op, opIndex)
+        fail(`"move" cannot move "${from}" into its own child "${op.path}"`, "INVALID_OPERATION", op, opIndex)
       }
       const { exists, value } = getAtPath(root, fromParts)
-      if (!exists) fail(`"move" source "${op.from}" does not exist`, "PATH_UNRESOLVABLE", op, opIndex)
+      if (!exists) fail(`"move" source "${from}" does not exist`, "PATH_UNRESOLVABLE", op, opIndex)
 
-      const afterRemove = applyOperation(root, { op: "remove", path: op.from }, opIndex, cloned, options)
+      const afterRemove = applyOperation(root, { op: "remove", path: from }, opIndex, cloned, options)
       return applyOperation(afterRemove, { op: "add", path: op.path, value }, opIndex, cloned, options)
     }
 
     case "copy": {
-      if (op.from === undefined) fail(`"copy" operation is missing "from"`, "INVALID_OPERATION", op, opIndex)
-      assertValidPointer(op.from, op, opIndex)
-      const { exists, value } = getAtPath(root, splitPath(op.from))
-      if (!exists) fail(`"copy" source "${op.from}" does not exist`, "PATH_UNRESOLVABLE", op, opIndex)
+      // `from` presence enforced by assertRequiredFields (tier 1) above.
+      const from = op.from as string
+      assertValidPointer(from, op, opIndex)
+      const { exists, value } = getAtPath(root, splitPath(from))
+      if (!exists) fail(`"copy" source "${from}" does not exist`, "PATH_UNRESOLVABLE", op, opIndex)
       // Deep-copy so the result never aliases another location in the document.
       const copied = deepCloneValue(value as JsonValue)
       return applyOperation(root, { op: "add", path: op.path, value: copied }, opIndex, cloned, options)

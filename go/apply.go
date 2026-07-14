@@ -197,6 +197,15 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		return applyOp(root, &Operation{Op: OpAdd, Path: op.Path, Value: copied, HasValue: true}, idx, opts)
 
 	case OpTest:
+		// D4 (SPEC §8.3/§8.3.5, RFC 6902 §4.6): `test` MUST carry `value`. An
+		// ABSENT value is a tier-1 required-field failure -> INVALID_OPERATION,
+		// evaluated BEFORE the tier-3 read-side existence check. A value present
+		// as JSON null (HasValue true) is VALID and tests against null — the
+		// previous code omitted this check, so a value-less test against a null
+		// target wrongly PASSED (absent Value defaulted to nil == null).
+		if !op.HasValue {
+			return nil, opErr(CodeInvalidOperation, `"test" is missing "value"`, idx, op)
+		}
 		val, exists := getAtPath(root, parts)
 		if !exists {
 			return nil, opErr(CodePathUnresolvable, `"test" path does not exist`, idx, op)

@@ -106,6 +106,52 @@ describe("applyPatch - RFC 6902 Appendix A", () => {
   })
 })
 
+// D4 (spec-v1-rc external-review defect round, SPEC §8.3/§8.3.5, RFC 6902 §4.6):
+// `test` MUST carry a `value` member. A `test` with NO `value` is a tier-1
+// required-field failure -> INVALID_OPERATION, evaluated BEFORE the tier-2
+// pointer-syntax gate and the tier-3 read-side existence check. The presence
+// distinction matters: `value: null` is PRESENT (a valid test against null),
+// only an ABSENT `value` is malformed.
+describe("D4 test op requires a value member", () => {
+  const expectCode = (fn: () => unknown, code: string, index = 0) => {
+    try {
+      fn()
+      expect.unreachable()
+    } catch (error) {
+      expect(error).toBeInstanceOf(JsonPatchError)
+      expect((error as JsonPatchError).code).toBe(code as never)
+      expect((error as JsonPatchError).operationIndex).toBe(index)
+    }
+  }
+
+  test("missing value against a null target is INVALID_OPERATION, not a pass", () => {
+    expectCode(() => applyPatch({ a: null }, [{ op: "test", path: "/a" }]), "INVALID_OPERATION")
+  })
+  test("missing value against a present target is INVALID_OPERATION, not TEST_FAILED", () => {
+    expectCode(() => applyPatch({ a: 1 }, [{ op: "test", path: "/a" }]), "INVALID_OPERATION")
+  })
+  test("missing value (tier 1) precedes read-side non-existence (tier 3)", () => {
+    // {op:test,path:/missing} on {a:1}: PATH_UNRESOLVABLE would be tier 3, but
+    // the missing-value tier-1 failure wins.
+    expectCode(() => applyPatch({ a: 1 }, [{ op: "test", path: "/missing" }]), "INVALID_OPERATION")
+  })
+  test("missing value (tier 1) precedes malformed-pointer (tier 2)", () => {
+    expectCode(() => applyPatch({ a: 1 }, [{ op: "test", path: "no-slash" }]), "INVALID_OPERATION")
+  })
+
+  test("a present null value is VALID and tests against null", () => {
+    expect(applyPatch({ a: null }, [{ op: "test", path: "/a", value: null }])).toEqual({ a: null })
+    // present null vs a non-null target -> a genuine value mismatch (TEST_FAILED),
+    // proving the null was actually compared, not treated as absent.
+    expectCode(() => applyPatch({ a: 1 }, [{ op: "test", path: "/a", value: null }]), "TEST_FAILED")
+  })
+
+  test("a present non-null value still tests normally", () => {
+    expect(applyPatch({ a: 1 }, [{ op: "test", path: "/a", value: 1 }])).toEqual({ a: 1 })
+    expectCode(() => applyPatch({ a: 1 }, [{ op: "test", path: "/a", value: 2 }]), "TEST_FAILED")
+  })
+})
+
 describe("applyPatch - paths and errors", () => {
   test("replace at root replaces whole document", () => {
     expect(applyPatch({ a: 1 }, [{ op: "replace", path: "", value: [1, 2] }])).toEqual([1, 2])

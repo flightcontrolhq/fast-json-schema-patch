@@ -41,29 +41,6 @@ import {
 import type { JsonValue, Operation } from "../src/types";
 
 // ---------------------------------------------------------------------------
-// KNOWN-FAILING-UNTIL-D-FIXES (spec-v1-rc external-review defect round).
-// These vectors pin the CORRECTED post-fix behavior for defects D1/D2/D4 (see
-// SPEC.md §1.3 and spec/vectors/generate.ts). They were committed with the
-// spec+vector unit, BEFORE the TS engine fixes land, so they legitimately fail
-// against the still-buggy reference. Each is skipped ONLY until its fix commit:
-//   - D1 (diff): src/performance/deepEqual.ts deepEqualMemo — []/{} empty-
-//     container fast path treats [] === {} (SPEC §2.4.1/§2.4.2).
-//   - D2 (apply): splitPath / pointer parse — a non-empty pointer without a
-//     leading "/" aliases to the root instead of INVALID_POINTER (SPEC §3.7).
-//   - D4 (apply): `test` op accepts a missing `value` (SPEC §8.3/§8.3.5).
-// The engine agent MUST delete each name below in the SAME commit that fixes
-// the corresponding defect, turning the skip into a live assertion.
-const KNOWN_FAILING = new Set<string>([
-	"test-missing-value-null-target-invalid", // D4
-	"test-missing-value-present-target-invalid", // D4
-	"test-missing-value-absent-target-invalid", // D4
-]);
-/** test() for a normal vector; test.skip() for a KNOWN-FAILING one (above). */
-function vectorTest(name: string) {
-	return KNOWN_FAILING.has(name) ? test.skip : test;
-}
-
-// ---------------------------------------------------------------------------
 // JSON-value equality helpers (§2.4.1), and the §10.3.1 multiset canonicalizer.
 // Deliberately independent of the reference's memoised deepEqual (that's part
 // of what's under test) — mirrors spec/vectors/generate.ts exactly so this
@@ -273,7 +250,7 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 	});
 
 	for (const { vector } of diffVectors) {
-		vectorTest(vector.name)(vector.name, () => {
+		test(vector.name, () => {
 			const planOpts = vector.options ?? {};
 			const plan: Plan = vector.schema
 				? buildPlan({
@@ -329,7 +306,7 @@ describe("conformance: apply vectors (SPEC §10.2/§10.2.1)", () => {
 	});
 
 	for (const { vector } of applyVectors) {
-		vectorTest(vector.name)(vector.name, () => {
+		test(vector.name, () => {
 			const hasExpected = vector.expected !== undefined;
 			const hasError = vector.error !== undefined;
 			if (hasExpected === hasError) {

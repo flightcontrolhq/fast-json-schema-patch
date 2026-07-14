@@ -121,3 +121,38 @@ func TestApplyErrorSentinels(t *testing.T) {
 		})
 	}
 }
+
+// TestApplyTestRequiresValue pins D4 (SPEC §8.3/§8.3.5, RFC 6902 §4.6): `test`
+// MUST carry a `value` member. An ABSENT value is INVALID_OPERATION at tier 1
+// (before the read-side existence check); a value present as JSON null is VALID
+// and tests against null. The Go applier previously omitted this check, so a
+// value-less test against a null target wrongly PASSED.
+func TestApplyTestRequiresValue(t *testing.T) {
+	t.Run("absent value against null target is INVALID_OPERATION", func(t *testing.T) {
+		_, err := applyJSON(t, `{"a":null}`, `[{"op":"test","path":"/a"}]`, ApplyOptions{})
+		if !errors.Is(err, ErrInvalidOperation) {
+			t.Errorf("err = %v, want ErrInvalidOperation", err)
+		}
+	})
+	t.Run("absent value (tier 1) precedes non-existence (tier 3)", func(t *testing.T) {
+		_, err := applyJSON(t, `{"a":1}`, `[{"op":"test","path":"/missing"}]`, ApplyOptions{})
+		if !errors.Is(err, ErrInvalidOperation) {
+			t.Errorf("err = %v, want ErrInvalidOperation", err)
+		}
+	})
+	t.Run("present null value tests against null and passes", func(t *testing.T) {
+		got, err := applyJSON(t, `{"a":null}`, `[{"op":"test","path":"/a","value":null}]`, ApplyOptions{})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got != `{"a":null}` {
+			t.Errorf("result = %s, want {\"a\":null}", got)
+		}
+	})
+	t.Run("present null value against a non-null target is TEST_FAILED, not a pass", func(t *testing.T) {
+		_, err := applyJSON(t, `{"a":1}`, `[{"op":"test","path":"/a","value":null}]`, ApplyOptions{})
+		if !errors.Is(err, ErrTestFailed) {
+			t.Errorf("err = %v, want ErrTestFailed", err)
+		}
+	})
+}

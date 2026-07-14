@@ -183,28 +183,6 @@ commit the vector diff alongside the code change. An **unintended** change shows
 up as a vector diff on a run where none was expected — treat that as a
 regression.
 
-### Pinning behavior before its fix (`expectRaw` / `pendingFix`)
-
-Sometimes a vector must pin the **corrected** behavior of a defect **before** the
-engine fix lands (so the spec+vector unit and the fix are separate commits). The
-generator cannot derive such a vector from the reference (the reference is still
-buggy), so two generation-time escape hatches exist:
-
-- **diff `expectRaw`** — a hand-authored `expectedPatch` used verbatim instead of
-  running the differ. The round-trip self-check still runs against it (a wrong
-  hand-authored patch is still caught), so it must genuinely reconstruct
-  `modified`. Used by `diff/kind-mismatch.json` (D1). Probe the fixed engine to
-  capture the exact op sequence; do **not** eyeball it.
-- **apply `pendingFix`** — skips the self-check that re-runs the reference applier
-  against the vector's `error`/`expected` oracle (the buggy reference would throw
-  the wrong code, or not throw, aborting the run). Used by
-  `apply/malformed-pointer.json` (D2) and `apply/test-required-value.json` (D4).
-
-Neither flag is written to the wire record — they are generation-time only (like
-`DiffSpec.roundtrip`). Every such vector is listed in `KNOWN_FAILING` in
-`test/conformance.test.ts` so the suite stays green; the fix commit **deletes**
-its name there in the same change that makes the reference conform.
-
 ## Cross-language caveats (flagged for the Go gate)
 
 These are limits of the JSON vector medium, not of the spec. A second
