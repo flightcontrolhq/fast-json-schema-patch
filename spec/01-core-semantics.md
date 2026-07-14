@@ -1,13 +1,23 @@
 # fast-json-schema-patch — Core semantics (CORE)
 
-**Spec version:** `spec-v1-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
+**Spec version:** `spec-v2-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
 
 This document is the stable *what*: the data model, JSON Pointer usage, the plan/semantic
-model, the patch wire format and its extensions, apply semantics (errors and security),
-invert semantics, and the round-trip contracts — everything an applier or consumer needs.
-The deterministic generator profile is in [GEN](02-generator-profile.md); conformance and
-versioning in [CONF](03-conformance.md); non-normative history in [RATIONALE](04-rationale.md).
-Conformance language (RFC 2119) is defined in CONF §1.4.
+model, the **declared semantic topology model** (§8), the patch wire format and its extensions,
+apply semantics (errors and security), invert semantics, and the round-trip contracts —
+everything an applier or consumer needs. The deterministic generator profile is in
+[GEN](02-generator-profile.md); conformance and versioning in [CONF](03-conformance.md);
+non-normative history in [RATIONALE](04-rationale.md). Conformance language (RFC 2119) is
+defined in CONF §1.4.
+
+**spec-v2 in one paragraph.** spec-v2 adds a *declared semantic topology* layer (§8): a schema
+node MAY declare, via `x-schema-patch-*` extensions, that an array is a **sequence**, **set**,
+**map** (keyed by a composite tuple), or **atomic** container, and that an object is **granular**
+or **atomic**. A declared topology fixes the array/object's *identity relation* and therefore its
+*round-trip contract* (§8.9), and ALWAYS overrides primary-key auto-detection (§3.5) and
+`primaryKeyMap` (§3.4.3). **Absent every extension, behavior is byte-for-byte spec-v1** (the
+compatibility profile, §8.8): v1 documents and vectors remain valid. Declared topologies are the
+only way to reach `set`, `atomic`, order-significant or composite-key `map`, or atomic objects.
 
 ---
 
@@ -172,20 +182,29 @@ at diff time (GEN §4) matches.
 
 ```
 ArrayPlan = {
-  primaryKey:     string | null            // the key field, or null
-  strategy:       "primaryKey" | "unique" | "lcs"
+  primaryKey:     string | null            // the key field, or null (compat view; §8.3)
+  strategy:       "primaryKey" | "unique" | "lcs"   // compat algorithm selector (§8.8)
   requiredFields: Set<string>  (optional)  // item schema's required[]
   hashFields:     string[]     (optional)  // required + primitive-typed fields (prefilter hint)
   itemSchema:     Schema        (optional)  // NON-NORMATIVE: internal, never read at diff time
+  // spec-v2 declared-topology fields (§8), present iff an x-schema-patch-* topology is declared:
+  topology?:      "sequence" | "set" | "map" | "atomic"
+  keys?:          string[]      // map only: composite key tuple in DECLARED order (§8.4)
+  order?:         "significant" | "insignificant"    // map only; default "insignificant"
 }
-Plan = Map<documentPath, ArrayPlan>
+ObjectPlan = { granularity: "atomic" }    // spec-v2; registered ONLY for a declared-atomic object (§8.3)
+Plan = Map<documentPath, ArrayPlan | ObjectPlan>
 ```
 
 `3.1.1` `hashFields` and `itemSchema` are **non-normative optimization metadata**. `hashFields`
 is a prefilter hint only (GEN §4.4) and MUST be output-neutral; `itemSchema` is never consulted at
 diff time and MAY be omitted entirely. `primaryKey`, `strategy`, and `requiredFields` are the
-output-relevant fields; their derivation from a schema is directly falsifiable via the
-plan-snapshot vector format (CONF §7).
+output-relevant compatibility fields; their derivation from a schema is directly falsifiable via the
+plan-snapshot vector format (CONF §7). **The spec-v2 fields `topology`, `keys`, `order`
+(ArrayPlan) and `granularity` (ObjectPlan) are output-relevant when present** (§8.3): they are
+populated only when a node declares an `x-schema-patch-*` topology, and they then govern dispatch
+(GEN §11) over the compat `strategy`. Absent a declaration they are omitted and the entry is
+identical to a spec-v1 `ArrayPlan` — so every v1 plan-snapshot vector remains valid (CONF §7.1).
 
 ### 3.2 `buildPlan` inputs
 
@@ -248,6 +267,15 @@ cycle guard treats a re-encountered node as `undefined`.
 
 Given an array node with resolved item schema `itemsSchema` (if `items` is a `$ref`, it is
 resolved once per §3.3.4; if resolution fails, the unresolved `items` is used):
+
+`3.4.0` **Declared topology short-circuit (spec-v2).** If the array node carries an
+`x-schema-patch-topology` extension (§8.2), the plan's declared-topology fields are set from it
+(§8.3) and that topology **governs dispatch** (GEN §11), overriding §3.4.2–§3.5 and any
+`primaryKeyMap` entry. The `strategy`/`primaryKey` compat fields are still filled to the
+topology's compatibility view (§8.3) for introspection, but a declared topology is authoritative.
+An `atomic` array node **prunes plan building for its whole subtree** (§8.3/§8.6): descendant
+array/object nodes are not registered. §3.4.1–§3.5 below describe the **compatibility derivation**
+used when no topology is declared (§8.8).
 
 `3.4.1` Start with `{ primaryKey: null, strategy: "lcs" }`.
 
@@ -647,9 +675,17 @@ arrays (keyed arrays inside keyed arrays) inherit the same per-level contract.
 / keyless / non-string-number-key elements, or duplicate keys) fall back to LCS and therefore get
 the **exact** contract (§7.1) instead.
 
-`7.2.6` `7.2.1`–`7.2.4` describe the **default** (`emitMoves` off). With the optional `emitMoves`
-capability on (GEN §8.7, CONF §5.4), this contract is **upgraded to exact byte-for-byte reconstruction**
-(order included): survivors are reordered via `move`s and new keys are INDEXED adds. See §7.4.
+`7.2.6` `7.2.1`–`7.2.4` describe the keyed-collection contract of a **map / order-insignificant**
+array (§8.4) — the compatibility profile's treatment of an auto-detected primaryKey or
+`primaryKeyMap` array (§8.8). **spec-v2 reframing (normative):** this order-insensitive contract is
+a property of the **topology**, not of a capability. The exact byte-for-byte keyed reconstruction
+(survivors reordered via `move`s, INDEXED adds) is the **map / order-significant** topology
+(§8.4, contract §7.4), reached only by declaring `x-schema-patch-order: "significant"`. In spec-v2
+the `emitMoves` *option* is **contract-preserving** and does **not** reorder the survivors of an
+order-insignificant map (RATIONALE §6): with `emitMoves` on, an insignificant map still applies to
+the §7.2.1 keyed-collection reconstruction. (This corrects spec-v1, in which `emitMoves` upgraded a
+primaryKey array to exact order — the review criticism that an optimization flag changed a
+round-trip contract; GEN §8.8.)
 
 ### 7.3 Invert round-trip
 
@@ -667,10 +703,16 @@ invertPatch(D, p))` **deep-equals `D`** (§6). The inverse is computed against t
 | unique (GEN §6) | exact (§7.1.2) | exact — multiset-equal reorders become `move`s (GEN §8.6); non-multiset-equal keeps GEN §6 positional replaces |
 | primaryKey (GEN §4) | keyed-collection, order-insensitive (§7.2) | **exact** — survivors reordered + INDEXED adds (GEN §8.7) |
 
-`7.4.2` The upgrade is strict for **primaryKey**: §7.2's contract ("survivors in original relative
-order ++ new keys at the tail", order **not** preserved) becomes byte-exact order equality when the
-capability is on. LCS and unique were already exact (§7.1); `emitMoves` only changes *which ops*
-express the same reconstruction (fewer, smaller ops), never the reconstructed document.
+`7.4.2` **spec-v2 reframing (normative).** The exact-order keyed reconstruction of the primaryKey
+row is, in spec-v2, the contract of the **map / order-significant** topology (§8.4), realized by the
+move machinery (GEN §8.7/§11.4) **definitionally** — independent of the `emitMoves` option, which is
+a no-op for such an array (GEN §8.8). For LCS (`sequence`) and `unique`, reconstruction is already
+exact (§7.1); there the `emitMoves` option only changes *which ops* express the same reconstruction
+(fewer, smaller ops via `move`), never the reconstructed document, so it is purely a
+**representation** optimization that preserves the topology's contract. Thus §7.4's "exact
+reconstruction across all strategies" holds in spec-v2 as: `sequence`/`unique` are exact with or
+without the `emitMoves` option (it is representational), and exact keyed order is the declared
+`map`/significant topology (not an `emitMoves`-triggered upgrade of `map`/insignificant).
 
 `7.4.3` Verified by exhaustive small-permutation enumeration and >1M randomized bijection trials
 (deletes + inserts + changes + reorders, with duplicate values) against **both** the reference
@@ -696,3 +738,241 @@ Because a `move`-paired relocation may carry an item whose *ignored* members sti
 `modified`'s (GEN §10.5), the exactness is likewise stated over that projection: the moved item is
 `modified`-equal on every non-ignored member. Conformance checks that use ignorePaths compare under
 this projection (CONF §4.1).
+
+### 7.7 Topology governs the contract (spec-v2)
+
+`7.7.1` In spec-v2 the round-trip contract of an array or object is fixed by its **declared
+semantic topology** (§8), not by any optional capability. The full per-topology table is §8.9; in
+brief: `sequence` → §7.1 (exact); `set` → §8.5 (content/multiset-equal, order insignificant);
+`map`/insignificant → §7.2 (keyed-collection, order insignificant); `map`/significant → §7.4 (exact,
+order included); `atomic` array and `atomic` object → single whole-container `replace`, trivially
+exact (§7.5-style). A `granular` object is §7.1.3 (exact).
+
+`7.7.2` The `emitMoves` and `wholesaleReplaceFallback` capabilities are **contract-preserving** for
+every topology: they change *which* / *how many* ops express a diff (representation and size), never
+the reconstructed document (GEN §8.8, GEN §9.5, GEN §11.5). This is the spec-v2 correction of the
+review finding that an optimization flag appeared to change a round-trip contract — see §7.2.6,
+§7.4.2, and RATIONALE §6.
+
+---
+
+## 8. Declared semantic topologies (spec-v2)
+
+spec-v2 lets a JSON Schema node **declare** the semantic topology of the array or object it
+describes, via `x-schema-patch-*` extensions. A declared topology fixes the container's *identity
+relation* — how the differ decides that two elements/members are "the same thing" — and therefore
+its *round-trip contract* (§8.9). It ALWAYS overrides primary-key auto-detection (§3.5) and
+`primaryKeyMap` (§3.4.3). **Absent every extension, behavior is byte-for-byte spec-v1** (§8.8). The
+generator algorithms that realize each topology are GEN §11 (which reuses GEN §1–§10).
+
+### 8.1 The semantics enumerations
+
+`8.1.1` **`ArraySemantics` ∈ { `sequence`, `set`, `map`, `atomic` }.**
+
+- **`sequence`** — order is **significant**; element identity is **positional**. Diffed by LCS
+  (GEN §5). Exact reconstruction (§7.1). This is spec-v1's default array behavior, now named.
+- **`set`** — order is **insignificant**; element identity is **the element value itself** (deep
+  equality, §1.4.1). Diffed by a membership pass (GEN §11.3). Content/multiset round-trip (§8.5).
+- **`map`** — element identity is a **composite key tuple** over one or more member fields (§8.4);
+  order is `significant` **or** `insignificant` (the `x-schema-patch-order` axis). Diffed by the
+  keyed strategy generalized to the tuple (GEN §11.4). Contract §7.2 (insignificant) or §7.4
+  (significant).
+- **`atomic`** — any deep difference (§1.4.1) replaces the **whole array** as one op (§8.6);
+  nothing recurses beneath it.
+
+`8.1.2` **`ObjectSemantics` ∈ { `granular`, `atomic` }.**
+
+- **`granular`** (**default**) — per-member diff (GEN §2). Contract §7.1.3.
+- **`atomic`** — any member difference replaces the **whole object** as one op (§8.6); nothing
+  recurses beneath it.
+
+### 8.2 Declaration and precedence — the `x-schema-patch-*` extensions
+
+`8.2.1` The extensions are placed on the **array or object schema node** they govern:
+
+| extension | applies to | values | default |
+|-----------|-----------|--------|---------|
+| `x-schema-patch-topology` | array node | `"sequence"` \| `"set"` \| `"map"` \| `"atomic"` | (none → compat, §8.8) |
+| `x-schema-patch-keys` | array node, `map` only | `string[]`, ≥ 1 field; **declared order is significant** | (required for `map`) |
+| `x-schema-patch-order` | array node, `map` only | `"significant"` \| `"insignificant"` | `"insignificant"` |
+| `x-schema-patch-granularity` | object node | `"granular"` \| `"atomic"` | `"granular"` |
+
+`8.2.2` **Precedence is total (normative).** A node's declared `x-schema-patch-topology` (or
+`x-schema-patch-granularity: "atomic"`) **ALWAYS** wins over primary-key auto-detection (§3.5) and
+over any `primaryKeyMap` entry for that node's path (§3.4.3). There is no merge and no ranking with
+the compat derivation; the declaration replaces it (§3.4.0). Two schema nodes mapping to the same
+document path (§3.7) MUST NOT carry conflicting declared topologies; if they do, plan construction
+MUST fail with a validation error (a declared topology is an assertion about identity, not a
+rankable preference).
+
+`8.2.3` **Construction-time validation (normative).** Checked once, when the plan/patcher is built;
+a violation is a construction error (`TypeError` in TS, a returned `error` in Go), never a silent
+fallback:
+
+- `x-schema-patch-topology: "map"` **REQUIRES** a non-empty `x-schema-patch-keys` — the key tuple
+  *is* the identity, so a `map` without keys is rejected. Each key MUST be a string (a member-field
+  name).
+- `x-schema-patch-order` and `x-schema-patch-keys` on a non-`map` topology, and any array extension
+  on an object node (or `x-schema-patch-granularity` on an array node), are **ignored** (they have
+  no effect); an implementation SHOULD surface the mismatch through the caller-suppressible
+  `onWarning` channel (§3.3.4). An unknown `x-schema-patch-topology`/`-order`/`-granularity` string
+  value is a construction error.
+- `atomic` × `ignorePaths` incompatibility: if any `ignorePaths` terminal (GEN §10) lies **at or
+  beneath** an `atomic` array or object node, construction MUST **fail** with a validation error. An
+  atomic container is replaced whole and cannot express "replace everything except this ignored
+  subtree"; unlike the `wholesaleReplaceFallback` optimization (GEN §10.6), an atomic *declaration*
+  cannot be silently downgraded to granular without violating the declared contract. (Same spirit as
+  the primaryKey-field rule GEN §10.7.)
+
+### 8.3 Mapping a declaration into the plan
+
+`8.3.1` **Array node.** For a declared `x-schema-patch-topology`, `buildPlan` sets the ArrayPlan's
+`topology` (and, for `map`, `keys` = the declared tuple and `order` = declared-or-`"insignificant"`).
+These fields are **authoritative** for dispatch (GEN §11). The compat `strategy`/`primaryKey` fields
+are still filled to the topology's compatibility view for introspection: `sequence` →
+`strategy:"lcs"`; `map` → `strategy:"primaryKey"`, `primaryKey: keys[0]` (the tuple's first field,
+a lossy single-field view when `|keys|>1`); `set`/`atomic` → `strategy:"lcs"`, `primaryKey:null`.
+`requiredFields`/`hashFields` are populated as usual where an item object schema is present (they
+remain non-normative prefilter hints).
+
+`8.3.2` **Object node.** A node declaring `x-schema-patch-granularity: "atomic"` is registered with
+an `ObjectPlan { granularity: "atomic" }` at the object's document path. A `granular` object (the
+default) is **not** registered — this keeps the plan/trie minimal and preserves byte-for-byte
+compat (§8.8). buildPlan otherwise recurses into object members as in §3.3.2.
+
+`8.3.3` **Atomic prunes the subtree (normative).** An `atomic` array or object node terminates
+plan traversal: buildPlan MUST NOT register any plan for a node **beneath** an atomic node (§8.6 —
+nothing recurses below atomic, so descendant strategies are unreachable and MUST NOT be built).
+The atomic node's own entry is the only plan entry for that subtree.
+
+### 8.4 `map`: composite-tuple identity and gate (normative)
+
+`8.4.1` **Identity.** A `map` element's identity is the ordered tuple
+`(e[keys[0]], e[keys[1]], …, e[keys[t-1]])` in **declared key order** (`t = |keys|`). Two elements
+are the same map element iff their tuples are equal: **same arity and, for every position `i`,
+`e1[keys[i]]` equals `e2[keys[i]]` by JSON type AND value** (§1.4.3 — no coercion, so a numeric
+component `1` and a string component `"1"` are distinct, and declared order matters: `(1,2)` ≠
+`(2,1)`).
+
+`8.4.2` **Per-element applicability gate.** In one `O(n+m)` pass over both arrays, verify:
+
+- **(a)** every element of both arrays is an **object**;
+- **(b)** for every element, **every** key field `keys[i]` is **present** with a value that is a
+  **string or number** (not `undefined`/`null`/other);
+- **(c)** tuple identity is by JSON type-and-value per §8.4.1;
+- **(d)** **no duplicate tuple** within `original` and none within `modified`.
+
+If any of (a)–(d) fails, the array **MUST fall back to `sequence` (LCS, GEN §5)** for this diff —
+exactly as the spec-v1 primaryKey gate falls back (GEN §4.3). For `|keys|=1` this gate is identical
+to the spec-v1 primaryKey gate.
+
+`8.4.3` **Composite-tuple encoding (determinism pin).** The identity relation of §8.4.1 is
+normative. For interning / map-key realization an implementation MUST use an encoding that realizes
+**exactly** that relation and is **identical across languages**. The **REQUIRED reference encoding**
+is the canonical serialization of the JSON array `[e[keys[0]], …, e[keys[t-1]]]` — the key values
+in **declared order** — using the **pinned scalar serializer** (§1.2 numbers as canonical `f64`
+text, standard JSON string escaping; the same serializer GEN §9.2/§9.4 pin). Two tuples are the same
+map key **iff these serializations are byte-identical**. Because key components are string-or-number
+only (gate (b)) — strings quoted, numbers bare — this preserves type-vs-value distinctness
+(`[1]` ≠ `["1"]`), declared-order significance (`[1,2]` ≠ `[2,1]`), and cross-language determinism.
+For `|keys|=1` this generalizes spec-v1's raw `string|number` `Map` key (GEN §4.1.5); the change of
+interning representation is **output-neutral** (§1.4.4), so single-key `map` output is byte-identical
+to spec-v1 primaryKey.
+
+`8.4.4` **Order axis.** `x-schema-patch-order`:
+
+- **`insignificant`** (default) → the keyed-collection contract §7.2 (survivors in ORIGINAL
+  relative order carrying `modified` field-content, ++ new keys appended at the tail; multiset-equal
+  to `modified`, position not preserved). Emission GEN §11.4 (the generalized three-phase GEN §4.1).
+- **`significant`** → **exact** reconstruction §7.4 (survivors reordered into `modified` order via
+  `move`s, new keys as INDEXED adds). The move machinery (GEN §8.7) is the emitter for this topology
+  **definitionally** — it runs unconditionally, independent of the `emitMoves` option, which is a
+  no-op for such an array (GEN §8.8).
+
+### 8.5 `set`: value identity, gate, and semantics (normative)
+
+`8.5.1` **Gate.** Every element of `original` MUST be unique by deep value (§1.4.1), and every
+element of `modified` MUST be unique by deep value. If either array contains a deep-equal duplicate,
+the array **falls back to `sequence` (LCS, GEN §5)** — a `set` is only well-defined when its members
+are distinguishable by value. (Elements need not be scalars; any distinct-by-deep-value elements
+qualify.)
+
+`8.5.2` **Identity and order.** Element identity is the **element value itself** (deep equality);
+order is **insignificant**. There is no "changed element": a value is either a member or not, so a
+content change is one removal + one addition, never a positional replace.
+
+`8.5.3` **Emission** (GEN §11.3): removals of `original` values **absent from** `modified`, by
+**descending original index**, each carrying `oldValue` (per `includeOldValue`, §4.4.2); then
+additions of `modified` values **absent from** `original`, via `/-` append in `modified` order. No
+positional replaces are emitted.
+
+`8.5.4` **Round-trip contract.** `applyPatch(original, p)` is **content-equal** (multiset-equal,
+hence set-equal under the gate) to `modified`: it holds `original`'s surviving members in their
+original relative order, with vanished members removed and new members appended — set-equal to
+`modified`, **order explicitly insignificant** (like §7.2 but with value identity rather than key
+identity). `set` is **opt-in**: absent an explicit topology, a primitive array keeps the
+grandfathered `unique` strategy (§8.8), which is NOT `set`.
+
+### 8.6 `atomic` array and `atomic` object (normative)
+
+`8.6.1` An `atomic` node compares `original` and `modified` by deep equality (§1.4.1): if equal,
+emit **nothing**; otherwise emit **exactly one** `{ op: "replace", path, value: modified, oldValue:
+original }` at the node's **own path** (`oldValue` present iff `includeOldValue`, §4.4.2). The whole
+container is the unit of change.
+
+`8.6.2` **Nothing recurses below an atomic node.** Any array/object plans that would otherwise apply
+to descendants are **ignored** (and are not built, §8.3.3). Granular descent (GEN §5.4.2), keyed
+recursion (GEN §4.1.2), and object member recursion (GEN §2) all stop at an atomic node.
+
+`8.6.3` **Reconstruction** is trivially **exact**: the single `replace` reproduces `modified`
+exactly (order and members). **Capability interactions:** `wholesaleReplaceFallback` (GEN §9) is a
+no-op for an atomic node (it already emits the wholesale replace unconditionally, with no size test);
+`emitMoves` is a no-op (no relocation ops arise); `ignorePaths` beneath an atomic node is a
+construction error (§8.2.3).
+
+### 8.7 `sequence` (normative)
+
+`8.7.1` A `sequence` array has **significant order** and **positional identity**: it is diffed by
+LCS (GEN §5) and reconstructs `modified` **exactly** (§7.1). This is spec-v1's default array
+behavior, now a named topology; declaring `x-schema-patch-topology: "sequence"` forces LCS even when
+a primary key would otherwise auto-detect (§8.2.2) or a `primaryKeyMap` entry exists.
+
+### 8.8 Compatibility profile — zero default-output change (normative, HARD requirement)
+
+`8.8.1` With **no** `x-schema-patch-*` extension present anywhere in the schema, `buildPlan` and the
+generator behave **exactly as spec-v1** — byte-for-byte identical emitted patches. The compat
+derivation (§3.4.1–§3.5) maps onto the topology model as:
+
+- an **auto-detected primary key** (§3.5) or a **`primaryKeyMap`** override (§3.4.3) → the array is
+  **`map` with `keys = [k]`, `order = "insignificant"`** (the spec-v1 primaryKey strategy *is*
+  map/insignificant; contract §7.2);
+- a **primitive-item array** selected as **`unique`** (§3.4.2) → keeps the **grandfathered `unique`
+  strategy** exactly as spec-v1 (GEN §6): equal-length positional replaces, unequal-length LCS
+  fallback. This is **not** `set` topology — `set` is opt-in only (§8.5). The `unique` strategy has
+  no declared-topology name; it is a compatibility carve-out;
+- every **other** array → **`sequence`** (LCS);
+- every **object** → **`granular`**.
+
+`8.8.2` Consequently a spec-v1 schema (no extensions) yields byte-identical output under spec-v2,
+and every spec-v1 diff/apply/plan/invert vector remains valid (CONF §1.3, RATIONALE §6). Declared
+topologies are the **only** way to reach `set`, `atomic`, order-significant `map`, composite-key
+`map`, or atomic objects.
+
+### 8.9 Per-topology round-trip contracts (normative summary)
+
+| topology | identity | order | contract | generator (GEN) |
+|----------|----------|-------|----------|-----------------|
+| array `sequence` | positional | significant | exact (§7.1) | LCS §5 |
+| array `set` | element value (deep-equal) | insignificant | content/multiset-equal (§8.5.4) | membership §11.3 |
+| array `map` / insignificant | composite key tuple (§8.4) | insignificant | keyed-collection (§7.2) | three-phase §4.1/§11.4 |
+| array `map` / significant | composite key tuple (§8.4) | significant | exact, order included (§7.4) | move machinery §8.7/§11.4 |
+| array `atomic` | whole array | n/a | single-replace exact (§8.6.3) | whole replace §11.2 |
+| object `granular` | per member | — | exact (§7.1.3) | object diff §2 |
+| object `atomic` | whole object | n/a | single-replace exact (§8.6.3) | whole replace §11.1 |
+
+`8.9.1` The contract of a row is a property of the **declared topology**, fixed at schema-authoring
+time. The `emitMoves` and `wholesaleReplaceFallback` capabilities never move a container to a
+different row (§7.7.2): for `sequence`/`unique` they only change the op *representation* (relocations
+as `move`s) and for any topology `wholesaleReplaceFallback` only changes op *count/size* when a
+single container `replace` is smaller — the reconstructed document, and thus the contract, is
+unchanged (GEN §8.8, §9.5, §11.5).

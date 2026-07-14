@@ -1,11 +1,12 @@
 # fast-json-schema-patch — Conformance (CONF)
 
-**Spec version:** `spec-v1-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
+**Spec version:** `spec-v2-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
 
 This document defines the vector formats (diff / apply / plan / invert), the conformance
-gates, the required coverage classes, the capability registry, and the spec versioning
-rules. The stable semantics are in [CORE](01-core-semantics.md); the generator profile in
-[GEN](02-generator-profile.md); non-normative history in [RATIONALE](04-rationale.md).
+gates, the required coverage classes (including the spec-v2 **topology coverage classes**, §6.3),
+the capability registry, and the spec versioning rules. The stable semantics — including the
+declared semantic topology model (CORE §8) — are in [CORE](01-core-semantics.md); the generator
+profile in [GEN](02-generator-profile.md); non-normative history in [RATIONALE](04-rationale.md).
 
 ---
 
@@ -31,9 +32,18 @@ consumer), and authors of conformance vectors.
 
 ### 1.3 Spec versioning and stability
 
-- This is `spec-v1-rc`, dated **2026-07-14** against reference implementation
+- This is `spec-v2-rc`, dated **2026-07-14** against reference implementation
   `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`). Section numbers
   (e.g. `5.3.2`) are stable citation anchors; vectors and implementations SHOULD cite them.
+- **spec-v2 (declared topology model).** spec-v2 adds the declared semantic topology layer
+  (CORE §8, GEN §11, this document's §5.7/§6.3/§7): a schema node MAY declare an array as
+  `sequence`/`set`/`map`/`atomic` and an object as `granular`/`atomic` via `x-schema-patch-*`
+  extensions, which override auto-detection and `primaryKeyMap`. **spec-v2 is a strict superset:
+  absent every extension, output is byte-for-byte spec-v1 (CORE §8.8), so every spec-v1 vector
+  remains valid and passing.** The one intentional semantic change is confined to an OPT-IN
+  capability: `emitMoves` no longer reorders the survivors of a keyed (`map`/insignificant) array —
+  exact keyed order is now the declared `map`/significant topology (RATIONALE §6). spec-v1 documents,
+  vectors, and the v1 compatibility surface are unchanged; v2 only *adds*.
 - `spec-v1` was first finalized after the P1–P4 phases landed (correctness, performance,
   compactness, packaging). Every section the draft marked *(draft-pending)* is now landed in
   the reference implementation and reads as normative; RATIONALE §2 records each landed fix
@@ -90,6 +100,14 @@ A diff vector is a JSON record:
 `schema` is null), then `execute({original, modified})`, and compares against `expectedPatch` per
 the gate (§4).
 
+`2.2` **Declared topologies (spec-v2)** are expressed **in the `schema`** via `x-schema-patch-*`
+extensions (CORE §8.2) on the relevant array/object nodes — no new vector field is needed; a
+topology vector is an ordinary diff vector whose `schema` carries the extensions. The
+construction-time errors of CORE §8.2.3 (a `map` without `x-schema-patch-keys`, an unknown topology
+value, an `atomic` node with an `ignorePaths` terminal beneath it) precede any diff and are
+therefore **not** expressible in the diff-vector wire format; each engine covers them with unit tests
+(§6.3, mirroring §6.2).
+
 ## 3. Apply vector format
 
 An apply vector is a JSON record:
@@ -141,7 +159,7 @@ capabilities.
 | capability | default | status | effect |
 |------------|---------|--------|--------|
 | `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§5.2) | suppress `oldValue` on all remove/replace (CORE §4.4.2); disables document-free invert |
-| `emitMoves` | off | OPTIONAL — **landed** (§5.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (GEN §8) |
+| `emitMoves` | off | OPTIONAL — **landed** (§5.4) | contract-preserving `move` representation for relocated elements (GEN §8, §8.8); no-op for `map`/insignificant and `set`/`atomic`; definitionally-on for `map`/significant (§5.7) |
 | `wholesaleReplaceFallback` | off | OPTIONAL — **landed** (§5.5) | emit a single container `replace` when the granular patch would exceed the container's own serialized size (GEN §9) |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§5.3) | override the auto-detection candidate list (CORE §3.5.5) |
 | `ignorePaths` | `[]` (none) | OPTIONAL — **landed** (§5.6) | a set of object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy (GEN §10) |
@@ -181,6 +199,14 @@ the emitted op sequence deterministic and Go-reproducible. `move` ops carry no `
 `remove`/`replace` still honor `includeOldValue` (CORE §4.4.2), and `emitMoves` composes with it. The
 apply layer (CORE §5.3) already supports `move`, so emitted patches round-trip through both the reference
 applier and any conforming RFC 6902 applier (verified against fast-json-patch).
+
+**spec-v2 amendment.** The three landings above are unchanged as *algorithms*, but GEN §8.7 (the
+keyed move machinery) is **retriggered**: in spec-v2 it fires for a declared `map`/**significant**
+array (definitionally, independent of the `emitMoves` option, GEN §8.8), and the `emitMoves` option
+no longer reorders the survivors of a `map`/insignificant (compat primaryKey) array — that array
+keeps CORE §7.2. The LCS-relocation (GEN §8.5) and unique-reorder (GEN §8.6) landings stay
+`emitMoves`-option-gated and remain **contract-preserving** (they only change op representation, not
+the reconstructed document; CORE §7.7.2, §5.7).
 
 `5.3` **`primaryKeyCandidates` (F25).** Surfaced as the `buildPlan` option
 `primaryKeyCandidates?: string[]`, **default `["id", "name", "port"]`** (CORE §3.5.3/CORE §3.5.5 —
@@ -224,6 +250,25 @@ are not expressible in the diff/apply/plan/invert vector wire formats (they prec
 covered by unit tests in both engines rather than by vectors (§6.2); the happy-path and interaction
 behaviors ARE covered by diff vectors and the differential corpus.
 
+`5.7` **Declared topologies are NOT capabilities (spec-v2).** The `ArraySemantics`/`ObjectSemantics`
+topologies (CORE §8) are declared **per schema node** (`x-schema-patch-*`), not toggled per patcher,
+so they are not rows in this registry; they are exercised by ordinary diff/plan vectors whose schema
+carries the extensions (§2.2, §6.3, §7). Their interaction with the capabilities above is pinned:
+
+- **`emitMoves` is reframed as contract-preserving (GEN §8.8).** It never changes a topology's
+  round-trip contract (CORE §7.7.2, §8.9). It is a **no-op** for `set`, `atomic`, and
+  `map`/order-insignificant (compat primaryKey); it is **definitionally on** for `map`/order-
+  significant (the move machinery is that topology's required emitter, GEN §8.7); and it remains an
+  optional **representational** relocation optimization for `sequence` (LCS) and the grandfathered
+  `unique` strategy. This is the spec-v2 correction of the review finding that `emitMoves` (v1)
+  changed the primaryKey contract from CORE §7.2 to CORE §7.4; in spec-v2 exact keyed order is a
+  **declared topology**, not a flag-driven upgrade (RATIONALE §6).
+- **`wholesaleReplaceFallback`** stays a size optimization (GEN §9): it may replace any topology's
+  granular op stream with one container `replace` when smaller, never changing the reconstructed
+  document. It is a **no-op for `atomic`** nodes (already wholesale, CORE §8.6.3).
+- **`ignorePaths`** beneath an `atomic` node is a **construction error** (CORE §8.2.3); a plan
+  `primaryKey`/`map`-key field remains non-ignorable (GEN §10.7).
+
 ## 6. Vector provenance
 
 Vectors SHOULD be harvested from the reference test suite and from randomized fuzzing (the
@@ -247,6 +292,38 @@ patch, never a constructor rejection). Each engine MUST therefore cover them wit
 The happy-path and interaction semantics (GEN §10.3–GEN §10.6) ARE vector-covered (`diff/capabilities-ignore-paths`)
 and exercised differentially (`spec/fuzz/corpus/ignore-*.jsonl`).
 
+`6.3` **Declared-topology coverage (REQUIRED, spec-v2).** The vector suite MUST include, with the
+topology declared in the vector's `schema` (§2.2):
+
+- **(a) one diff vector per topology** exhibiting its round-trip contract (CORE §8.9): array
+  `sequence`, array `set`, array `map`/insignificant, array `map`/significant, array `atomic`, object
+  `granular`-vs-`atomic`. Each vector's round-trip (§4.1) is checked against that topology's contract:
+  exact for `sequence`/`atomic`/object-`atomic`; content/multiset-equal for `set` (CORE §8.5.4);
+  keyed-collection for `map`/insignificant (CORE §7.2); exact order for `map`/significant (CORE §7.4).
+- **(b) a composite-key `map`** (`x-schema-patch-keys` with `|keys| ≥ 2`) in **both** orders,
+  asserting tuple identity (CORE §8.4.1) — including that a numeric vs string component is distinct
+  (`(1,…)` ≠ `("1",…)`) and that declared key order matters.
+- **(c) gate-fallback to `sequence`/LCS** (exact reconstruction, CORE §7.1): one vector per `set`
+  gate-failure class (a deep-equal duplicate in `original` **or** in `modified`, CORE §8.5.1) and one
+  per `map` tuple-gate class (CORE §8.4.2: non-object element; a key field missing/`null`/non-
+  string-number; a **duplicate tuple** in either array, including a composite duplicate).
+- **(d) precedence:** a vector whose `schema` both would auto-detect a primary key (or carries a
+  `primaryKeyMap` entry) **and** declares a conflicting `x-schema-patch-topology` (e.g. `sequence`),
+  asserting the **declared** topology wins (CORE §8.2.2) — LCS output, not keyed.
+- **(e) atomic pruning:** a vector where an `atomic` array/object contains descendant arrays that
+  would otherwise be keyed, asserting a single whole-container `replace` and **no** nested ops
+  (CORE §8.6.2).
+- **(f) compatibility:** every spec-v1 diff/apply/plan/invert vector (no extensions) MUST remain
+  present and passing byte-for-byte (CORE §8.8) — this is the primary guard that v2 changed no default
+  output.
+
+`6.4` **Topology construction-error coverage (REQUIRED, engine-local).** The CORE §8.2.3 errors — a
+`map` topology without `x-schema-patch-keys`, an unknown `x-schema-patch-*` value, a declared-topology
+conflict at one path (CORE §8.2.2), and an `ignorePaths` terminal at/beneath an `atomic` node —
+occur **before any diff** and are not expressible in the vector wire formats. Each engine MUST cover
+them with **unit tests** (`test/topology.test.ts` in TS, `topology_test.go` in Go), asserting the same
+rejection set (mirroring §6.2).
+
 ## 7. Plan-snapshot vector format (normative)
 
 To make CORE §3 plan derivation falsifiable independently of any diff, a **plan-snapshot vector** is a
@@ -255,28 +332,50 @@ JSON record:
 ```
 {
   "name":    string,                          // unique id
-  "schema":  Schema,                          // REQUIRED
+  "schema":  Schema,                          // REQUIRED (may carry x-schema-patch-* extensions)
   "options": { primaryKeyMap?, basePath? },   // optional
   "expectedPlan": [                           // sorted by `path`
+    // array-plan entry:
     {
       "path":           documentPath,
       "primaryKey":     string | null,
       "strategy":       "primaryKey" | "unique" | "lcs",
       "requiredFields": string[],   // sorted; [] when absent
-      "hashFields":     string[]    // sorted; [] when absent
+      "hashFields":     string[],   // sorted; [] when absent
+      // spec-v2 declared-topology fields — present IFF an x-schema-patch-* topology is declared:
+      "topology":       "sequence" | "set" | "map" | "atomic",   // optional
+      "keys":           string[],                                // map only; DECLARED order
+      "order":          "significant" | "insignificant"          // map only
     }
+    // OR object-plan entry (spec-v2; a declared-atomic object, CORE §8.3.2):
+    // { "path": documentPath, "granularity": "atomic" }
   ]
 }
 ```
 
 `7.1` The implementation under test computes `buildPlan(schema, options)` and compares the
-resulting `documentPath → ArrayPlan` map against `expectedPlan`: the **set of paths** must match,
-and for each path the `primaryKey`, `strategy`, `requiredFields` (as a sorted string array), and
-`hashFields` (as a sorted string array) must match. `itemSchema` (CORE §3.1.1) is **never** compared.
-Both the entry list and the two field arrays are compared **order-insensitively** (by sorting);
-the `expectedPlan` array is authored sorted by `path` for readability. This format makes the CORE §3
-derivation — including CORE §3.1.1 (which fields are output-relevant) and CORE §3.7.4 (metadata merge /
-`hashFields`) — directly falsifiable.
+resulting `documentPath → (ArrayPlan | ObjectPlan)` map against `expectedPlan`: the **set of paths**
+must match, and for each path the `primaryKey`, `strategy`, `requiredFields` (as a sorted string
+array), and `hashFields` (as a sorted string array) must match. `itemSchema` (CORE §3.1.1) is
+**never** compared. The entry list and the `requiredFields`/`hashFields` arrays are compared
+**order-insensitively** (by sorting); the `expectedPlan` array is authored sorted by `path` for
+readability. This format makes the CORE §3 derivation — including CORE §3.1.1 (output-relevant
+fields) and CORE §3.7.4 (metadata merge / `hashFields`) — directly falsifiable.
+
+`7.2` **spec-v2 fields (normative comparison).** When present, the declared-topology fields are
+compared:
+
+- **`topology`** (array entries) and **`granularity`** (object entries) MUST match exactly. They are
+  present **iff** the node declares a topology (CORE §8.2/§8.3); an entry with neither is a spec-v1-
+  shaped array plan and every v1 plan vector remains valid unchanged.
+- **`keys`** is compared **ORDER-SENSITIVELY** (as an ordered list, not sorted) — unlike
+  `requiredFields`/`hashFields` — because the declared tuple order is significant to identity and to
+  the composite-tuple encoding (CORE §8.4.3).
+- **`order`** MUST match (`map` entries; a `map` entry omitting it is understood as the default
+  `"insignificant"`, CORE §8.2.1).
+- **Atomic pruning (CORE §8.3.3):** a plan MUST NOT contain any entry for a path **beneath** an
+  `atomic` node; a plan-snapshot vector for an atomic subtree asserts the atomic node's single entry
+  and the **absence** of descendant entries.
 
 ## 8. Invert vector format (normative)
 

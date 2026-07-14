@@ -1,7 +1,7 @@
 # fast-json-schema-patch — Normative Specification
 
-**Spec version:** `spec-v1-rc`
-**Status:** Release Candidate. Reopened 2026-07-14 for an external-review defect round (D1–D7); see RATIONALE §1 and CONF §1.3.
+**Spec version:** `spec-v2-rc`
+**Status:** Release Candidate. spec-v2 adds the declared semantic topology model (CORE §8, GEN §11); it is a strict superset of spec-v1 — absent `x-schema-patch-*` extensions, output is byte-for-byte spec-v1 (CORE §8.8). See RATIONALE §6 (v1→v2 statement) and CONF §1.3.
 **Reference implementation:** the TypeScript package in this repository, `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`).
 
 ---
@@ -11,10 +11,10 @@ short name and the document-local section number, e.g. `CORE §4.2`, `GEN §5.0`
 
 | Short name | Document | Contents |
 |------------|----------|----------|
-| **CORE** | [`spec/01-core-semantics.md`](./spec/01-core-semantics.md) | Data model (numbers, equality, key order), JSON Pointer, plan/semantic model, patch format + extensions, apply semantics + errors + security, invert semantics, round-trip contracts. The stable *what*. |
-| **GEN** | [`spec/02-generator-profile.md`](./spec/02-generator-profile.md) | The deterministic generator profile: strategy selection + gates, Myers pass, emission ordering, granular descent, moves machinery + LIS, wholesale byte formula, capability behaviors. Byte-deterministic output, cross-language. |
-| **CONF** | [`spec/03-conformance.md`](./spec/03-conformance.md) | Vector formats (diff/apply/plan/invert), the conformance gates, required coverage classes, the capability registry, and spec versioning rules. |
-| **RATIONALE** | [`spec/04-rationale.md`](./spec/04-rationale.md) | **NON-NORMATIVE.** The F-number audit history, the D1–D7 defect narrative, performance measurements, design rationale, known-limitation notes, and the complete old-section → new-section mapping table. |
+| **CORE** | [`spec/01-core-semantics.md`](./spec/01-core-semantics.md) | Data model (numbers, equality, key order), JSON Pointer, plan/semantic model, the **declared topology model** (§8: `ArraySemantics`/`ObjectSemantics`, `x-schema-patch-*`, per-topology contracts), patch format + extensions, apply semantics + errors + security, invert semantics, round-trip contracts. The stable *what*. |
+| **GEN** | [`spec/02-generator-profile.md`](./spec/02-generator-profile.md) | The deterministic generator profile: strategy selection + gates, Myers pass, emission ordering, granular descent, moves machinery + LIS, wholesale byte formula, capability behaviors, and **topology dispatch** (§11: topology→algorithm mapping, `set` membership emission, composite-key `map`). Byte-deterministic output, cross-language. |
+| **CONF** | [`spec/03-conformance.md`](./spec/03-conformance.md) | Vector formats (diff/apply/plan/invert), the conformance gates, required coverage classes (incl. **topology coverage**, §6.3), the capability registry, and spec versioning rules. |
+| **RATIONALE** | [`spec/04-rationale.md`](./spec/04-rationale.md) | **NON-NORMATIVE.** The F-number audit history, the D1–D7 defect narrative, the **spec-v2 topology model + v1→v2 statement + Kubernetes comparison (§6)**, performance measurements, design rationale, known-limitation notes, and the complete old-section → new-section mapping table. |
 
 **Nothing normative lives in this index.** The four documents above are authoritative.
 

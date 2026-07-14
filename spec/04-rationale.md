@@ -1,9 +1,10 @@
 # fast-json-schema-patch — Rationale & history (RATIONALE)
 
-**Spec version:** `spec-v1-rc`  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
+**Spec version:** `spec-v2-rc`  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
 
 > **This entire document is NON-NORMATIVE.** Nothing here defines conforming behavior. It
 > records the audit history (the F-number fixes), the external-review defect round (D1–D7),
+> the **spec-v2 declared topology model and its v1→v2 compatibility statement (§6)**,
 > performance measurements, design rationale, known-limitation notes, and a complete
 > old-section → new-section mapping table so every existing §-citation can be traced. The
 > normative documents are [CORE](01-core-semantics.md), [GEN](02-generator-profile.md), and
@@ -368,3 +369,128 @@ structurally relocated:
 The per-document navigational preambles at the top of CORE, GEN, CONF, and RATIONALE, and this
 index's document map, are new **non-normative** wayfinding text (they define the short names and
 point across documents); they add no normative content.
+
+---
+
+## 6. spec-v2: the declared topology model (non-normative rationale)
+
+spec-v2 was cut on 2026-07-14 after the same external review that drove the D1–D7 round. Its one
+theme is the **declared semantic topology model** (CORE §8, GEN §11, CONF §5.7/§6.3/§7): the schema
+author, not a heuristic, states what an array or object *is*. The normative text is in those
+sections; this records why it exists, how it stays back-compatible, its Kubernetes ancestry, and the
+determinism pins a second-engine implementer should double-check.
+
+### 6.1 The v1 → v2 compatibility statement
+
+**spec-v2 is a strict superset of spec-v1; default output is byte-for-byte unchanged.** The plumbing:
+
+- Absent every `x-schema-patch-*` extension, `buildPlan` and the generator run the spec-v1 compat
+  derivation (CORE §8.8): auto-detected primaryKey / `primaryKeyMap` → `map`/insignificant (which
+  *is* the v1 primaryKey strategy); primitive `unique` → the grandfathered v1 `unique` strategy (not
+  `set`); everything else → `sequence` (LCS); every object → `granular`. No emitted patch changes.
+- Therefore **every spec-v1 diff/apply/plan/invert vector remains valid and passing** under a v2
+  engine (CONF §6.3(f) makes this a required, checked coverage class). The 294-vector v1 corpus is
+  the primary regression guard that v2 added no default-output drift.
+- The plan-snapshot format only *adds* optional fields (`topology`/`keys`/`order`/`granularity`),
+  absent on compat entries, so v1 plan vectors are unchanged (CONF §7.2).
+
+**The single intentional semantic change** is confined to the OPT-IN `emitMoves` capability and is
+the direct fix the review asked for (§6.3): in spec-v1, turning `emitMoves` on **upgraded** a
+primaryKey array's contract from order-insensitive (CORE §7.2) to exact-order (CORE §7.4) — an
+optimization flag silently changing a round-trip contract. In spec-v2 that exact-order keyed
+reconstruction is a **distinct declared topology**, `map`/`significant`; the `emitMoves` *option* is
+contract-preserving everywhere and no longer reorders keyed survivors. A v1 caller who relied on
+`emitMoves`-on primaryKey exact order MUST, under v2, declare `x-schema-patch-order: "significant"`.
+Because `emitMoves` is off by default and carries no spec-v1 conformance vectors (CONF §5), this
+changes no default output and no vector.
+
+### 6.2 Why declared over inferred
+
+Auto-detection (CORE §3.5) is a convenience that guesses identity from field names (`id`/`name`/
+`port`). It cannot express: a set (identity = the whole value), a composite key (identity spanning
+two fields), order significance, or "treat this whole container as one blob." Worse, editing a
+guessed key field (`name`, `port`) silently degrades an in-place edit into remove+append (CORE
+§3.5.5). Declaration removes the guess: the author asserts the identity relation, and it **always
+wins** over the heuristic and over `primaryKeyMap` (CORE §8.2.2). Auto-detection is retained only as
+the zero-config compatibility default (CORE §8.8).
+
+### 6.3 The `emitMoves` reframing (resolving the review criticism)
+
+The review's sharpest structural finding was that an *optimization* (`emitMoves`) changed a
+*contract* (primaryKey order semantics). Two things are wrong with that in principle: (1) whether a
+consumer can rely on array order should not depend on a generator performance flag; (2) it made the
+round-trip contract non-compositional (you could not read a topology's guarantee off the schema).
+spec-v2's fix is to make **the contract a property of the declared topology** (CORE §8.9, §7.7) and
+**every capability contract-preserving** (CORE §7.7.2, GEN §8.8, §9.5, §11.5):
+
+- `map`/insignificant keeps survivors in original order → `emitMoves` has nothing to relocate → it is
+  a no-op there (it MUST NOT reorder).
+- `map`/significant's exact order is realized by the move machinery **definitionally** — the machinery
+  is the topology's emitter, on regardless of the option.
+- For `sequence` (LCS) and `unique`, the arrays are already exactly reconstructed (CORE §7.1);
+  `emitMoves` only swaps a remove+add for a `move` (fewer, smaller ops) — pure representation.
+
+So in spec-v2 there is no flag that changes what document you get back; flags change only *how the
+same document is expressed* (op shape, op count/size). `wholesaleReplaceFallback` was already framed
+this way (size only); v2 states the invariant uniformly.
+
+### 6.4 Kubernetes lineage and comparison
+
+The four array topologies and two object topologies are modeled on Kubernetes' structural-schema
+merge annotations, which solved the same "how do I diff/merge this list?" problem for
+server-side apply:
+
+| Kubernetes (structural schema) | this spec (CORE §8) | note |
+|--------------------------------|---------------------|------|
+| `x-kubernetes-list-type: atomic` | array `atomic` | whole list replaced as a unit |
+| `x-kubernetes-list-type: set` | array `set` | identity = element value; k8s restricts to scalars, we allow any deep-value-distinct elements (CORE §8.5.1) |
+| `x-kubernetes-list-type: map` + `x-kubernetes-list-map-keys: [k1,k2]` | array `map` + `x-schema-patch-keys: [k1,k2]` | **composite key** — the direct analog; our tuple identity (CORE §8.4.1) mirrors k8s's map keys |
+| `x-kubernetes-map-type: atomic` / `granular` | object `atomic` / `granular` | identical object model (CORE §8.1.2) |
+| *(no equivalent)* | array `sequence` | ordered positional LCS diff — **our addition** |
+| *(no equivalent)* | array `map` + `x-schema-patch-order: "significant"` | order-significant keyed reconstruction — **our addition** |
+
+Two deliberate divergences: (1) **the default differs.** A non-annotated Kubernetes list is
+`atomic` (replace-whole); our non-annotated array is `sequence` (granular positional LCS), because a
+JSON-patch differ's value *is* the granular diff — defaulting to whole-array replace would discard
+the library's reason to exist. (2) **We add an order axis to `map`.** Kubernetes map-lists are
+key-merged and the server normalizes order; we let the author choose `insignificant` (the v1 keyed
+multiset contract, CORE §7.2) or `significant` (exact order via moves, CORE §7.4), because a JSON
+document's array order is often meaningful to *its* consumer even when identity is keyed. The naming
+(`x-schema-patch-*`, not `x-kubernetes-*`) keeps the vendor extension namespace this library's own
+while signaling the lineage.
+
+### 6.5 Determinism pins introduced in spec-v2 (double-check when porting)
+
+Every pin below is normative in CORE/GEN; collected here for a porting implementer:
+
+- **Composite-tuple encoding (CORE §8.4.3).** The map identity relation is normative; the **required
+  reference realization** is the canonical serialization of the JSON array `[v1,…,vt]` of the key
+  values in **declared order**, using the same pinned scalar serializer as GEN §9.2/§9.4 (numbers as
+  canonical `f64` text — `1.0`→`1`, `-0`→`0`, `1e3`→`1000`; standard JSON string escaping). Two
+  tuples are the same map key **iff these serializations are byte-identical**. Because components are
+  string-or-number only (strings quoted, numbers bare), `[1]` ≠ `["1"]` and `[1,2]` ≠ `[2,1]`. For
+  `|keys|=1` this generalizes v1's raw `string|number` `Map` key (GEN §4.1.5) and is output-neutral,
+  so single-key `map` output is byte-identical to v1 primaryKey. This is the pin most likely to drift
+  between a JS `Map`-of-strings and a Go `map[string]` if an implementer invents an ad-hoc join
+  (e.g. `strings.Join` with a delimiter that a string value could contain) — the canonical-JSON-array
+  encoding is collision-free precisely because scalar quoting disambiguates.
+- **`set` fingerprint (GEN §11.3.1).** Membership is by the same canonical key-sorted fingerprint as
+  LCS interning (GEN §5.2), output-neutral, MUST agree with deep-equal.
+- **Emission order pins.** `set`: removals descending original index, then `/-` appends in modified
+  order (GEN §11.3). `map`/insignificant: the v1 three-phase concatenation (GEN §4.1.4/§11.4).
+  `map`/significant: the move machinery's staged order and pinned LIS (GEN §8.2–§8.4/§8.7).
+- **Declared-topology precedence (CORE §8.2.2).** Total: a declaration beats auto-detection and
+  `primaryKeyMap`; conflicting declarations at one path are a construction error, not a ranking.
+- **Atomic prunes the subtree (CORE §8.3.3/§8.6.2).** No plan is built or consulted beneath an
+  atomic node; nothing recurses below it.
+- **Construction-error set (CORE §8.2.3).** `map` without keys; unknown extension value; `atomic`
+  with an `ignorePaths` terminal beneath it — all rejected at build time (TS throw / Go `error`),
+  covered by engine-local unit tests (CONF §6.4).
+- **Plan-vector `keys` is order-sensitive (CONF §7.2)** — unlike `requiredFields`/`hashFields`.
+
+### 6.6 spec-v2 section additions (no old-SPEC counterpart)
+
+The §5 mapping table traces spec-v1 (former monolithic `SPEC.md`) citations. The spec-v2 additions —
+CORE §7.7, CORE §8 (all subsections), GEN §8.8, GEN §11 (all subsections), CONF §2.2, CONF §5.7,
+CONF §6.3–§6.4, CONF §7.2 — are **new**; they have no old-`SPEC.md` counterpart and are not in the
+§5 table. Existing v1 anchors are unchanged.

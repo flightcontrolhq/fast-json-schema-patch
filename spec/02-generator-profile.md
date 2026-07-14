@@ -1,14 +1,20 @@
 # fast-json-schema-patch — Generator profile (GEN)
 
-**Spec version:** `spec-v1-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
+**Spec version:** `spec-v2-rc`  ·  **Status:** Release Candidate  ·  part of the four-document specification (see [`SPEC.md`](../SPEC.md)).
 
 This document is the deterministic generator profile: strategy selection and gates, the
 Myers pass with pinned tie-breaks and trimming, emission ordering (including ECMAScript key
-order), granular descent, the moves machinery and LIS, the wholesale byte formula, and the
-capability behaviors — everything needed to reproduce byte-deterministic output
-cross-language. The data model and plan model it builds on are in
-[CORE](01-core-semantics.md); conformance in [CONF](03-conformance.md). RFC 2119 language:
-CONF §1.4.
+order), granular descent, the moves machinery and LIS, the wholesale byte formula, the
+capability behaviors, and the **declared-topology dispatch** (§11) — everything needed to
+reproduce byte-deterministic output cross-language. The data model, plan model, and semantic
+topology model it builds on are in [CORE](01-core-semantics.md); conformance in
+[CONF](03-conformance.md). RFC 2119 language: CONF §1.4.
+
+**spec-v2.** §1–§10 are the spec-v1 generator, unchanged. §11 adds the mapping from CORE §8's
+declared `ArraySemantics`/`ObjectSemantics` topologies onto these algorithms; absent any
+`x-schema-patch-*` declaration, dispatch is exactly §1–§10 and output is byte-identical to spec-v1
+(the compatibility profile, CORE §8.8). §8.8 (new) reframes `emitMoves`/`wholesaleReplaceFallback`
+as contract-preserving optimizations.
 
 ---
 
@@ -484,8 +490,40 @@ index `original` by key (§4.1.1); for each `modified[j]`, if its key matches an
 are `pureInserts` (`j`); original keys never matched are `pureDeletes`. Then §8.4 emits — so
 survivors are **reordered** into `modified` order via `move`s and new keys are **INDEXED** adds at
 their `modified` position (never `/-`), making `applyPatch(original, p)` equal `modified`
-**byte-exactly** (order included). This upgrades CORE §7.2 to CORE §7.4 for this array. The gate still governs:
-non-conforming / duplicate-key arrays fall back to `lcs`, which under `emitMoves` uses §8.5.
+**byte-exactly** (order included). The gate still governs: non-conforming / duplicate-key arrays
+fall back to `lcs`, which under `emitMoves` uses §8.5.
+
+### 8.8 spec-v2 reframing: `emitMoves` is contract-preserving
+
+`8.8.1` **The round-trip contract of an array is fixed by its declared topology (CORE §8.9), not
+by the `emitMoves` option.** In spec-v2 the option is a **representation** optimization only: for a
+given topology it may express a **relocated deep-equal** element as one `move` instead of a
+remove+add pair, without changing the reconstructed document. Per topology:
+
+- **`sequence` (LCS, §5)** — already exact (CORE §7.1). `emitMoves` on: relocations become `move`s
+  (§8.5); the reconstructed array is identical. Representational.
+- **`unique` (§6)** — already exact (CORE §7.1.2). `emitMoves` on: a multiset-equal reorder becomes
+  `move`s (§8.6); identical reconstruction. Representational.
+- **`map` / order-significant (CORE §8.4)** — the move machinery (§8.7) is this topology's
+  **required emitter**: it runs **unconditionally**, independent of the `emitMoves` option, which is
+  therefore a **no-op** ("already on") for such an array. The exact-order contract (CORE §7.4) is the
+  topology's, not the option's.
+- **`map` / order-insignificant (CORE §8.4)** — the keyed-collection contract (CORE §7.2) keeps
+  survivors in ORIGINAL order, so **there is nothing to relocate**; `emitMoves` is a **no-op** here
+  and MUST NOT reorder survivors. (This is the spec-v2 correction of spec-v1 §8.7, in which
+  `emitMoves` reordered a primaryKey array's survivors and thereby *changed* its contract from
+  CORE §7.2 to CORE §7.4 — the review criticism that an optimization flag changed a round-trip
+  contract. In spec-v2 that exact-order behavior is reached only by **declaring**
+  `x-schema-patch-order: "significant"`, which makes it the topology's contract; see RATIONALE §6.)
+- **`set` / `atomic`** — no relocation ops arise; `emitMoves` is a no-op.
+
+`8.8.2` **Normative effect on §8.7's trigger.** The move machinery of §8.7 (indexing `original` by
+key, building the bijection, staged §8.4 emission) is unchanged as an **algorithm**. What changes in
+spec-v2 is its **trigger**: it fires for a **`map`/significant** array (CORE §8.4 — definitionally,
+regardless of the `emitMoves` option) and **not** for a `map`/insignificant (compat primaryKey)
+array under the `emitMoves` option. §8.5 (LCS relocations) and §8.6 (unique reorders) remain
+`emitMoves`-option-gated and contract-preserving. `wholesaleReplaceFallback` is likewise
+contract-preserving (§9.5).
 
 ## 9. `wholesaleReplaceFallback` capability (normative when enabled)
 
@@ -632,3 +670,98 @@ can never be filtered away.
 the pinned traversal (§10.3), and the pinned ignore-filtered fingerprint (§10.5) — no per-instance
 caches, no data-dependent ordering — so the emitted patch is fully deterministic and Go/TS-identical
 for a given `(ignorePaths, plan, original, modified)`.
+
+## 11. Topology dispatch (normative — spec-v2)
+
+This section maps CORE §8's declared `ArraySemantics`/`ObjectSemantics` onto the algorithms of
+§1–§10. **A declared topology REPLACES the §3.1/§3.2 (arrays) and §2 (objects) selection** it
+applies to, and overrides primary-key auto-detection and `primaryKeyMap` (CORE §8.2.2). **Absent
+any `x-schema-patch-*` declaration, dispatch is exactly §1–§10** (the compatibility profile,
+CORE §8.8) and output is byte-identical to spec-v1. The topology comes from the plan node reached
+by the same trie threading used for strategy selection (§4.5): the ArrayPlan's `topology`/`keys`/
+`order` fields, or an ObjectPlan's `granularity` (CORE §8.3).
+
+### 11.1 Object dispatch extension (`granular` / `atomic`)
+
+`11.1.1` Before §2 runs for an object pair `(a, b)` at `path`, consult the object's plan node
+(CORE §8.3.2): if it carries `granularity: "atomic"` and `a` is **not** deep-equal to `b`
+(CORE §1.4.1), emit **one** `{ op: "replace", path, value: b, oldValue: a }` (CORE §8.6, `oldValue`
+per CORE §4.4.2) and **STOP** — do not run §2, do not recurse. If `a` deep-equals `b`, emit nothing.
+Otherwise (`granular`, the default, or no node) run §2 unchanged.
+
+### 11.2 Array dispatch extension (topology selects the emitter)
+
+`11.2.1` Before the §3.1/§3.2 runtime-gated selection, consult the array's plan node topology
+(CORE §8.3.1):
+
+- **`atomic`** → if `a` is not deep-equal to `b`, emit one whole-array `{ op: "replace", path,
+  value: b, oldValue: a }` (CORE §8.6); else nothing. **STOP** — no recursion beneath (CORE §8.6.2).
+- **`set`** → §11.3, subject to the CORE §8.5.1 uniqueness gate (violation → `sequence`/LCS §5).
+- **`map`** → §11.4 (keyed strategy over the composite tuple), subject to the CORE §8.4.2 tuple gate
+  (violation → `sequence`/LCS §5); `order` selects the emitter within §11.4.
+- **`sequence`** → §5 (LCS), unconditionally (even where a primary key would auto-detect).
+- **no declared topology** (compat) → the §3.1/§3.2 selection exactly as spec-v1
+  (`primaryKey`/`unique`/`lcs`; CORE §8.8).
+
+`11.2.2` `wholesaleReplaceFallback` (§9) and `ignorePaths` (§10) compose with §11 exactly as with
+§1–§8: they are evaluated at each array-diff call site over whatever op list the selected topology
+emitter produced. `atomic` nodes are exempt from `wholesaleReplaceFallback` (already wholesale,
+CORE §8.6.3) and forbid an `ignorePaths` terminal beneath them (CORE §8.2.3).
+
+### 11.3 `set` membership emission (normative)
+
+Given arrays `a` (original, length `n`), `b` (modified) that passed the CORE §8.5.1 gate, with
+`prefix = (path === "" ? "/" : path + "/")`:
+
+`11.3.1` Build a membership index of `b`'s element **values** by deep equality (CORE §1.4.1). The
+reference interns each element to a canonical, key-sorted fingerprint (the §5.2 interning, shared
+across both arrays) so membership is an `O(1)` set probe; the interning is output-neutral
+(CORE §1.4.4) and MUST agree with deep-equal.
+
+`11.3.2` **Removals.** For `i` from `n-1` **down to `0`** (descending), if `a[i]`'s value is
+**absent from `b`**, emit `{ op: "remove", path: prefix + i, oldValue: a[i] }` (`oldValue` per
+CORE §4.4.2). Descending order keeps lower survivor indices valid under sequential apply (§7.3).
+
+`11.3.3` **Additions.** For `j` from `0` to `b.length-1` (ascending), if `b[j]`'s value is
+**absent from `a`**, emit `{ op: "add", path: prefix + "-", value: b[j] }` (CORE §2.5 append token).
+
+`11.3.4` **Order.** Emit all removals (§11.3.2) **then** all additions (§11.3.3) — the §4.1.4
+concatenation minus the modifications group (a `set` has no field-level modifications: identity is
+the value, CORE §8.5.2). Survivors (values present in both) receive **no op**. Reconstruction is the
+CORE §8.5.4 content-equality contract. Because the gate guarantees distinctness, "absent from" is
+unambiguous (multiset = set).
+
+### 11.4 `map` emission (keyed strategy generalized to the composite tuple)
+
+`11.4.1` The §4 primaryKey strategy is generalized from a single `primaryKey` field to the composite
+key **tuple** (CORE §8.4.1), using the CORE §8.4.3 tuple encoding as the index/`Map` key in place of
+the single raw `string|number` value:
+
+- **Phase 1** indexes `original` by tuple key (record `tupleKey → index`); an element failing gate
+  (b) is a gate violation (CORE §8.4.2), not a skip.
+- **Phase 2** scans `modified` by tuple key: **matched** → recurse field-level ops at the ORIGINAL
+  index into the *modifications* group (§4.1.2); **unmatched** → *additions* group.
+- **Phase 3** collects unmatched-original indices, **descending**, into the *removals* group
+  (§4.1.3).
+
+`11.4.2` **`order` selects the emission:**
+
+- **`insignificant`** → the §4.1.4 concatenation (`modifications ++ removals ++ additions`, additions
+  as `/-` appends). Byte-identical to spec-v1 primaryKey for `|keys|=1` (CORE §8.8.1). Contract
+  CORE §7.2.
+- **`significant`** → the move machinery §8.7 is the emitter (survivors reordered into `modified`
+  order via `move`s, new keys as **INDEXED** adds), run **unconditionally** (independent of the
+  `emitMoves` option; §8.8). Contract CORE §7.4.
+
+`11.4.3` The CORE §8.4.2 tuple gate governs both orders: a violating array falls back to
+`sequence`/LCS (§5). Key equality is by JSON type-and-value per tuple component (CORE §8.4.1), never
+coerced.
+
+### 11.5 Capabilities remain contract-preserving under §11
+
+`11.5.1` §11 changes *which emitter* runs for a declared topology, but the two op-shaping
+capabilities keep their contract-preserving role (CORE §7.7.2): **`emitMoves`** is a no-op for
+`set`/`atomic`/`map`-insignificant, definitionally-on for `map`-significant, and a representational
+relocation optimization for `sequence`/`unique` (§8.8); **`wholesaleReplaceFallback`** may swap any
+topology's granular op stream for a single container `replace` when smaller (§9), never changing the
+reconstructed document. Neither ever moves a container to a different CORE §8.9 contract row.
