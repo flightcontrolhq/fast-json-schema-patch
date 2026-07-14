@@ -423,6 +423,34 @@ describe("invertPatch", () => {
   })
 })
 
+describe("toRfc6902", () => {
+  test("strips oldValue from remove/replace ops, leaves other ops untouched", () => {
+    const patches: Operation[] = [
+      { op: "replace", path: "/a", value: 2, oldValue: 1 },
+      { op: "remove", path: "/b", oldValue: "gone" },
+      { op: "add", path: "/c", value: 3 },
+      { op: "move", from: "/d", path: "/e" },
+    ]
+    expect(toRfc6902(patches)).toEqual([
+      { op: "replace", path: "/a", value: 2 },
+      { op: "remove", path: "/b" },
+      { op: "add", path: "/c", value: 3 },
+      { op: "move", from: "/d", path: "/e" },
+    ])
+  })
+
+  test("stripped output still applies to reach the same document", () => {
+    const original = { a: 1, b: "gone" }
+    const patches: Operation[] = [
+      { op: "replace", path: "/a", value: 2, oldValue: 1 },
+      { op: "remove", path: "/b", oldValue: "gone" },
+    ]
+    const strict = toRfc6902(patches)
+    expect(strict.every((op) => !("oldValue" in op))).toBe(true)
+    expect(applyPatch(original, strict)).toEqual(applyPatch(original, patches))
+  })
+})
+
 describe("diff -> apply round-trip", () => {
   const schema = {
     type: "object",

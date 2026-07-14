@@ -307,6 +307,28 @@ go test ./...
 gofmt -l .   # must print nothing
 ```
 
+## How it compares
+
+Condensed capability comparison against [`wI2L/jsondiff`](https://github.com/wI2L/jsondiff) v0.7.1,
+the closest alternative in the Go ecosystem (version pinned in
+[`go-bench/go.mod`](../go-bench/go.mod), checked against that exact source in the Go module
+cache). See the [root README](../README.md#-how-it-compares) for the full matrix including the
+three JS competitors, and the [notebook](../analysis/benchmark_visualization.ipynb) for
+performance (this table is capabilities only).
+
+| Capability | Ours (Go) | wI2L/jsondiff v0.7.1 |
+|---|---|---|
+| Schema-aware array strategies | Yes — `BuildPlan` derives a per-array strategy (`lcs`/`unique`/`primaryKey`) from a JSON Schema.<!-- proof: spec/vectors/diff/plan-selection.json; go/plan.go --> | No — one generic recursive/LCS comparison; `Compare`/`CompareJSON` take no schema argument. |
+| Raw-JSON entry | Yes — `CompareJSON(schema, original, modified []byte, ...)`.<!-- proof: go/compare_test.go --> | Yes — `CompareJSON(source, target []byte, ...)` (compare.go:21). |
+| Typed-value entry | Yes — `Compare(schema, source, target any, ...)`.<!-- proof: go/compare_any_test.go --> | Yes — `Compare(source, target interface{}, ...)` (compare.go:11). |
+| Apply | Yes — `ApplyPatch`, all six RFC 6902 ops, immutable and atomic.<!-- proof: go/apply.go; go/apply_conformance_test.go; spec/vectors/apply/ (93 vectors) --> | No — an `apply` method exists but is deliberately unexported: "will **NEVER** be exported... is feature-wise out of scope of the project" (apply.go:19-22, citing wI2L/jsondiff#28). |
+| Invert (incl. WITHOUT `oldValue`) | Yes — `InvertPatch(doc, patch)` recovers prior values from the original document even when the patch carries no `oldValue`.<!-- proof: go/invert.go; go/invert_conformance_test.go; spec/vectors/invert/ (28 vectors) --> | Partial — `Patch.Invert()` requires the patch to have been generated with `Invertible()` (a preceding `test` op); otherwise returns `ErrNonReversible` (patch.go:34-58). |
+| Move factorization | Yes, scoped to one array — `EmitMoves(true)` expresses a relocated element as one `move` within its own array.<!-- proof: spec/vectors/diff/capabilities-emit-moves.json; SPEC.md §5.8 --> | Yes, document-wide — `Factorize()` turns any matching remove+add pair anywhere in the tree into `move`/`copy`. |
+| Size rationalization (wholesale) | Yes — `WholesaleReplaceFallback(true)` caps an array's patch at roughly its own serialized size.<!-- proof: spec/vectors/diff/capabilities-wholesale.json; SPEC.md §5.5.6 --> | Yes — `Rationalize()` replaces a set of child ops with one parent `replace` when it marshals smaller. |
+| Ignores | Yes — `IgnorePaths(...)` (JSON Pointer + `*` wildcard).<!-- proof: spec/vectors/diff/capabilities-ignore-paths.json; SPEC.md §5.10 --> | Yes — `Ignores()` (variadic JSON Pointer list), marked experimental. |
+| Deterministic cross-language output | Yes — checked against the TypeScript engine via 300+ shared conformance vectors plus a 576-record differential-fuzz corpus, zero mismatches.<!-- proof: go/differential_test.go ("differential fuzz records executed: 576 across 9 files") --> | N/A — single-language implementation. |
+| Conformance test suite | Yes — 300+ spec-linked vectors under `spec/vectors/`, documented and run by both engines.<!-- proof: go/*_conformance_test.go; ../spec/vectors/README.md --> | Partial — internal `testdata/tests/jsonpatch/*.json` fixtures for its own tests only; not published as a spec-linked suite for external implementers. |
+
 ## Releasing / tagging
 
 This is a **subdirectory module** (it lives in `go/`, not the repo root), so its
