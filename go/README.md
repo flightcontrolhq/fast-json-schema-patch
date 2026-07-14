@@ -174,7 +174,10 @@ plan, err := schemapatch.BuildPlan(schema, schemapatch.BuildPlanOptions{})
 if err != nil {
 	panic(err)
 }
-patcher := schemapatch.NewPatcher(plan) // add capability options here
+patcher, err := schemapatch.NewPatcher(plan) // add capability options here
+if err != nil {
+	panic(err) // only fails for invalid IgnorePaths (SPEC §5.10)
+}
 
 original, err := schemapatch.Decode([]byte(`{"users":[{"id":"user1","status":"active"}]}`))
 if err != nil {
@@ -240,12 +243,18 @@ through to it. The defaults reproduce pre-capability output byte-for-byte:
 | `IncludeOldValue(bool)`             | `true`  | Attach the full prior value as `oldValue` on every `remove`/`replace` (§6.4). Pass `false` to omit it. |
 | `EmitMoves(bool)`                   | `false` | Express relocations of otherwise-identical items as `move` ops so the applied document matches `modified`'s order exactly, not just its content (§5.8). |
 | `WholesaleReplaceFallback(bool)`    | `false` | For a heavily-rewritten array, replace it wholesale when that is smaller than the element-wise edit script (§5.9), capping patch size. |
+| `IgnorePaths(paths...)`             | none    | Object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy; use `*` for an array level (§5.10). An invalid pointer makes `NewPatcher` return an error. |
 
 ```go
-patch := schemapatch.NewPatcher(plan,
+patcher, err := schemapatch.NewPatcher(plan,
 	schemapatch.IncludeOldValue(false),
 	schemapatch.EmitMoves(true),
-).Execute(original, modified)
+	schemapatch.IgnorePaths("/users/*/updatedAt"),
+)
+if err != nil {
+	panic(err)
+}
+patch := patcher.Execute(original, modified)
 ```
 
 `BuildPlan` takes plan-shaping options via `BuildPlanOptions`:

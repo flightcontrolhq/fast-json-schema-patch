@@ -33,7 +33,11 @@ func roundTrip(t *testing.T, doc string, ops []Operation) {
 func TestInvertRoundTripWithoutOldValue(t *testing.T) {
 	orig := `{"a":{"x":1},"b":[1,2,3],"c":"gone"}`
 	mod := `{"a":{"x":9},"b":[1,2,3,4]}`
-	ops := NewPatcher(Plan{}, IncludeOldValue(false)).Execute(mustDecode(t, orig), mustDecode(t, mod))
+	patcher, err := NewPatcher(Plan{}, IncludeOldValue(false))
+	if err != nil {
+		t.Fatalf("NewPatcher: %v", err)
+	}
+	ops := patcher.Execute(mustDecode(t, orig), mustDecode(t, mod))
 	for i := range ops {
 		if ops[i].HasOldValue {
 			t.Fatalf("expected no oldValue with includeOldValue=false, op %d has one", i)
@@ -52,7 +56,11 @@ func TestInvertRoundTripGeneratedPrimaryKey(t *testing.T) {
 	}
 	orig := `{"users":[{"id":"a","name":"A"},{"id":"b","name":"B"},{"id":"c","name":"C"}]}`
 	mod := `{"users":[{"id":"c","name":"C2"},{"id":"a","name":"A"},{"id":"d","name":"D"}]}`
-	ops := NewPatcher(plan).Execute(mustDecode(t, orig), mustDecode(t, mod))
+	patcher, err := NewPatcher(plan)
+	if err != nil {
+		t.Fatalf("NewPatcher: %v", err)
+	}
+	ops := patcher.Execute(mustDecode(t, orig), mustDecode(t, mod))
 	roundTrip(t, orig, ops)
 }
 

@@ -65,7 +65,7 @@ func pad(i, width int) string {
 
 func benchDiff(b *testing.B, plan Plan, a, bb Value) {
 	b.Helper()
-	p := NewPatcher(plan)
+	p, _ := NewPatcher(plan)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {

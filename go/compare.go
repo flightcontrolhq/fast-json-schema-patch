@@ -38,7 +38,11 @@ func CompareJSON(schema, original, modified []byte, opts ...PatcherOption) ([]Op
 	if err != nil {
 		return nil, fmt.Errorf("schemapatch: decode modified: %w", err)
 	}
-	return NewPatcher(plan, opts...).Execute(orig, mod), nil
+	patcher, err := NewPatcher(plan, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return patcher.Execute(orig, mod), nil
 }
 
 // planFromJSONSchema decodes a JSON-Schema byte slice and builds a [Plan] with

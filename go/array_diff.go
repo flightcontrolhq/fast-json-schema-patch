@@ -258,7 +258,7 @@ type scriptEntry struct {
 // backtrack (§5.5.3), adjacent remove+add collapse and granular descent
 // (§5.5.4), then index-correct emission (§5.5.5). With emitMoves on it builds the
 // bijection and defers to the shared staged emitter (§5.8.5).
-func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Operation, onMod modCallback) {
+func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Operation, onMod modCallback, itemIgnore *ignoreNode) {
 	n := len(arr1)
 	m := len(arr2)
 
@@ -318,7 +318,10 @@ func (p *Patcher) diffArrayLCS(arr1, arr2 []Value, path string, patches *[]Opera
 	// state is call-local.
 	fpToID := make(map[string]int)
 	intern := func(v Value) int {
-		fp := stableStringify(v)
+		// ignorePaths (SPEC §5.10.5): the fingerprint is ignore-filtered so items
+		// differing only in ignored fields intern equal. itemIgnore==nil delegates
+		// to stableStringify (byte-identical to the pre-capability path).
+		fp := ignoreFingerprint(v, itemIgnore)
 		id, ok := fpToID[fp]
 		if !ok {
 			id = len(fpToID)

@@ -45,6 +45,7 @@ type fuzzOptions struct {
 	IncludeOldValue          bool              `json:"includeOldValue"`
 	EmitMoves                bool              `json:"emitMoves"`
 	WholesaleReplaceFallback bool              `json:"wholesaleReplaceFallback"`
+	IgnorePaths              []string          `json:"ignorePaths"`
 }
 
 func TestDifferentialFuzzCorpus(t *testing.T) {
@@ -132,11 +133,18 @@ func runFuzzRecord(t *testing.T, rec *fuzzRecord, loadSchema func(string) (Value
 		t.Fatalf("decode modified: %v", err)
 	}
 
-	patcher := NewPatcher(plan,
+	opts := []PatcherOption{
 		IncludeOldValue(rec.Options.IncludeOldValue),
 		EmitMoves(rec.Options.EmitMoves),
 		WholesaleReplaceFallback(rec.Options.WholesaleReplaceFallback),
-	)
+	}
+	if len(rec.Options.IgnorePaths) > 0 {
+		opts = append(opts, IgnorePaths(rec.Options.IgnorePaths...))
+	}
+	patcher, err := NewPatcher(plan, opts...)
+	if err != nil {
+		t.Fatalf("NewPatcher: %v", err)
+	}
 	got := patcher.Execute(original, modified)
 
 	// (1) Structural op equality against the TS reference patch (§10.3.2).

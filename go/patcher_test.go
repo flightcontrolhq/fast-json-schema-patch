@@ -8,7 +8,11 @@ import (
 // supplied) and return the compact-encoded patch for two JSON strings.
 func diffJSON(t *testing.T, plan Plan, a, b string, opts ...PatcherOption) string {
 	t.Helper()
-	ops := NewPatcher(plan, opts...).Execute(mustDecode(t, a), mustDecode(t, b))
+	patcher, err := NewPatcher(plan, opts...)
+	if err != nil {
+		t.Fatalf("NewPatcher: %v", err)
+	}
+	ops := patcher.Execute(mustDecode(t, a), mustDecode(t, b))
 	enc, err := EncodeOperations(ops)
 	if err != nil {
 		t.Fatalf("encode ops: %v", err)
@@ -224,7 +228,7 @@ func TestWholesaleReplaceFallback(t *testing.T) {
 
 func TestDefaultOptionsIncludeOldValue(t *testing.T) {
 	// The zero-option constructor defaults includeOldValue on.
-	p := NewPatcher(Plan{})
+	p, _ := NewPatcher(Plan{})
 	if !p.includeOldValue || p.emitMoves || p.wholesaleReplaceFallback {
 		t.Errorf("defaults = {iov:%v, moves:%v, wholesale:%v}, want {true,false,false}",
 			p.includeOldValue, p.emitMoves, p.wholesaleReplaceFallback)

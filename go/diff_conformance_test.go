@@ -26,9 +26,10 @@ type diffVectorOpts struct {
 	BasePath             string            `json:"basePath"`
 	PrimaryKeyCandidates []string          `json:"primaryKeyCandidates"`
 	Capabilities         struct {
-		IncludeOldValue          *bool `json:"includeOldValue"`
-		EmitMoves                *bool `json:"emitMoves"`
-		WholesaleReplaceFallback *bool `json:"wholesaleReplaceFallback"`
+		IncludeOldValue          *bool    `json:"includeOldValue"`
+		EmitMoves                *bool    `json:"emitMoves"`
+		WholesaleReplaceFallback *bool    `json:"wholesaleReplaceFallback"`
+		IgnorePaths              []string `json:"ignorePaths"`
 	} `json:"capabilities"`
 }
 
@@ -100,6 +101,9 @@ func runDiffVector(t *testing.T, vec diffVector) {
 		if c.WholesaleReplaceFallback != nil {
 			opts = append(opts, WholesaleReplaceFallback(*c.WholesaleReplaceFallback))
 		}
+		if len(c.IgnorePaths) > 0 {
+			opts = append(opts, IgnorePaths(c.IgnorePaths...))
+		}
 	}
 
 	original, err := Decode(vec.Original)
@@ -111,7 +115,11 @@ func runDiffVector(t *testing.T, vec diffVector) {
 		t.Fatalf("decode modified: %v", err)
 	}
 
-	got := NewPatcher(plan, opts...).Execute(original, modified)
+	patcher, err := NewPatcher(plan, opts...)
+	if err != nil {
+		t.Fatalf("NewPatcher: %v", err)
+	}
+	got := patcher.Execute(original, modified)
 
 	// (b) Structural op equality (§10.3.2).
 	want := decodeExpectedPatch(t, vec.ExpectedPatch)

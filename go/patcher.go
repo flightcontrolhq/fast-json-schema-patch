@@ -19,6 +19,11 @@ type Patcher struct {
 	includeOldValue          bool
 	emitMoves                bool
 	wholesaleReplaceFallback bool
+	// ignorePaths capability (SPEC §5.10, §10.4.6). ignorePaths holds the raw
+	// pointers set by the IgnorePaths option; NewPatcher compiles+validates them
+	// into ignoreRoot (nil when empty/absent -> byte-stable output).
+	ignorePaths []string
+	ignoreRoot  *ignoreNode
 }
 
 // PatcherOption configures a [Patcher] (SPEC §10.4). The defaults reproduce the
@@ -48,10 +53,24 @@ func WholesaleReplaceFallback(b bool) PatcherOption {
 	return func(p *Patcher) { p.wholesaleReplaceFallback = b }
 }
 
+// IgnorePaths enables the ignorePaths capability (SPEC §5.10, §10.4.6): a set of
+// object-member JSON Pointers whose subtrees are treated as EQUAL in both
+// directions — no ops at or beneath a matched location, in any strategy. An
+// array level is matched only by a "*" wildcard; a literal array-index or "-"
+// segment, a rootless/empty pointer, or a pointer covering a plan primaryKey
+// field makes [NewPatcher] return a non-nil error (§5.10.1/§5.10.7). Default
+// empty (byte-stable). Modeled on wI2L/jsondiff's Ignores.
+func IgnorePaths(paths ...string) PatcherOption {
+	return func(p *Patcher) { p.ignorePaths = append(p.ignorePaths, paths...) }
+}
+
 // NewPatcher returns a [Patcher] over plan (build one with [BuildPlan], or pass
 // an empty [Plan] for schemaless diffing where every array uses lcs). Options
-// override the defaults documented on each [PatcherOption].
-func NewPatcher(plan Plan, opts ...PatcherOption) *Patcher {
+// override the defaults documented on each [PatcherOption]. It returns a non-nil
+// error only when [IgnorePaths] was given an invalid pointer, or a pointer that
+// covers a plan primaryKey field (SPEC §5.10.1/§5.10.7); with no ignore paths
+// the error is always nil.
+func NewPatcher(plan Plan, opts ...PatcherOption) (*Patcher, error) {
 	p := &Patcher{
 		plan:            plan,
 		planIsEmpty:     plan.Len() == 0,
@@ -60,7 +79,18 @@ func NewPatcher(plan Plan, opts ...PatcherOption) *Patcher {
 	for _, o := range opts {
 		o(p)
 	}
-	return p
+	// Compile+validate ignorePaths after all options are applied (SPEC §5.10.1).
+	root, err := compileIgnoreTrie(p.ignorePaths)
+	if err != nil {
+		return nil, err
+	}
+	p.ignoreRoot = root
+	if root != nil {
+		if err := validatePrimaryKeysNotIgnored(p.plan, root); err != nil {
+			return nil, err
+		}
+	}
+	return p, nil
 }
 
 // Execute computes the patch transforming original into modified (SPEC §5). It
@@ -76,7 +106,9 @@ func (p *Patcher) Execute(original, modified Value) []Operation {
 	if !p.planIsEmpty {
 		node = p.plan.Root()
 	}
-	p.diff(original, modified, "", &patches, node)
+	// Thread the ignore trie from the root in parallel with the plan trie (SPEC
+	// §5.10.2); nil when no ignore paths were given.
+	p.diff(original, modified, "", &patches, node, p.ignoreRoot)
 	return patches
 }
 
@@ -84,7 +116,14 @@ func (p *Patcher) Execute(original, modified Value) []Operation {
 // with both sides present (object add/remove are emitted directly by the parent
 // container); the absent cases of the reference are unreachable for the
 // [Value]-model JSON contract.
-func (p *Patcher) diff(a, b Value, path string, patches *[]Operation, node *PlanNode) {
+func (p *Patcher) diff(a, b Value, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
+	// ignorePaths (SPEC §5.10.4): a terminal ignore node makes this subtree EQUAL
+	// in both directions — emit nothing at or beneath it. Per-member add/remove
+	// are guarded in diffObject (which does not route through diff).
+	if ignoreNode.terminal() {
+		return
+	}
+
 	_, aIsArr := a.([]Value)
 	_, bIsArr := b.([]Value)
 
@@ -101,20 +140,27 @@ func (p *Patcher) diff(a, b Value, path string, patches *[]Operation, node *Plan
 
 	// §5.1.5 Both arrays.
 	if aIsArr {
-		p.diffArray(a.([]Value), b.([]Value), path, patches, node)
+		p.diffArray(a.([]Value), b.([]Value), path, patches, node, ignoreNode)
 		return
 	}
 
 	// §5.1.6 Both objects.
-	p.diffObject(a.(*Object), b.(*Object), path, patches, node)
+	p.diffObject(a.(*Object), b.(*Object), path, patches, node, ignoreNode)
 }
 
 // diffObject diffs two objects in ECMAScript [[OwnPropertyKeys]] visitation
 // order (SPEC §5.2.2): all of original's keys (integer-like ascending, then
 // insertion order), followed by keys present only in modified in the same
 // ordering.
-func (p *Patcher) diffObject(obj1, obj2 *Object, path string, patches *[]Operation, node *PlanNode) {
+func (p *Patcher) diffObject(obj1, obj2 *Object, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
 	for _, key := range ecmaOwnKeys(obj1) {
+		// ignorePaths (SPEC §5.10.3/§5.10.4): a terminal child ignore node means
+		// this member is EQUAL — emit no remove/recursion (add/remove are pushed
+		// here without routing through diff, so the check must be at this site).
+		childIgnore := ignoreNode.member(key)
+		if childIgnore.terminal() {
+			continue
+		}
 		newPath := path + "/" + EscapeToken(key)
 		val1, _ := obj1.Get(key) // present: key is an own member of obj1
 		val2, has2 := obj2.Get(key)
@@ -124,12 +170,16 @@ func (p *Patcher) diffObject(obj1, obj2 *Object, path string, patches *[]Operati
 		}
 		// Descend the trie by RAW property key: an exact child edge takes
 		// precedence over the wildcard at each level (§5.4.5.2).
-		p.diff(val1, val2, newPath, patches, node.Member(key))
+		p.diff(val1, val2, newPath, patches, node.Member(key), childIgnore)
 	}
 
 	for _, key := range ecmaOwnKeys(obj2) {
 		if _, present := obj1.Get(key); present {
 			continue // already visited in pass 1
+		}
+		// A modified-only member under a terminal ignore node emits no add.
+		if ignoreNode.member(key).terminal() {
+			continue
 		}
 		val2, _ := obj2.Get(key)
 		*patches = append(*patches, p.addOp(path+"/"+EscapeToken(key), val2))
@@ -141,13 +191,23 @@ func (p *Patcher) diffObject(obj1, obj2 *Object, path string, patches *[]Operati
 // (byte-identical output); with it on it buffers locally, applies the pinned
 // byte estimate, and either flushes the granular ops or emits a single
 // whole-array replace.
-func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode) {
-	if !p.wholesaleReplaceFallback {
-		p.dispatchArrayStrategy(arr1, arr2, path, patches, node)
+func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
+	// ignorePaths (SPEC §5.10.4): an ignore entry ending at the array-element
+	// level (e.g. `/arr/*`) makes EVERY element — and thus the whole array —
+	// equal, in any strategy. Short-circuit to no ops.
+	if ignoreNode.item().terminal() {
+		return
+	}
+	// ignorePaths interaction (SPEC §5.10.6): if any ignore terminal lies BENEATH
+	// this array, a wholesale replace would leak ignored content into its value —
+	// so the capability is DISABLED for that array and the ignore-filtered
+	// granular stream is kept.
+	if !p.wholesaleReplaceFallback || ignoreSubtreeHasTerminal(ignoreNode) {
+		p.dispatchArrayStrategy(arr1, arr2, path, patches, node, ignoreNode)
 		return
 	}
 	var local []Operation
-	p.dispatchArrayStrategy(arr1, arr2, path, &local, node)
+	p.dispatchArrayStrategy(arr1, arr2, path, &local, node, ignoreNode)
 	estimate := estimatePatchBytes(local)
 	threshold := jsStringifyLen(arr2)
 	if estimate > threshold { // strict >: a tie keeps the granular ops (§5.9.3)
@@ -160,17 +220,24 @@ func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operatio
 // dispatchArrayStrategy selects and runs the array-diff strategy for one array
 // (SPEC §5.3). Strategy is read straight off the trie node; the runtime gates
 // (§5.3.2) may still force an LCS fallback.
-func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode) {
+func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode, ignoreNode *ignoreNode) {
 	plan := node.arrayPlan()
 	strategy := StrategyLCS
 	if plan != nil && plan.Strategy != "" {
 		strategy = plan.Strategy
 	}
 
+	// The item-level ignore node: descending into an array element consumes one
+	// wildcard "*" (the array index level, SPEC §5.10.3). Every element advances
+	// the same way, so this is used both for element recursion and for the
+	// ignore-filtered LCS interning.
+	itemIgnore := ignoreNode.item()
+
 	// The modification callback recurses a matched element pair, threading the
 	// correct child node: a nested-array element descends to the wildcard child
 	// (the inner array's plan at ${path}/*, §4.3.5); an object element stays at
-	// THIS array's node (item property plans are its children, §4.3.3).
+	// THIS array's node (item property plans are its children, §4.3.3). The
+	// element's ignore node is ALWAYS itemIgnore (the array wildcard, §5.10.3).
 	onMod := func(oldVal, newVal Value, cbPath string, cbPatches *[]Operation, skipEqualityCheck bool) {
 		var elementNode *PlanNode
 		_, oa := oldVal.([]Value)
@@ -180,7 +247,7 @@ func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches
 		} else {
 			elementNode = node
 		}
-		p.refine(oldVal, newVal, cbPath, cbPatches, skipEqualityCheck, elementNode)
+		p.refine(oldVal, newVal, cbPath, cbPatches, skipEqualityCheck, elementNode, itemIgnore)
 	}
 
 	// primaryKey applicability gate (§5.4.3). A primaryKeyMap override selects the
@@ -203,18 +270,18 @@ func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches
 		return
 	}
 
-	p.diffArrayLCS(arr1, arr2, path, patches, onMod)
+	p.diffArrayLCS(arr1, arr2, path, patches, onMod, itemIgnore)
 }
 
 // refine recurses a matched element pair back through diff (SPEC §5.5.4.2 /
 // §5.4.1.2). Every real call site passes skipEqualityCheck=true (the pair is
 // already known to differ); the equality-gated branch is retained for parity
 // with the reference.
-func (p *Patcher) refine(oldVal, newVal Value, path string, patches *[]Operation, skipEqualityCheck bool, node *PlanNode) {
+func (p *Patcher) refine(oldVal, newVal Value, path string, patches *[]Operation, skipEqualityCheck bool, node *PlanNode, ignoreNode *ignoreNode) {
 	if !skipEqualityCheck && DeepEqual(oldVal, newVal) {
 		return
 	}
-	p.diff(oldVal, newVal, path, patches, node)
+	p.diff(oldVal, newVal, path, patches, node, ignoreNode)
 }
 
 // --- op builders (honor includeOldValue) ---
