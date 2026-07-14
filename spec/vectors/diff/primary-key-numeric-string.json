@@ -1,0 +1,113 @@
+[
+  {
+    "name": "pk-numeric-to-string-key-is-distinct-item",
+    "comment": "§5.4.1.5: numeric key 1 and string key \"1\" are distinct (no coercion) — the numeric-keyed item is removed and the string-keyed item appended, never matched as an in-place edit",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/users": "id"
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": 1,
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "1",
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/users/0",
+        "oldValue": {
+          "id": 1,
+          "name": "A"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/users/-",
+        "value": {
+          "id": "1",
+          "name": "A"
+        }
+      }
+    ]
+  },
+  {
+    "name": "pk-numeric-and-string-key-coexist-reorder-noop",
+    "comment": "§5.4.1.5/§7.2.3: numeric 1 and string \"1\" coexist as distinct keys; a pure reorder of the two deep-equal-content items is order-insensitive under the default contract -> zero ops",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/users": "id"
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": 1,
+          "name": "X"
+        },
+        {
+          "id": "1",
+          "name": "X"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "1",
+          "name": "X"
+        },
+        {
+          "id": 1,
+          "name": "X"
+        }
+      ]
+    },
+    "expectedPatch": []
+  }
+]

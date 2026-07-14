@@ -707,6 +707,12 @@ A("options", { name: "opt-clone-values-value-equal", comment: "§8.7.2: cloneVal
 A("options", { name: "opt-clone-result-value-equal", comment: "§8.7.3: cloneResult yields the same document value (independent copy)", doc: { a: { x: 1 } }, patch: [{ op: "replace", path: "/a/x", value: 2 }], options: { cloneResult: true }, expected: { a: { x: 2 } } });
 A("options", { name: "opt-clone-result-empty-patch", comment: "§8.7.5/§8.7.3: empty patch under cloneResult still returns the document value", doc: { a: 1 }, patch: [], options: { cloneResult: true }, expected: { a: 1 } });
 
+// --- diff/primary-key-numeric-string: §5.4.1.5 key equality — numeric N and string "N" are DISTINCT keys ---
+// id is unconstrained ({}) so both a number and a string value satisfy the gate (§5.4.3(a): string OR number).
+const PK_ID_ANY = { type: "object", properties: { users: { type: "array", items: { type: "object", properties: { id: {}, name: { type: "string" } } } } } };
+D("primary-key-numeric-string", { name: "pk-numeric-to-string-key-is-distinct-item", comment: "§5.4.1.5: numeric key 1 and string key \"1\" are distinct (no coercion) — the numeric-keyed item is removed and the string-keyed item appended, never matched as an in-place edit", schema: PK_ID_ANY, planOpts: { primaryKeyMap: { "/users": "id" } }, original: { users: [{ id: 1, name: "A" }] }, modified: { users: [{ id: "1", name: "A" }] }, roundtrip: "multiset" });
+D("primary-key-numeric-string", { name: "pk-numeric-and-string-key-coexist-reorder-noop", comment: "§5.4.1.5/§7.2.3: numeric 1 and string \"1\" coexist as distinct keys; a pure reorder of the two deep-equal-content items is order-insensitive under the default contract -> zero ops", schema: PK_ID_ANY, planOpts: { primaryKeyMap: { "/users": "id" } }, original: { users: [{ id: 1, name: "X" }, { id: "1", name: "X" }] }, modified: { users: [{ id: "1", name: "X" }, { id: 1, name: "X" }] }, roundtrip: "multiset" });
+
 //<<THEMES>>
 
 // ===========================================================================
