@@ -58,6 +58,28 @@ function fail(message: string, code: PatchErrorCode, op: Operation | undefined, 
   throw new JsonPatchError(message, code, op, index)
 }
 
+/**
+ * Whole-pointer syntax gate (RFC 6901 §3, SPEC §3.7, D2). A JSON Pointer is
+ * either the empty string (the root) or a string that BEGINS with "/". A
+ * non-empty pointer without a leading "/" is a syntax error and MUST be
+ * rejected with INVALID_POINTER before any resolution — it MUST NOT alias to
+ * the root (which is what `splitPath` would silently do: splitPath("foo")
+ * === splitPath("") === []). This is validated here, at the applyPatch/
+ * invertPatch boundary where pointers arrive from callers, so that `splitPath`
+ * itself stays an unguarded fast primitive for the engine's own always-
+ * well-formed (joinPath-produced) pointers.
+ */
+function assertValidPointer(pointer: string, op: Operation, opIndex: number): void {
+  if (pointer !== "" && pointer.charCodeAt(0) !== 0x2f /* "/" */) {
+    fail(
+      `Invalid JSON Pointer "${pointer}": a non-empty pointer must start with "/"`,
+      "INVALID_POINTER",
+      op,
+      opIndex,
+    )
+  }
+}
+
 const ARRAY_INDEX_RE = /^(0|[1-9]\d*)$/
 
 /**
@@ -209,6 +231,7 @@ function applyOperation(
   cloned: WeakSet<object>,
   options: ApplyPatchOptions,
 ): JsonValue {
+  assertValidPointer(op.path, op, opIndex)
   const parts = splitPath(op.path)
 
   switch (op.op) {
@@ -275,6 +298,7 @@ function applyOperation(
 
     case "move": {
       if (op.from === undefined) fail(`"move" operation is missing "from"`, "INVALID_OPERATION", op, opIndex)
+      assertValidPointer(op.from, op, opIndex)
       const fromParts = splitPath(op.from)
       if (fromParts.length < parts.length && fromParts.every((part, i) => part === parts[i])) {
         fail(`"move" cannot move "${op.from}" into its own child "${op.path}"`, "INVALID_OPERATION", op, opIndex)
@@ -288,6 +312,7 @@ function applyOperation(
 
     case "copy": {
       if (op.from === undefined) fail(`"copy" operation is missing "from"`, "INVALID_OPERATION", op, opIndex)
+      assertValidPointer(op.from, op, opIndex)
       const { exists, value } = getAtPath(root, splitPath(op.from))
       if (!exists) fail(`"copy" source "${op.from}" does not exist`, "PATH_UNRESOLVABLE", op, opIndex)
       // Deep-copy so the result never aliases another location in the document.
@@ -391,6 +416,10 @@ export function invertPatch(document: JsonValue, patches: readonly Operation[]):
 
   for (let i = 0; i < patches.length; i++) {
     const op = patches[i] as Operation
+    assertValidPointer(op.path, op, i)
+    if ((op.op === "move" || op.op === "copy") && op.from !== undefined) {
+      assertValidPointer(op.from, op, i)
+    }
     const parts = splitPath(op.path)
 
     switch (op.op) {

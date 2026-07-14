@@ -159,6 +159,52 @@ describe("applyPatch - paths and errors", () => {
     expect(() => applyPatch({ a: 1 }, [{ op: "replace", path: "/b", value: 2 }])).toThrow(JsonPatchError)
   })
 
+  // D2 (spec-v1-rc external-review defect round, SPEC §3.7 / RFC 6901 §3): a
+  // non-empty pointer without a leading "/" is a whole-pointer syntax error and
+  // MUST be rejected with INVALID_POINTER before any resolution — it MUST NOT
+  // alias to the root (splitPath("foo") === splitPath("") === [], the old bug
+  // that let `replace "foo"` silently overwrite the whole document).
+  describe("D2 non-empty pointer without leading slash -> INVALID_POINTER", () => {
+    const expectInvalidPointer = (fn: () => unknown) => {
+      try {
+        fn()
+        expect.unreachable()
+      } catch (error) {
+        expect(error).toBeInstanceOf(JsonPatchError)
+        expect((error as JsonPatchError).code).toBe("INVALID_POINTER")
+        expect((error as JsonPatchError).operationIndex).toBe(0)
+      }
+    }
+
+    test('replace path "foo" does not alias the root', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "replace", path: "foo", value: 2 }]))
+    })
+    test('add path "foo"', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "add", path: "foo", value: 2 }]))
+    })
+    test('remove path "foo"', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "remove", path: "foo" }]))
+    })
+    test('test path "foo"', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "test", path: "foo", value: 1 }]))
+    })
+    test('move from "foo" (read-side pointer too)', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "move", path: "/bar", from: "foo" }]))
+    })
+    test('move path "bar" (write-side)', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "move", path: "bar", from: "/foo" }]))
+    })
+    test('copy from "foo"', () => {
+      expectInvalidPointer(() => applyPatch({ foo: 1 }, [{ op: "copy", path: "/bar", from: "foo" }]))
+    })
+    test("the empty pointer is still a valid root reference", () => {
+      expect(applyPatch({ a: 1 }, [{ op: "replace", path: "", value: 2 }])).toBe(2)
+    })
+    test("invertPatch also rejects a malformed pointer", () => {
+      expectInvalidPointer(() => invertPatch({ foo: 1 }, [{ op: "replace", path: "foo", value: 2 }]))
+    })
+  })
+
   test("error carries the failing operation, its index, and a code", () => {
     try {
       applyPatch({ a: 1 }, [
