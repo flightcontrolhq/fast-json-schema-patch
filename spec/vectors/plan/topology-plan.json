@@ -1,0 +1,417 @@
+[
+  {
+    "name": "plan-map-composite-insignificant",
+    "comment": "CONF §7.2: a composite map registers topology=map, keys in DECLARED order, order=insignificant (default), compat view strategy=primaryKey primaryKey=keys[0]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/ports",
+        "primaryKey": "containerPort",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "map",
+        "keys": [
+          "containerPort",
+          "protocol"
+        ],
+        "order": "insignificant"
+      }
+    ]
+  },
+  {
+    "name": "plan-map-ordered-significant",
+    "comment": "CONF §7.2: order=significant is recorded verbatim on the map entry",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/ports",
+        "primaryKey": "containerPort",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "map",
+        "keys": [
+          "containerPort",
+          "protocol"
+        ],
+        "order": "significant"
+      }
+    ]
+  },
+  {
+    "name": "plan-map-single-key-ordered",
+    "comment": "CONF §7.2: single-key ordered map — keys=[id], order=significant",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "id"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "map",
+        "keys": [
+          "id"
+        ],
+        "order": "significant"
+      }
+    ]
+  },
+  {
+    "name": "plan-map-keys-order-ab",
+    "comment": "CONF §7.2: `keys` is compared ORDER-SENSITIVELY — this vector declares [a,b]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "a",
+            "b"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "number"
+              },
+              "b": {
+                "type": "number"
+              },
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "a",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "map",
+        "keys": [
+          "a",
+          "b"
+        ],
+        "order": "insignificant"
+      }
+    ]
+  },
+  {
+    "name": "plan-map-keys-order-ba",
+    "comment": "CONF §7.2: the same fields declared as [b,a] are a DISTINCT plan from [a,b] (declared tuple order is significant, §8.4.3)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "b",
+            "a"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "number"
+              },
+              "b": {
+                "type": "number"
+              },
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "b",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "map",
+        "keys": [
+          "b",
+          "a"
+        ],
+        "order": "insignificant"
+      }
+    ]
+  },
+  {
+    "name": "plan-set-topology",
+    "comment": "CONF §7.2/§8.3.1: a set array records topology=set with the compat view strategy=lcs, primaryKey=null",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/xs",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "set"
+      }
+    ]
+  },
+  {
+    "name": "plan-sequence-topology",
+    "comment": "CONF §7.2: a declared sequence records topology=sequence, strategy=lcs (even though items would auto-detect id)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "sequence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "sequence"
+      }
+    ]
+  },
+  {
+    "name": "plan-atomic-array",
+    "comment": "CONF §7.2: an atomic array records topology=atomic; its subtree is PRUNED so there is no descendant entry",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/matrix",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "atomic"
+      }
+    ]
+  },
+  {
+    "name": "plan-object-atomic-prunes-inner-keyed-array",
+    "comment": "CONF §7.2/§8.3.3: an atomic OBJECT registers a single {granularity:atomic} entry and PRUNES its subtree — the inner id-keyed `rules` array gets NO plan entry",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "x-schema-patch-granularity": "atomic",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/config",
+        "granularity": "atomic"
+      }
+    ]
+  },
+  {
+    "name": "plan-declared-sequence-overrides-autodetect",
+    "comment": "CONF §7.2/§8.2.2: the declared sequence wins over the item's auto-detectable primaryKey — topology=sequence, primaryKey=null, strategy=lcs",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "sequence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/rows": "id"
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": [],
+        "topology": "sequence"
+      }
+    ]
+  }
+]

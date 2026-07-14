@@ -1,0 +1,295 @@
+[
+  {
+    "name": "atomic-array-any-diff-whole-replace",
+    "comment": "CORE §8.6.1: any deep difference under an atomic array emits exactly one whole-array replace at the node's own path (oldValue present by default)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        }
+      ]
+    },
+    "modified": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/matrix",
+        "value": [
+          {
+            "id": "a",
+            "n": 2
+          }
+        ],
+        "oldValue": [
+          {
+            "id": "a",
+            "n": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "atomic-array-equal-emits-nothing",
+    "comment": "CORE §8.6.1: deep-equal atomic arrays emit nothing",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        }
+      ]
+    },
+    "modified": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        }
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "atomic-array-includeOldValue-false",
+    "comment": "CORE §8.6.1/§4.4.2: with includeOldValue:false the single atomic replace carries no oldValue",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        }
+      ]
+    },
+    "modified": {
+      "matrix": [
+        {
+          "id": "b",
+          "n": 9
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/matrix",
+        "value": [
+          {
+            "id": "b",
+            "n": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "atomic-array-pruning-no-nested-ops",
+    "comment": "CORE §8.6.2 (CONF §6.3e): nothing recurses below an atomic node — an item whose id would otherwise key it is NOT diffed granularly; a single whole-array replace, no nested /matrix/0/... ops",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        },
+        {
+          "id": "b",
+          "n": 2
+        }
+      ]
+    },
+    "modified": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        },
+        {
+          "id": "b",
+          "n": 3
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/matrix",
+        "value": [
+          {
+            "id": "a",
+            "n": 1
+          },
+          {
+            "id": "b",
+            "n": 3
+          }
+        ],
+        "oldValue": [
+          {
+            "id": "a",
+            "n": 1
+          },
+          {
+            "id": "b",
+            "n": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "atomic-array-wholesaleReplaceFallback-noop",
+    "comment": "CORE §8.6.3: wholesaleReplaceFallback is a no-op for an atomic array (it already emits the wholesale replace unconditionally) — output identical to default",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "wholesaleReplaceFallback": true
+      }
+    },
+    "original": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 1
+        }
+      ]
+    },
+    "modified": {
+      "matrix": [
+        {
+          "id": "a",
+          "n": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/matrix",
+        "value": [
+          {
+            "id": "a",
+            "n": 2
+          }
+        ],
+        "oldValue": [
+          {
+            "id": "a",
+            "n": 1
+          }
+        ]
+      }
+    ]
+  }
+]

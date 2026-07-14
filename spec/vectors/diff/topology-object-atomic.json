@@ -1,0 +1,305 @@
+[
+  {
+    "name": "object-atomic-member-change-whole-replace",
+    "comment": "CORE §8.6.1: any member difference under an atomic object emits one whole-object replace at its path",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "x-schema-patch-granularity": "atomic",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "modified": {
+      "config": {
+        "a": 2,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/config",
+        "value": {
+          "a": 2,
+          "rules": [
+            {
+              "id": "r1",
+              "v": 1
+            }
+          ]
+        },
+        "oldValue": {
+          "a": 1,
+          "rules": [
+            {
+              "id": "r1",
+              "v": 1
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "object-atomic-equal-emits-nothing",
+    "comment": "CORE §8.6.1: deep-equal atomic objects (key order insignificant, §1.4.2) emit nothing",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "x-schema-patch-granularity": "atomic",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "modified": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "object-atomic-pruning-inner-keyed-array-not-diffed",
+    "comment": "CORE §8.6.2 (CONF §6.3e): the inner `rules` array would auto-key on id, but nothing recurses below the atomic object — a single whole-object replace, NO /config/rules/... ops",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "x-schema-patch-granularity": "atomic",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          },
+          {
+            "id": "r2",
+            "v": 2
+          }
+        ]
+      }
+    },
+    "modified": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 5
+          },
+          {
+            "id": "r2",
+            "v": 2
+          }
+        ]
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/config",
+        "value": {
+          "a": 1,
+          "rules": [
+            {
+              "id": "r1",
+              "v": 5
+            },
+            {
+              "id": "r2",
+              "v": 2
+            }
+          ]
+        },
+        "oldValue": {
+          "a": 1,
+          "rules": [
+            {
+              "id": "r1",
+              "v": 1
+            },
+            {
+              "id": "r2",
+              "v": 2
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "object-atomic-includeOldValue-false",
+    "comment": "CORE §8.6.1/§4.4.2: includeOldValue:false suppresses oldValue on the atomic object replace",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "x-schema-patch-granularity": "atomic",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "config": {
+        "a": 1,
+        "rules": [
+          {
+            "id": "r1",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "modified": {
+      "config": {
+        "a": 9,
+        "rules": []
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/config",
+        "value": {
+          "a": 9,
+          "rules": []
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,254 @@
+[
+  {
+    "name": "set-add-and-remove-members",
+    "comment": "CORE §8.5.3: vanished member removed by descending original index, new member appended via '/-' — survivors get NO op",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        1,
+        3,
+        4
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/1",
+        "oldValue": 2
+      },
+      {
+        "op": "add",
+        "path": "/xs/-",
+        "value": 4
+      }
+    ]
+  },
+  {
+    "name": "set-multiple-removals-descending-index",
+    "comment": "CORE §8.5.3: multiple vanished members removed by DESCENDING original index so earlier indices stay valid",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        10,
+        20,
+        30,
+        40
+      ]
+    },
+    "modified": {
+      "xs": [
+        10,
+        40
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/2",
+        "oldValue": 30
+      },
+      {
+        "op": "remove",
+        "path": "/xs/1",
+        "oldValue": 20
+      }
+    ]
+  },
+  {
+    "name": "set-pure-reorder-emits-nothing",
+    "comment": "CORE §8.5.2/§8.5.4: a reorder of the same multiset is order-INSIGNIFICANT — zero ops; round-trip is content/multiset-equal",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        3,
+        2,
+        1
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "set-scalar-change-is-remove-then-append",
+    "comment": "CORE §8.5.2: a set has no positional replace — a changed scalar is one removal + one addition (2 gone, 9 appended)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        1,
+        3,
+        9
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/1",
+        "oldValue": 2
+      },
+      {
+        "op": "add",
+        "path": "/xs/-",
+        "value": 9
+      }
+    ]
+  },
+  {
+    "name": "set-of-objects-value-identity",
+    "comment": "CORE §8.5.2: set-of-objects identity is the whole element value (deep equality); {k:b} vanishes, {k:c} appended",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "object",
+            "properties": {
+              "k": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "items": [
+        {
+          "k": "a"
+        },
+        {
+          "k": "b"
+        }
+      ]
+    },
+    "modified": {
+      "items": [
+        {
+          "k": "a"
+        },
+        {
+          "k": "c"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/items/1",
+        "oldValue": {
+          "k": "b"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/items/-",
+        "value": {
+          "k": "c"
+        }
+      }
+    ]
+  },
+  {
+    "name": "set-removal-includeOldValue-false",
+    "comment": "CORE §8.5.3/§4.4.2: with includeOldValue:false a set removal carries no oldValue",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2
+      ]
+    },
+    "modified": {
+      "xs": [
+        1
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/1"
+      }
+    ]
+  }
+]

@@ -1,0 +1,456 @@
+[
+  {
+    "name": "gate-set-duplicate-in-original-falls-back-lcs",
+    "comment": "CORE §8.5.1: a deep-equal duplicate in `original` fails the set gate → the array falls back to sequence/LCS (exact reconstruction)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/2",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gate-set-duplicate-in-modified-falls-back-lcs",
+    "comment": "CORE §8.5.1: a deep-equal duplicate in `modified` fails the set gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        1,
+        2,
+        2,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/xs/1",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "path": "/xs/2",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "gate-map-non-object-element-falls-back-lcs",
+    "comment": "CORE §8.4.2(a): a non-object element fails the map gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        7
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "b"
+        },
+        7
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/ports/0/name",
+        "value": "b",
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "gate-map-missing-key-field-falls-back-lcs",
+    "comment": "CORE §8.4.2(b): an element missing a key field (protocol absent) fails the map gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "name": "no-proto"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "name": "still"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/ports/0/name",
+        "value": "still",
+        "oldValue": "no-proto"
+      }
+    ]
+  },
+  {
+    "name": "gate-map-null-key-field-falls-back-lcs",
+    "comment": "CORE §8.4.2(b): a key field present but null fails the string|number gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "region",
+            "id"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": "string"
+              },
+              "id": {},
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "region": "us",
+          "id": null,
+          "v": "x"
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "region": "us",
+          "id": null,
+          "v": "y"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/0/v",
+        "value": "y",
+        "oldValue": "x"
+      }
+    ]
+  },
+  {
+    "name": "gate-map-non-scalar-key-field-falls-back-lcs",
+    "comment": "CORE §8.4.2(b): a key field that is neither string nor number (an object) fails the gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "region",
+            "id"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": "string"
+              },
+              "id": {},
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "region": "us",
+          "id": {
+            "nested": 1
+          },
+          "v": "x"
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "region": "us",
+          "id": {
+            "nested": 1
+          },
+          "v": "y"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/0/v",
+        "value": "y",
+        "oldValue": "x"
+      }
+    ]
+  },
+  {
+    "name": "gate-map-duplicate-tuple-in-original-falls-back-lcs",
+    "comment": "CORE §8.4.2(d): a duplicate composite tuple (80,TCP) within `original` fails the map gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "dup"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/ports/1",
+        "oldValue": {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "dup"
+        }
+      }
+    ]
+  },
+  {
+    "name": "gate-map-duplicate-tuple-in-modified-falls-back-lcs",
+    "comment": "CORE §8.4.2(d): a duplicate composite tuple within `modified` fails the map gate → sequence/LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "dup"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/ports/1",
+        "value": {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "dup"
+        }
+      }
+    ]
+  }
+]

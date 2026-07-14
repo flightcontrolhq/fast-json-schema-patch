@@ -35,6 +35,7 @@ import {
 	applyPatch,
 	buildPlan,
 	invertPatch,
+	isObjectPlan,
 	JsonPatchError,
 	JsonSchemaPatcher,
 } from "../src/index";
@@ -95,9 +96,30 @@ function canonSort(v: JsonValue): JsonValue {
 	return v;
 }
 
-function hasPrimaryKeyStrategy(plan: Plan): boolean {
-	for (const ap of plan.values()) if (ap.strategy === "primaryKey") return true;
-	return false;
+/**
+ * CONF §4.1 / §6.3(a) round-trip contract selection, derived entirely from the
+ * plan (a Go implementer builds the same plan and reaches the same verdict).
+ * Returns true iff the vector's plan justifies the weaker **multiset** contract
+ * for a diff whose exact reconstruction failed:
+ *   - a declared `set` topology → content/multiset-equal, order insignificant
+ *     (CORE §8.5.4); `emitMoves` is a no-op for it (CONF §5.7);
+ *   - a declared `map`/insignificant → keyed-collection multiset (CORE §7.2);
+ *     `emitMoves` is a no-op for it too;
+ *   - a legacy (no-topology) auto-detected / `primaryKeyMap` primaryKey →
+ *     multiset, UNLESS `emitMoves` upgrades it to exact reconstruction (CONF §5.4).
+ * A declared `sequence`/`atomic`/`map`-significant, or a granular/atomic object,
+ * is exact-only and never justifies the fallback.
+ */
+function multisetContractJustified(plan: Plan, emitMovesEnabled: boolean): boolean {
+	let sawLegacyPrimaryKey = false;
+	for (const entry of plan.values()) {
+		if (isObjectPlan(entry)) continue; // atomic object → exact only
+		if (entry.topology === "set") return true;
+		if (entry.topology === "map" && entry.order !== "significant") return true;
+		if (entry.topology) continue; // map/significant, sequence, atomic → exact only
+		if (entry.strategy === "primaryKey") sawLegacyPrimaryKey = true;
+	}
+	return sawLegacyPrimaryKey && !emitMovesEnabled;
 }
 
 /**
@@ -105,9 +127,8 @@ function hasPrimaryKeyStrategy(plan: Plan): boolean {
  * test (already asserted structurally equal to `expectedPatch`) to `original`.
  * Exact reconstruction is checked first and, if it holds, always satisfies the
  * gate (exact => multiset). Only if exact fails do we fall back to the
- * multiset contract, and only when the vector's plan justifies it (a
- * primaryKey-strategy path exists and `emitMoves` is not enabled, per
- * CONF §5.4) — otherwise this is a genuine round-trip failure.
+ * multiset contract, and only when the vector's plan justifies it
+ * (`multisetContractJustified`) — otherwise this is a genuine round-trip failure.
  */
 function checkRoundTrip(
 	vectorName: string,
@@ -117,7 +138,7 @@ function checkRoundTrip(
 	emitMovesEnabled: boolean,
 ): void {
 	if (deepEqual(applied, modified)) return;
-	const multisetJustified = hasPrimaryKeyStrategy(plan) && !emitMovesEnabled;
+	const multisetJustified = multisetContractJustified(plan, emitMovesEnabled);
 	if (!multisetJustified) {
 		throw new Error(
 			`${vectorName}: round-trip failed exact reconstruction (CORE §7) and the vector's plan shows ` +
@@ -176,10 +197,16 @@ interface PlanOptionsBlock {
 }
 interface PlanExpectedEntry {
 	path: string;
-	primaryKey: string | null;
-	strategy: "primaryKey" | "unique" | "lcs";
-	requiredFields: string[];
-	hashFields: string[];
+	primaryKey?: string | null;
+	strategy?: "primaryKey" | "unique" | "lcs";
+	requiredFields?: string[];
+	hashFields?: string[];
+	// spec-v2 declared-topology fields (CONF §7.2), present iff declared.
+	topology?: "sequence" | "set" | "map" | "atomic";
+	keys?: string[];
+	order?: "significant" | "insignificant";
+	// spec-v2 object-plan entry (a declared-atomic object): { path, granularity }.
+	granularity?: "atomic";
 }
 interface PlanVector {
 	name: string;
@@ -356,16 +383,39 @@ describe("conformance: apply vectors (CONF §3/CONF §3.1)", () => {
 function sortFields(fields: string[]): string[] {
 	return [...fields].sort();
 }
+/**
+ * Canonicalize a plan entry to a single comparable shape (CONF §7.1/§7.2), so
+ * `toEqual` compares actual and expected identically regardless of source. An
+ * object-plan entry (`granularity` present) is just `{ path, granularity }`.
+ * `requiredFields`/`hashFields` are compared order-insensitively (sorted);
+ * `keys` stays ORDER-sensitive (declared tuple order is significant, §7.2).
+ */
+function canonPlanEntry(e: PlanExpectedEntry): Record<string, unknown> {
+	if (e.granularity) return { path: e.path, granularity: e.granularity };
+	const c: Record<string, unknown> = {
+		path: e.path,
+		primaryKey: e.primaryKey ?? null,
+		strategy: e.strategy ?? "lcs",
+		requiredFields: sortFields(e.requiredFields ?? []),
+		hashFields: sortFields(e.hashFields ?? []),
+	};
+	if (e.topology) c.topology = e.topology;
+	if (e.keys) c.keys = [...e.keys];
+	if (e.order) c.order = e.order;
+	return c;
+}
 function normalizePlanEntries(
 	entries: PlanExpectedEntry[],
-): PlanExpectedEntry[] {
+): Record<string, unknown>[] {
 	return entries
-		.map((e) => ({
-			...e,
-			requiredFields: sortFields(e.requiredFields),
-			hashFields: sortFields(e.hashFields),
-		}))
-		.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+		.map(canonPlanEntry)
+		.sort((a, b) =>
+			(a.path as string) < (b.path as string)
+				? -1
+				: (a.path as string) > (b.path as string)
+					? 1
+					: 0,
+		);
 }
 
 describe("conformance: plan-snapshot vectors (CONF §7/CONF §7.1)", () => {
@@ -383,13 +433,23 @@ describe("conformance: plan-snapshot vectors (CONF §7/CONF §7.1)", () => {
 				primaryKeyCandidates: planOpts.primaryKeyCandidates,
 			});
 			const actual: PlanExpectedEntry[] = [...plan.entries()].map(
-				([path, ap]) => ({
-					path,
-					primaryKey: ap.primaryKey ?? null,
-					strategy: ap.strategy ?? "lcs",
-					requiredFields: ap.requiredFields ? [...ap.requiredFields] : [],
-					hashFields: ap.hashFields ? [...ap.hashFields] : [],
-				}),
+				([path, entry]) => {
+					if (isObjectPlan(entry)) {
+						return { path, granularity: entry.granularity };
+					}
+					const ap = entry;
+					const e: PlanExpectedEntry = {
+						path,
+						primaryKey: ap.primaryKey ?? null,
+						strategy: ap.strategy ?? "lcs",
+						requiredFields: ap.requiredFields ? [...ap.requiredFields] : [],
+						hashFields: ap.hashFields ? [...ap.hashFields] : [],
+					};
+					if (ap.topology) e.topology = ap.topology;
+					if (ap.keys) e.keys = [...ap.keys];
+					if (ap.order) e.order = ap.order;
+					return e;
+				},
 			);
 
 			// CONF §7.1: path set matches, and per path primaryKey/strategy/

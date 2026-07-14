@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "properties": {
+    "servers": {
+      "type": "array",
+      "x-schema-patch-topology": "map",
+      "x-schema-patch-keys": [
+        "region",
+        "id"
+      ],
+      "items": {
+        "type": "object",
+        "required": [
+          "region",
+          "id"
+        ],
+        "properties": {
+          "region": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "cpu": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "x-schema-patch-topology": "map",
+      "x-schema-patch-keys": [
+        "path"
+      ],
+      "x-schema-patch-order": "significant",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "handler": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "x-schema-patch-topology": "set",
+      "items": {
+        "type": "string"
+      }
+    },
+    "matrix": {
+      "type": "array",
+      "x-schema-patch-topology": "atomic",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "x-schema-patch-granularity": "atomic",
+      "properties": {
+        "theme": {
+          "type": "string"
+        },
+        "retries": {
+          "type": "number"
+        },
+        "nested": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

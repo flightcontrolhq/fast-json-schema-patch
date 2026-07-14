@@ -30,17 +30,40 @@ stating what it pins and citing its spec section.
 
 | category | vectors | files |
 |----------|--------:|------:|
-| diff     | 157     | 16    |
+| diff     | 215     | 25    |
 | apply    | 93      | 11    |
-| plan     | 23      | 2     |
+| plan     | 33      | 3     |
 | invert   | 28      | 3     |
-| **total**| **301** | **32**|
+| **total**| **369** | **42**|
 
 Seven of these (one diff, six apply) are the **spec-v1-rc external-review defect round**
 (D1/D2/D4): `diff/kind-mismatch.json`, `apply/malformed-pointer.json`,
 `apply/test-required-value.json`. They pin the **corrected** behavior for defects the
 external review found in the reference engines; the engine fixes have landed, so they are
 derived/self-checked against the (fixed) reference like every other vector.
+
+#### spec-v2 declared-topology groups (CONF §6.3)
+
+54 vectors cover the declared semantic topology model (CORE §8, the
+`x-schema-patch-*` extensions). Each is an ordinary vector whose **`schema`
+carries the extensions** — no new wire field (CONF §2.2). Construction-time
+errors (CORE §8.2.3) precede any diff and live in the engines' unit tests
+(`test/topology.test.ts`, `go/topology_test.go`), not here.
+
+| group | file | vectors |
+|-------|------|--------:|
+| set membership (value identity) | `diff/topology-set.json` | 6 |
+| composite-key map, order insignificant | `diff/topology-map-composite.json` | 5 |
+| order-significant map (moves normative) | `diff/topology-map-ordered.json` | 4 |
+| atomic array | `diff/topology-atomic.json` | 5 |
+| atomic object | `diff/topology-object-atomic.json` | 4 |
+| declared topology beats auto-detect/`primaryKeyMap` | `diff/topology-overrides.json` | 4 |
+| gate failure → `sequence`/LCS fallback | `diff/topology-gate-fallbacks.json` | 8 |
+| compat equivalence (declared == spec-v1 output) | `diff/profile-equivalence.json` | 8 |
+| topology plan snapshots | `plan/topology-plan.json` | 10 |
+
+Every **spec-v1** (extension-free) vector is unchanged byte-for-byte — the
+primary guard that spec-v2 changed no default output (CORE §8.8, CONF §6.3f).
 
 ## Vector record formats
 
@@ -72,6 +95,11 @@ To run a diff vector: build the plan (empty when `schema` is absent), construct
 the patcher with the given capabilities, `execute({original, modified})`, and
 compare against `expectedPatch` per the gate (CONF §4, below).
 
+**spec-v2 topologies** are declared **inside `schema`** via `x-schema-patch-*`
+extensions on the relevant array/object nodes (CORE §8.2) — a topology vector is
+an ordinary diff vector, no extra field (CONF §2.2). `BuildPlan` parses the
+extensions, so the same build-plan-then-execute path runs unchanged.
+
 ### apply (`apply/`, CONF §3)
 
 ```jsonc
@@ -101,7 +129,12 @@ self-check, so a regenerated suite is also a reference-applier conformance run.
   "options": { "primaryKeyMap": {...}, "basePath": "...", "primaryKeyCandidates": [...] },  // OMITTED when empty
   "expectedPlan": [                            // sorted by `path`
     { "path": "/matrix",   "primaryKey": null, "strategy": "lcs",        "requiredFields": [], "hashFields": [] },
-    { "path": "/matrix/*", "primaryKey": "id", "strategy": "primaryKey", "requiredFields": ["id"], "hashFields": ["id"] }
+    { "path": "/matrix/*", "primaryKey": "id", "strategy": "primaryKey", "requiredFields": ["id"], "hashFields": ["id"] },
+    // spec-v2: an array entry declaring a topology adds topology / keys (map, DECLARED order) / order (map):
+    { "path": "/ports",    "primaryKey": "containerPort", "strategy": "primaryKey", "requiredFields": [], "hashFields": [],
+      "topology": "map", "keys": ["containerPort", "protocol"], "order": "insignificant" },
+    // spec-v2: a declared-ATOMIC object is a distinct entry shape — just path + granularity:
+    { "path": "/settings", "granularity": "atomic" }
   ]
 }
 ```
@@ -110,6 +143,14 @@ self-check, so a regenerated suite is also a reference-applier conformance run.
 same `primaryKey`, `strategy`, `requiredFields` and `hashFields`. `itemSchema`
 (CORE §3.1.1) is **never** compared. The entry list and both field arrays are
 compared **order-insensitively** (they are authored sorted for readability).
+
+**spec-v2 fields (CONF §7.2), present iff the node declares a topology:**
+`topology` (array) and `granularity` (object) match **exactly**; `order` (map)
+matches exactly (a `map` entry omitting it means `"insignificant"`); `keys` (map)
+is compared **ORDER-SENSITIVELY** — unlike `requiredFields`/`hashFields` — because
+the declared tuple order is significant to identity (CORE §8.4.3). An `atomic`
+node **prunes its subtree**: a plan MUST NOT contain any entry for a path beneath
+it (CORE §8.3.3).
 
 ### invert (`invert/`, CONF §8)
 
@@ -131,9 +172,13 @@ spec is authoritative.
 - **diff (CONF §4).** Both must hold:
   1. **Round-trip (CONF §4.1).** Applying `expectedPatch` sequentially (CORE §5) to
      `original` reproduces `modified` per the strategy's round-trip contract
-     (CORE §7): **exact** deep-equality for LCS / unique / object-only / `emitMoves`
-     / `wholesaleReplaceFallback`; **multiset-equal** (survivors in original
-     order ++ tail appends) for default-mode `primaryKey`. For `ignorePaths`
+     (CORE §7, per-topology summary CORE §8.9): **exact** deep-equality for LCS /
+     unique / object-only / `sequence` / `atomic` / order-significant `map` /
+     `emitMoves` / `wholesaleReplaceFallback`; **multiset-equal** (survivors in
+     original order ++ tail appends) for default-mode `primaryKey` and
+     `map`/insignificant; **content/multiset-equal** (order insignificant) for
+     `set` (CORE §8.5.4). Runners derive which contract applies **from the plan**
+     (topology + strategy), not from a wire field. For `ignorePaths`
      vectors the reconstruction is exact **modulo the ignored subtrees** (CORE §7.6),
      so runners skip the whole-document round-trip and rely on gate 2 plus the
      differential corpus (`spec/fuzz`).
@@ -148,8 +193,10 @@ spec is authoritative.
   with `code === error.code` and `operationIndex === error.index`. For an
   `expected` vector, the result MUST deep-equal `expected` (CORE §1.4.1) and MUST NOT
   throw.
-- **plan (CONF §7.1).** Path set matches; per path, `primaryKey` / `strategy` /
-  `requiredFields` / `hashFields` match (field arrays order-insensitively).
+- **plan (CONF §7.1/§7.2).** Path set matches; per path, `primaryKey` / `strategy` /
+  `requiredFields` / `hashFields` match (field arrays order-insensitively), and —
+  where declared — `topology` / `granularity` / `order` match exactly and `keys`
+  matches **order-sensitively**.
 - **invert (CONF §8.2).** Both must hold: **(a)** `invertPatch(document, patch)`
   is structurally equal to `expectedInverse` (same relation as CONF §4.2); **(b)**
   `applyPatch(applyPatch(document, patch), expectedInverse)` deep-equals

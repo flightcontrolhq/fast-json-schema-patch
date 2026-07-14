@@ -1,0 +1,455 @@
+[
+  {
+    "name": "equiv-autodetect-id-vs-map-single-key-compat",
+    "comment": "CORE §8.8.1: an auto-detected primaryKey `id` IS map/insignificant keys=[id] — reorder+modify+add produce identical keyed ops [spec-v1 compat schema]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "b",
+          "name": "B2"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/1/name",
+        "value": "B2",
+        "oldValue": "B"
+      },
+      {
+        "op": "add",
+        "path": "/users/-",
+        "value": {
+          "id": "c",
+          "name": "C"
+        }
+      }
+    ]
+  },
+  {
+    "name": "equiv-autodetect-id-vs-map-single-key-declared",
+    "comment": "CORE §8.8.1: an auto-detected primaryKey `id` IS map/insignificant keys=[id] — reorder+modify+add produce identical keyed ops [declared-topology schema — byte-identical output]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "id"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "b",
+          "name": "B2"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/1/name",
+        "value": "B2",
+        "oldValue": "B"
+      },
+      {
+        "op": "add",
+        "path": "/users/-",
+        "value": {
+          "id": "c",
+          "name": "C"
+        }
+      }
+    ]
+  },
+  {
+    "name": "equiv-primarykeymap-vs-map-declared-compat",
+    "comment": "CORE §8.8.1/§3.4.3: a primaryKeyMap {/rows: name} override IS map/insignificant keys=[name] — identical output [spec-v1 compat schema]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/rows": "name"
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "name": "x",
+          "v": 1
+        },
+        {
+          "name": "y",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "name": "y",
+          "v": 9
+        },
+        {
+          "name": "x",
+          "v": 1
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/1/v",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "equiv-primarykeymap-vs-map-declared-declared",
+    "comment": "CORE §8.8.1/§3.4.3: a primaryKeyMap {/rows: name} override IS map/insignificant keys=[name] — identical output [declared-topology schema — byte-identical output]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "name"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "name": "x",
+          "v": 1
+        },
+        {
+          "name": "y",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "name": "y",
+          "v": 9
+        },
+        {
+          "name": "x",
+          "v": 1
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/1/v",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "equiv-keyless-array-vs-sequence-compat",
+    "comment": "CORE §8.8.1: a keyless object array is `sequence` in the compat profile — LCS output identical to a declared `sequence` [spec-v1 compat schema]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "v": 1
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 3
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "v": 1
+        },
+        {
+          "v": 9
+        },
+        {
+          "v": 3
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/1/v",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "equiv-keyless-array-vs-sequence-declared",
+    "comment": "CORE §8.8.1: a keyless object array is `sequence` in the compat profile — LCS output identical to a declared `sequence` [declared-topology schema — byte-identical output]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "sequence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "v": 1
+        },
+        {
+          "v": 2
+        },
+        {
+          "v": 3
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "v": 1
+        },
+        {
+          "v": 9
+        },
+        {
+          "v": 3
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/1/v",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "equiv-default-object-vs-declared-granular-compat",
+    "comment": "CORE §8.8.1: the default object granularity IS `granular`; declaring it explicitly changes nothing (member-wise ops) [spec-v1 compat schema]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cfg": {
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "b": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "cfg": {
+        "a": 1,
+        "b": 2
+      }
+    },
+    "modified": {
+      "cfg": {
+        "a": 1,
+        "b": 3
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/cfg/b",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "equiv-default-object-vs-declared-granular-declared",
+    "comment": "CORE §8.8.1: the default object granularity IS `granular`; declaring it explicitly changes nothing (member-wise ops) [declared-topology schema — byte-identical output]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "cfg": {
+          "type": "object",
+          "x-schema-patch-granularity": "granular",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "b": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "cfg": {
+        "a": 1,
+        "b": 2
+      }
+    },
+    "modified": {
+      "cfg": {
+        "a": 1,
+        "b": 3
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/cfg/b",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  }
+]

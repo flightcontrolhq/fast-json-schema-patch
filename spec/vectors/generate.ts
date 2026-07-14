@@ -33,6 +33,7 @@ import {
   applyPatch,
   buildPlan,
   invertPatch,
+  isObjectPlan,
   JsonPatchError,
   JsonSchemaPatcher,
 } from "../../src/index";
@@ -235,13 +236,27 @@ function buildPlanRecord(spec: PlanSpec): Record<string, unknown> {
   // biome-ignore lint: schemas are authored as plain objects
   const plan = buildPlan({ schema: spec.schema as never, ...spec.planOpts });
   const expectedPlan = [...plan.entries()]
-    .map(([path, ap]) => ({
-      path,
-      primaryKey: ap.primaryKey ?? null,
-      strategy: ap.strategy ?? "lcs",
-      requiredFields: ap.requiredFields ? [...ap.requiredFields].sort() : [],
-      hashFields: ap.hashFields ? [...ap.hashFields].sort() : [],
-    }))
+    .map(([path, entry]): { path: string } & Record<string, unknown> => {
+      // CONF §7.2 / §8.3.2: a declared-atomic OBJECT plan is a distinct entry
+      // shape — just `{ path, granularity }`, no strategy/primaryKey fields.
+      if (isObjectPlan(entry)) {
+        return { path, granularity: entry.granularity };
+      }
+      const ap = entry;
+      const rec: { path: string } & Record<string, unknown> = {
+        path,
+        primaryKey: ap.primaryKey ?? null,
+        strategy: ap.strategy ?? "lcs",
+        requiredFields: ap.requiredFields ? [...ap.requiredFields].sort() : [],
+        hashFields: ap.hashFields ? [...ap.hashFields].sort() : [],
+      };
+      // spec-v2 declared-topology fields, present IFF the node declares a
+      // topology (CONF §7.2). `keys` stays in DECLARED order (order-sensitive).
+      if (ap.topology) rec.topology = ap.topology;
+      if (ap.keys) rec.keys = [...ap.keys];
+      if (ap.order) rec.order = ap.order;
+      return rec;
+    })
     .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   const rec: Record<string, unknown> = { name: spec.name };
   if (spec.comment) rec.comment = spec.comment;
@@ -795,6 +810,152 @@ A("malformed-pointer", { name: "ptr-move-from-no-leading-slash-invalid", comment
 A("test-required-value", { name: "test-missing-value-null-target-invalid", comment: "CORE §5.3/CORE §5.3.5 (D4): {op:test,path:/a} on {a:null} with NO `value` -> INVALID_OPERATION (tier 1), NOT a pass treating absent value as null (Go's bug) and NOT TEST_FAILED (TS's bug)", doc: { a: null }, patch: [{ op: "test", path: "/a" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 } });
 A("test-required-value", { name: "test-missing-value-present-target-invalid", comment: "CORE §5.3/CORE §5.3.5 (D4): {op:test,path:/a} on {a:1} with NO `value` -> INVALID_OPERATION at tier 1, before any value comparison", doc: { a: 1 }, patch: [{ op: "test", path: "/a" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 } });
 A("test-required-value", { name: "test-missing-value-absent-target-invalid", comment: "CORE §5.3.5 (D4): missing `value` (tier 1) precedes read-side non-existence (tier 3) -> INVALID_OPERATION, not PATH_UNRESOLVABLE", doc: { a: 1 }, patch: [{ op: "test", path: "/missing" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 } });
+
+// ===========================================================================
+// SPEC-V2 DECLARED TOPOLOGY VECTORS (CORE §8, GEN §11, CONF §6.3).
+// Every topology is declared IN THE SCHEMA via x-schema-patch-* extensions
+// (CONF §2.2); no new vector field is needed. Construction-time errors
+// (CORE §8.2.3) precede any diff and live in the engines' unit tests (CONF §6.4:
+// test/topology.test.ts, go/topology_test.go), not here.
+// ===========================================================================
+
+// --- Reusable declared-topology schemas ---------------------------------------
+// A primitive array declared as a `set` (value identity, order insignificant).
+const SET_INTS = { type: "object", properties: { xs: { type: "array", "x-schema-patch-topology": "set", items: { type: "number" } } } };
+// A set of objects — identity is the whole element value (deep equality).
+const SET_OBJS = { type: "object", properties: { items: { type: "array", "x-schema-patch-topology": "set", items: { type: "object", properties: { k: { type: "string" } } } } } };
+// k8s-style composite-key map: identity = (containerPort, protocol) tuple.
+const MAP_PORTS = { type: "object", properties: { ports: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["containerPort", "protocol"], items: { type: "object", properties: { containerPort: { type: "number" }, protocol: { type: "string" }, name: { type: "string" } }, required: ["containerPort", "protocol"] } } } };
+// Same tuple identity but order-SIGNIFICANT (exact reconstruction, moves normative).
+const MAP_PORTS_ORDERED = { type: "object", properties: { ports: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["containerPort", "protocol"], "x-schema-patch-order": "significant", items: { type: "object", properties: { containerPort: { type: "number" }, protocol: { type: "string" }, name: { type: "string" } }, required: ["containerPort", "protocol"] } } } };
+// Composite key (region,id) where id is UNCONSTRAINED so a number and a string both satisfy the gate.
+const MAP_REGION_ID = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["region", "id"], items: { type: "object", properties: { region: { type: "string" }, id: {}, v: { type: "string" } } } } } };
+// Composite key (a,b) — two number fields; used to show tuple-value distinctness.
+const MAP_AB = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["a", "b"], items: { type: "object", properties: { a: { type: "number" }, b: { type: "number" }, v: { type: "string" } } } } } };
+// Single-key ordered map (identity = id, order significant).
+const MAP_ID_ORDERED = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["id"], "x-schema-patch-order": "significant", items: { type: "object", properties: { id: { type: "number" }, v: { type: "string" } } } } } };
+// An `atomic` array whose items would otherwise be keyed (id) — pruning target.
+const ATOMIC_ARR = { type: "object", properties: { matrix: { type: "array", "x-schema-patch-topology": "atomic", items: { type: "object", properties: { id: { type: "string" } }, required: ["id"] } } } };
+// An `atomic` object containing a would-be-keyed inner array — pruning target.
+const ATOMIC_OBJ = { type: "object", properties: { config: { type: "object", "x-schema-patch-granularity": "atomic", properties: { a: { type: "number" }, rules: { type: "array", items: { type: "object", properties: { id: { type: "string" }, v: { type: "number" } }, required: ["id"] } } } } } };
+
+// --- topology-set: value identity, membership diff (CORE §8.5) -----------------
+D("topology-set", { name: "set-add-and-remove-members", comment: "CORE §8.5.3: vanished member removed by descending original index, new member appended via '/-' — survivors get NO op", schema: SET_INTS, original: { xs: [1, 2, 3] }, modified: { xs: [1, 3, 4] } });
+D("topology-set", { name: "set-multiple-removals-descending-index", comment: "CORE §8.5.3: multiple vanished members removed by DESCENDING original index so earlier indices stay valid", schema: SET_INTS, original: { xs: [10, 20, 30, 40] }, modified: { xs: [10, 40] } });
+D("topology-set", { name: "set-pure-reorder-emits-nothing", comment: "CORE §8.5.2/§8.5.4: a reorder of the same multiset is order-INSIGNIFICANT — zero ops; round-trip is content/multiset-equal", schema: SET_INTS, original: { xs: [1, 2, 3] }, modified: { xs: [3, 2, 1] }, roundtrip: "multiset" });
+D("topology-set", { name: "set-scalar-change-is-remove-then-append", comment: "CORE §8.5.2: a set has no positional replace — a changed scalar is one removal + one addition (2 gone, 9 appended)", schema: SET_INTS, original: { xs: [1, 2, 3] }, modified: { xs: [1, 3, 9] } });
+D("topology-set", { name: "set-of-objects-value-identity", comment: "CORE §8.5.2: set-of-objects identity is the whole element value (deep equality); {k:b} vanishes, {k:c} appended", schema: SET_OBJS, original: { items: [{ k: "a" }, { k: "b" }] }, modified: { items: [{ k: "a" }, { k: "c" }] } });
+D("topology-set", { name: "set-removal-includeOldValue-false", comment: "CORE §8.5.3/§4.4.2: with includeOldValue:false a set removal carries no oldValue", schema: SET_INTS, capabilities: { includeOldValue: false }, original: { xs: [1, 2] }, modified: { xs: [1] } });
+
+// --- topology-map-composite: composite-key tuple identity (CORE §8.4) ----------
+D("topology-map-composite", { name: "map-composite-modify-remove-add", comment: "CORE §8.4/§7.2: (80,TCP) matched+modified at its original index; (80,UDP) removed; (443,TCP) appended — keyed-collection (order insignificant)", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "http" }, { containerPort: 80, protocol: "UDP", name: "http-udp" }] }, modified: { ports: [{ containerPort: 80, protocol: "TCP", name: "web" }, { containerPort: 443, protocol: "TCP", name: "https" }] }, roundtrip: "multiset" });
+D("topology-map-composite", { name: "map-composite-same-port-diff-protocol-distinct", comment: "CORE §8.4.1: same containerPort but different protocol are DISTINCT tuples — (80,TCP) removed, (80,UDP) added, never an in-place modify", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }] }, modified: { ports: [{ containerPort: 80, protocol: "UDP", name: "a" }] }, roundtrip: "multiset" });
+D("topology-map-composite", { name: "map-composite-numeric-vs-string-component-distinct", comment: "CORE §8.4.1/§8.4.3: a numeric key component 1 and a string component \"1\" are DISTINCT tuples (type-and-value identity) — remove (us,1) + add (us,\"1\")", schema: MAP_REGION_ID, original: { rows: [{ region: "us", id: 1, v: "x" }] }, modified: { rows: [{ region: "us", id: "1", v: "x" }] }, roundtrip: "multiset" });
+D("topology-map-composite", { name: "map-composite-declared-order-ab-swap-distinct", comment: "CORE §8.4.3: with declared keys [a,b], elements {a:1,b:2} and {a:2,b:1} are distinct tuples ([1,2] != [2,1]) — remove + add, not a modify", schema: MAP_AB, original: { rows: [{ a: 1, b: 2, v: "x" }] }, modified: { rows: [{ a: 2, b: 1, v: "y" }] }, roundtrip: "multiset" });
+D("topology-map-composite", { name: "map-composite-reorder-modify-append-multiset", comment: "CORE §7.2: reorder + content-modify + append — survivors stay at their ORIGINAL relative positions carrying modified content, new tuple appended; multiset-equal to modified", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 81, protocol: "TCP", name: "b" }] }, modified: { ports: [{ containerPort: 81, protocol: "TCP", name: "B" }, { containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 82, protocol: "TCP", name: "c" }] }, roundtrip: "multiset" });
+
+// --- topology-map-ordered: order-significant map, exact reconstruction (CORE §8.4.4/§7.4) ---
+D("topology-map-ordered", { name: "map-ordered-exact-reconstruction-with-moves", comment: "CORE §8.4.4/§7.4: order significant → EXACT reconstruction; survivors reordered into modified order via move(s), new tuple as an INDEXED add — move machinery is definitional (no emitMoves option)", schema: MAP_PORTS_ORDERED, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 81, protocol: "TCP", name: "b" }] }, modified: { ports: [{ containerPort: 81, protocol: "TCP", name: "B" }, { containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 82, protocol: "TCP", name: "c" }] } });
+D("topology-map-ordered", { name: "map-ordered-pure-reorder-is-exact", comment: "CORE §8.4.4: a pure reorder under order=significant reconstructs modified EXACTLY (positions preserved), unlike the insignificant multiset contract", schema: MAP_PORTS_ORDERED, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 81, protocol: "TCP", name: "b" }] }, modified: { ports: [{ containerPort: 81, protocol: "TCP", name: "b" }, { containerPort: 80, protocol: "TCP", name: "a" }] } });
+D("topology-map-ordered", { name: "map-ordered-single-key-exact", comment: "CORE §8.4.4/§7.4: single-key (id) order-significant map — exact reconstruction of a reorder+modify+append", schema: MAP_ID_ORDERED, original: { rows: [{ id: 1, v: "a" }, { id: 2, v: "b" }, { id: 3, v: "c" }] }, modified: { rows: [{ id: 3, v: "C" }, { id: 1, v: "a" }, { id: 2, v: "b" }] } });
+D("topology-map-ordered", { name: "map-ordered-emitMoves-option-is-noop", comment: "CORE §8.9.1/GEN §8.8: the emitMoves OPTION is a no-op for an order-significant map (moves already run definitionally) — enabling it yields byte-identical output", schema: MAP_PORTS_ORDERED, capabilities: { emitMoves: true }, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 81, protocol: "TCP", name: "b" }] }, modified: { ports: [{ containerPort: 81, protocol: "TCP", name: "b" }, { containerPort: 80, protocol: "TCP", name: "a" }] } });
+
+// --- topology-atomic: whole-array atomic replace (CORE §8.6) --------------------
+D("topology-atomic", { name: "atomic-array-any-diff-whole-replace", comment: "CORE §8.6.1: any deep difference under an atomic array emits exactly one whole-array replace at the node's own path (oldValue present by default)", schema: ATOMIC_ARR, original: { matrix: [{ id: "a", n: 1 }] }, modified: { matrix: [{ id: "a", n: 2 }] } });
+D("topology-atomic", { name: "atomic-array-equal-emits-nothing", comment: "CORE §8.6.1: deep-equal atomic arrays emit nothing", schema: ATOMIC_ARR, original: { matrix: [{ id: "a", n: 1 }] }, modified: { matrix: [{ id: "a", n: 1 }] } });
+D("topology-atomic", { name: "atomic-array-includeOldValue-false", comment: "CORE §8.6.1/§4.4.2: with includeOldValue:false the single atomic replace carries no oldValue", schema: ATOMIC_ARR, capabilities: { includeOldValue: false }, original: { matrix: [{ id: "a", n: 1 }] }, modified: { matrix: [{ id: "b", n: 9 }] } });
+D("topology-atomic", { name: "atomic-array-pruning-no-nested-ops", comment: "CORE §8.6.2 (CONF §6.3e): nothing recurses below an atomic node — an item whose id would otherwise key it is NOT diffed granularly; a single whole-array replace, no nested /matrix/0/... ops", schema: ATOMIC_ARR, original: { matrix: [{ id: "a", n: 1 }, { id: "b", n: 2 }] }, modified: { matrix: [{ id: "a", n: 1 }, { id: "b", n: 3 }] } });
+D("topology-atomic", { name: "atomic-array-wholesaleReplaceFallback-noop", comment: "CORE §8.6.3: wholesaleReplaceFallback is a no-op for an atomic array (it already emits the wholesale replace unconditionally) — output identical to default", schema: ATOMIC_ARR, capabilities: { wholesaleReplaceFallback: true }, original: { matrix: [{ id: "a", n: 1 }] }, modified: { matrix: [{ id: "a", n: 2 }] } });
+
+// --- topology-object-atomic: whole-object atomic replace (CORE §8.6, §8.3.2) ----
+D("topology-object-atomic", { name: "object-atomic-member-change-whole-replace", comment: "CORE §8.6.1: any member difference under an atomic object emits one whole-object replace at its path", schema: ATOMIC_OBJ, original: { config: { a: 1, rules: [{ id: "r1", v: 1 }] } }, modified: { config: { a: 2, rules: [{ id: "r1", v: 1 }] } } });
+D("topology-object-atomic", { name: "object-atomic-equal-emits-nothing", comment: "CORE §8.6.1: deep-equal atomic objects (key order insignificant, §1.4.2) emit nothing", schema: ATOMIC_OBJ, original: { config: { a: 1, rules: [{ id: "r1", v: 1 }] } }, modified: { config: { a: 1, rules: [{ id: "r1", v: 1 }] } } });
+D("topology-object-atomic", { name: "object-atomic-pruning-inner-keyed-array-not-diffed", comment: "CORE §8.6.2 (CONF §6.3e): the inner `rules` array would auto-key on id, but nothing recurses below the atomic object — a single whole-object replace, NO /config/rules/... ops", schema: ATOMIC_OBJ, original: { config: { a: 1, rules: [{ id: "r1", v: 1 }, { id: "r2", v: 2 }] } }, modified: { config: { a: 1, rules: [{ id: "r1", v: 5 }, { id: "r2", v: 2 }] } } });
+D("topology-object-atomic", { name: "object-atomic-includeOldValue-false", comment: "CORE §8.6.1/§4.4.2: includeOldValue:false suppresses oldValue on the atomic object replace", schema: ATOMIC_OBJ, capabilities: { includeOldValue: false }, original: { config: { a: 1, rules: [{ id: "r1", v: 1 }] } }, modified: { config: { a: 9, rules: [] } } });
+
+// --- topology-overrides: a declared topology BEATS auto-detection/primaryKeyMap (CORE §8.2.2, CONF §6.3d) ---
+// items carry a required `id` (would auto-detect a primaryKey), but `sequence` forces positional LCS.
+const OVERRIDE_SEQ = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "sequence", items: { type: "object", properties: { id: { type: "string" }, v: { type: "number" } }, required: ["id"] } } } };
+D("topology-overrides", { name: "override-sequence-beats-autodetected-primarykey", comment: "CORE §8.2.2/§8.7: items have a required `id` that WOULD auto-detect a primaryKey, but the declared `sequence` topology forces positional LCS — a reorder becomes remove+add at positions, not a keyed no-op", schema: OVERRIDE_SEQ, original: { rows: [{ id: "a", v: 1 }, { id: "b", v: 2 }] }, modified: { rows: [{ id: "b", v: 2 }, { id: "a", v: 1 }] } });
+// primaryKeyMap targets /rows, but the declared atomic topology wins.
+const OVERRIDE_ATOMIC = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "atomic", items: { type: "object", properties: { id: { type: "string" }, v: { type: "number" } } } } } };
+D("topology-overrides", { name: "override-atomic-beats-primaryKeyMap", comment: "CORE §8.2.2: an explicit primaryKeyMap entry for /rows is OVERRIDDEN by the declared `atomic` topology — one whole-array replace, not a keyed diff", schema: OVERRIDE_ATOMIC, planOpts: { primaryKeyMap: { "/rows": "id" } }, original: { rows: [{ id: "a", v: 1 }, { id: "b", v: 2 }] }, modified: { rows: [{ id: "a", v: 1 }, { id: "b", v: 9 }] } });
+D("topology-overrides", { name: "override-set-beats-compat-unique-primitive", comment: "CORE §8.5/§8.8: a primitive array is `unique` (positional replace) by the compat profile, but declaring `set` makes an equal-length scalar change a remove+append instead of a positional replace", schema: SET_INTS, original: { xs: [1, 2, 3] }, modified: { xs: [1, 9, 3] }, roundtrip: "multiset" });
+// items auto-detect `id`, but declared map keys=[name] uses `name` as identity instead.
+const OVERRIDE_MAP_NAME = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["name"], items: { type: "object", properties: { id: { type: "string" }, name: { type: "string" }, v: { type: "number" } }, required: ["id", "name"] } } } };
+D("topology-overrides", { name: "override-map-keys-beats-autodetected-id", comment: "CORE §8.2.2: `id` would auto-detect as the primaryKey, but declared map keys=[name] makes `name` the identity — the same id with a changed name is remove+add, not an in-place modify", schema: OVERRIDE_MAP_NAME, original: { rows: [{ id: "x", name: "alpha", v: 1 }] }, modified: { rows: [{ id: "x", name: "beta", v: 1 }] }, roundtrip: "multiset" });
+
+// --- topology-gate-fallbacks: gate failure → sequence/LCS (CORE §8.4.2, §8.5.1, CONF §6.3c) ---
+D("topology-gate-fallbacks", { name: "gate-set-duplicate-in-original-falls-back-lcs", comment: "CORE §8.5.1: a deep-equal duplicate in `original` fails the set gate → the array falls back to sequence/LCS (exact reconstruction)", schema: SET_INTS, original: { xs: [1, 2, 2, 3] }, modified: { xs: [1, 2, 3] } });
+D("topology-gate-fallbacks", { name: "gate-set-duplicate-in-modified-falls-back-lcs", comment: "CORE §8.5.1: a deep-equal duplicate in `modified` fails the set gate → sequence/LCS", schema: SET_INTS, original: { xs: [1, 3] }, modified: { xs: [1, 2, 2, 3] } });
+D("topology-gate-fallbacks", { name: "gate-map-non-object-element-falls-back-lcs", comment: "CORE §8.4.2(a): a non-object element fails the map gate → sequence/LCS", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, 7] }, modified: { ports: [{ containerPort: 80, protocol: "TCP", name: "b" }, 7] } });
+D("topology-gate-fallbacks", { name: "gate-map-missing-key-field-falls-back-lcs", comment: "CORE §8.4.2(b): an element missing a key field (protocol absent) fails the map gate → sequence/LCS", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, name: "no-proto" }] }, modified: { ports: [{ containerPort: 80, name: "still" }] } });
+D("topology-gate-fallbacks", { name: "gate-map-null-key-field-falls-back-lcs", comment: "CORE §8.4.2(b): a key field present but null fails the string|number gate → sequence/LCS", schema: MAP_REGION_ID, original: { rows: [{ region: "us", id: null, v: "x" }] }, modified: { rows: [{ region: "us", id: null, v: "y" }] } });
+D("topology-gate-fallbacks", { name: "gate-map-non-scalar-key-field-falls-back-lcs", comment: "CORE §8.4.2(b): a key field that is neither string nor number (an object) fails the gate → sequence/LCS", schema: MAP_REGION_ID, original: { rows: [{ region: "us", id: { nested: 1 }, v: "x" }] }, modified: { rows: [{ region: "us", id: { nested: 1 }, v: "y" }] } });
+D("topology-gate-fallbacks", { name: "gate-map-duplicate-tuple-in-original-falls-back-lcs", comment: "CORE §8.4.2(d): a duplicate composite tuple (80,TCP) within `original` fails the map gate → sequence/LCS", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 80, protocol: "TCP", name: "dup" }] }, modified: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }] } });
+D("topology-gate-fallbacks", { name: "gate-map-duplicate-tuple-in-modified-falls-back-lcs", comment: "CORE §8.4.2(d): a duplicate composite tuple within `modified` fails the map gate → sequence/LCS", schema: MAP_PORTS, original: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }] }, modified: { ports: [{ containerPort: 80, protocol: "TCP", name: "a" }, { containerPort: 80, protocol: "TCP", name: "dup" }] } });
+
+// --- profile-equivalence: declared topology == compat behavior, byte-for-byte (CORE §8.8, CONF §6.3f) ---
+// Each pair diffs the SAME documents under a spec-v1 (extension-free) schema and its declared-topology
+// equivalent, asserting IDENTICAL emitted ops at generation time, then emits BOTH as vectors.
+function equiv(
+  baseName: string,
+  comment: string,
+  schemaCompat: object,
+  schemaDeclared: object,
+  original: JsonValue,
+  modified: JsonValue,
+  compatPlanOpts: PlanOpts | undefined,
+  roundtrip: DiffSpec["roundtrip"],
+) {
+  const cp = new JsonSchemaPatcher({
+    // biome-ignore lint: schemas are authored as plain objects
+    plan: buildPlan({ schema: schemaCompat as never, ...(compatPlanOpts ?? {}) }),
+  }).execute({ original, modified }) as Operation[];
+  const dp = new JsonSchemaPatcher({
+    // biome-ignore lint: schemas are authored as plain objects
+    plan: buildPlan({ schema: schemaDeclared as never }),
+  }).execute({ original, modified }) as Operation[];
+  assert(
+    deepEqual(cp, dp),
+    `profile-equivalence ${baseName}: compat and declared-topology outputs differ (CORE §8.8):\n compat=${JSON.stringify(cp)}\n declared=${JSON.stringify(dp)}`,
+  );
+  D("profile-equivalence", { name: `${baseName}-compat`, comment: `${comment} [spec-v1 compat schema]`, schema: schemaCompat, planOpts: compatPlanOpts, original, modified, roundtrip });
+  D("profile-equivalence", { name: `${baseName}-declared`, comment: `${comment} [declared-topology schema — byte-identical output]`, schema: schemaDeclared, original, modified, roundtrip });
+}
+// (1) auto-detected primaryKey `id` == declared map keys=[id] insignificant (CORE §8.8.1 bullet 1).
+const EQ_AUTO_ID = { type: "object", properties: { users: { type: "array", items: { type: "object", properties: { id: { type: "string" }, name: { type: "string" } }, required: ["id"] } } } };
+const EQ_MAP_ID = { type: "object", properties: { users: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["id"], items: { type: "object", properties: { id: { type: "string" }, name: { type: "string" } }, required: ["id"] } } } };
+equiv("equiv-autodetect-id-vs-map-single-key", "CORE §8.8.1: an auto-detected primaryKey `id` IS map/insignificant keys=[id] — reorder+modify+add produce identical keyed ops", EQ_AUTO_ID, EQ_MAP_ID, { users: [{ id: "a", name: "A" }, { id: "b", name: "B" }] }, { users: [{ id: "b", name: "B2" }, { id: "a", name: "A" }, { id: "c", name: "C" }] }, undefined, "multiset");
+// (2) primaryKeyMap {/rows: name} == declared map keys=[name] insignificant (CORE §8.8.1 bullet 1 via §3.4.3).
+const EQ_PLAIN_ROWS = { type: "object", properties: { rows: { type: "array", items: { type: "object", properties: { name: { type: "string" }, v: { type: "number" } } } } } };
+const EQ_MAP_NAME = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["name"], items: { type: "object", properties: { name: { type: "string" }, v: { type: "number" } } } } } };
+equiv("equiv-primarykeymap-vs-map-declared", "CORE §8.8.1/§3.4.3: a primaryKeyMap {/rows: name} override IS map/insignificant keys=[name] — identical output", EQ_PLAIN_ROWS, EQ_MAP_NAME, { rows: [{ name: "x", v: 1 }, { name: "y", v: 2 }] }, { rows: [{ name: "y", v: 9 }, { name: "x", v: 1 }] }, { primaryKeyMap: { "/rows": "name" } }, "multiset");
+// (3) a keyless object array (compat → sequence/LCS) == declared sequence (CORE §8.8.1 bullet 3).
+const EQ_KEYLESS = { type: "object", properties: { rows: { type: "array", items: { type: "object", properties: { v: { type: "number" } } } } } };
+const EQ_SEQ = { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "sequence", items: { type: "object", properties: { v: { type: "number" } } } } } };
+equiv("equiv-keyless-array-vs-sequence", "CORE §8.8.1: a keyless object array is `sequence` in the compat profile — LCS output identical to a declared `sequence`", EQ_KEYLESS, EQ_SEQ, { rows: [{ v: 1 }, { v: 2 }, { v: 3 }] }, { rows: [{ v: 1 }, { v: 9 }, { v: 3 }] }, undefined, "exact");
+// (4) a default (granular) object == an explicitly declared `granular` object (CORE §8.8.1 bullet 4); declaring granular is a no-op and is NOT registered.
+const EQ_OBJ_DEFAULT = { type: "object", properties: { cfg: { type: "object", properties: { a: { type: "number" }, b: { type: "number" } } } } };
+const EQ_OBJ_GRANULAR = { type: "object", properties: { cfg: { type: "object", "x-schema-patch-granularity": "granular", properties: { a: { type: "number" }, b: { type: "number" } } } } };
+equiv("equiv-default-object-vs-declared-granular", "CORE §8.8.1: the default object granularity IS `granular`; declaring it explicitly changes nothing (member-wise ops)", EQ_OBJ_DEFAULT, EQ_OBJ_GRANULAR, { cfg: { a: 1, b: 2 } }, { cfg: { a: 1, b: 3 } }, undefined, "exact");
+
+// ===========================================================================
+// SPEC-V2 TOPOLOGY PLAN-SNAPSHOT VECTORS (CONF §7.2). Assert BuildPlan parses the
+// x-schema-patch-* extensions into the declared-topology plan fields identically
+// across engines: topology/granularity exact, keys ORDER-sensitive, order exact,
+// and atomic PRUNING (no descendant entries).
+// ===========================================================================
+P("topology-plan", { name: "plan-map-composite-insignificant", comment: "CONF §7.2: a composite map registers topology=map, keys in DECLARED order, order=insignificant (default), compat view strategy=primaryKey primaryKey=keys[0]", schema: MAP_PORTS });
+P("topology-plan", { name: "plan-map-ordered-significant", comment: "CONF §7.2: order=significant is recorded verbatim on the map entry", schema: MAP_PORTS_ORDERED });
+P("topology-plan", { name: "plan-map-single-key-ordered", comment: "CONF §7.2: single-key ordered map — keys=[id], order=significant", schema: MAP_ID_ORDERED });
+P("topology-plan", { name: "plan-map-keys-order-ab", comment: "CONF §7.2: `keys` is compared ORDER-SENSITIVELY — this vector declares [a,b]", schema: MAP_AB });
+P("topology-plan", { name: "plan-map-keys-order-ba", comment: "CONF §7.2: the same fields declared as [b,a] are a DISTINCT plan from [a,b] (declared tuple order is significant, §8.4.3)", schema: { type: "object", properties: { rows: { type: "array", "x-schema-patch-topology": "map", "x-schema-patch-keys": ["b", "a"], items: { type: "object", properties: { a: { type: "number" }, b: { type: "number" }, v: { type: "string" } } } } } } });
+P("topology-plan", { name: "plan-set-topology", comment: "CONF §7.2/§8.3.1: a set array records topology=set with the compat view strategy=lcs, primaryKey=null", schema: SET_INTS });
+P("topology-plan", { name: "plan-sequence-topology", comment: "CONF §7.2: a declared sequence records topology=sequence, strategy=lcs (even though items would auto-detect id)", schema: OVERRIDE_SEQ });
+P("topology-plan", { name: "plan-atomic-array", comment: "CONF §7.2: an atomic array records topology=atomic; its subtree is PRUNED so there is no descendant entry", schema: ATOMIC_ARR });
+P("topology-plan", { name: "plan-object-atomic-prunes-inner-keyed-array", comment: "CONF §7.2/§8.3.3: an atomic OBJECT registers a single {granularity:atomic} entry and PRUNES its subtree — the inner id-keyed `rules` array gets NO plan entry", schema: ATOMIC_OBJ });
+P("topology-plan", { name: "plan-declared-sequence-overrides-autodetect", comment: "CONF §7.2/§8.2.2: the declared sequence wins over the item's auto-detectable primaryKey — topology=sequence, primaryKey=null, strategy=lcs", schema: OVERRIDE_SEQ, planOpts: { primaryKeyMap: { "/rows": "id" } } });
 
 //<<THEMES>>
 

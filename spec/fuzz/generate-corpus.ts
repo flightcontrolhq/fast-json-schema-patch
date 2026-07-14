@@ -472,6 +472,255 @@ function mutateIgnoreDoc(doc: IgnoreDoc): IgnoreDoc {
 }
 
 // ---------------------------------------------------------------------------
+// spec-v2 declared-topology differential corpus (CORE §8). A dedicated,
+// self-contained family whose schema declares every array/object topology via
+// x-schema-patch-* extensions: a composite-key map (order insignificant), an
+// order-SIGNIFICANT single-key map (exercises the move machinery, GEN §11.4), a
+// primitive `set` (membership diff), an `atomic` array, and an `atomic` object.
+// Doc pairs are generated + mutated with a SEPARATE seeded PRNG (so the
+// faker/jsf corpus above stays byte-identical) whose modifications hit every
+// topology: composite add/remove/modify, ordered reorder, set membership churn,
+// atomic whole-container replace. The Go differential replays each record and
+// asserts structural op equality + apply equality (CONF §4.2/CORE §5.7.4). The
+// element generators keep composite tuples / set members / ordered keys UNIQUE so
+// each array stays on its topology's fast path (gate fallbacks are covered by
+// the conformance vectors, spec/vectors/diff/topology-gate-fallbacks.json).
+// ---------------------------------------------------------------------------
+const TOPOLOGY_SCHEMA = {
+  type: "object",
+  properties: {
+    servers: {
+      type: "array",
+      "x-schema-patch-topology": "map",
+      "x-schema-patch-keys": ["region", "id"],
+      items: {
+        type: "object",
+        required: ["region", "id"],
+        properties: {
+          region: { type: "string" },
+          id: { type: "number" },
+          cpu: { type: "number" },
+          name: { type: "string" },
+        },
+      },
+    },
+    routes: {
+      type: "array",
+      "x-schema-patch-topology": "map",
+      "x-schema-patch-keys": ["path"],
+      "x-schema-patch-order": "significant",
+      items: {
+        type: "object",
+        required: ["path"],
+        properties: { path: { type: "string" }, handler: { type: "string" } },
+      },
+    },
+    tags: { type: "array", "x-schema-patch-topology": "set", items: { type: "string" } },
+    matrix: {
+      type: "array",
+      "x-schema-patch-topology": "atomic",
+      items: { type: "array", items: { type: "number" } },
+    },
+    settings: {
+      type: "object",
+      "x-schema-patch-granularity": "atomic",
+      properties: {
+        theme: { type: "string" },
+        retries: { type: "number" },
+        nested: { type: "object", properties: { a: { type: "number" } } },
+      },
+    },
+  },
+};
+writeFileSync(join(schemaDir, "topology.json"), `${JSON.stringify(TOPOLOGY_SCHEMA, null, 2)}\n`);
+
+interface TopoServer {
+  region: string;
+  id: number;
+  cpu: number;
+  name: string;
+}
+interface TopoRoute {
+  path: string;
+  handler: string;
+}
+interface TopoDoc {
+  servers: TopoServer[];
+  routes: TopoRoute[];
+  tags: string[];
+  matrix: number[][];
+  settings: { theme: string; retries: number; nested: { a: number } };
+}
+
+const trng = mulberry32(SEED ^ 0x709010); // "topolo" — independent stream.
+const tri = (n: number) => Math.floor(trng() * n);
+const REGIONS = ["us", "eu", "ap", "sa"];
+const HANDLERS = ["h1", "h2", "h3", "h4", "h5"];
+const THEMES = ["light", "dark", "auto"];
+
+function makeTopoDoc(): TopoDoc {
+  // servers: unique (region,id) tuples (composite map fast path).
+  const nServers = 2 + tri(5);
+  const servers: TopoServer[] = [];
+  const seenTuple = new Set<string>();
+  for (let i = 0; i < nServers; i++) {
+    const region = REGIONS[tri(REGIONS.length)] as string;
+    const id = tri(8);
+    const key = `${region}:${id}`;
+    if (seenTuple.has(key)) continue;
+    seenTuple.add(key);
+    servers.push({ region, id, cpu: tri(100), name: WORDS[tri(WORDS.length)] as string });
+  }
+  // routes: unique paths (ordered map fast path).
+  const nRoutes = 2 + tri(4);
+  const routes: TopoRoute[] = [];
+  const seenPath = new Set<string>();
+  for (let i = 0; i < nRoutes; i++) {
+    const path = `/${WORDS[tri(WORDS.length)]}/${i}`;
+    if (seenPath.has(path)) continue;
+    seenPath.add(path);
+    routes.push({ path, handler: HANDLERS[tri(HANDLERS.length)] as string });
+  }
+  // tags: unique set members.
+  const tags: string[] = [];
+  const usedTag = new Set<string>();
+  const nt = 2 + tri(5);
+  for (let i = 0; i < nt; i++) {
+    const t = `${TAGPOOL[tri(TAGPOOL.length)]}${tri(3)}`;
+    if (usedTag.has(t)) continue;
+    usedTag.add(t);
+    tags.push(t);
+  }
+  const matrix: number[][] = [];
+  const rows = 1 + tri(3);
+  for (let r = 0; r < rows; r++) {
+    const row: number[] = [];
+    const cols = 1 + tri(3);
+    for (let c = 0; c < cols; c++) row.push(tri(50));
+    matrix.push(row);
+  }
+  return {
+    servers,
+    routes,
+    tags,
+    matrix,
+    settings: { theme: THEMES[tri(THEMES.length)] as string, retries: tri(5), nested: { a: tri(10) } },
+  };
+}
+
+function mutateTopoDoc(doc: TopoDoc): TopoDoc {
+  const m: TopoDoc = clone(doc);
+  // servers (composite map, insignificant): modify content, remove, add a fresh tuple.
+  for (const s of m.servers) {
+    if (tri(2) === 0) s.cpu = tri(100); // modify (matched by tuple)
+    if (tri(3) === 0) s.name = WORDS[tri(WORDS.length)] as string;
+  }
+  if (m.servers.length > 1 && tri(3) === 0) m.servers.splice(tri(m.servers.length), 1);
+  if (tri(2) === 0) {
+    // add a tuple guaranteed unique (id offset into a disjoint band).
+    m.servers.push({ region: REGIONS[tri(REGIONS.length)] as string, id: 100 + tri(50), cpu: tri(100), name: WORDS[tri(WORDS.length)] as string });
+  }
+  // reorder servers — order is insignificant, so this must produce NO extra ops.
+  if (m.servers.length > 1 && tri(2) === 0) {
+    const i = tri(m.servers.length);
+    const j = tri(m.servers.length);
+    const t = m.servers[i] as TopoServer;
+    m.servers[i] = m.servers[j] as TopoServer;
+    m.servers[j] = t;
+  }
+  // routes (ordered map, significant): reorder (→ moves), modify handler, add/remove.
+  if (m.routes.length > 1 && tri(2) === 0) {
+    const i = tri(m.routes.length);
+    const j = tri(m.routes.length);
+    const t = m.routes[i] as TopoRoute;
+    m.routes[i] = m.routes[j] as TopoRoute;
+    m.routes[j] = t;
+  }
+  for (const r of m.routes) if (tri(3) === 0) r.handler = HANDLERS[tri(HANDLERS.length)] as string;
+  if (m.routes.length > 1 && tri(3) === 0) m.routes.splice(tri(m.routes.length), 1);
+  if (tri(3) === 0) {
+    const path = `/added/${100 + tri(50)}`;
+    if (!m.routes.some((r) => r.path === path)) m.routes.push({ path, handler: HANDLERS[tri(HANDLERS.length)] as string });
+  }
+  // tags (set): remove some, add fresh unique members, occasionally reorder (no ops).
+  m.tags = m.tags.filter(() => tri(3) !== 0);
+  const used = new Set(m.tags);
+  if (tri(2) === 0) {
+    const t = `new${tri(100)}`;
+    if (!used.has(t)) m.tags.push(t);
+  }
+  if (m.tags.length > 1 && tri(2) === 0) m.tags.reverse();
+  // matrix (atomic array): sometimes mutate one cell → whole-array replace.
+  if (tri(2) === 0 && m.matrix.length > 0) {
+    const r = tri(m.matrix.length);
+    const row = m.matrix[r] as number[];
+    if (row.length > 0) row[tri(row.length)] = tri(50);
+  }
+  // settings (atomic object): sometimes change a field → whole-object replace.
+  if (tri(2) === 0) m.settings.theme = THEMES[tri(THEMES.length)] as string;
+  if (tri(3) === 0) m.settings.nested.a = tri(10);
+  return m;
+}
+
+const topoVariants: {
+  includeOldValue: boolean;
+  emitMoves: boolean;
+  wholesaleReplaceFallback: boolean;
+}[] = [
+  { includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: false },
+  { includeOldValue: false, emitMoves: false, wholesaleReplaceFallback: false },
+  { includeOldValue: true, emitMoves: true, wholesaleReplaceFallback: false },
+  { includeOldValue: false, emitMoves: true, wholesaleReplaceFallback: false },
+  { includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: true },
+];
+
+{
+  const lines: string[] = [];
+  let seq = 0;
+  const topoPlan = buildPlan({ schema: TOPOLOGY_SCHEMA as never });
+  for (let d = 0; d < 30; d++) {
+    const original = makeTopoDoc() as unknown as JsonValue;
+    const modified = mutateTopoDoc(original as unknown as TopoDoc) as unknown as JsonValue;
+    for (const v of topoVariants) {
+      const patcher = new JsonSchemaPatcher({
+        plan: topoPlan,
+        includeOldValue: v.includeOldValue,
+        emitMoves: v.emitMoves,
+        wholesaleReplaceFallback: v.wholesaleReplaceFallback,
+      });
+      const tsPatch = patcher.execute({ original, modified });
+      const tsApplied = applyPatch(clone(original), tsPatch, {});
+      const capLabel = `iov=${v.includeOldValue ? 1 : 0},mov=${v.emitMoves ? 1 : 0},whole=${
+        v.wholesaleReplaceFallback ? 1 : 0
+      }`;
+      lines.push(
+        JSON.stringify({
+          name: `topology/${seq}/${capLabel}`,
+          schemaRef: "topology",
+          options: {
+            includeOldValue: v.includeOldValue,
+            emitMoves: v.emitMoves,
+            wholesaleReplaceFallback: v.wholesaleReplaceFallback,
+          },
+          original,
+          modified,
+          tsPatch,
+          tsApplied,
+        }),
+      );
+      stats.total++;
+      stats.byConfig.set("topology", (stats.byConfig.get("topology") ?? 0) + 1);
+      stats.byCapability.set(capLabel, (stats.byCapability.get(capLabel) ?? 0) + 1);
+      if (tsPatch.length === 0) stats.emptyPatches++;
+      stats.totalOps += tsPatch.length;
+      for (const op of tsPatch) stats.opCounts.set(op.op, (stats.opCounts.get(op.op) ?? 0) + 1);
+      seq++;
+    }
+  }
+  writeFileSync(join(outDir, "topology.jsonl"), `${lines.join("\n")}\n`);
+}
+
+// ---------------------------------------------------------------------------
 // Run summary (also useful as a commit-message reference).
 // ---------------------------------------------------------------------------
 const sorted = (m: Map<string, number>) => [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));

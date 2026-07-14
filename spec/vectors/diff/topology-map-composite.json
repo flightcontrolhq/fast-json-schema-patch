@@ -1,0 +1,385 @@
+[
+  {
+    "name": "map-composite-modify-remove-add",
+    "comment": "CORE §8.4/§7.2: (80,TCP) matched+modified at its original index; (80,UDP) removed; (443,TCP) appended — keyed-collection (order insignificant)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "http"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "UDP",
+          "name": "http-udp"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "web"
+        },
+        {
+          "containerPort": 443,
+          "protocol": "TCP",
+          "name": "https"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/ports/0/name",
+        "value": "web",
+        "oldValue": "http"
+      },
+      {
+        "op": "remove",
+        "path": "/ports/1",
+        "oldValue": {
+          "containerPort": 80,
+          "protocol": "UDP",
+          "name": "http-udp"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/ports/-",
+        "value": {
+          "containerPort": 443,
+          "protocol": "TCP",
+          "name": "https"
+        }
+      }
+    ]
+  },
+  {
+    "name": "map-composite-same-port-diff-protocol-distinct",
+    "comment": "CORE §8.4.1: same containerPort but different protocol are DISTINCT tuples — (80,TCP) removed, (80,UDP) added, never an in-place modify",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "UDP",
+          "name": "a"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/ports/0",
+        "oldValue": {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/ports/-",
+        "value": {
+          "containerPort": 80,
+          "protocol": "UDP",
+          "name": "a"
+        }
+      }
+    ]
+  },
+  {
+    "name": "map-composite-numeric-vs-string-component-distinct",
+    "comment": "CORE §8.4.1/§8.4.3: a numeric key component 1 and a string component \"1\" are DISTINCT tuples (type-and-value identity) — remove (us,1) + add (us,\"1\")",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "region",
+            "id"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": "string"
+              },
+              "id": {},
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "region": "us",
+          "id": 1,
+          "v": "x"
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "region": "us",
+          "id": "1",
+          "v": "x"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/rows/0",
+        "oldValue": {
+          "region": "us",
+          "id": 1,
+          "v": "x"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/rows/-",
+        "value": {
+          "region": "us",
+          "id": "1",
+          "v": "x"
+        }
+      }
+    ]
+  },
+  {
+    "name": "map-composite-declared-order-ab-swap-distinct",
+    "comment": "CORE §8.4.3: with declared keys [a,b], elements {a:1,b:2} and {a:2,b:1} are distinct tuples ([1,2] != [2,1]) — remove + add, not a modify",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "a",
+            "b"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "number"
+              },
+              "b": {
+                "type": "number"
+              },
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "a": 1,
+          "b": 2,
+          "v": "x"
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "a": 2,
+          "b": 1,
+          "v": "y"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/rows/0",
+        "oldValue": {
+          "a": 1,
+          "b": 2,
+          "v": "x"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/rows/-",
+        "value": {
+          "a": 2,
+          "b": 1,
+          "v": "y"
+        }
+      }
+    ]
+  },
+  {
+    "name": "map-composite-reorder-modify-append-multiset",
+    "comment": "CORE §7.2: reorder + content-modify + append — survivors stay at their ORIGINAL relative positions carrying modified content, new tuple appended; multiset-equal to modified",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "B"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 82,
+          "protocol": "TCP",
+          "name": "c"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/ports/1/name",
+        "value": "B",
+        "oldValue": "b"
+      },
+      {
+        "op": "add",
+        "path": "/ports/-",
+        "value": {
+          "containerPort": 82,
+          "protocol": "TCP",
+          "name": "c"
+        }
+      }
+    ]
+  }
+]

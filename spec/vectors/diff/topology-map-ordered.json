@@ -1,0 +1,313 @@
+[
+  {
+    "name": "map-ordered-exact-reconstruction-with-moves",
+    "comment": "CORE §8.4.4/§7.4: order significant → EXACT reconstruction; survivors reordered into modified order via move(s), new tuple as an INDEXED add — move machinery is definitional (no emitMoves option)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "B"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 82,
+          "protocol": "TCP",
+          "name": "c"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/ports/0",
+        "path": "/ports/1"
+      },
+      {
+        "op": "add",
+        "path": "/ports/2",
+        "value": {
+          "containerPort": 82,
+          "protocol": "TCP",
+          "name": "c"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/ports/0/name",
+        "value": "B",
+        "oldValue": "b"
+      }
+    ]
+  },
+  {
+    "name": "map-ordered-pure-reorder-is-exact",
+    "comment": "CORE §8.4.4: a pure reorder under order=significant reconstructs modified EXACTLY (positions preserved), unlike the insignificant multiset contract",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/ports/0",
+        "path": "/ports/1"
+      }
+    ]
+  },
+  {
+    "name": "map-ordered-single-key-exact",
+    "comment": "CORE §8.4.4/§7.4: single-key (id) order-significant map — exact reconstruction of a reorder+modify+append",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "id"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "v": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "id": 1,
+          "v": "a"
+        },
+        {
+          "id": 2,
+          "v": "b"
+        },
+        {
+          "id": 3,
+          "v": "c"
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "id": 3,
+          "v": "C"
+        },
+        {
+          "id": 1,
+          "v": "a"
+        },
+        {
+          "id": 2,
+          "v": "b"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/rows/2",
+        "path": "/rows/0"
+      },
+      {
+        "op": "replace",
+        "path": "/rows/0/v",
+        "value": "C",
+        "oldValue": "c"
+      }
+    ]
+  },
+  {
+    "name": "map-ordered-emitMoves-option-is-noop",
+    "comment": "CORE §8.9.1/GEN §8.8: the emitMoves OPTION is a no-op for an order-significant map (moves already run definitionally) — enabling it yields byte-identical output",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "ports": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "x-schema-patch-order": "significant",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerPort": {
+                "type": "number"
+              },
+              "protocol": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "containerPort",
+              "protocol"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "ports": [
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        },
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        }
+      ]
+    },
+    "modified": {
+      "ports": [
+        {
+          "containerPort": 81,
+          "protocol": "TCP",
+          "name": "b"
+        },
+        {
+          "containerPort": 80,
+          "protocol": "TCP",
+          "name": "a"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/ports/0",
+        "path": "/ports/1"
+      }
+    ]
+  }
+]

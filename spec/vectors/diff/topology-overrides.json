@@ -1,0 +1,264 @@
+[
+  {
+    "name": "override-sequence-beats-autodetected-primarykey",
+    "comment": "CORE §8.2.2/§8.7: items have a required `id` that WOULD auto-detect a primaryKey, but the declared `sequence` topology forces positional LCS — a reorder becomes remove+add at positions, not a keyed no-op",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "sequence",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "b",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "id": "b",
+          "v": 2
+        },
+        {
+          "id": "a",
+          "v": 1
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/rows/0",
+        "oldValue": {
+          "id": "a",
+          "v": 1
+        }
+      },
+      {
+        "op": "add",
+        "path": "/rows/1",
+        "value": {
+          "id": "a",
+          "v": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "override-atomic-beats-primaryKeyMap",
+    "comment": "CORE §8.2.2: an explicit primaryKeyMap entry for /rows is OVERRIDDEN by the declared `atomic` topology — one whole-array replace, not a keyed diff",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "atomic",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/rows": "id"
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "b",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "b",
+          "v": 9
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows",
+        "value": [
+          {
+            "id": "a",
+            "v": 1
+          },
+          {
+            "id": "b",
+            "v": 9
+          }
+        ],
+        "oldValue": [
+          {
+            "id": "a",
+            "v": 1
+          },
+          {
+            "id": "b",
+            "v": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "override-set-beats-compat-unique-primitive",
+    "comment": "CORE §8.5/§8.8: a primitive array is `unique` (positional replace) by the compat profile, but declaring `set` makes an equal-length scalar change a remove+append instead of a positional replace",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "xs": {
+          "type": "array",
+          "x-schema-patch-topology": "set",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "xs": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "xs": [
+        1,
+        9,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/xs/1",
+        "oldValue": 2
+      },
+      {
+        "op": "add",
+        "path": "/xs/-",
+        "value": 9
+      }
+    ]
+  },
+  {
+    "name": "override-map-keys-beats-autodetected-id",
+    "comment": "CORE §8.2.2: `id` would auto-detect as the primaryKey, but declared map keys=[name] makes `name` the identity — the same id with a changed name is remove+add, not an in-place modify",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "x-schema-patch-topology": "map",
+          "x-schema-patch-keys": [
+            "name"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "id": "x",
+          "name": "alpha",
+          "v": 1
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "id": "x",
+          "name": "beta",
+          "v": 1
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/rows/0",
+        "oldValue": {
+          "id": "x",
+          "name": "alpha",
+          "v": 1
+        }
+      },
+      {
+        "op": "add",
+        "path": "/rows/-",
+        "value": {
+          "id": "x",
+          "name": "beta",
+          "v": 1
+        }
+      }
+    ]
+  }
+]

@@ -31,6 +31,12 @@ type expectedArrayPlan struct {
 	Strategy       string   `json:"strategy"`
 	RequiredFields []string `json:"requiredFields"`
 	HashFields     []string `json:"hashFields"`
+	// spec-v2 declared-topology fields (CONF §7.2), present iff declared. Absent
+	// decodes to the zero value, which equals a compat-derived plan's zero value.
+	Topology    string   `json:"topology"`
+	Keys        []string `json:"keys"`
+	Order       string   `json:"order"`
+	Granularity string   `json:"granularity"`
 }
 
 func TestPlanConformanceVectors(t *testing.T) {
@@ -112,7 +118,36 @@ func assertPlanEquals(t *testing.T, plan Plan, expected []expectedArrayPlan) {
 		if !sameStringSet(ap.HashFields, exp.HashFields) {
 			t.Errorf("path %q: hashFields = %v, want %v (order-insensitive)", exp.Path, ap.HashFields, exp.HashFields)
 		}
+		// CONF §7.2: spec-v2 declared-topology fields. topology/granularity/order
+		// exact; keys compared ORDER-SENSITIVELY. Absent (compat) plans zero-value
+		// on both sides, so this is inert for every spec-v1 vector.
+		if string(ap.Topology) != exp.Topology {
+			t.Errorf("path %q: topology = %q, want %q", exp.Path, ap.Topology, exp.Topology)
+		}
+		if ap.Granularity != exp.Granularity {
+			t.Errorf("path %q: granularity = %q, want %q", exp.Path, ap.Granularity, exp.Granularity)
+		}
+		if ap.Order != exp.Order {
+			t.Errorf("path %q: order = %q, want %q", exp.Path, ap.Order, exp.Order)
+		}
+		if !sameStringSliceOrdered(ap.Keys, exp.Keys) {
+			t.Errorf("path %q: keys = %v, want %v (ORDER-sensitive)", exp.Path, ap.Keys, exp.Keys)
+		}
 	}
+}
+
+// sameStringSliceOrdered compares two string slices ORDER-sensitively, treating
+// nil and [] as equal (CONF §7.2: `keys` declared tuple order is significant).
+func sameStringSliceOrdered(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // sameStringSet compares two string slices order-insensitively, treating nil and
