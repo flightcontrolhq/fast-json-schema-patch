@@ -42,8 +42,9 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { faker } from "@faker-js/faker";
+import jsf from "json-schema-faker";
 import { applyPatch, buildPlan, JsonSchemaPatcher } from "../../src/index";
-import type { Operation } from "../../src/types";
+import type { JsonValue, Operation } from "../../src/types";
 import mainSchema from "../../schema/schema.json";
 import ecommerceSchema from "../../schema/e-commerce.json";
 import { createRandomCloudConfig } from "../../comparison/data-generators";
@@ -58,6 +59,24 @@ import {
 // ---------------------------------------------------------------------------
 const SEED = 0xc0ffee;
 faker.seed(SEED);
+
+// The e-commerce family is built by json-schema-faker (jsf), which has its OWN
+// internal RNG defaulting to Math.random — faker.seed() does NOT cover it, so
+// without this the e-commerce corpus would differ on every run. jsf routes all
+// of its structural randomness through the `random` option, so installing a
+// seeded PRNG here makes jsf.generate() fully reproducible. (Format values that
+// jsf delegates to faker via jsf.extend("faker", …) are already covered by
+// faker.seed above.) mulberry32 is a small, well-distributed seedable PRNG.
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+jsf.option({ random: mulberry32(SEED ^ 0x5eed) });
 
 type Complexity = "Low" | "Medium";
 const RANGES: Record<Complexity, { label: string; min: number; max: number }> = {
@@ -187,22 +206,22 @@ const capabilityVariants: {
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
 
-function makePair(family: Family, complexity: Complexity): { original: unknown; modified: unknown } {
+function makePair(family: Family, complexity: Complexity): { original: JsonValue; modified: JsonValue } {
   const range = RANGES[complexity];
   const target = TARGET[complexity];
   if (family === "cloud") {
     const original = createRandomCloudConfig({ complexity });
     const modified = clone(original);
     applyModificationsForTargetComplexity(modified, target, range);
-    return { original, modified };
+    return { original: original as JsonValue, modified: modified as JsonValue };
   }
   const original = generateRandomECommerceConfig({ complexity });
   const modified = clone(original);
   applyECommerceModificationsForTargetComplexity(modified, target, range);
-  return { original, modified };
+  return { original: original as unknown as JsonValue, modified: modified as unknown as JsonValue };
 }
 
-interface Record {
+interface FuzzRecord {
   name: string;
   schemaRef: string;
   options: PlanOpts & {
@@ -210,10 +229,10 @@ interface Record {
     emitMoves: boolean;
     wholesaleReplaceFallback: boolean;
   };
-  original: unknown;
-  modified: unknown;
+  original: JsonValue;
+  modified: JsonValue;
   tsPatch: Operation[];
-  tsApplied: unknown;
+  tsApplied: JsonValue;
 }
 
 const outDir = join(import.meta.dir, "corpus");
@@ -261,7 +280,7 @@ for (const config of configs) {
         const capLabel = `iov=${caps.includeOldValue ? 1 : 0},mov=${
           caps.emitMoves ? 1 : 0
         },whole=${caps.wholesaleReplaceFallback ? 1 : 0}`;
-        const record: Record = {
+        const record: FuzzRecord = {
           name: `${config.label}/${complexity}/${seq}/${capLabel}`,
           schemaRef: config.schemaRef,
           options: { ...config.planOpts, ...caps },
