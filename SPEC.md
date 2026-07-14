@@ -756,6 +756,11 @@ token (RFC 6902-standard; the reference and fast-json-patch both accept it, incl
 indices** for all adds, including empty-source additions (`/0`, `/1`, …; §5.5.1) and in-place adds
 (§5.5.5). A conforming consumer MUST handle both concrete-index and `/-` add paths.
 
+`6.3.2` **`oldValue` presence is capability-governed.** The "✔ (default mode)" cells for
+`remove`/`replace` above hold under the **default** `includeOldValue = true` (SPEC §6.4, capability
+registry §10.4). Under the opt-out `includeOldValue = false`, `oldValue` is present on **no** op;
+`add` never carries it in either mode. The `path`/`value` cells are unaffected.
+
 ### 6.4 `oldValue` extension
 
 `6.4.1` `oldValue` is a **non-RFC-6902 extension**. In the **default** capability mode it is
@@ -1076,7 +1081,7 @@ capabilities.
 
 | capability | default | status | effect |
 |------------|---------|--------|--------|
-| `includeOldValue=false` | on (oldValue present) | OPTIONAL | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
+| `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§10.4.2) | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
 | `emitMoves` | off | OPTIONAL (reserved) | emit RFC 6902 `move` for LCS relocations and primaryKey order fidelity |
 | `wholesaleReplaceFallback` | off | OPTIONAL (reserved) | emit a single container `replace` when the granular patch would exceed the container's own serialized size |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL (reserved) | override the auto-detection candidate list (§4.5.5) |
@@ -1087,6 +1092,20 @@ disable it. Any `spec-v1-draft` vector that asserted a whole-item replace for a 
 (object↔object or array↔array) changed LCS element is **re-baselined** to the granular nested ops
 that descent now emits; vectors for primitive or mismatched-kind replacements are unchanged (those
 stay whole-item, §5.5.4.2).
+
+`10.4.2` **`includeOldValue` (F11).** Surfaced as the `JsonSchemaPatcher` constructor option
+`includeOldValue?: boolean`, **default `true`** (back-compat: identical, byte-for-byte, to the
+pre-capability output). When `false`, **every** `oldValue`-producing emission site is suppressed —
+object-member removes/replaces (§5.2), the type-mismatch/opaque-leaf replace (§5.1.4), primaryKey
+removals (§5.4), LCS removals and whole-item replaces including the empty-window fast paths (§5.5),
+and unique removals/replaces (§5.6). `add` ops are identical in both modes (they never carry
+`oldValue`). Granular same-kind descent (§5.5.4.2) recurses through the shared object/array differ,
+so nested ops it emits also honor the flag. The flag changes **only** the presence of the
+`oldValue` key; `op`, `path`, `value`, op ordering, and op count are unchanged. `invertPatch`
+(§9) is unaffected because it recovers pre-change values from the **original document** it is given,
+not from `oldValue`; the round-trip identity §9.1.2 holds under either mode. Measured savings on the
+compactness repro shapes: 26–51% on typical remove/replace-heavy diffs, up to ~86x when a large
+subtree is removed (a 2.7 KB removal drops from 2680 B to 31 B).
 
 ### 10.5 Vector provenance
 

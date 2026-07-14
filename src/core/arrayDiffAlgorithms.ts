@@ -124,7 +124,11 @@ export function diffArrayByPrimaryKey(
   path: string,
   patches: Operation[],
   onModification: ModificationCallback,
-  hashFields?: string[]
+  hashFields?: string[],
+  // F11 (SPEC §6.4.2): when false, removals omit `oldValue`. Additions never
+  // carry one, and modifications recurse through `onModification` -> the
+  // class differ, which honors the flag itself.
+  includeOldValue: boolean = true
 ) {
   // F37: this used to also accept a `plan` 8th argument, but the only real
   // caller (index.ts's diffArray) never passed one, making the
@@ -244,11 +248,9 @@ export function diffArrayByPrimaryKey(
 
   for (let i = 0; i < removalIndices.length; i++) {
     const index = removalIndices[i] as number;
-    removalPatches[i] = {
-      op: "remove",
-      path: pathPrefix + index,
-      oldValue: itemsByIndex[index],
-    };
+    const op: Operation = { op: "remove", path: pathPrefix + index };
+    if (includeOldValue) op.oldValue = itemsByIndex[index];
+    removalPatches[i] = op;
   }
 
   // Plain loops rather than spread pushes: a single array can contribute
@@ -279,7 +281,11 @@ export function diffArrayLCS(
   // NEVER routed through it (F20) — only genuine same-kind replacements are.
   onModification: ModificationCallback,
   hashFields?: string[],
-  plan?: ArrayPlan
+  plan?: ArrayPlan,
+  // F11 (SPEC §6.4.2): when false, every `remove`/`replace` this function
+  // emits omits `oldValue`. Same-kind granular replacements recurse through
+  // `onModification` -> the class differ, which honors the flag itself.
+  includeOldValue: boolean = true
 ) {
   const effectiveHashFields = getEffectiveHashFields(
     plan,
@@ -306,11 +312,9 @@ export function diffArrayLCS(
   }
   if (m === 0) {
     for (let i = n - 1; i >= 0; i--) {
-      patches.push({
-        op: "remove",
-        path: prefixPath + i,
-        oldValue: arr1[i] as JsonValue,
-      });
+      const op: Operation = { op: "remove", path: prefixPath + i };
+      if (includeOldValue) op.oldValue = arr1[i] as JsonValue;
+      patches.push(op);
     }
     return;
   }
@@ -375,11 +379,9 @@ export function diffArrayLCS(
     // Pure deletion window (truncate / prefix / suffix / interior removal):
     // descending removes so lower indices stay valid during application.
     for (let j = wn - 1; j >= 0; j--) {
-      patches.push({
-        op: "remove",
-        path: prefixPath + (lo + j),
-        oldValue: arr1[lo + j] as JsonValue,
-      });
+      const op: Operation = { op: "remove", path: prefixPath + (lo + j) };
+      if (includeOldValue) op.oldValue = arr1[lo + j] as JsonValue;
+      patches.push(op);
     }
     return;
   }
@@ -608,22 +610,24 @@ export function diffArrayLCS(
         if (bothObjects) {
           onModification(v1, v2, prefixPath + currentIndex, patches, true);
         } else {
-          patches.push({
+          const op: Operation = {
             op: "replace",
             path: prefixPath + currentIndex,
             value: v2,
-            oldValue: v1,
-          });
+          };
+          if (includeOldValue) op.oldValue = v1;
+          patches.push(op);
         }
         currentIndex++;
         break;
       }
       case "remove": {
-        patches.push({
+        const op: Operation = {
           op: "remove",
           path: prefixPath + currentIndex,
-          oldValue: arr1[lo + (operation.ai as number)],
-        });
+        };
+        if (includeOldValue) op.oldValue = arr1[lo + (operation.ai as number)];
+        patches.push(op);
         // Don't increment currentIndex for removes
         break;
       }
@@ -644,7 +648,9 @@ export function diffArrayUnique(
   arr1: JsonArray,
   arr2: JsonArray,
   path: string,
-  patches: Operation[]
+  patches: Operation[],
+  // F11 (SPEC §6.4.2): when false, `remove`/`replace` ops omit `oldValue`.
+  includeOldValue: boolean = true
 ) {
   const n = arr1.length;
   const m = arr2.length;
@@ -666,11 +672,9 @@ export function diffArrayUnique(
   if (m === 0) {
     // All removals (descending order)
     for (let i = n - 1; i >= 0; i--) {
-      patches_temp.push({
-        op: "remove",
-        path: pathPrefix + i,
-        oldValue: arr1[i],
-      });
+      const op: Operation = { op: "remove", path: pathPrefix + i };
+      if (includeOldValue) op.oldValue = arr1[i];
+      patches_temp.push(op);
     }
     for (let i = 0; i < patches_temp.length; i++) {
       patches.push(patches_temp[i] as Operation);
@@ -699,12 +703,9 @@ export function diffArrayUnique(
     const val2 = arr2[i];
 
     if (val1 !== val2) {
-      patches_temp.push({
-        op: "replace",
-        path: pathPrefix + i,
-        value: val2,
-        oldValue: val1,
-      });
+      const op: Operation = { op: "replace", path: pathPrefix + i, value: val2 };
+      if (includeOldValue) op.oldValue = val1;
+      patches_temp.push(op);
       replacedItems.add(val2 as JsonValue);
     }
   }
@@ -728,11 +729,9 @@ export function diffArrayUnique(
 
   // Add removal patches (already in descending order)
   for (const index of removalIndices) {
-    patches_temp.push({
-      op: "remove",
-      path: pathPrefix + index,
-      oldValue: arr1[index],
-    });
+    const op: Operation = { op: "remove", path: pathPrefix + index };
+    if (includeOldValue) op.oldValue = arr1[index];
+    patches_temp.push(op);
   }
 
   // Phase 3: Handle additions - O(m)

@@ -51,8 +51,18 @@ export class JsonSchemaPatcher {
   private plan: Plan;
   private readonly planIsEmpty: boolean;
   private readonly planTrie: PlanTrieNode;
+  /**
+   * F11 / capability `includeOldValue` (SPEC §6.4, §10.4). When `true`
+   * (default, back-compat) every `remove`/`replace` op carries the complete
+   * pre-change subtree in `oldValue`. When `false`, NO emission site attaches
+   * `oldValue`, yielding strict RFC 6902-shaped ops (add/remove/replace with
+   * only path/value) and measurably smaller patches on remove/replace-heavy
+   * diffs. `invertPatch` still round-trips because it recovers old values from
+   * the original document, not from `oldValue` (SPEC §6.4.2, §9).
+   */
+  private readonly includeOldValue: boolean;
 
-  constructor(options: { plan: Plan }) {
+  constructor(options: { plan: Plan; includeOldValue?: boolean }) {
     // F42: fail fast with an actionable message instead of a cryptic
     // "undefined is not an object (evaluating this.plan.size)" TypeError
     // thrown later from the planIsEmpty computation below. Any Map instance
@@ -69,6 +79,8 @@ export class JsonSchemaPatcher {
     this.plan = options.plan;
     this.planIsEmpty = this.plan.size === 0;
     this.planTrie = this.compilePlanTrie(this.plan);
+    // Default on for back-compat (SPEC §6.4.1); opt out with `false`.
+    this.includeOldValue = options.includeOldValue ?? true;
   }
 
   /**
@@ -164,7 +176,11 @@ export class JsonSchemaPatcher {
     }
 
     if (obj2 === undefined) {
-      patches.push({ op: "remove", path, oldValue: obj1 });
+      // `oldValue` is inserted LAST so default-mode key order stays byte-stable
+      // ({op, path, oldValue}); omitted entirely when includeOldValue is off.
+      const op: Operation = { op: "remove", path };
+      if (this.includeOldValue) op.oldValue = obj1;
+      patches.push(op);
       return;
     }
 
@@ -175,7 +191,9 @@ export class JsonSchemaPatcher {
       obj2 === null ||
       Array.isArray(obj1) !== Array.isArray(obj2)
     ) {
-      patches.push({ op: "replace", path, value: obj2, oldValue: obj1 });
+      const op: Operation = { op: "replace", path, value: obj2 };
+      if (this.includeOldValue) op.oldValue = obj1;
+      patches.push(op);
       return;
     }
 
@@ -191,7 +209,9 @@ export class JsonSchemaPatcher {
     // opaque leaf instead: replace wholesale when unequal (per valueOf()/===).
     if (isOpaqueObject(obj1) || isOpaqueObject(obj2)) {
       if (!deepEqualMemo(obj1, obj2)) {
-        patches.push({ op: "replace", path, value: obj2, oldValue: obj1 });
+        const op: Operation = { op: "replace", path, value: obj2 };
+        if (this.includeOldValue) op.oldValue = obj1;
+        patches.push(op);
       }
       return;
     }
@@ -227,7 +247,9 @@ export class JsonSchemaPatcher {
       if (val1 === undefined && val2 !== undefined) {
         patches.push({ op: "add", path: newPath, value: val2 });
       } else if (val2 === undefined && val1 !== undefined) {
-        patches.push({ op: "remove", path: newPath, oldValue: val1 });
+        const op: Operation = { op: "remove", path: newPath };
+        if (this.includeOldValue) op.oldValue = val1;
+        patches.push(op);
       } else {
         // Descend the trie by RAW property key: an exact `children` edge takes
         // precedence over the `*` wildcard edge at each level (§5.4.5). A literal
@@ -322,13 +344,14 @@ export class JsonSchemaPatcher {
         path,
         patches,
         createModificationCallback(plan.hashFields || []),
-        plan.hashFields
+        plan.hashFields,
+        this.includeOldValue
       );
       return;
     }
 
     if (strategy === "unique" && checkArraysUnique(arr1, arr2)) {
-      diffArrayUnique(arr1, arr2, path, patches);
+      diffArrayUnique(arr1, arr2, path, patches, this.includeOldValue);
       return;
     }
 
@@ -339,7 +362,8 @@ export class JsonSchemaPatcher {
       patches,
       createModificationCallback(plan?.hashFields || []),
       plan?.hashFields,
-      plan
+      plan,
+      this.includeOldValue
     );
   }
 
