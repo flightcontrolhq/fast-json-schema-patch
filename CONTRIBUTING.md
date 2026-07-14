@@ -54,6 +54,12 @@ changes that provably do not change output (see `SPEC.md` §2.4, output-neutrali
 spec update, but say so explicitly in the PR description and show how you verified byte-identical
 output (e.g. a snapshot diff or a byte-stability test).
 
+**The vector-first rule applies to *both* engines.** `SPEC.md` §10's vectors are the shared,
+language-neutral oracle, and the Go engine in [`go/`](./go) is verified against the very same
+`spec/vectors` (plus the differential-fuzz corpus in `spec/fuzz`). A semantic change lands the
+spec + vector update first; the TypeScript reference (`src/`) and the Go port (`go/`) both follow
+from the vectors, so neither engine is the source of truth — the spec is.
+
 ## Releasing (changesets)
 
 This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and

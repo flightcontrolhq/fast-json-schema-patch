@@ -265,6 +265,22 @@ Run benchmarks on your own data:
 bun run compare
 ```
 
+## 🐹 Go engine
+
+A Go port lives in [`go/`](./go) as a separate module
+(`github.com/flightcontrolhq/fast-json-schema-patch/go`, package `schemapatch`,
+zero third-party dependencies). It implements the same **spec-v1**
+([`SPEC.md`](./SPEC.md)) behavior and is held byte-identical to this TypeScript
+reference by the shared conformance vectors ([`spec/vectors`](./spec/vectors))
+plus a seeded differential-fuzz corpus ([`spec/fuzz`](./spec/fuzz)).
+
+```sh
+go get github.com/flightcontrolhq/fast-json-schema-patch/go
+```
+
+See [`go/README.md`](./go/README.md) for the quick start, capability options, and
+the subdirectory-module tagging note (`go/vX.Y.Z`).
+
 ## 🔗 Related Standards
 
 - [RFC 6902 - JSON Patch](https://tools.ietf.org/html/rfc6902)
