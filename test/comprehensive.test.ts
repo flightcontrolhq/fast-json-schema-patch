@@ -793,7 +793,17 @@ describe("buildPlan > ArrayPlan metadata", () => {
     expect(arrayPlan?.strategy).toBe("unique");
   });
 
-  it("should pre-resolve itemSchema for refs", () => {
+  it("resolves $ref items for primary-key detection without retaining itemSchema (F19)", () => {
+    // Historically this test asserted that buildPlan pre-resolved and stored
+    // the item schema on ArrayPlan.itemSchema. F19 found that field
+    // write-only (nothing at diff time ever read it — deepEqualSchemaAware/
+    // getEffectiveHashFields use only primaryKey/hashFields/requiredFields)
+    // and retaining it pinned the resolved schema graph in memory for the
+    // plan's lifetime (~2x plan memory). buildPlan still resolves the $ref
+    // internally to run primary-key auto-detection (§4.5) correctly — that
+    // behavior is unchanged and asserted below — it just no longer stores
+    // the resolved schema onto the plan. SPEC §4.1.1 already documents
+    // itemSchema as non-normative and MAY be omitted, so this is valid.
     const schema = {
       definitions: {
         user: {
@@ -816,13 +826,11 @@ describe("buildPlan > ArrayPlan metadata", () => {
     };
     const plan = buildPlan({ schema });
     const arrayPlan = plan.get("/users");
-    expect(arrayPlan?.itemSchema).toEqual({
-      type: "object",
-      required: ["id"],
-      properties: {
-        id: { type: "string" },
-      },
-    });
+    // $ref resolution still worked (primary key found through the ref).
+    expect(arrayPlan?.primaryKey).toBe("id");
+    expect(arrayPlan?.strategy).toBe("primaryKey");
+    // ...but the resolved schema itself is no longer retained on the plan.
+    expect(arrayPlan?.itemSchema).toBeUndefined();
   });
 });
 

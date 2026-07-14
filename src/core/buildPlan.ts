@@ -17,7 +17,17 @@ type Schema = JSONSchema
 
 export interface ArrayPlan {
   primaryKey: string | null
-  // Pre-resolved item schema to avoid repeated $ref resolution
+  /**
+   * @deprecated F19: write-only since this field's introduction — no code
+   * outside buildPlan.ts ever read it (deepEqualSchemaAware/
+   * getEffectiveHashFields, the only consumers of an ArrayPlan at diff time,
+   * use only primaryKey/hashFields/requiredFields). Because it references
+   * into the parsed schema object graph, retaining it pinned ~2x plan memory
+   * (SPEC §4.1.1 already documents itemSchema as non-normative and MAY be
+   * omitted). `buildPlan` no longer sets this field. Kept in the exported
+   * type only so 0.x consumers who read it directly do not get a type error;
+   * it will always be `undefined` from `buildPlan` going forward.
+   */
   itemSchema?: JSONSchema
   // Set of required fields for faster validation and comparison
   requiredFields?: Set<string>
@@ -130,8 +140,12 @@ export function _traverseSchema(
       itemsSchema = _resolveRef(itemsSchema.$ref, schema) || itemsSchema
     }
 
-    // Store the resolved item schema to avoid repeated resolution
-    arrayPlan.itemSchema = itemsSchema
+    // F19: itemsSchema is resolved and used locally below (primitive check,
+    // primary-key auto-detection, array-of-arrays detection) but is
+    // deliberately NOT stored onto arrayPlan.itemSchema — nothing at diff
+    // time ever read it, and retaining it pinned the resolved schema graph
+    // in memory for the plan's lifetime (~2x plan memory, see the
+    // @deprecated note on ArrayPlan.itemSchema).
 
     // Check if items are primitives
     const isPrimitive =
