@@ -40,7 +40,7 @@
     "test": "bun test",
     "check-exports": "attw --pack .",
     "release": "bun test && bun run build && bun changeset version && changeset publish",
-    "prepublishOnly": "bun test",
+    "prepublishOnly": "bun test && bun run build && bun run check-exports",
     "build": "tsc && tsdown"
   },
   "exports": {

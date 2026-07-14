@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.5"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Test
+        run: bun test
+
+      - name: Build
+        run: bun run build
+
+      - name: Check package exports (attw)
+        run: bun run check-exports
+
+      - name: Lint (biome)
+        # Scoped to src/, test/, and schema/ — the shipped library, its test
+        # suite, and the schemas they exercise. `comparison/` is a benchmarking
+        # / demo tool that is never published (see package.json "files") and
+        # carries its own pre-existing lint debt (var/==, unseeded faker,
+        # etc. — tracked separately, not a packaging/CI concern).
+        #
+        # --formatter-enabled=false and --assist-enabled=false disable the
+        # formatter and import-sorting checks: biome.json's tab indentStyle
+        # predates the project's actual 2-space source and the whole tree
+        # would need a single mechanical (but large, hard-to-review-in-one-go)
+        # reformat to satisfy it. Real linter rules (correctness, suspicious,
+        # style) still run and are enforced. See CONTRIBUTING.md.
+        run: bunx biome ci src test schema --formatter-enabled=false --assist-enabled=false
