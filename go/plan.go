@@ -42,6 +42,26 @@ type ArrayPlan struct {
 	HashFields []string
 }
 
+// clone returns a deep copy of the plan, including independent RequiredFields
+// and HashFields slices, so a caller that mutates the copy cannot reach the
+// plan a [Plan] holds internally. A nil receiver clones to nil. This backs the
+// defensive copies returned by [Plan.Lookup] and [PlanNode.ArrayPlan]; the
+// differ reads plans through the unexported [PlanNode.arrayPlan] instead and
+// never pays for a copy.
+func (ap *ArrayPlan) clone() *ArrayPlan {
+	if ap == nil {
+		return nil
+	}
+	cp := *ap
+	if ap.RequiredFields != nil {
+		cp.RequiredFields = append([]string(nil), ap.RequiredFields...)
+	}
+	if ap.HashFields != nil {
+		cp.HashFields = append([]string(nil), ap.HashFields...)
+	}
+	return &cp
+}
+
 // Plan maps document paths to array strategies, derived once from a JSON Schema
 // by [BuildPlan] and reused across diffs (SPEC §4). It holds both the flat
 // path→[ArrayPlan] map (queryable with [Plan.Lookup]) and the compiled trie
@@ -61,9 +81,19 @@ type PlanNode struct {
 	wildcard *PlanNode
 }
 
-// ArrayPlan returns the strategy registered at this node, or nil when the node
-// carries no plan (SPEC §5.4.5.3: absent plan ⇒ lcs).
+// ArrayPlan returns a defensive copy of the strategy registered at this node, or
+// nil when the node carries no plan (SPEC §5.4.5.3: absent plan ⇒ lcs). The copy
+// (see [ArrayPlan.clone]) means an introspecting caller cannot mutate the
+// compiled plan the patcher relies on; the differ reads the internal plan
+// through the unexported [PlanNode.arrayPlan] to avoid the copy.
 func (n *PlanNode) ArrayPlan() *ArrayPlan {
+	return n.arrayPlan().clone()
+}
+
+// arrayPlan returns the node's internal *ArrayPlan without copying. It is the
+// differ's read path (patcher hot loop); callers MUST treat the result as
+// read-only. Nil-receiver-safe.
+func (n *PlanNode) arrayPlan() *ArrayPlan {
 	if n == nil {
 		return nil
 	}
@@ -92,12 +122,15 @@ func (n *PlanNode) Wildcard() *PlanNode {
 	return n.wildcard
 }
 
-// Lookup returns the [ArrayPlan] registered at path in the flat map and whether
-// one exists. It is a direct map probe; the differ uses the trie ([Plan.Root])
-// instead, but Lookup is convenient for tests and introspection.
+// Lookup returns a defensive copy of the [ArrayPlan] registered at path in the
+// flat map and whether one exists. The copy (see [ArrayPlan.clone]) protects the
+// compiled plan from mutation through the returned value, so a [Plan] stays safe
+// to share across concurrent diffs after construction. It is a direct map probe;
+// the differ uses the trie ([Plan.Root]) instead, but Lookup is convenient for
+// tests and introspection.
 func (p Plan) Lookup(path string) (*ArrayPlan, bool) {
 	ap, ok := p.paths[path]
-	return ap, ok
+	return ap.clone(), ok
 }
 
 // Paths returns the document paths that carry a plan, in unspecified order.
@@ -720,7 +753,7 @@ func stableStringify(v Value) string {
 				return
 			}
 			seen[x] = true
-			keys := append([]string(nil), x.Keys()...)
+			keys := append([]string(nil), x.keys...)
 			sort.Strings(keys)
 			buf.WriteByte('{')
 			for i, k := range keys {

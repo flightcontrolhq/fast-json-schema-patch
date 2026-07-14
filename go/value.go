@@ -67,9 +67,34 @@ func NewObject() *Object {
 // Len returns the number of members.
 func (o *Object) Len() int { return len(o.keys) }
 
-// Keys returns the member keys in iteration order. The returned slice is the
-// object's internal storage and MUST NOT be mutated by the caller.
-func (o *Object) Keys() []string { return o.keys }
+// Keys returns a copy of the member keys in iteration order. The copy is
+// defensive: the caller may retain or mutate it freely without disturbing the
+// object (an object handed out by a [Plan] or held inside a document must not be
+// mutable through a returned slice). The copy costs one allocation of len(o)
+// strings per call; hot-path or allocation-sensitive callers that only need to
+// iterate should use [Object.Members], which yields each member with no
+// allocation.
+func (o *Object) Keys() []string {
+	if len(o.keys) == 0 {
+		return nil
+	}
+	return append([]string(nil), o.keys...)
+}
+
+// Members iterates the object's members in insertion order, invoking yield for
+// each (key, value) pair; iteration stops early if yield returns false. It
+// allocates nothing and never exposes the object's internal storage, so it is
+// the allocation-free counterpart to [Object.Keys] for read-only traversal. The
+// signature matches Go 1.23's range-over-func iterator shape, so `for k, v :=
+// range obj.Members` works under a 1.23+ toolchain while remaining a plain
+// callback under the 1.22 target. The callback MUST NOT mutate the object.
+func (o *Object) Members(yield func(key string, value Value) bool) {
+	for i := range o.keys {
+		if !yield(o.keys[i], o.vals[i]) {
+			return
+		}
+	}
+}
 
 // Get returns the value for key and whether the key is present. A present member
 // whose value is nil (JSON null) returns (nil, true); an absent member returns

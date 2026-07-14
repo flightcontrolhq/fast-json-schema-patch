@@ -161,7 +161,7 @@ func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operatio
 // (SPEC §5.3). Strategy is read straight off the trie node; the runtime gates
 // (§5.3.2) may still force an LCS fallback.
 func (p *Patcher) dispatchArrayStrategy(arr1, arr2 []Value, path string, patches *[]Operation, node *PlanNode) {
-	plan := node.ArrayPlan()
+	plan := node.arrayPlan()
 	strategy := StrategyLCS
 	if plan != nil && plan.Strategy != "" {
 		strategy = plan.Strategy
@@ -274,7 +274,7 @@ func sameContainerKind(a, b Value) bool {
 // decoded insertion order already matches, so the internal key slice is returned
 // directly (read-only).
 func ecmaOwnKeys(obj *Object) []string {
-	all := obj.Keys()
+	all := obj.keys // same-package read; not exposed to callers
 	type ik struct {
 		v uint32
 		s string
