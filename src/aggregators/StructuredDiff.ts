@@ -86,9 +86,11 @@ export class StructuredDiff {
     ]);
 
     for (const candidate of candidatePaths) {
-      const arrayPlan = plan.get(candidate);
-      if (arrayPlan) {
-        return arrayPlan;
+      const entry = plan.get(candidate);
+      // A declared-atomic ObjectPlan carries no array metadata (no primaryKey);
+      // the aggregator only consumes ArrayPlans (CORE §8.3.2).
+      if (entry && !("granularity" in entry)) {
+        return entry;
       }
     }
 

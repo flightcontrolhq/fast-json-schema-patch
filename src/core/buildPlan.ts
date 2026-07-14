@@ -11,9 +11,18 @@ export interface JSONSchema extends JsonObject {
   oneOf?: JSONSchema[]
   allOf?: JSONSchema[]
   required?: string[]
+  // spec-v2 declared-topology extensions (CORE §8.2). Placed on the array/object
+  // schema node they govern. Absent every one of these, buildPlan behaves exactly
+  // as spec-v1 (the compatibility profile, CORE §8.8).
+  "x-schema-patch-topology"?: string
+  "x-schema-patch-keys"?: string[]
+  "x-schema-patch-order"?: string
+  "x-schema-patch-granularity"?: string
 }
 
 type Schema = JSONSchema
+
+export type ArraySemantics = "sequence" | "set" | "map" | "atomic"
 
 export interface ArrayPlan {
   primaryKey: string | null
@@ -35,9 +44,45 @@ export interface ArrayPlan {
   hashFields?: string[]
   // Strategy hint for array comparison
   strategy?: "primaryKey" | "lcs" | "unique"
+  /**
+   * spec-v2 declared topology (CORE §8.3.1). Present iff the array node carries
+   * an `x-schema-patch-topology` extension. When present it is AUTHORITATIVE for
+   * dispatch (GEN §11), overriding the compat `strategy`/`primaryKey` fields
+   * (which are still filled to the topology's compatibility view for
+   * introspection, CORE §8.3.1). Absent, the entry is identical to a spec-v1
+   * ArrayPlan and dispatch is exactly spec-v1 (CORE §8.8).
+   */
+  topology?: ArraySemantics
+  /** `map` only: the composite key tuple in DECLARED order (CORE §8.4). */
+  keys?: string[]
+  /** `map` only: `"significant"` | `"insignificant"` (default `"insignificant"`). */
+  order?: "significant" | "insignificant"
 }
 
-export type Plan = Map<string, ArrayPlan>
+/**
+ * spec-v2 object plan (CORE §8.3.2). Registered ONLY for a declared
+ * `x-schema-patch-granularity: "atomic"` object node; a `granular` (default)
+ * object is not registered, keeping the plan/trie minimal and byte-for-byte
+ * spec-v1 compatible (CORE §8.8). The runtime object is exactly
+ * `{ granularity: "atomic" }`; it extends `Partial<ArrayPlan>` purely at the
+ * type level so that existing consumers of the (now union) `Plan` value type —
+ * which read `ArrayPlan` fields like `primaryKey`/`strategy` — keep compiling
+ * without per-site narrowing (those fields simply read back `undefined`). Use
+ * `isObjectPlan` (the `granularity` discriminant) to narrow when the distinction
+ * matters.
+ */
+export interface ObjectPlan extends Partial<ArrayPlan> {
+  granularity: "atomic"
+}
+
+export type PlanEntry = ArrayPlan | ObjectPlan
+
+export type Plan = Map<string, PlanEntry>
+
+/** Discriminate an ObjectPlan from an ArrayPlan within a `PlanEntry`. */
+export function isObjectPlan(entry: PlanEntry): entry is ObjectPlan {
+  return "granularity" in entry
+}
 
 export interface BuildPlanOptions {
   schema: Schema
@@ -67,6 +112,188 @@ export interface BuildPlanOptions {
 
 /** CORE §3.5.3 default primary-key candidate list (the default of `primaryKeyCandidates`). */
 const DEFAULT_PRIMARY_KEY_CANDIDATES = ["id", "name", "port"]
+
+const ARRAY_TOPOLOGIES = new Set(["sequence", "set", "map", "atomic"])
+
+/**
+ * Parse the declared array-topology extensions on a node (CORE §8.2/§8.3.1).
+ * Returns the declared topology fields, or `null` when the node declares no
+ * `x-schema-patch-topology`. Construction-time validation (CORE §8.2.3) throws a
+ * `TypeError` on an unknown topology value, a `map` without a non-empty string
+ * `keys` tuple, or an unknown `order` value.
+ */
+function parseArrayTopology(
+  node: JSONSchema,
+  onWarning?: (message: string) => void,
+): Pick<ArrayPlan, "topology" | "keys" | "order"> | null {
+  const topology = node["x-schema-patch-topology"]
+  if (topology === undefined) {
+    // A stray `x-schema-patch-keys`/`-order` on a node without a topology has no
+    // effect (CORE §8.2.3); surface the mismatch through the warning channel.
+    if (node["x-schema-patch-keys"] !== undefined || node["x-schema-patch-order"] !== undefined) {
+      onWarning?.(
+        "x-schema-patch-keys/-order present without x-schema-patch-topology: ignored (CORE §8.2.3)",
+      )
+    }
+    return null
+  }
+  if (typeof topology !== "string" || !ARRAY_TOPOLOGIES.has(topology)) {
+    throw new TypeError(
+      `x-schema-patch-topology: unknown value ${JSON.stringify(topology)} ` +
+        `(expected "sequence" | "set" | "map" | "atomic") (CORE §8.2.3)`,
+    )
+  }
+  const result: Pick<ArrayPlan, "topology" | "keys" | "order"> = {
+    topology: topology as ArraySemantics,
+  }
+  if (topology === "map") {
+    const keys = node["x-schema-patch-keys"]
+    if (!Array.isArray(keys) || keys.length === 0) {
+      throw new TypeError(
+        'x-schema-patch-topology: "map" REQUIRES a non-empty x-schema-patch-keys ' +
+          "array (the key tuple is the identity) (CORE §8.2.3)",
+      )
+    }
+    for (const k of keys) {
+      if (typeof k !== "string") {
+        throw new TypeError(
+          `x-schema-patch-keys entries must be strings (member-field names); got ${typeof k} (CORE §8.2.3)`,
+        )
+      }
+    }
+    result.keys = [...keys]
+    const order = node["x-schema-patch-order"] ?? "insignificant"
+    if (order !== "significant" && order !== "insignificant") {
+      throw new TypeError(
+        `x-schema-patch-order: unknown value ${JSON.stringify(order)} ` +
+          `(expected "significant" | "insignificant") (CORE §8.2.3)`,
+      )
+    }
+    result.order = order
+  } else {
+    // keys/order on a non-map topology are ignored (CORE §8.2.3).
+    if (node["x-schema-patch-keys"] !== undefined || node["x-schema-patch-order"] !== undefined) {
+      onWarning?.(
+        `x-schema-patch-keys/-order on a non-map topology (${topology}): ignored (CORE §8.2.3)`,
+      )
+    }
+  }
+  return result
+}
+
+/** Parse the declared object granularity (CORE §8.2/§8.3.2); throws on unknown value. */
+function parseObjectGranularity(
+  node: JSONSchema,
+): "granular" | "atomic" | undefined {
+  const g = node["x-schema-patch-granularity"]
+  if (g === undefined) return undefined
+  if (g !== "granular" && g !== "atomic") {
+    throw new TypeError(
+      `x-schema-patch-granularity: unknown value ${JSON.stringify(g)} ` +
+        `(expected "granular" | "atomic") (CORE §8.2.3)`,
+    )
+  }
+  return g
+}
+
+/** Resolve `docPath` to its plan key under `basePath`, or `null` if out of base (CORE §3.6.2). */
+function resolveTargetPath(
+  docPath: string,
+  basePath: string | undefined,
+): string | null {
+  const inBase =
+    !basePath || docPath === basePath || docPath.startsWith(`${basePath}/`)
+  if (!inBase) return null
+  return basePath ? docPath.slice(basePath.length) : docPath
+}
+
+function sameStringArray(a: string[] | undefined, b: string[] | undefined): boolean {
+  if (a === b) return true
+  if (!a || !b || a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
+  return true
+}
+
+/**
+ * A declared topology is an assertion about identity, not a rankable preference:
+ * two schema nodes at the same document path MUST NOT declare conflicting
+ * topologies (CORE §8.2.2), and an array node MUST NOT collide with a declared
+ * atomic object node.
+ */
+function declaredTopologyConflict(path: string): TypeError {
+  return new TypeError(
+    `Conflicting declared topology at ${JSON.stringify(path || "/")}: ` +
+      "two schema nodes mapping to the same document path declare incompatible " +
+      "x-schema-patch-* semantics (CORE §8.2.2)",
+  )
+}
+
+/** Register an ArrayPlan at `docPath`, reconciling with any existing entry (CORE §3.7/§8.2.2). */
+function registerArrayPlan(
+  plan: Plan,
+  docPath: string,
+  arrayPlan: ArrayPlan,
+  basePath: string | undefined,
+): void {
+  const targetPath = resolveTargetPath(docPath, basePath)
+  if (targetPath === null) return
+  const existing = plan.get(targetPath)
+  if (!existing) {
+    plan.set(targetPath, arrayPlan)
+    return
+  }
+  if (isObjectPlan(existing)) {
+    // An ObjectPlan only exists for a declared-atomic object; an array node at
+    // the same path is a conflicting declared assertion.
+    throw declaredTopologyConflict(targetPath)
+  }
+  const candDeclared = arrayPlan.topology !== undefined
+  const existDeclared = existing.topology !== undefined
+  if (candDeclared && existDeclared) {
+    if (
+      existing.topology !== arrayPlan.topology ||
+      !sameStringArray(existing.keys, arrayPlan.keys) ||
+      existing.order !== arrayPlan.order
+    ) {
+      throw declaredTopologyConflict(targetPath)
+    }
+    return // identical declaration — idempotent
+  }
+  if (candDeclared) {
+    // Declared topology ALWAYS wins over a compat-derived plan (CORE §8.2.2).
+    mergePlanMetadata(arrayPlan, existing)
+    plan.set(targetPath, arrayPlan)
+    return
+  }
+  if (existDeclared) {
+    // Keep the declared topology; a compat plan never downgrades it.
+    mergePlanMetadata(existing, arrayPlan)
+    return
+  }
+  // Neither declared: spec-v1 rank-based reconciliation (CORE §3.7).
+  if (isBetterPlan(arrayPlan, existing)) {
+    mergePlanMetadata(arrayPlan, existing)
+    plan.set(targetPath, arrayPlan)
+  } else {
+    mergePlanMetadata(existing, arrayPlan)
+  }
+}
+
+/** Register a declared-atomic ObjectPlan at `docPath` (CORE §8.3.2), guarding conflicts. */
+function registerObjectPlan(
+  plan: Plan,
+  docPath: string,
+  basePath: string | undefined,
+): void {
+  const targetPath = resolveTargetPath(docPath, basePath)
+  if (targetPath === null) return
+  const existing = plan.get(targetPath)
+  if (existing && !isObjectPlan(existing)) {
+    // An array node already registered at this object's path is a conflict.
+    throw declaredTopologyConflict(targetPath)
+  }
+  plan.set(targetPath, { granularity: "atomic" })
+}
 
 export function _resolveRef(
   ref: string,
@@ -131,6 +358,26 @@ export function _traverseSchema(
     }
   }
 
+  // spec-v2 object granularity (CORE §8.3.2). An object node is one carrying the
+  // shape keywords `properties`/`additionalProperties` (CORE §3.3.1).
+  const granularity = parseObjectGranularity(subSchema)
+  const isObjectNode =
+    !!subSchema.properties ||
+    (typeof subSchema.additionalProperties === "object" && !!subSchema.additionalProperties)
+  if (granularity !== undefined && !isObjectNode) {
+    // x-schema-patch-granularity on a non-object node has no effect (CORE §8.2.3).
+    options?.onWarning?.(
+      "x-schema-patch-granularity on a non-object node: ignored (CORE §8.2.3)",
+    )
+  }
+  if (granularity === "atomic" && isObjectNode) {
+    // CORE §8.3.2/§8.3.3: register the atomic object and PRUNE its whole subtree —
+    // nothing recurses below an atomic node (CORE §8.6.2).
+    registerObjectPlan(plan, docPath, options?.basePath)
+    visited.delete(subSchema)
+    return
+  }
+
   // Traverse as an object whenever the shape keywords are present, regardless of
   // whether an explicit `type: "object"` is declared (CORE §3.3.1). JSON Schema does
   // not require `type` alongside `properties`/`additionalProperties` (common in
@@ -163,6 +410,9 @@ export function _traverseSchema(
 
   // Likewise, traverse as an array whenever `items` is present (CORE §3.3.1).
   if (subSchema.items) {
+    // spec-v2: a declared topology short-circuits the compat derivation
+    // (CORE §3.4.0/§8.3.1) and overrides primaryKeyMap + auto-detection.
+    const declaredTopology = parseArrayTopology(subSchema, options?.onWarning)
     const arrayPlan: ArrayPlan = {primaryKey: null, strategy: "lcs"}
 
     let itemsSchema = subSchema.items
@@ -184,152 +434,163 @@ export function _traverseSchema(
         itemsSchema.type === "number" ||
         itemsSchema.type === "boolean")
 
-    if (isPrimitive) {
-      arrayPlan.strategy = "unique"
+    // Resolve a leading $ref and merge `allOf` branches into a single synthetic
+    // object view (CORE §3.5.1). Items composed with allOf — e.g. a branch that
+    // declares a required "id" — otherwise never surface a primary key, and
+    // required fields split across allOf branches are never combined, so the
+    // array silently degrades to LCS. Nested allOf and $ref branches are merged
+    // recursively; branch properties/required are unioned.
+    const mergeAllOf = (s: JSONSchema): JSONSchema => {
+      let cur = s
+      if (cur?.$ref) {
+        const resolved = _resolveRef(cur.$ref, schema, options?.onWarning)
+        if (!resolved) return cur
+        cur = resolved
+      }
+      if (!cur?.allOf || !Array.isArray(cur.allOf)) return cur
+
+      const mergedProps: Record<string, JSONSchema> = {...(cur.properties || {})}
+      const mergedRequired = new Set<string>(cur.required || [])
+      for (const branch of cur.allOf) {
+        const view = mergeAllOf(branch as JSONSchema)
+        if (view?.properties) Object.assign(mergedProps, view.properties)
+        for (const req of view?.required || []) mergedRequired.add(req)
+      }
+      return {type: "object", properties: mergedProps, required: [...mergedRequired]}
     }
 
-    const customKey = options?.primaryKeyMap?.[docPath]
-    if (customKey) {
-      arrayPlan.primaryKey = customKey
-      arrayPlan.strategy = "primaryKey"
-    } else if (!isPrimitive) {
-      // Resolve a leading $ref and merge `allOf` branches into a single synthetic
-      // object view (CORE §3.5.1). Items composed with allOf — e.g. a branch that
-      // declares a required "id" — otherwise never surface a primary key, and
-      // required fields split across allOf branches are never combined, so the
-      // array silently degrades to LCS. Nested allOf and $ref branches are merged
-      // recursively; branch properties/required are unioned.
-      const mergeAllOf = (s: JSONSchema): JSONSchema => {
-        let cur = s
-        if (cur?.$ref) {
-          const resolved = _resolveRef(cur.$ref, schema, options?.onWarning)
-          if (!resolved) return cur
-          cur = resolved
-        }
-        if (!cur?.allOf || !Array.isArray(cur.allOf)) return cur
+    // Find primary key and other metadata only for non-primitive object arrays
+    const findMetadata = (
+      s: JSONSchema,
+    ): Pick<ArrayPlan, "primaryKey" | "requiredFields" | "hashFields"> | null => {
+      if (!s || typeof s !== "object") return null
 
-        const mergedProps: Record<string, JSONSchema> = {...(cur.properties || {})}
-        const mergedRequired = new Set<string>(cur.required || [])
-        for (const branch of cur.allOf) {
-          const view = mergeAllOf(branch as JSONSchema)
-          if (view?.properties) Object.assign(mergedProps, view.properties)
-          for (const req of view?.required || []) mergedRequired.add(req)
-        }
-        return {type: "object", properties: mergedProps, required: [...mergedRequired]}
-      }
-
-      // Find primary key and other metadata only for non-primitive object arrays
-      const findMetadata = (
-        s: JSONSchema,
-      ): Pick<ArrayPlan, "primaryKey" | "requiredFields" | "hashFields"> | null => {
-        if (!s || typeof s !== "object") return null
-
-        const currentSchema = mergeAllOf(s)
-        if (!currentSchema || currentSchema.type !== "object" || !currentSchema.properties) {
-          return null
-        }
-
-        const props = currentSchema.properties
-        const required = new Set(currentSchema.required || []) as Set<string>
-        const hashFields: string[] = []
-
-        // Identify potential hash fields (required, primitive types)
-        for (const key of required) {
-          const prop = props[key]
-          if (prop && (prop.type === "string" || prop.type === "number")) {
-            hashFields.push(key)
-          }
-        }
-
-        // F25: the candidate list is configurable (CORE §3.5.5); default when the
-        // option is omitted. An explicit empty array iterates zero candidates,
-        // disabling auto-detection so the array keeps its base strategy.
-        const potentialKeys =
-          options?.primaryKeyCandidates ?? DEFAULT_PRIMARY_KEY_CANDIDATES
-        for (const key of potentialKeys) {
-          if (required.has(key)) {
-            const prop = props[key]
-            if (prop && (prop.type === "string" || prop.type === "number")) {
-              return {
-                primaryKey: key,
-                requiredFields: required,
-                hashFields,
-              }
-            }
-          }
-        }
-
+      const currentSchema = mergeAllOf(s)
+      if (!currentSchema || currentSchema.type !== "object" || !currentSchema.properties) {
         return null
       }
 
+      const props = currentSchema.properties
+      const required = new Set(currentSchema.required || []) as Set<string>
+      const hashFields: string[] = []
+
+      // Identify potential hash fields (required, primitive types)
+      for (const key of required) {
+        const prop = props[key]
+        if (prop && (prop.type === "string" || prop.type === "number")) {
+          hashFields.push(key)
+        }
+      }
+
+      // F25: the candidate list is configurable (CORE §3.5.5); default when the
+      // option is omitted. An explicit empty array iterates zero candidates,
+      // disabling auto-detection so the array keeps its base strategy.
+      const potentialKeys =
+        options?.primaryKeyCandidates ?? DEFAULT_PRIMARY_KEY_CANDIDATES
+      for (const key of potentialKeys) {
+        if (required.has(key)) {
+          const prop = props[key]
+          if (prop && (prop.type === "string" || prop.type === "number")) {
+            return {
+              primaryKey: key,
+              requiredFields: required,
+              hashFields,
+            }
+          }
+        }
+      }
+
+      return null
+    }
+
+    // Auto-detection over the (allOf-merged) item schema, following anyOf/oneOf
+    // branches in array order (CORE §3.5.1).
+    const detectMetadata = (): ReturnType<typeof findMetadata> => {
       const schemas = itemsSchema.anyOf || itemsSchema.oneOf
-      let metadata: ReturnType<typeof findMetadata> | null = null
       if (schemas) {
+        let metadata: ReturnType<typeof findMetadata> | null = null
         for (const s of schemas) {
           metadata = findMetadata(s)
-          if (metadata?.primaryKey) {
-            break
+          if (metadata?.primaryKey) return metadata
+        }
+        return metadata
+      }
+      return findMetadata(itemsSchema)
+    }
+
+    if (declaredTopology) {
+      // CORE §3.4.0: declared topology governs dispatch; fill the compat
+      // strategy/primaryKey view for introspection (CORE §8.3.1).
+      arrayPlan.topology = declaredTopology.topology
+      if (declaredTopology.topology === "map") {
+        arrayPlan.keys = declaredTopology.keys
+        arrayPlan.order = declaredTopology.order
+        arrayPlan.strategy = "primaryKey"
+        arrayPlan.primaryKey = declaredTopology.keys?.[0] ?? null
+        // requiredFields/hashFields are non-normative prefilter hints
+        // (CORE §8.3.1); populate from the item object schema where present.
+        if (!isPrimitive) {
+          const meta = detectMetadata()
+          if (meta) {
+            arrayPlan.requiredFields = meta.requiredFields
+            arrayPlan.hashFields = meta.hashFields
           }
         }
       } else {
-        metadata = findMetadata(itemsSchema)
+        // sequence / set / atomic: strategy "lcs", no primaryKey (CORE §8.3.1).
+        arrayPlan.strategy = "lcs"
+        arrayPlan.primaryKey = null
+      }
+    } else {
+      // Compatibility derivation (CORE §3.4.1–§3.5) — spec-v1 behavior.
+      if (isPrimitive) {
+        arrayPlan.strategy = "unique"
       }
 
-      if (metadata?.primaryKey) {
-        arrayPlan.primaryKey = metadata.primaryKey
-        arrayPlan.requiredFields = metadata.requiredFields
-        arrayPlan.hashFields = metadata.hashFields
+      const customKey = options?.primaryKeyMap?.[docPath]
+      if (customKey) {
+        arrayPlan.primaryKey = customKey
         arrayPlan.strategy = "primaryKey"
+      } else if (!isPrimitive) {
+        const metadata = detectMetadata()
+        if (metadata?.primaryKey) {
+          arrayPlan.primaryKey = metadata.primaryKey
+          arrayPlan.requiredFields = metadata.requiredFields
+          arrayPlan.hashFields = metadata.hashFields
+          arrayPlan.strategy = "primaryKey"
+        }
       }
     }
 
-    // basePath must match on a path-segment boundary (CORE §3.6.2). A raw
-    // startsWith/replace wrongly captures siblings ("/env" matching "/envelope")
-    // and can strip mid-segment, producing plan keys that never match at diff
-    // time. Match iff docPath === basePath or docPath starts with basePath + "/",
-    // and relativize by slicing exactly basePath.length characters.
-    const basePath = options?.basePath
-    const inBase =
-      !basePath || docPath === basePath || docPath.startsWith(`${basePath}/`)
-    if (inBase) {
-      const targetPath = basePath ? docPath.slice(basePath.length) : docPath
+    // Register, reconciling with any existing entry at this path (CORE §3.7);
+    // a declared topology overrides a compat plan and conflicts fail
+    // construction (CORE §8.2.2). basePath restriction/relativization is applied
+    // inside registerArrayPlan (CORE §3.6.2).
+    registerArrayPlan(plan, docPath, arrayPlan, options?.basePath)
 
-      const existingPlan = plan.get(targetPath)
-      if (!existingPlan) {
-        plan.set(targetPath, arrayPlan)
-      } else if (isBetterPlan(arrayPlan, existingPlan)) {
-        mergePlanMetadata(arrayPlan, existingPlan)
-        plan.set(targetPath, arrayPlan)
-      } else {
-        // Keep existing but merge any useful metadata from the candidate.
-        mergePlanMetadata(existingPlan, arrayPlan)
-      }
+    // Continue traversal into array items — UNLESS this is a declared `atomic`
+    // array, which prunes its whole subtree (CORE §8.3.3/§8.6.2: nothing
+    // recurses below an atomic node). For an object item the path is unchanged
+    // (the differ adds the array index at diff time, so an item property
+    // registers at `${docPath}/<prop>`). But when `items` is itself an array
+    // schema (array-of-arrays), the inner array MUST register at a DISTINCT
+    // path — a wildcard element segment `${docPath}/*` — so its plan never
+    // overwrites the outer array's plan at the same key (CORE §3.3.5).
+    if (declaredTopology?.topology !== "atomic") {
+      const itemsIsArray = !!(
+        itemsSchema &&
+        typeof itemsSchema === "object" &&
+        (itemsSchema.items || itemsSchema.type === "array")
+      )
+      _traverseSchema(
+        subSchema.items,
+        itemsIsArray ? `${docPath}/*` : docPath,
+        plan,
+        schema,
+        visited,
+        options,
+      )
     }
-
-    // Continue traversal into array items. For an object item the path is
-    // unchanged (the differ adds the array index at diff time, so an item
-    // property registers at `${docPath}/<prop>`). But when `items` is itself an
-    // array schema (array-of-arrays), the inner array MUST register at a
-    // DISTINCT path — a wildcard element segment `${docPath}/*` — so its plan
-    // never overwrites the outer array's plan at the same key (CORE §3.3.5).
-    // Otherwise an inner primaryKey plan clobbers the outer LCS plan and the
-    // outer array (whose elements are arrays, not keyed objects) silently emits
-    // no ops. Detection uses the resolved item schema and keys off the shape
-    // keyword `items` (consistent with CORE §3.3.1), so an explicit type is not
-    // required.
-    const itemsIsArray = !!(
-      itemsSchema &&
-      typeof itemsSchema === "object" &&
-      (itemsSchema.items || itemsSchema.type === "array")
-    )
-    _traverseSchema(
-      subSchema.items,
-      itemsIsArray ? `${docPath}/*` : docPath,
-      plan,
-      schema,
-      visited,
-      options,
-    )
   }
   visited.delete(subSchema)
 }

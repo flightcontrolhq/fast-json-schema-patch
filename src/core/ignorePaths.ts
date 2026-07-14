@@ -1,4 +1,4 @@
-import type { Plan } from "./buildPlan";
+import { isObjectPlan, type Plan } from "./buildPlan";
 import { unescapeJsonPointer } from "../utils/pathUtils";
 
 /**
@@ -144,20 +144,83 @@ export function validatePrimaryKeysNotIgnored(
   plan: Plan,
   ignoreRoot: IgnoreTrieNode
 ): void {
-  for (const [planKey, ap] of plan) {
-    const key = ap.primaryKey;
-    if (!key) continue;
+  for (const [planKey, entry] of plan) {
+    if (isObjectPlan(entry)) continue;
+    // A declared `map` topology's identity is its whole composite key tuple, so
+    // NO key field may be ignorable (same spirit as GEN §10.7 for primaryKey).
+    // Compat plans carry only a single `primaryKey`.
+    const keyFields = entry.keys ?? (entry.primaryKey ? [entry.primaryKey] : []);
+    if (keyFields.length === 0) continue;
     const segs = planKey.length === 0 ? [] : planKey.split("/").slice(1);
-    if (ignoreCoversKeyField(ignoreRoot, segs, 0, key)) {
+    for (const key of keyFields) {
+      if (ignoreCoversKeyField(ignoreRoot, segs, 0, key)) {
+        throw new TypeError(
+          `ignorePaths: an ignore entry covers the key field ${JSON.stringify(
+            key
+          )} of the array plan at ${JSON.stringify(
+            planKey || "/"
+          )} — a primaryKey/map key field must not be ignorable (GEN §10.7)`
+        );
+      }
+    }
+  }
+}
+
+/**
+ * CORE §8.2.3: an `ignorePaths` terminal at or beneath a declared `atomic`
+ * array/object node is a construction error. An atomic container is replaced
+ * whole and cannot express "replace everything except this ignored subtree".
+ * Throws `TypeError` on the first such collision.
+ */
+export function validateAtomicNotIgnored(
+  plan: Plan,
+  ignoreRoot: IgnoreTrieNode
+): void {
+  for (const [planKey, entry] of plan) {
+    const isAtomic = isObjectPlan(entry)
+      ? true
+      : entry.topology === "atomic";
+    if (!isAtomic) continue;
+    const segs = planKey.length === 0 ? [] : planKey.split("/").slice(1);
+    if (ignoreTerminalAtOrBeneath(ignoreRoot, segs, 0)) {
       throw new TypeError(
-        `ignorePaths: an ignore entry covers the primaryKey field ${JSON.stringify(
-          key
-        )} of the array plan at ${JSON.stringify(
-          planKey || "/"
-        )} — a primaryKey field must not be ignorable (GEN §10.7)`
+        `ignorePaths: an ignore entry lies at or beneath the declared atomic node at ` +
+          `${JSON.stringify(planKey || "/")} — an atomic container is replaced whole ` +
+          `and cannot express an ignored subtree (CORE §8.2.3)`
       );
     }
   }
+}
+
+/**
+ * True iff, following the plan path `segs` into the ignore trie, the reached
+ * node has any terminal at or below it. A `*` plan segment (additionalProperties
+ * or nested-array level) matches any member at diff time, so both the ignore
+ * wildcard and every exact child are explored. Ignore terminals strictly ABOVE
+ * the node (an ancestor ignored) are NOT flagged — that ignores the whole atomic
+ * container, which is permitted.
+ */
+function ignoreTerminalAtOrBeneath(
+  node: IgnoreTrieNode | undefined,
+  segs: string[],
+  i: number
+): boolean {
+  if (!node) return false;
+  if (i >= segs.length) return ignoreSubtreeHasTerminal(node);
+  const seg = segs[i] as string;
+  if (seg === "*") {
+    if (ignoreTerminalAtOrBeneath(node.wildcard, segs, i + 1)) return true;
+    if (node.children) {
+      for (const child of node.children.values()) {
+        if (ignoreTerminalAtOrBeneath(child, segs, i + 1)) return true;
+      }
+    }
+    return false;
+  }
+  const raw = unescapeJsonPointer(seg);
+  const exact = node.children?.get(raw);
+  if (exact && ignoreTerminalAtOrBeneath(exact, segs, i + 1)) return true;
+  return ignoreTerminalAtOrBeneath(node.wildcard, segs, i + 1);
 }
 
 function ignoreCoversKeyField(

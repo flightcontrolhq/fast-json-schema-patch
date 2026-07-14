@@ -20,4 +20,12 @@ export type {
   Operation,
   DiffOperation,
 } from "./types";
-export type { Plan, BuildPlanOptions } from "./core/buildPlan";
+export type {
+  Plan,
+  PlanEntry,
+  ArrayPlan,
+  ObjectPlan,
+  ArraySemantics,
+  BuildPlanOptions,
+} from "./core/buildPlan";
+export { isObjectPlan } from "./core/buildPlan";

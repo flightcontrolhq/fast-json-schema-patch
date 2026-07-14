@@ -345,6 +345,254 @@ export function diffArrayByPrimaryKeyMoves(
   );
 }
 
+/**
+ * Composite-tuple encoding for `map` topology (CORE §8.4.3, determinism pin).
+ * The canonical serialization of the JSON array `[e[keys[0]], …, e[keys[t-1]]]`
+ * in DECLARED key order, using the pinned scalar serializer (`JSON.stringify`:
+ * numbers as canonical f64 text, standard string escaping). Two tuples are the
+ * same map key IFF these serializations are byte-identical — preserving
+ * type-vs-value distinctness (`[1]` ≠ `["1"]`) and declared-order significance
+ * (`[1,2]` ≠ `[2,1]`). The gate (CORE §8.4.2) guarantees every key component is
+ * a string or number, so the encoding is total. For `|keys|=1` this generalizes
+ * spec-v1's raw `string|number` `Map` key and is OUTPUT-NEUTRAL (CORE §1.4.4),
+ * so single-key `map` output is byte-identical to spec-v1 primaryKey.
+ */
+export function encodeTupleKey(item: JsonObject, keys: string[]): string {
+  const tuple: JsonValue[] = new Array(keys.length);
+  for (let i = 0; i < keys.length; i++) {
+    tuple[i] = item[keys[i] as string] as JsonValue;
+  }
+  return JSON.stringify(tuple) as string;
+}
+
+/**
+ * `map` per-element applicability gate (CORE §8.4.2). In one O(n+m) pass verify:
+ * (a) every element of both arrays is a plain object; (b) every key field is
+ * present with a string|number value; (c/d) no duplicate tuple within `arr1` and
+ * none within `arr2` (tuple identity by JSON type-and-value per CORE §8.4.1,
+ * realized by the CORE §8.4.3 encoding). Any violation → the caller MUST fall
+ * back to `sequence`/LCS (§5). For `|keys|=1` this is identical to the spec-v1
+ * primaryKey gate (`checkPrimaryKeyApplicable`).
+ */
+export function checkCompositeKeyApplicable(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  keys: string[]
+): boolean {
+  const validate = (arr: JsonArray): boolean => {
+    const seen = new Set<string>();
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i];
+      if (typeof item !== "object" || item === null || Array.isArray(item)) {
+        return false;
+      }
+      const obj = item as JsonObject;
+      for (let k = 0; k < keys.length; k++) {
+        const v = obj[keys[k] as string];
+        const t = typeof v;
+        if (t !== "string" && t !== "number") return false;
+      }
+      const tupleKey = encodeTupleKey(obj, keys);
+      if (seen.has(tupleKey)) return false;
+      seen.add(tupleKey);
+    }
+    return true;
+  };
+  return validate(arr1) && validate(arr2);
+}
+
+/**
+ * `map` / order-INSIGNIFICANT emission (GEN §11.4, CORE §7.2). The spec-v1
+ * primaryKey three-phase strategy (GEN §4.1) generalized from a single field to
+ * the composite tuple (CORE §8.4.3 encoding as the index Map key). Emits
+ * `modifications ++ removals ++ additions`: matched elements recurse field-level
+ * at their ORIGINAL index, vanished elements become `remove`s in DESCENDING
+ * original index, new elements become `/-` appends in `modified` order. For
+ * `|keys|=1` this is byte-identical to `diffArrayByPrimaryKey` (CORE §8.8.1).
+ * The caller guarantees the CORE §8.4.2 gate passed.
+ */
+export function diffArrayByCompositeKey(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  keys: string[],
+  path: string,
+  patches: Operation[],
+  onModification: ModificationCallback,
+  includeOldValue: boolean = true
+): void {
+  const pathPrefix = path + "/";
+  // Phase 1: index original by tuple key (GEN §11.4.1).
+  const keyToIndex = new Map<string, number>();
+  for (let i = 0; i < arr1.length; i++) {
+    keyToIndex.set(encodeTupleKey(arr1[i] as JsonObject, keys), i);
+  }
+
+  const modificationPatches: Operation[] = [];
+  const additionPatches: Operation[] = [];
+
+  // Phase 2: scan modified by tuple key (GEN §11.4.1).
+  for (let i = 0; i < arr2.length; i++) {
+    const newItem = arr2[i] as JsonObject;
+    const tupleKey = encodeTupleKey(newItem, keys);
+    const oldIndex = keyToIndex.get(tupleKey);
+    if (oldIndex !== undefined) {
+      keyToIndex.delete(tupleKey);
+      const oldItem = arr1[oldIndex] as JsonValue;
+      if (oldItem !== newItem && !deepEqual(oldItem, newItem)) {
+        onModification(oldItem, newItem, pathPrefix + oldIndex, modificationPatches, true);
+      }
+    } else {
+      additionPatches.push({ op: "add", path: pathPrefix + "-", value: newItem });
+    }
+  }
+
+  // Phase 3: unmatched originals → removals, DESCENDING original index (GEN §11.4.1).
+  const removalIndices = Array.from(keyToIndex.values());
+  removalIndices.sort((a, b) => b - a);
+  const removalPatches: Operation[] = new Array(removalIndices.length);
+  for (let i = 0; i < removalIndices.length; i++) {
+    const index = removalIndices[i] as number;
+    const op: Operation = { op: "remove", path: pathPrefix + index };
+    if (includeOldValue) op.oldValue = arr1[index] as JsonValue;
+    removalPatches[i] = op;
+  }
+
+  // Concatenate modifications ++ removals ++ additions (GEN §4.1.4). Plain loops
+  // (not spread) to avoid the argument-count ceiling on very large arrays (F13).
+  for (let i = 0; i < modificationPatches.length; i++) patches.push(modificationPatches[i] as Operation);
+  for (let i = 0; i < removalPatches.length; i++) patches.push(removalPatches[i] as Operation);
+  for (let i = 0; i < additionPatches.length; i++) patches.push(additionPatches[i] as Operation);
+}
+
+/**
+ * `map` / order-SIGNIFICANT emission (GEN §11.4.2, CORE §7.4). Build the tuple
+ * bijection between surviving `original` indices and their `modified` targets and
+ * hand it to the shared staged move-emitter, so survivors are REORDERED into
+ * `modified` order via `move`s and new keys are INDEXED adds — making
+ * `applyPatch(original, p)` equal `modified` byte-exactly. The move machinery
+ * runs UNCONDITIONALLY for this topology (independent of the `emitMoves` option;
+ * GEN §8.8). The caller guarantees the CORE §8.4.2 gate passed.
+ */
+export function diffArrayByCompositeKeyMoves(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  keys: string[],
+  path: string,
+  patches: Operation[],
+  onModification: ModificationCallback,
+  includeOldValue: boolean = true
+): void {
+  const keyToIndex = new Map<string, number>();
+  for (let i = 0; i < arr1.length; i++) {
+    keyToIndex.set(encodeTupleKey(arr1[i] as JsonObject, keys), i);
+  }
+
+  const matched: MatchedPair[] = [];
+  const pureInserts: number[] = [];
+  for (let j = 0; j < arr2.length; j++) {
+    const tupleKey = encodeTupleKey(arr2[j] as JsonObject, keys);
+    const src = keyToIndex.get(tupleKey);
+    if (src !== undefined) {
+      keyToIndex.delete(tupleKey);
+      matched.push({ src, tgt: j, changed: !deepEqual(arr1[src], arr2[j]) });
+    } else {
+      pureInserts.push(j);
+    }
+  }
+
+  const pureDeletes = Array.from(keyToIndex.values());
+
+  emitArrayMovesPatch(
+    arr1,
+    arr2,
+    path,
+    patches,
+    matched,
+    pureDeletes,
+    pureInserts,
+    onModification,
+    includeOldValue
+  );
+}
+
+/** Assign a stable per-reference id to an opaque (non-JSON) object, closed over one Map. */
+function makeOpaqueIdAllocator(): (o: object) => number {
+  const idMap = new Map<object, number>();
+  let seq = 0;
+  return (o: object): number => {
+    let id = idMap.get(o);
+    if (id === undefined) {
+      id = seq++;
+      idMap.set(o, id);
+    }
+    return id;
+  };
+}
+
+/**
+ * `set` uniqueness gate (CORE §8.5.1). Every element of `arr1` MUST be unique by
+ * deep value (CORE §1.4.1) and every element of `arr2` likewise. A deep-equal
+ * duplicate in either array → the caller MUST fall back to `sequence`/LCS (§5):
+ * a `set` is only well-defined when its members are distinguishable by value.
+ * Uses the canonical fingerprint (exact deep-equal for JSON inputs).
+ */
+export function checkArraysSetUnique(arr1: JsonArray, arr2: JsonArray): boolean {
+  const opaqueId = makeOpaqueIdAllocator();
+  const uniqueByValue = (arr: JsonArray): boolean => {
+    const seen = new Set<string>();
+    for (let i = 0; i < arr.length; i++) {
+      const fp = canonicalFingerprint(arr[i] as JsonValue, opaqueId);
+      if (seen.has(fp)) return false;
+      seen.add(fp);
+    }
+    return true;
+  };
+  return uniqueByValue(arr1) && uniqueByValue(arr2);
+}
+
+/**
+ * `set` membership emission (GEN §11.3, CORE §8.5). Element identity is the
+ * element VALUE itself (deep equality); order is insignificant. Emit removals of
+ * `original` values ABSENT from `modified` by DESCENDING original index (each
+ * with `oldValue` per `includeOldValue`), THEN additions of `modified` values
+ * ABSENT from `original` via `/-` append in `modified` order. No positional
+ * replaces: survivors receive no op. The caller guarantees the CORE §8.5.1 gate
+ * passed, so "absent from" is unambiguous (multiset = set).
+ */
+export function diffArraySet(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  path: string,
+  patches: Operation[],
+  includeOldValue: boolean = true
+): void {
+  const prefix = path === "" ? "/" : path + "/";
+  const opaqueId = makeOpaqueIdAllocator();
+  // Fingerprint each element once (CORE §1.4.1 interning; output-neutral).
+  const fpA: string[] = new Array(arr1.length);
+  for (let i = 0; i < arr1.length; i++) fpA[i] = canonicalFingerprint(arr1[i] as JsonValue, opaqueId);
+  const fpB: string[] = new Array(arr2.length);
+  for (let j = 0; j < arr2.length; j++) fpB[j] = canonicalFingerprint(arr2[j] as JsonValue, opaqueId);
+  const setA = new Set(fpA);
+  const setB = new Set(fpB);
+
+  // Removals: DESCENDING original index keeps lower survivor indices valid under
+  // sequential apply (GEN §11.3.2).
+  for (let i = arr1.length - 1; i >= 0; i--) {
+    if (!setB.has(fpA[i] as string)) {
+      const op: Operation = { op: "remove", path: prefix + i };
+      if (includeOldValue) op.oldValue = arr1[i] as JsonValue;
+      patches.push(op);
+    }
+  }
+  // Additions: `/-` append in modified order (GEN §11.3.3).
+  for (let j = 0; j < arr2.length; j++) {
+    if (!setA.has(fpB[j] as string)) {
+      patches.push({ op: "add", path: prefix + "-", value: arr2[j] as JsonValue });
+    }
+  }
+}
+
 export function diffArrayLCS(
   arr1: JsonArray,
   arr2: JsonArray,

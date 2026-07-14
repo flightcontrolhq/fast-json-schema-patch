@@ -1,18 +1,24 @@
 import {
+  checkArraysSetUnique,
   checkArraysUnique,
+  checkCompositeKeyApplicable,
   checkPrimaryKeyApplicable,
+  diffArrayByCompositeKey,
+  diffArrayByCompositeKeyMoves,
   diffArrayByPrimaryKey,
   diffArrayByPrimaryKeyMoves,
   diffArrayLCS,
+  diffArraySet,
   diffArrayUnique,
   diffArrayUniqueMoves,
   type ModificationCallback,
 } from "./arrayDiffAlgorithms";
-import type { ArrayPlan, Plan } from "./buildPlan";
+import { isObjectPlan, type ArrayPlan, type ObjectPlan, type Plan, type PlanEntry } from "./buildPlan";
 import {
   compileIgnoreTrie,
   ignoreMember,
   ignoreSubtreeHasTerminal,
+  validateAtomicNotIgnored,
   validatePrimaryKeysNotIgnored,
   type IgnoreTrieNode,
 } from "./ignorePaths";
@@ -36,7 +42,7 @@ import { escapeJsonPointer, unescapeJsonPointer } from "../utils/pathUtils";
  * at this node (the array registered at that path).
  */
 interface PlanTrieNode {
-  plan?: ArrayPlan;
+  plan?: PlanEntry;
   children?: Map<string, PlanTrieNode>;
   wildcard?: PlanTrieNode;
 }
@@ -122,7 +128,13 @@ export class JsonSchemaPatcher {
     // set compiles to `undefined` (no ignore node threaded -> byte-stable). When
     // a trie is present, a plan primaryKey field must not be ignorable (GEN §10.7).
     this.ignoreTrie = compileIgnoreTrie(options.ignorePaths);
-    if (this.ignoreTrie) validatePrimaryKeysNotIgnored(this.plan, this.ignoreTrie);
+    if (this.ignoreTrie) {
+      validatePrimaryKeysNotIgnored(this.plan, this.ignoreTrie);
+      // CORE §8.2.3: an `ignorePaths` terminal at or beneath a declared atomic
+      // array/object node is a construction error — an atomic container is
+      // replaced whole and cannot express "replace everything except this".
+      validateAtomicNotIgnored(this.plan, this.ignoreTrie);
+    }
   }
 
   /**
@@ -307,6 +319,21 @@ export class JsonSchemaPatcher {
     node: PlanTrieNode | undefined,
     ignoreNode: IgnoreTrieNode | undefined
   ) {
+    // spec-v2 object dispatch (GEN §11.1): a declared `granularity: "atomic"`
+    // object emits ONE whole-object replace when it differs and STOPS — no §2
+    // per-member walk, no recursion (CORE §8.6). The plan trie has no children
+    // beneath an atomic node (buildPlan pruned the subtree, CORE §8.3.3), so the
+    // check belongs here at the object's own node.
+    const objectPlan = node?.plan;
+    if (objectPlan && isObjectPlan(objectPlan)) {
+      if (!deepEqualMemo(obj1, obj2)) {
+        const op: Operation = { op: "replace", path, value: obj2 };
+        if (this.includeOldValue) op.oldValue = obj1;
+        patches.push(op);
+      }
+      return;
+    }
+
     // F36: GEN §2.2 visitation order is "all of original's keys in
     // original insertion order, followed by keys present only in modified in
     // modified insertion order." The previous implementation built that order
@@ -384,6 +411,23 @@ export class JsonSchemaPatcher {
     // level (its item node is terminal, e.g. `/arr/*`) makes EVERY element — and
     // thus the whole array — equal, in any strategy. Short-circuit to no ops.
     if (ignoreNode?.wildcard?.end) return;
+
+    // spec-v2 array dispatch (GEN §11.2): a declared `atomic` array emits ONE
+    // whole-array replace when it differs and STOPS — no recursion beneath
+    // (CORE §8.6.2). Handled BEFORE the wholesaleReplaceFallback wrapper because
+    // an atomic node is EXEMPT from that capability (it is already wholesale,
+    // CORE §8.6.3) and forbids an ignore terminal beneath it (construction error,
+    // CORE §8.2.3), so no ignore filtering applies here.
+    const arrPlan = node?.plan;
+    if (arrPlan && !isObjectPlan(arrPlan) && arrPlan.topology === "atomic") {
+      if (!deepEqualMemo(arr1, arr2)) {
+        const op: Operation = { op: "replace", path, value: arr2 };
+        if (this.includeOldValue) op.oldValue = arr1;
+        patches.push(op);
+      }
+      return;
+    }
+
     // wholesaleReplaceFallback (GEN §9 / CONF §5.5, F24). OFF by default:
     // dispatch straight into the caller's `patches` exactly as before — zero
     // extra allocation and byte-identical output. ON: generate into a local
@@ -431,8 +475,11 @@ export class JsonSchemaPatcher {
     // element recursion (below) and for the ignore-filtered LCS interning.
     const itemIgnore = ignoreNode?.wildcard;
     // Strategy is read straight off the trie node for THIS array (GEN §3.1):
-    // O(1) pointer access, no string normalization and no per-path caches.
-    const plan = node?.plan;
+    // O(1) pointer access, no string normalization and no per-path caches. An
+    // ObjectPlan can never legitimately sit at an array path; treat it as no plan.
+    const rawPlan = node?.plan;
+    const plan =
+      rawPlan && !isObjectPlan(rawPlan) ? (rawPlan as ArrayPlan) : undefined;
     const strategy = plan?.strategy || "lcs";
 
     const createModificationCallback = (
@@ -471,6 +518,74 @@ export class JsonSchemaPatcher {
         );
       };
     };
+
+    // spec-v2 declared-topology dispatch (GEN §11.2). A declared topology
+    // REPLACES the §3.1/§3.2 runtime-gated selection below (`atomic` was already
+    // handled in diffArray). Each topology's identity gate falls back to
+    // `sequence`/LCS on violation (CORE §8.4.2/§8.5.1). LCS is invoked with the
+    // same arguments as the compat tail so the fallback is byte-identical.
+    const topology = plan?.topology;
+    if (topology) {
+      const lcsFallback = () =>
+        diffArrayLCS(
+          arr1,
+          arr2,
+          path,
+          patches,
+          createModificationCallback(plan?.hashFields || []),
+          plan?.hashFields,
+          plan,
+          this.includeOldValue,
+          this.emitMoves,
+          itemIgnore
+        );
+      if (topology === "sequence") {
+        // Forced LCS even where a primary key would auto-detect (CORE §8.7).
+        lcsFallback();
+        return;
+      }
+      if (topology === "set") {
+        if (checkArraysSetUnique(arr1, arr2)) {
+          diffArraySet(arr1, arr2, path, patches, this.includeOldValue);
+          return;
+        }
+        lcsFallback();
+        return;
+      }
+      if (topology === "map") {
+        const keys = plan?.keys as string[];
+        if (checkCompositeKeyApplicable(arr1, arr2, keys)) {
+          // order=significant → moves machinery, run unconditionally (GEN §11.4.2,
+          // independent of the emitMoves option). order=insignificant → the
+          // keyed three-phase emission (CORE §7.2).
+          if (plan?.order === "significant") {
+            diffArrayByCompositeKeyMoves(
+              arr1,
+              arr2,
+              keys,
+              path,
+              patches,
+              createModificationCallback(plan?.hashFields || []),
+              this.includeOldValue
+            );
+          } else {
+            diffArrayByCompositeKey(
+              arr1,
+              arr2,
+              keys,
+              path,
+              patches,
+              createModificationCallback(plan?.hashFields || []),
+              this.includeOldValue
+            );
+          }
+          return;
+        }
+        lcsFallback();
+        return;
+      }
+      // topology === "atomic" is unreachable here (handled in diffArray).
+    }
 
     // primaryKey applicability gate (GEN §4.3): commit to the keyed strategy
     // only when every element of both arrays is a plain object with a unique
