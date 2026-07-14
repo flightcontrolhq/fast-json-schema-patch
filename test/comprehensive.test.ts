@@ -2547,27 +2547,27 @@ describe("Array diffing strategies", () => {
 
       const patches = patcher.execute({ original: doc1, modified: doc2 });
 
-      // The LCS algorithm may generate different operations than expected
-      // Check that some modification occurred and new item was added
+      // §5.5.4.2 granular descent (F10): whenever the LCS window collapses a
+      // remove+add into a replace of two same-kind objects, the differ recurses
+      // and emits FIELD-level ops (paths like `/items/N/<field>`) instead of a
+      // whole-item object replace. The exact Myers alignment is generator-
+      // defined (§1.3), so assert the granular *shape* rather than one alignment:
+      // at least one field-level replace is emitted...
+      expect(
+        patches.some((p) => /^\/items\/\d+\/[^/]+$/.test(p.path))
+      ).toBe(true);
+      // ...and no `replace` op carries a whole object value (the pre-F10 bloat).
       expect(
         patches.some(
           (p) =>
             p.op === "replace" &&
-            p.value &&
             typeof p.value === "object" &&
-            (p.value as any).name === "item1" &&
-            (p.value as any).value === 15
+            p.value !== null
         )
-      ).toBe(true);
-      expect(
-        patches.some(
-          (p) =>
-            p.op === "add" &&
-            p.value &&
-            typeof p.value === "object" &&
-            (p.value as any).name === "new"
-        )
-      ).toBe(true);
+      ).toBe(false);
+      // The whole diff still round-trips under strict sequential application.
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
     });
 
     test("should handle empty to non-empty arrays", () => {
@@ -2710,8 +2710,17 @@ describe("Array diffing strategies", () => {
       const b = a.map((o, i) => (i === 150 ? mk(150, 99999) : o));
       const patches = roundtrips(a, b);
       // Only element 150 changed; the interned run trims to a 1-element window.
+      // §5.5.4.2 granular descent (F10): the collapsed replace pair are both
+      // plain objects, so the differ recurses into the item and emits a
+      // field-level op for the single changed field (`val`) rather than a
+      // whole-item replace carrying the full new object + oldValue.
       expect(patches).toHaveLength(1);
-      expect(patches[0]).toMatchObject({ op: "replace", path: "/items/150" });
+      expect(patches[0]).toMatchObject({
+        op: "replace",
+        path: "/items/150/val",
+        value: 99999,
+        oldValue: 150,
+      });
     });
 
     test("70k-element single-edit array round-trips (regression, no cliff)", () => {
@@ -2730,6 +2739,158 @@ describe("Array diffing strategies", () => {
         patches
       );
       expect(applied).toEqual({ items: b });
+    });
+  });
+
+  describe("LCS granular descent into changed items (§5.5.4.2, F10)", () => {
+    const lcsPatcher = () =>
+      new JsonSchemaPatcher({
+        plan: new Map([
+          ["/items", { primaryKey: null, strategy: "lcs" as const }],
+        ]),
+      });
+
+    // A ~600B object item with no key field (LCS default strategy).
+    const bigItem = (bio: string) => ({
+      slug: "the-quick-brown-fox-jumps",
+      title: "A Reasonably Long Human Readable Title For This Record",
+      bio,
+      tags: ["alpha", "beta", "gamma", "delta", "epsilon"],
+      meta: {
+        createdAt: "2024-01-02T03:04:05.000Z",
+        updatedAt: "2024-06-07T08:09:10.000Z",
+        author: "Jane Q. Public",
+        revision: 7,
+      },
+      score: 42,
+    });
+
+    test("single-field change in an object item emits a granular nested replace, not a whole-item replace (byte win vs 23x audit baseline)", () => {
+      const longBio =
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do " +
+        "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim " +
+        "ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut " +
+        "aliquip ex ea commodo consequat. Duis aute irure dolor in " +
+        "reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla " +
+        "pariatur. Excepteur sint occaecat cupidatat non proident.";
+      const items = Array.from({ length: 10 }, () => bigItem(longBio));
+      const doc1 = { items: structuredClone(items) };
+      const doc2 = structuredClone(doc1);
+      // One scalar field on one item changes.
+      (doc2.items[4] as any).score = 43;
+
+      // Each item is roughly ~600 bytes.
+      const itemBytes = JSON.stringify(items[0]).length;
+      expect(itemBytes).toBeGreaterThan(500);
+
+      const patches = lcsPatcher().execute({ original: doc1, modified: doc2 });
+
+      // Exactly one granular op targeting the changed field, no whole item.
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/4/score", value: 43, oldValue: 42 },
+      ]);
+
+      // Byte proof: granular patch vs the whole-item replace the pre-F10 code
+      // emitted (full value + full oldValue). Audit baseline was ~1252B (23x);
+      // the granular op is an order of magnitude smaller.
+      const granularBytes = JSON.stringify(patches).length;
+      const wholeItemBytes = JSON.stringify([
+        {
+          op: "replace",
+          path: "/items/4",
+          value: doc2.items[4],
+          oldValue: doc1.items[4],
+        },
+      ]).length;
+      expect(wholeItemBytes).toBeGreaterThan(1200); // matches ~1252B audit baseline
+      expect(granularBytes).toBeLessThan(80);
+      expect(granularBytes * 15).toBeLessThan(wholeItemBytes); // >15x smaller
+
+      // Round-trips.
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
+    });
+
+    test("changed nested arrays inside an lcs item descend (array-of-arrays)", () => {
+      // Outer array of objects (lcs); each object holds a `rows` array.
+      const doc1 = {
+        items: [
+          { id: "a", rows: [1, 2, 3] },
+          { id: "b", rows: [4, 5, 6] },
+        ],
+      };
+      const doc2 = {
+        items: [
+          { id: "a", rows: [1, 2, 3] },
+          { id: "b", rows: [4, 5, 7] }, // one nested element changes
+        ],
+      };
+      const patches = lcsPatcher().execute({ original: doc1, modified: doc2 });
+      // Granular descent recurses through the object into the nested array and
+      // emits a single element-level op, not a whole-item object replace.
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/1/rows/2", value: 7, oldValue: 6 },
+      ]);
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
+    });
+
+    test("array-typed items descend granularly through the nested-array wildcard plan", () => {
+      // Array-of-arrays: outer `/matrix` is lcs (elements are arrays); the inner
+      // array is registered at the wildcard element path `/matrix/*`. A collapsed
+      // replace of two array elements must recurse into that wildcard plan.
+      const schema = {
+        type: "object",
+        properties: {
+          matrix: {
+            type: "array",
+            items: {
+              type: "array",
+              items: { type: "object", properties: { id: { type: "string" } }, required: ["id"] },
+            },
+          },
+        },
+      };
+      const patcher = new JsonSchemaPatcher({
+        plan: buildPlan({ schema: schema as any }),
+      });
+      const doc1 = { matrix: [[{ id: "a", v: 1 }], [{ id: "b", v: 2 }]] };
+      const doc2 = { matrix: [[{ id: "a", v: 1 }], [{ id: "b", v: 9 }]] };
+      const patches = patcher.execute({ original: doc1, modified: doc2 });
+      // Descends outer lcs -> inner primaryKey plan (`/matrix/*`, keyed by id) ->
+      // granular field op. No whole-array or whole-item replace.
+      expect(patches.some((p) => typeof p.value === "object")).toBe(false);
+      expect(patches).toContainEqual({
+        op: "replace",
+        path: "/matrix/1/0/v",
+        value: 9,
+        oldValue: 2,
+      });
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
+    });
+
+    test("primitive replace stays a whole-item replace (no descent)", () => {
+      const doc1 = { items: ["a", "b", "c"] };
+      const doc2 = { items: ["a", "X", "c"] };
+      const patches = lcsPatcher().execute({ original: doc1, modified: doc2 });
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/1", value: "X", oldValue: "b" },
+      ]);
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
+    });
+
+    test("mismatched container kind (object vs array) stays a whole-item replace", () => {
+      const doc1 = { items: [{ id: 1 }, { id: 2 }, { id: 3 }] };
+      const doc2 = { items: [{ id: 1 }, [9, 9], { id: 3 }] };
+      const patches = lcsPatcher().execute({ original: doc1, modified: doc2 });
+      // object -> array is a type change; no granular descent, whole replace.
+      expect(patches).toEqual([
+        { op: "replace", path: "/items/1", value: [9, 9], oldValue: { id: 2 } },
+      ]);
+      const applied = applySchemaPatch(structuredClone(doc1) as any, patches);
+      expect(applied).toEqual(doc2);
     });
   });
 

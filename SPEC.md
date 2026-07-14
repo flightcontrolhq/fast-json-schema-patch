@@ -649,19 +649,21 @@ Backtrack from `(n, m)` to `(0, 0)` following the same down/right rule against t
 V-rows, producing a forward-ordered script of `common(ai,bi)`, `remove(ai)`, and `add(bi)`
 entries.
 
-#### 5.5.4 Replace collapse and granular descent *(§5.5.4.2 draft-pending — compactness phase F10)*
+#### 5.5.4 Replace collapse and granular descent
 
 `5.5.4.1` **Collapse.** Scan the forward script; whenever a `remove` is immediately followed by an
 `add`, collapse the pair into a single `replace` at the same output index.
 
-`5.5.4.2` **Granular descent (normative default, draft-pending).** For a collapsed `replace` pair
+`5.5.4.2` **Granular descent (normative default).** For a collapsed `replace` pair
 `(original[ai], modified[bi])`: if **both** sides are objects, **or both** are arrays, the differ
 **MUST recurse** — `diff(original[ai], modified[bi], prefix + currentIndex)` — emitting granular
 nested ops instead of a whole-item replace. If the pair is primitive, or the two sides are of
 mismatched container kind (object vs array), it stays a **whole-item** `{ op: "replace", path,
-value: modified[bi], oldValue: original[ai] }`. (At HEAD every collapsed pair is a whole-item
-replace; the compactness phase adds the same-kind recursion. This is the one LCS behavior that
-changes between `spec-v1-draft` and `spec-v1`.)
+value: modified[bi], oldValue: original[ai] }`. The recursion reuses the ordinary `diff` dispatch,
+so nested plans apply: an object element recurses at the array's own plan node (item property plans
+are its children, §4.3.3); an array element recurses into the nested-array wildcard plan at
+`${path}/*` (§4.3.5). This is the one LCS behavior that changed between `spec-v1-draft` (whole-item
+replace always) and `spec-v1`.
 
 #### 5.5.5 Emission from the script
 
@@ -1080,8 +1082,11 @@ capabilities.
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL (reserved) | override the auto-detection candidate list (§4.5.5) |
 
 `10.4.1` **Granular LCS descent (§5.5.4.2) is NOT a capability** — it is normative default
-behavior in `spec-v1` (landed in the compactness phase). `spec-v1-draft` vectors that predate it
-use whole-item replaces; they are re-baselined at spec-v1 finalization.
+behavior in `spec-v1`, landed in the compactness phase (F10). It is always on; there is no flag to
+disable it. Any `spec-v1-draft` vector that asserted a whole-item replace for a same-kind
+(object↔object or array↔array) changed LCS element is **re-baselined** to the granular nested ops
+that descent now emits; vectors for primitive or mismatched-kind replacements are unchanged (those
+stay whole-item, §5.5.4.2).
 
 ### 10.5 Vector provenance
 
@@ -1142,7 +1147,7 @@ These sections specify the intended post-bugfix semantics; the listed phase land
 | 4.6.2 | `basePath` matches on segment boundary, slices by length | `startsWith`+`replace`, mid-segment bugs | P1 (F14) |
 | 5.4.3 | primaryKey gate + `lcs` fallback (non-conforming elements, duplicate keys) | silently skips / corrupts | P1 (F05/F06) |
 | 5.4.5 | structural trie matching: wildcard reachable at **any** depth incl top-level `/*`; numeric object keys route by construction; no per-path caches | flat string lookup (exact / index-normalize / single trailing `*`) with four unbounded per-instance caches | P2 (F18/F33) |
-| 5.5.4.2 | granular LCS descent into same-kind changed items | whole-item replace always | compactness (F10) |
+| 5.5.4.2 | granular LCS descent into same-kind changed items | whole-item replace always | compactness (F10) — **landed** |
 
 All other sections describe behavior already present at HEAD (verified by probing: pointer
 escaping in object diff, root-array-to-empty removals with `oldValue`, collision-free LCS cache

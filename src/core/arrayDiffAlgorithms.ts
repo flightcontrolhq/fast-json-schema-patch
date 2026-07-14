@@ -272,10 +272,11 @@ export function diffArrayLCS(
   arr2: JsonArray,
   path: string,
   patches: Operation[],
-  // Reserved for granular descent of collapsed `replace` pairs (§5.5.4.2 / F10,
-  // compactness phase); intentionally unused until then. `common` entries are
-  // proven equal by interning and never routed through it (F20).
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: wired for P3 F10 granular descent
+  // Granular descent of collapsed `replace` pairs (§5.5.4.2 / F10): when both
+  // sides of a collapsed replace are the same container kind (both objects, or
+  // both arrays), this recurses to emit granular nested ops instead of a
+  // whole-item replace. `common` entries are proven equal by interning and are
+  // NEVER routed through it (F20) — only genuine same-kind replacements are.
   onModification: ModificationCallback,
   hashFields?: string[],
   plan?: ArrayPlan
@@ -578,20 +579,42 @@ export function diffArrayLCS(
         // onModification here, which re-ran a full deep-equal that could only
         // return "equal" and emit nothing — dead re-verification, up to a
         // second (or, with a plan, third) full structural walk per element on
-        // mostly-unchanged arrays (F20). It is deleted. `onModification` is
-        // retained as a parameter for the granular-descent of collapsed
-        // `replace` pairs (§5.5.4.2 / F10), which lands in the compactness
-        // phase; do NOT route common entries through it.
+        // mostly-unchanged arrays (F20). It is deleted. `onModification` IS used
+        // for the granular descent of collapsed `replace` pairs (§5.5.4.2 / F10,
+        // the `replace` case below); do NOT route common entries through it —
+        // they are already proven deep-equal by interning.
         currentIndex++;
         break;
       }
       case "replace": {
-        patches.push({
-          op: "replace",
-          path: prefixPath + currentIndex,
-          value: arr2[lo + (operation.bi as number)] as JsonValue,
-          oldValue: arr1[lo + (operation.ai as number)],
-        });
+        const v1 = arr1[lo + (operation.ai as number)] as JsonValue;
+        const v2 = arr2[lo + (operation.bi as number)] as JsonValue;
+        // §5.5.4.2 Granular descent (F10). If both sides are the same container
+        // kind — both plain objects, or both arrays — recurse via onModification
+        // with skipEqualityCheck=true (exactly the diffArrayByPrimaryKey
+        // modification path) to emit granular nested ops at this index instead of
+        // a whole-item replace carrying full value + oldValue. The callback
+        // (index.ts) picks the correct trie node for the recursion: an object
+        // element stays at THIS array's node (item property plans are its
+        // children, §4.3.3); an array element descends to the wildcard child
+        // (the nested array's plan at `${path}/*`, §4.3.5). Primitives and
+        // mismatched-kind pairs (object vs array) keep the whole-item replace.
+        const bothObjects =
+          v1 !== null &&
+          v2 !== null &&
+          typeof v1 === "object" &&
+          typeof v2 === "object" &&
+          Array.isArray(v1) === Array.isArray(v2);
+        if (bothObjects) {
+          onModification(v1, v2, prefixPath + currentIndex, patches, true);
+        } else {
+          patches.push({
+            op: "replace",
+            path: prefixPath + currentIndex,
+            value: v2,
+            oldValue: v1,
+          });
+        }
         currentIndex++;
         break;
       }
