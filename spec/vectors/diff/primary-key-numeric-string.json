@@ -109,5 +109,55 @@
       ]
     },
     "expectedPatch": []
+  },
+  {
+    "name": "pk-numeric-key-f64-equal-differing-literal-modifies-in-place",
+    "comment": "§2.2/§5.4.1.5: primary keys 1 and 1.0 are equal at f64 -> the SAME key; the matched item's changed field is a granular in-place modification, NOT remove+add (a text-keyed impl would wrongly split them)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {},
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/users": "id"
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": 1,
+          "name": "a"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": 1,
+          "name": "b"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "b",
+        "oldValue": "a"
+      }
+    ]
   }
 ]
