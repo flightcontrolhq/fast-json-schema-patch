@@ -487,11 +487,17 @@ describe("nested arrays-of-arrays (F04)", () => {
     expect(plan.get("/matrix/*")?.primaryKey).toBe("id");
   });
 
-  it("resolves a concrete inner-array path to the wildcard element plan", () => {
+  it("compiles the inner array into the matrix node's wildcard trie edge", () => {
+    // The path-string getPlanForPath lookup was replaced by a compiled plan
+    // trie threaded structurally through the recursion (SPEC §5.4.5). The inner
+    // array's `/matrix/*` plan is reachable as the wildcard child of the matrix
+    // node — the structural equivalent of the old element-wildcard lookup, and
+    // the node a nested-array element (array-of-arrays) descends to at diff time.
     const patcher = new JsonSchemaPatcher({
       plan: buildPlan({ schema: matrixSchema as any }),
     });
-    const innerPlan = (patcher as any).getPlanForPath("/matrix/0");
+    const trie = (patcher as any).planTrie;
+    const innerPlan = trie.children.get("matrix").wildcard.plan;
     expect(innerPlan?.strategy).toBe("primaryKey");
     expect(innerPlan?.primaryKey).toBe("id");
   });
@@ -518,6 +524,203 @@ describe("nested arrays-of-arrays (F04)", () => {
 
     const result = applySchemaPatch(original, patches);
     expect(result).toEqual(modified);
+  });
+});
+
+describe("structural plan-trie matching (F18/F33)", () => {
+  // A reorder of a primaryKey-keyed array is a 0-op diff (§7.2 keyed-collection
+  // semantics); under `lcs`/`unique` the same reorder emits ops. So "reorder ==
+  // 0 ops" is a clean proof that the primaryKey plan was actually reached.
+  const keyedItems = {
+    type: "array",
+    items: {
+      type: "object",
+      required: ["id"],
+      properties: { id: { type: "string" }, v: { type: "number" } },
+    },
+  };
+
+  it("matches a TOP-LEVEL additionalProperties `/*` keyed array (was §B.5, unreachable at HEAD)", () => {
+    const schema = { type: "object", additionalProperties: keyedItems };
+    const plan = buildPlan({ schema: schema as any });
+    expect([...plan.keys()]).toContain("/*");
+
+    const patcher = new JsonSchemaPatcher({ plan });
+    const original = { svcA: [{ id: "a", v: 1 }, { id: "b", v: 2 }] };
+    const modified = { svcA: [{ id: "b", v: 2 }, { id: "a", v: 1 }] };
+    // primaryKey reached -> reorder is a no-op.
+    expect(patcher.execute({ original, modified })).toEqual([]);
+
+    // A real add/modify routes through the keyed strategy (append via `/-`,
+    // field op at the ORIGINAL index) and still round-trips as a keyed set.
+    const o2 = { svcA: [{ id: "a", v: 1 }] };
+    const m2 = { svcA: [{ id: "a", v: 9 }, { id: "c", v: 3 }] };
+    const p2 = patcher.execute({ original: o2, modified: m2 });
+    expect(p2).toEqual([
+      { op: "replace", path: "/svcA/0/v", value: 9, oldValue: 1 },
+      { op: "add", path: "/svcA/-", value: { id: "c", v: 3 } },
+    ]);
+    expect(applySchemaPatch(o2, p2)).toEqual(m2);
+  });
+
+  it("matches a DEEP `/*/x/*/items` wildcard array at any depth (was §B.1, unreachable at HEAD)", () => {
+    const schema = {
+      type: "object",
+      additionalProperties: {
+        type: "object",
+        properties: {
+          x: {
+            type: "object",
+            additionalProperties: {
+              type: "object",
+              properties: { items: keyedItems },
+            },
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema: schema as any });
+    expect([...plan.keys()]).toContain("/*/x/*/items");
+
+    const patcher = new JsonSchemaPatcher({ plan });
+    const original = { envA: { x: { grp: { items: [{ id: "a", v: 1 }, { id: "b", v: 2 }] } } } };
+    const modified = { envA: { x: { grp: { items: [{ id: "b", v: 2 }, { id: "a", v: 1 }] } } } };
+    // Wildcard matched through two additionalProperties levels + a literal `x`.
+    expect(patcher.execute({ original, modified })).toEqual([]);
+  });
+
+  it("disambiguates a numeric-STRING object key from an array index (F33 / former §B.2)", () => {
+    // A numeric object key sits MID-PATH. The old index-normalization stripped
+    // `/0`, collapsing `/registry/0/list` -> `/registry/list`, which collided
+    // with the sibling LITERAL `list` property plan (a primitive-string `unique`
+    // array) instead of the additionalProperties object-array (`primaryKey`).
+    const schema = {
+      type: "object",
+      properties: {
+        registry: {
+          type: "object",
+          properties: { list: { type: "array", items: { type: "string" } } },
+          additionalProperties: {
+            type: "object",
+            properties: { list: keyedItems },
+          },
+        },
+      },
+    };
+    const plan = buildPlan({ schema: schema as any });
+    expect(plan.get("/registry/list")?.strategy).toBe("unique");
+    expect(plan.get("/registry/*/list")?.strategy).toBe("primaryKey");
+
+    const patcher = new JsonSchemaPatcher({ plan });
+
+    // The object-array under numeric key "0" must reach its primaryKey plan:
+    // a reorder is a no-op (the old misroute to `unique` emitted positional ops).
+    const original = { registry: { "0": { list: [{ id: "a", v: 1 }, { id: "b", v: 2 }] } } };
+    const modified = { registry: { "0": { list: [{ id: "b", v: 2 }, { id: "a", v: 1 }] } } };
+    expect(patcher.execute({ original, modified })).toEqual([]);
+
+    // A field edit emits a granular op at the item's ORIGINAL index — proof the
+    // keyed strategy (not positional `unique`) handled the numeric-keyed bucket.
+    const o2 = { registry: { "0": { list: [{ id: "a", v: 1 }, { id: "b", v: 2 }] } } };
+    const m2 = { registry: { "0": { list: [{ id: "a", v: 1 }, { id: "b", v: 99 }] } } };
+    expect(patcher.execute({ original: o2, modified: m2 })).toEqual([
+      { op: "replace", path: "/registry/0/list/1/v", value: 99, oldValue: 2 },
+    ]);
+
+    // The sibling LITERAL `list` (a primitive `unique` array) still routes to
+    // its own plan, unaffected by the numeric-keyed bucket.
+    const o3 = { registry: { list: ["x", "y", "z"] } };
+    const m3 = { registry: { list: ["x", "Y", "z"] } };
+    const p3 = patcher.execute({ original: o3, modified: m3 });
+    expect(applySchemaPatch(o3, p3)).toEqual(m3);
+  });
+
+  it("exact property edge takes precedence over the wildcard edge at each level", () => {
+    // `known` is a literal property (lcs whole-object array); everything else is
+    // additionalProperties (primaryKey). The exact edge must win for `known`.
+    const schema = {
+      type: "object",
+      properties: {
+        known: { type: "array", items: { type: "object" } }, // /known -> lcs
+      },
+      additionalProperties: keyedItems, // /* -> primaryKey
+    };
+    const plan = buildPlan({ schema: schema as any });
+    const patcher = new JsonSchemaPatcher({ plan });
+
+    // `known` (exact) is lcs: a reorder of opaque objects DOES emit ops.
+    const knownReorder = patcher.execute({
+      original: { known: [{ a: 1 }, { a: 2 }] },
+      modified: { known: [{ a: 2 }, { a: 1 }] },
+    });
+    expect(knownReorder.length).toBeGreaterThan(0);
+
+    // `other` (wildcard) is primaryKey: the same-shaped reorder is a no-op.
+    const otherReorder = patcher.execute({
+      original: { other: [{ id: "a", v: 1 }, { id: "b", v: 2 }] },
+      modified: { other: [{ id: "b", v: 2 }, { id: "a", v: 1 }] },
+    });
+    expect(otherReorder).toEqual([]);
+  });
+});
+
+describe("plan dispatch carries no per-instance path caches (F18)", () => {
+  it("removed the four unbounded caches and retains no per-diff state after a 20k-element execute", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        services: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["id"],
+            properties: {
+              id: { type: "string" },
+              ports: { type: "array", items: { type: "number" } },
+            },
+          },
+        },
+      },
+    };
+    const patcher = new JsonSchemaPatcher({ plan: buildPlan({ schema: schema as any }) }) as any;
+
+    // The four path-string caches that grew with data (one 20k execute left
+    // planLookupCache.size === 20001) no longer exist as fields.
+    expect(patcher.planLookupCache).toBeUndefined();
+    expect(patcher.negativePlanCache).toBeUndefined();
+    expect(patcher.wildcardPathCache).toBeUndefined();
+    expect(patcher.simplePathCache).toBeUndefined();
+
+    const mk = (n: number, portsLen: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        id: `s${i}`,
+        ports: Array.from({ length: portsLen }, (_, p) => p),
+      }));
+
+    const original = { services: mk(20000, 3) };
+    const modified = { services: mk(20000, 4) }; // every nested ports array grows
+
+    // Snapshot every own enumerable field's collection size before/after so any
+    // accidental reintroduction of a data-proportional cache is caught.
+    const sizes = () =>
+      Object.values(patcher).map((v: any) =>
+        v instanceof Map || v instanceof Set ? v.size : -1
+      );
+    const before = sizes();
+    const patches = patcher.execute({ original, modified });
+    expect(patches.length).toBeGreaterThan(0);
+    // Second run must not accumulate anything either.
+    patcher.execute({ original, modified });
+    const after = sizes();
+
+    // No per-instance Map/Set grew with the 20k elements; the only Maps are the
+    // compiled trie (built once in the constructor, size fixed by the schema).
+    expect(after).toEqual(before);
+    for (const v of Object.values(patcher)) {
+      if (v instanceof Map || v instanceof Set) {
+        expect(v.size).toBeLessThan(100); // schema-sized, never data-sized
+      }
+    }
   });
 });
 

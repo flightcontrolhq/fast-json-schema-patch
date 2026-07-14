@@ -6,11 +6,6 @@ import type {JsonObject, JsonValue} from "../types"
 const pathResolutionCache = new Map<string, WeakMap<object, JsonValue | undefined>>()
 
 /**
- * Cache for normalized paths to avoid repeated regex operations
- */
-const normalizedPathCache = new Map<string, string>()
-
-/**
  * Resolves a JSON Pointer path to get a value from an object
  * Handles JSON Pointer escaping (~0 for ~, ~1 for /)
  */
@@ -94,65 +89,6 @@ export function resolvePatchPath(
   }
 
   return path
-}
-
-/**
- * Normalizes a path by removing array indices (e.g., /items/0/name -> /items/name)
- * Optimized to avoid regex for simple cases
- */
-export function normalizePath(path: string): string {
-  if (normalizedPathCache.has(path)) {
-    return normalizedPathCache.get(path) as string
-  }
-
-  // Fast path: if no digits, no normalization needed
-  if (!/\d/.test(path)) {
-    normalizedPathCache.set(path, path)
-    return path
-  }
-
-  // For paths with digits, use optimized replacement
-  const normalized = path.replace(/\/\d+/g, "")
-  normalizedPathCache.set(path, normalized)
-  return normalized
-}
-
-/**
- * Gets the parent path and generates a wildcard version
- */
-export function getWildcardPath(path: string): string | null {
-  const normalizedPath = normalizePath(path)
-  const lastSlash = normalizedPath.lastIndexOf("/")
-
-  if (lastSlash >= 0) {
-    return `${normalizedPath.substring(0, lastSlash)}/*`
-  }
-
-  return null
-}
-
-/**
- * Maps a concrete nested-array element path to its wildcard element plan key.
- *
- * An array that is itself an element of another array (an array-of-arrays) has a
- * concrete document path ending in a numeric index (e.g. "/matrix/0") and its
- * plan is registered under a wildcard element key ("/matrix/*", per §4.3.5).
- * The parent portion is index-normalized so nesting under other arrays still
- * resolves (e.g. "/root/0/tags/1" -> "/root/tags/*").
- *
- * Returns null when the path does not end in an index (ordinary object-property
- * arrays), or when there is no parent segment (a top-level element, which is
- * never matched — §5.4.5 limitation iii).
- */
-export function getElementWildcardPath(path: string): string | null {
-  const lastSlash = path.lastIndexOf("/")
-  if (lastSlash <= 0) return null
-
-  const lastSegment = path.slice(lastSlash + 1)
-  if (!/^\d+$/.test(lastSegment)) return null
-
-  const parent = path.slice(0, lastSlash)
-  return `${normalizePath(parent)}/*`
 }
 
 /**

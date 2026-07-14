@@ -10,12 +10,7 @@ import type { ArrayPlan, Plan } from "./core/buildPlan";
 import { deepEqualMemo, isOpaqueObject } from "./performance/deepEqual";
 import { bumpEpoch } from "./performance/epoch";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "./types";
-import {
-  escapeJsonPointer,
-  getElementWildcardPath,
-  getWildcardPath,
-  normalizePath,
-} from "./utils/pathUtils";
+import { escapeJsonPointer, unescapeJsonPointer } from "./utils/pathUtils";
 
 export { buildPlan } from "./core/buildPlan";
 export { StructuredDiff } from "./aggregators/StructuredDiff";
@@ -32,13 +27,30 @@ export type {
 } from "./types";
 export type { Plan, BuildPlanOptions } from "./core/buildPlan";
 
+/**
+ * A node in the compiled plan trie (SPEC §5.4.5). The public `Plan` is still a
+ * flat `Map<documentPath, ArrayPlan>`; the constructor compiles it once into
+ * this trie so strategy selection at diff time is *structural* — the current
+ * node is threaded down the recursion instead of re-deriving and string-keying
+ * a concrete path per array (which grew four unbounded per-instance caches, F18,
+ * and mis-routed numeric object keys via index-normalization, F33).
+ *
+ * Each plan-key segment is either a literal property name (an exact `children`
+ * edge, stored UNESCAPED so it matches raw object keys) or the wildcard `*`
+ * (the `wildcard` edge — an `additionalProperties` value schema, §4.3.2, or the
+ * nested-array element level, §4.3.5). `plan` is set iff a plan key terminates
+ * at this node (the array registered at that path).
+ */
+interface PlanTrieNode {
+  plan?: ArrayPlan;
+  children?: Map<string, PlanTrieNode>;
+  wildcard?: PlanTrieNode;
+}
+
 export class JsonSchemaPatcher {
   private plan: Plan;
-  private planLookupCache = new Map<string, ArrayPlan | undefined>();
-  private wildcardPathCache = new Map<string, string | null>();
-  private negativePlanCache = new Set<string>();
   private readonly planIsEmpty: boolean;
-  private simplePathCache = new Set<string>();
+  private readonly planTrie: PlanTrieNode;
 
   constructor(options: { plan: Plan }) {
     // F42: fail fast with an actionable message instead of a cryptic
@@ -56,16 +68,38 @@ export class JsonSchemaPatcher {
     }
     this.plan = options.plan;
     this.planIsEmpty = this.plan.size === 0;
+    this.planTrie = this.compilePlanTrie(this.plan);
   }
 
-  private getWildcardPathCached(path: string): string | null {
-    if (this.wildcardPathCache.has(path)) {
-      return this.wildcardPathCache.get(path) as string | null;
+  /**
+   * Compile the flat `Plan` map into a trie (SPEC §5.4.5). Each key is split on
+   * `/`; a `*` segment is the wildcard edge, any other segment is unescaped and
+   * stored as an exact `children` edge. The empty key `""` (a root-level array
+   * document) terminates at the root node itself.
+   */
+  private compilePlanTrie(plan: Plan): PlanTrieNode {
+    const root: PlanTrieNode = {};
+    for (const [key, arrayPlan] of plan) {
+      const segments = key.length === 0 ? [] : key.split("/").slice(1);
+      let node = root;
+      for (const seg of segments) {
+        if (seg === "*") {
+          node.wildcard ??= {};
+          node = node.wildcard;
+        } else {
+          const raw = unescapeJsonPointer(seg);
+          node.children ??= new Map();
+          let child = node.children.get(raw);
+          if (!child) {
+            child = {};
+            node.children.set(raw, child);
+          }
+          node = child;
+        }
+      }
+      node.plan = arrayPlan;
     }
-
-    const wildcardPath = getWildcardPath(path);
-    this.wildcardPathCache.set(path, wildcardPath);
-    return wildcardPath;
+    return root;
   }
 
   /**
@@ -103,7 +137,15 @@ export class JsonSchemaPatcher {
     // preserving memo hits WITHIN this single call (SPEC §2.4.4).
     bumpEpoch();
     const patches: Operation[] = [];
-    this.diff(original, modified, "", patches);
+    // Thread the compiled plan trie from the root (SPEC §5.4.5). An empty plan
+    // threads `undefined` so every `node?.` access short-circuits with no work.
+    this.diff(
+      original,
+      modified,
+      "",
+      patches,
+      this.planIsEmpty ? undefined : this.planTrie
+    );
     return patches;
   }
 
@@ -111,7 +153,8 @@ export class JsonSchemaPatcher {
     obj1: JsonValue | undefined,
     obj2: JsonValue | undefined,
     path: string,
-    patches: Operation[]
+    patches: Operation[],
+    node: PlanTrieNode | undefined
   ) {
     if (obj1 === obj2) return;
 
@@ -137,7 +180,7 @@ export class JsonSchemaPatcher {
     }
 
     if (Array.isArray(obj1)) {
-      this.diffArray(obj1, obj2 as JsonArray, path, patches);
+      this.diffArray(obj1, obj2 as JsonArray, path, patches, node);
       return;
     }
 
@@ -153,14 +196,15 @@ export class JsonSchemaPatcher {
       return;
     }
 
-    this.diffObject(obj1, obj2 as JsonObject, path, patches);
+    this.diffObject(obj1, obj2 as JsonObject, path, patches, node);
   }
 
   private diffObject(
     obj1: JsonObject,
     obj2: JsonObject,
     path: string,
-    patches: Operation[]
+    patches: Operation[],
+    node: PlanTrieNode | undefined
   ) {
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
@@ -176,7 +220,14 @@ export class JsonSchemaPatcher {
       } else if (val2 === undefined && val1 !== undefined) {
         patches.push({ op: "remove", path: newPath, oldValue: val1 });
       } else {
-        this.diff(val1, val2, newPath, patches);
+        // Descend the trie by RAW property key: an exact `children` edge takes
+        // precedence over the `*` wildcard edge at each level (§5.4.5). A literal
+        // numeric key (e.g. "0") is an ordinary exact edge — never confused with
+        // an array index, which is handled structurally in diffArray (F33).
+        const childNode = node
+          ? node.children?.get(key) ?? node.wildcard
+          : undefined;
+        this.diff(val1, val2, newPath, patches, childNode);
       }
     }
   }
@@ -185,23 +236,12 @@ export class JsonSchemaPatcher {
     arr1: JsonArray,
     arr2: JsonArray,
     path: string,
-    patches: Operation[]
+    patches: Operation[],
+    node: PlanTrieNode | undefined
   ) {
-    // Fast path for very simple cases - avoid all plan lookups
-    if (this.planIsEmpty || this.simplePathCache.has(path)) {
-      this.simpleArrayDiff(arr1, arr2, path, patches);
-      return;
-    }
-
-    const plan = this.getPlanForPath(path);
-
-    // Cache simple paths for future calls
-    if (!plan && arr1.length < 10 && arr2.length < 10) {
-      this.simplePathCache.add(path);
-      this.simpleArrayDiff(arr1, arr2, path, patches);
-      return;
-    }
-
+    // Strategy is read straight off the trie node for THIS array (SPEC §5.3.1):
+    // O(1) pointer access, no string normalization and no per-path caches.
+    const plan = node?.plan;
     const strategy = plan?.strategy || "lcs";
 
     const createModificationCallback = (
@@ -210,17 +250,29 @@ export class JsonSchemaPatcher {
       return (
         oldVal: JsonValue,
         newVal: JsonValue,
-        path: string,
-        patches: Operation[],
+        cbPath: string,
+        cbPatches: Operation[],
         skipEqualityCheck?: boolean
       ) => {
+        // Choose the child node for the recursed element. A nested-array element
+        // (array-of-arrays) descends to the wildcard child — the inner array's
+        // plan registered at `${path}/*` (§4.3.5). An object element stays at
+        // THIS array's node, because array items recurse at the same document
+        // path (§4.3.3): the item's property plans are the node's `children`. A
+        // mixed-kind pair never descends (diff emits a whole replace), so the
+        // node choice is immaterial there.
+        const elementNode =
+          Array.isArray(oldVal) && Array.isArray(newVal)
+            ? node?.wildcard
+            : node;
         this.refine(
           oldVal,
           newVal,
-          path,
-          patches,
+          cbPath,
+          cbPatches,
           hashFields,
-          skipEqualityCheck || false
+          skipEqualityCheck || false,
+          elementNode
         );
       };
     };
@@ -263,111 +315,17 @@ export class JsonSchemaPatcher {
     );
   }
 
-  // Fast, simple array diffing for cases without plans
-  private simpleArrayDiff(
-    arr1: JsonArray,
-    arr2: JsonArray,
-    path: string,
-    patches: Operation[]
-  ) {
-    diffArrayLCS(
-      arr1,
-      arr2,
-      path,
-      patches,
-      (
-        oldVal: JsonValue,
-        newVal: JsonValue,
-        path: string,
-        patches: Operation[],
-        skipEqualityCheck?: boolean
-      ) => {
-        // Use simple equality check for fast path
-        if (skipEqualityCheck || oldVal !== newVal) {
-          this.diff(oldVal, newVal, path, patches);
-        }
-      },
-      []
-    );
-  }
-
-  private getPlanForPath(path: string): ArrayPlan | undefined {
-    if (this.planIsEmpty) return undefined;
-
-    // Check negative cache first - fastest check
-    if (this.negativePlanCache.has(path)) {
-      return undefined;
-    }
-
-    // Check positive cache
-    if (this.planLookupCache.has(path)) {
-      return this.planLookupCache.get(path);
-    }
-
-    let plan: ArrayPlan | undefined;
-
-    // Try exact match first
-    plan = this.plan.get(path);
-    if (plan) {
-      this.planLookupCache.set(path, plan);
-      return plan;
-    }
-
-    // Nested-array element (array-of-arrays): an array that is itself an element
-    // of another array has a concrete path ending in an index and registers
-    // under a wildcard element key `${parent}/*` (§4.3.5, §5.4.5). This must be
-    // resolved BEFORE index normalization, which would otherwise collapse
-    // `/matrix/0` to the OUTER array's key `/matrix` and hand the inner array
-    // the wrong plan.
-    const elementWildcardPath = getElementWildcardPath(path);
-    if (elementWildcardPath) {
-      plan = this.plan.get(elementWildcardPath);
-      if (plan) {
-        this.planLookupCache.set(path, plan);
-        return plan;
-      }
-    }
-
-    // Lazy path operations - only do expensive operations if exact match fails
-    // Try normalized path (remove array indices) - only if path contains digits
-    if (path.includes("/") && /\/\d+/.test(path)) {
-      const normalizedPath = normalizePath(path);
-      if (normalizedPath !== path) {
-        plan = this.plan.get(normalizedPath);
-        if (plan) {
-          this.planLookupCache.set(path, plan);
-          return plan;
-        }
-      }
-    }
-
-    // Try parent wildcard path - only if no plan found yet and path has parent
-    if (path.lastIndexOf("/") > 0) {
-      const wildcardPath = this.getWildcardPathCached(path);
-      if (wildcardPath) {
-        plan = this.plan.get(wildcardPath);
-        if (plan) {
-          this.planLookupCache.set(path, plan);
-          return plan;
-        }
-      }
-    }
-
-    // No plan found - cache the negative result
-    this.negativePlanCache.add(path);
-    return undefined;
-  }
-
   private refine(
     oldVal: JsonValue,
     newVal: JsonValue,
     path: string,
     patches: Operation[],
     hashFields: string[] = [],
-    skipEqualityCheck: boolean = false
+    skipEqualityCheck: boolean = false,
+    node?: PlanTrieNode
   ) {
     if (skipEqualityCheck) {
-      this.diff(oldVal, newVal, path, patches);
+      this.diff(oldVal, newVal, path, patches, node);
       return;
     }
 
@@ -381,13 +339,13 @@ export class JsonSchemaPatcher {
       newVal === null ||
       (typeof oldVal !== "object" && oldVal !== newVal)
     ) {
-      this.diff(oldVal, newVal, path, patches);
+      this.diff(oldVal, newVal, path, patches, node);
       return;
     }
 
     // Only use expensive deep equality for complex objects
     if (!deepEqualMemo(oldVal, newVal, hashFields)) {
-      this.diff(oldVal, newVal, path, patches);
+      this.diff(oldVal, newVal, path, patches, node);
     }
   }
 }

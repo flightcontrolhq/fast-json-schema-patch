@@ -485,32 +485,49 @@ element references over primitive arrays; because `unique` is only assigned to p
 schemas, reference-set uniqueness coincides with deep-equal uniqueness for the values it sees.)
 If the check fails, the array falls back to `lcs`.
 
-#### 5.4.5 Plan lookup by path *(matching algorithm — normative for strategy selection)*
+#### 5.4.5 Plan lookup by structural trie matching *(matching algorithm — normative for strategy selection)* *(draft-pending — P2 fixes F18/F33)*
 
-To find the plan for a concrete array at document path `P`, resolve in this order and use the
-first hit:
+The `Plan` map (§4.1) is **compiled once** into a **trie** and matched **structurally** by
+threading the current trie node down the diff recursion — no concrete path string is ever
+normalized or looked up, and no per-path caches are kept. (The reference at HEAD instead re-derived
+a concrete path per array and probed the flat map with exact / index-normalized / single-trailing-
+wildcard string keys, which grew four unbounded per-instance caches, §F18, mis-routed numeric
+object keys via index-normalization, §F33, and could not reach a wildcard plan at arbitrary depth
+or at the top level. The trie makes all four issues structural.)
 
-1. **Exact:** `plan.get(P)`.
-2. **Index-normalized:** remove every `/<digits>` segment from `P` (regex `/\/\d+/g` → ``) and
-   look that up. (This is how an array nested under array elements — path
-   `/services/3/ports` — matches its schema key `/services/ports`.)
-3. **Immediate-parent wildcard:** take the index-normalized `P`, replace its **last** segment
-   with `*`, and look that up (matches a nested `additionalProperties`-array key such as `/foo/*`).
-   This step is **guarded by `P.lastIndexOf('/') > 0`** and is skipped entirely when `P` has no
-   parent segment (see limitation (iii)).
+`5.4.5.1` **Trie construction.** Each plan key is split on `/` into segments (the empty key `""`
+— a root-level array document — has zero segments and terminates at the root node). A `*` segment
+is the node's **wildcard edge**; any other segment is **unescaped** (§3.3) and is an exact
+**child edge** keyed by the raw property name. The `ArrayPlan` is stored on the node where its key
+terminates. (Because `buildPlan` emits both an `additionalProperties` value and a nested-array
+element level as the literal segment `*`, a schema property whose name is literally `"*"` is
+indistinguishable from the wildcard edge — a pinned edge case, §B.1, not latitude.)
 
-If none hits, there is no plan (strategy `lcs`). **Known limitations an implementation MUST
-reproduce for conformance:** (i) the wildcard match forms **only a single trailing `*`**, so an
-`additionalProperties` plan registered at a *deeper* key such as `/*/items` is **not** reachable
-for a concrete path `/envA/items` — that array falls back to `lcs`; (ii) index-normalization
-strips **all** `/<digits>` segments, so an object member whose key is a decimal-digit string
-(e.g. `"0"`) is also stripped and may mis-route the lookup (§F33); (iii) a **top-level `/*` plan
-key** — a concrete array path with no parent segment, e.g. a root array member at path `/foo`,
-whose only `/` is at index 0 — is **never** matched at diff time, because step 3 above is guarded
-by `path.lastIndexOf('/') > 0` (a concrete path with `lastIndexOf('/') === 0` skips the wildcard
-lookup), so such an array falls back to `lcs`. These are pinned behaviors, not latitude.
-*(draft-pending §4.3.5 adds one wildcard element level for nested arrays and the lookup MUST be
-extended to match it.)*
+`5.4.5.2` **Threaded matching.** The diff starts at the trie root (an **empty plan threads no
+node**, so every array is `lcs`). The node is advanced by the container being descended:
+
+- **Object member `key`** (§5.2): the child node is the node's **exact child** for `key` if one
+  exists, **else** its **wildcard** edge, **else none**. *Exact edges take precedence over the
+  wildcard edge at every level* — an `id` property beats `additionalProperties`. A member whose key
+  is a decimal-digit string (e.g. `"0"`) is an ordinary exact/​wildcard descent and is **never**
+  conflated with an array index (§F33), because array indices are consumed only in the array rule.
+- **Array element** (§5.4/§5.5 recursing into an item): an **object** element **stays at the
+  array's own node** (array items share the array's document path, §4.3.3, so an item property's
+  plan is a child of the array's node); an **array** element (array-of-arrays) descends to the
+  array node's **wildcard** edge — the inner array's `${path}/*` plan (§4.3.5). A mixed-kind
+  element pair does not descend (§5.1 emits a whole `replace`), so its node is immaterial.
+
+`5.4.5.3` **Strategy selection.** An array's strategy is the `plan` on the trie node reached for
+that array, or `lcs` when the node is absent or carries no plan. Under the (non-normative,
+output-neutral, §5.3.3) `hashFields`/negative caches the reference may keep, the result MUST equal
+this structural lookup.
+
+**Consequences (formerly pinned limitations, now specified matches):** an `additionalProperties`
+(wildcard) plan is reachable at **any depth**, including a **deeper** key such as `/*/items` for a
+concrete path `/envA/items`, a nested `/*/x/*/items`, **and a top-level `/*`** plan key for a
+concrete root array member such as `/foo` (the old `lastIndexOf('/') > 0` guard is gone). Numeric-
+string object keys route by construction. The exact-over-wildcard precedence is the only tie-break.
+The nested-array wildcard element level (§4.3.5) is matched by the array-element rule above.
 
 #### 5.4.6 Hash-field prefilter (non-normative)
 
@@ -1106,6 +1123,7 @@ These sections specify the intended post-bugfix semantics; the listed phase land
 | 4.3.5 | nested arrays get distinct plan paths | inner plan clobbers outer at same key | P1 (F04) |
 | 4.6.2 | `basePath` matches on segment boundary, slices by length | `startsWith`+`replace`, mid-segment bugs | P1 (F14) |
 | 5.4.3 | primaryKey gate + `lcs` fallback (non-conforming elements, duplicate keys) | silently skips / corrupts | P1 (F05/F06) |
+| 5.4.5 | structural trie matching: wildcard reachable at **any** depth incl top-level `/*`; numeric object keys route by construction; no per-path caches | flat string lookup (exact / index-normalize / single trailing `*`) with four unbounded per-instance caches | P2 (F18/F33) |
 | 5.5.4.2 | granular LCS descent into same-kind changed items | whole-item replace always | compactness (F10) |
 
 All other sections describe behavior already present at HEAD (verified by probing: pointer
@@ -1114,14 +1132,12 @@ key, prototype-pollution guard, error codes, invert round-trip).
 
 ## Appendix B. Known pinned limitations (reproduce for conformance)
 
-- **B.1** primaryKey plan keys registered at a deeper `additionalProperties` path (`/*/items`) are
-  not reachable at diff time; such arrays fall back to LCS (§5.4.5).
-- **B.2** Index-normalization for plan lookup strips **all** decimal-digit segments, so an object
-  member literally keyed `"0"` may mis-route (§5.4.5, F33).
+- **B.1** A schema property whose name is literally `"*"` is indistinguishable from the wildcard
+  (`additionalProperties`/nested-array-element) edge in the compiled plan trie, because `buildPlan`
+  emits both as the segment `*`; the wildcard interpretation wins (§5.4.5.1). This is a pinned edge
+  case, not latitude. *(Former B.1/B.2/B.5 — deeper/​top-level `/*` unreachable and numeric-object-
+  key mis-routing — are **resolved** by structural trie matching, §5.4.5, P2 fixes F18/F33.)*
+- **B.2** `unique` set-diff/move semantics are unspecified in spec-v1; unequal lengths fall back to
+  LCS (§5.6.2).
 - **B.3** `allOf` item schemas are not merged for primary-key detection; a key declared only in an
   `allOf` branch is not found (§4.5.1).
-- **B.4** `unique` set-diff/move semantics are unspecified in spec-v1; unequal lengths fall back to
-  LCS (§5.6.2).
-- **B.5** A top-level `/*` plan key (a concrete array path with no parent segment, e.g. a root
-  array member at `/foo`) is never matched at diff time — the wildcard lookup is guarded by
-  `path.lastIndexOf('/') > 0` — so such arrays fall back to LCS (§5.4.5, limitation (iii)).
