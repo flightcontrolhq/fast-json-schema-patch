@@ -19,6 +19,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Test
+        # Runs the full suite including test/conformance.test.ts, which replays
+        # every vector under spec/vectors/{diff,apply,plan,invert} (SPEC §10).
         run: bun test
 
       - name: Build
@@ -41,3 +43,35 @@ jobs:
         # reformat to satisfy it. Real linter rules (correctness, suspicious,
         # style) still run and are enforced. See CONTRIBUTING.md.
         run: bunx biome ci src test schema --formatter-enabled=false --assist-enabled=false
+
+  # Go engine (go/ subdirectory module). Runs the same gates the AGENTS.md rule
+  # requires locally: go vet, a gofmt cleanliness check, and go test — the Go
+  # test suite includes the §10 conformance vectors (go/*_conformance_test.go)
+  # and the differential-fuzz corpus (go/differential_test.go), both reading
+  # ../spec, which is present in a full checkout.
+  go:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: go
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: gofmt (check)
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "gofmt needs to be run on:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Test
+        run: go test ./...
