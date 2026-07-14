@@ -1225,7 +1225,7 @@ capabilities.
 | capability | default | status | effect |
 |------------|---------|--------|--------|
 | `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§10.4.2) | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
-| `emitMoves` | off | OPTIONAL — **landing** (§10.4.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (§5.8) |
+| `emitMoves` | off | OPTIONAL — **landed** (§10.4.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (§5.8) |
 | `wholesaleReplaceFallback` | off | OPTIONAL (reserved) | emit a single container `replace` when the granular patch would exceed the container's own serialized size |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§10.4.3) | override the auto-detection candidate list (§4.5.5) |
 
