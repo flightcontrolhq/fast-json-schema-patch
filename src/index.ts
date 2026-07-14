@@ -61,8 +61,23 @@ export class JsonSchemaPatcher {
    * the original document, not from `oldValue` (SPEC §6.4.2, §9).
    */
   private readonly includeOldValue: boolean;
+  /**
+   * emitMoves capability (SPEC §5.8, §10.4.4). When `false` (default) output is
+   * byte-stable versus the pre-capability tree. When `true`, relocated
+   * (deep-equal) array elements are expressed as single RFC 6902 `move` ops
+   * instead of remove+add pairs, and both the `unique` and `primaryKey`
+   * strategies reconstruct `modified` ORDER EXACTLY (upgrading the §7.2
+   * primaryKey contract from keyed-collection to exact). Applies across LCS
+   * relocations (F22), unique reorders (F23), and primaryKey order fidelity
+   * (F07).
+   */
+  private readonly emitMoves: boolean;
 
-  constructor(options: { plan: Plan; includeOldValue?: boolean }) {
+  constructor(options: {
+    plan: Plan;
+    includeOldValue?: boolean;
+    emitMoves?: boolean;
+  }) {
     // F42: fail fast with an actionable message instead of a cryptic
     // "undefined is not an object (evaluating this.plan.size)" TypeError
     // thrown later from the planIsEmpty computation below. Any Map instance
@@ -81,6 +96,8 @@ export class JsonSchemaPatcher {
     this.planTrie = this.compilePlanTrie(this.plan);
     // Default on for back-compat (SPEC §6.4.1); opt out with `false`.
     this.includeOldValue = options.includeOldValue ?? true;
+    // Default OFF (SPEC §10.4.4): byte-stable output unless explicitly enabled.
+    this.emitMoves = options.emitMoves ?? false;
   }
 
   /**
@@ -363,7 +380,8 @@ export class JsonSchemaPatcher {
       createModificationCallback(plan?.hashFields || []),
       plan?.hashFields,
       plan,
-      this.includeOldValue
+      this.includeOldValue,
+      this.emitMoves
     );
   }
 

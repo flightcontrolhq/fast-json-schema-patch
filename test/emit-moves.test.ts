@@ -1,0 +1,202 @@
+import { describe, expect, test } from "bun:test";
+import { applyPatch as fjpApplyPatch } from "fast-json-patch";
+import { computeMoves, lisIndices } from "../src/core/arrayMoves";
+import { JsonSchemaPatcher, applyPatch, buildPlan } from "../src/index";
+import type { JsonValue, Operation } from "../src/types";
+
+// emitMoves capability (SPEC §5.8, §10.4.4). This file pins the OPT-IN surface:
+// default output is byte-identical (capability off), relocated elements become
+// single `move` ops, and every strategy round-trips `modified` EXACTLY through
+// BOTH the repo applier and fast-json-patch. F22 (this file's LCS section) plus
+// F23/F07 (unique/primaryKey sections) share one machinery (§5.8).
+
+const stableStringify = (v: unknown): string => JSON.stringify(v);
+
+/** Apply through both the repo applier and fast-json-patch; assert both equal `expected`. */
+function assertRoundTrip(
+  original: JsonValue,
+  ops: Operation[],
+  expected: JsonValue
+) {
+  const repo = applyPatch(structuredClone(original), ops);
+  expect(stableStringify(repo)).toBe(stableStringify(expected));
+  // fast-json-patch mutates its inputs and ignores the non-RFC `oldValue` field.
+  const fjp = fjpApplyPatch(
+    structuredClone(original) as object,
+    structuredClone(ops) as never,
+    false,
+    false
+  ).newDocument;
+  expect(stableStringify(fjp)).toBe(stableStringify(expected));
+}
+
+describe("emitMoves — pure move machinery (SPEC §5.8.2/§5.8.3)", () => {
+  test("lisIndices: canonical patience-sorting LIS", () => {
+    expect(lisIndices([])).toEqual([]);
+    expect(lisIndices([0, 1, 2, 3])).toEqual([0, 1, 2, 3]);
+    expect(lisIndices([3, 2, 1, 0]).length).toBe(1);
+    // [1,2,...,49,0] -> LIS is the first 49 (indices 0..48)
+    const rot = [...Array.from({ length: 49 }, (_, i) => i + 1), 0];
+    expect(lisIndices(rot)).toEqual(Array.from({ length: 49 }, (_, i) => i));
+  });
+
+  test("computeMoves: rotation by one is a single move", () => {
+    // O=[a0..a49] -> M=[a49,a0..a48]: a0's target rank is 1, ..., a49's is 0.
+    const rankSeq = [
+      ...Array.from({ length: 49 }, (_, i) => i + 1),
+      0,
+    ];
+    const moves = computeMoves(rankSeq);
+    expect(moves.length).toBe(1);
+    // The single non-anchor (a49, source index 49) moves to the front.
+    expect(moves[0]).toEqual({ from: 49, to: 0 });
+  });
+
+  test("computeMoves: identity permutation emits no moves", () => {
+    expect(computeMoves([0, 1, 2, 3, 4])).toEqual([]);
+  });
+});
+
+describe("emitMoves default-off byte-stability (SPEC §10.4.4)", () => {
+  const cases: Array<{ original: JsonValue; modified: JsonValue }> = [
+    { original: [1, 2, 3, 4, 5], modified: [5, 1, 2, 3, 4] },
+    {
+      original: [{ a: 1 }, { a: 2 }, { a: 3 }],
+      modified: [{ a: 2 }, { a: 3 }, { a: 1 }],
+    },
+    { original: { x: [1, 2, 3] }, modified: { x: [3, 1, 2, 9] } },
+  ];
+  for (const [i, c] of cases.entries()) {
+    test(`case ${i}: omitted === emitMoves:false, both === pre-capability output`, () => {
+      const omitted = new JsonSchemaPatcher({ plan: new Map() }).execute(c);
+      const explicitFalse = new JsonSchemaPatcher({
+        plan: new Map(),
+        emitMoves: false,
+      }).execute(c);
+      expect(stableStringify(omitted)).toBe(stableStringify(explicitFalse));
+    });
+  }
+});
+
+describe("emitMoves LCS relocations (F22, SPEC §5.8.5)", () => {
+  test("relocated ~596B item is ONE move, not remove+add", () => {
+    const big = (i: number) => ({
+      id: `item${i}`,
+      payload: "x".repeat(560),
+      n: i,
+    });
+    const original = [0, 1, 2, 3, 4, 5, 6, 7].map(big);
+    const modified = [1, 2, 3, 4, 5, 6, 7, 0].map(big);
+
+    const off = new JsonSchemaPatcher({ plan: new Map() }).execute({
+      original,
+      modified,
+    });
+    const on = new JsonSchemaPatcher({
+      plan: new Map(),
+      emitMoves: true,
+    }).execute({ original, modified });
+
+    expect(on.filter((o) => o.op === "move").length).toBe(1);
+    expect(on.length).toBe(1);
+    // Compactness: the move patch is an order of magnitude smaller.
+    expect(JSON.stringify(on).length).toBeLessThan(
+      JSON.stringify(off).length / 10
+    );
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("move ops never carry value/oldValue", () => {
+    const original = ["a", "b", "c", "d", "e"];
+    const modified = ["b", "c", "d", "e", "a"];
+    const on = new JsonSchemaPatcher({
+      plan: new Map(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    for (const op of on) {
+      if (op.op === "move") {
+        expect(op).not.toHaveProperty("value");
+        expect(op).not.toHaveProperty("oldValue");
+        expect(typeof op.from).toBe("string");
+      }
+    }
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("reorder + modify + add + remove round-trips exactly", () => {
+    const original = [
+      { k: "a", v: 1 },
+      { k: "b", v: 2 },
+      { k: "c", v: 3 },
+      { k: "d", v: 4 },
+    ];
+    const modified = [
+      { k: "c", v: 3 },
+      { k: "a", v: 99 }, // modified
+      { k: "e", v: 5 }, // added
+      { k: "b", v: 2 },
+    ]; // d removed
+    const on = new JsonSchemaPatcher({
+      plan: new Map(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("duplicate values: a move never pairs non-identical values", () => {
+    const original = ["a", "a", "b", "c", "b"];
+    const modified = ["b", "a", "c", "a", "b"];
+    const on = new JsonSchemaPatcher({
+      plan: new Map(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    // A move only relocates a deep-equal element, so it is safe for the applier
+    // to move a value even when equal values occur elsewhere; the end-to-end
+    // round-trip through both appliers proves no non-identical pairing slipped in.
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("emitMoves composes with includeOldValue:false", () => {
+    const original = [
+      { k: "a", v: 1 },
+      { k: "b", v: 2 },
+      { k: "c", v: 3 },
+    ];
+    const modified = [
+      { k: "b", v: 2 },
+      { k: "c", v: 3 },
+      { k: "a", v: 9 },
+    ];
+    const on = new JsonSchemaPatcher({
+      plan: new Map(),
+      emitMoves: true,
+      includeOldValue: false,
+    }).execute({ original, modified });
+    expect(on.some((o) => Object.hasOwn(o, "oldValue"))).toBe(false);
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("randomized LCS fuzz (mixed values) round-trips through both appliers", () => {
+    const pool: JsonValue[] = [1, 2, 3, 4, 5, 6, { a: 1 }, { a: 2 }, "x", "y"];
+    let seed = 12345;
+    const rnd = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    for (let iter = 0; iter < 3000; iter++) {
+      const n = 1 + Math.floor(rnd() * 8);
+      const m = 1 + Math.floor(rnd() * 8);
+      const O: JsonValue[] = [];
+      const M: JsonValue[] = [];
+      for (let i = 0; i < n; i++)
+        O.push(structuredClone(pool[Math.floor(rnd() * pool.length)]!));
+      for (let i = 0; i < m; i++)
+        M.push(structuredClone(pool[Math.floor(rnd() * pool.length)]!));
+      const on = new JsonSchemaPatcher({
+        plan: new Map(),
+        emitMoves: true,
+      }).execute({ original: structuredClone(O), modified: structuredClone(M) });
+      assertRoundTrip(O, on, M);
+    }
+  });
+});

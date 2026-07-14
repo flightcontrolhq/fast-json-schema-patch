@@ -8,6 +8,7 @@ import {
 } from "../performance/deepEqual";
 import { getEffectiveHashFields } from "../performance/getEffectiveHashFields";
 import type { JsonArray, JsonObject, JsonValue, Operation } from "../types";
+import { emitArrayMovesPatch, type MatchedPair } from "./arrayMoves";
 
 /**
  * Canonical, key-sorted fingerprint of a JSON value (F21). Two values produce
@@ -285,7 +286,11 @@ export function diffArrayLCS(
   // F11 (SPEC §6.4.2): when false, every `remove`/`replace` this function
   // emits omits `oldValue`. Same-kind granular replacements recurse through
   // `onModification` -> the class differ, which honors the flag itself.
-  includeOldValue: boolean = true
+  includeOldValue: boolean = true,
+  // emitMoves capability (SPEC §5.8, §10.4.4): when true, the main Myers path
+  // emits a single RFC 6902 `move` for each relocated (deep-equal) element
+  // instead of a remove+add pair (F22). Default false — byte-stable output.
+  emitMoves: boolean = false
 ) {
   const effectiveHashFields = getEffectiveHashFields(
     plan,
@@ -566,6 +571,93 @@ export function diffArrayLCS(
     } else if (current) {
       optimizedScript.push(current);
     }
+  }
+
+  // emitMoves capability (SPEC §5.8.4 / F22). Reconstruct the full original↔
+  // modified bijection from the (collapsed) script plus the trimmed prefix/
+  // suffix, pair leftover removes with equal-valued leftover adds into
+  // relocations (by interned id — exact deep-equal, never pairing non-identical
+  // values), and hand the bijection to the shared staged move-emitter. The
+  // move-free fast paths above (n/m/wn/wm === 0) already emit the same ops the
+  // emitter would, so only this main path branches.
+  if (emitMoves) {
+    const matched: MatchedPair[] = [];
+    const leftoverRemoves: Array<{ src: number; id: number }> = [];
+    const leftoverAdds: Array<{ tgt: number; id: number }> = [];
+    // Trimmed common prefix: unchanged, in place.
+    for (let i = 0; i < lo; i++) matched.push({ src: i, tgt: i, changed: false });
+    // Window (collapsed script), offset by lo into absolute array coordinates.
+    for (const op of optimizedScript) {
+      if (op.op === "common") {
+        matched.push({
+          src: lo + (op.ai as number),
+          tgt: lo + (op.bi as number),
+          changed: false,
+        });
+      } else if (op.op === "replace") {
+        matched.push({
+          src: lo + (op.ai as number),
+          tgt: lo + (op.bi as number),
+          changed: true,
+        });
+      } else if (op.op === "remove") {
+        const ai = op.ai as number;
+        leftoverRemoves.push({ src: lo + ai, id: idsA[ai] as number });
+      } else {
+        const bi = op.bi as number;
+        leftoverAdds.push({ tgt: lo + bi, id: idsB[bi] as number });
+      }
+    }
+    // Trimmed common suffix: unchanged, in place.
+    for (let j = 0; j < hi; j++) {
+      matched.push({ src: n - 1 - j, tgt: m - 1 - j, changed: false });
+    }
+    // Pair leftover removes with equal-id leftover adds -> relocations. For each
+    // id, adds are queued in ascending target order; each remove (in script
+    // order) claims the earliest unused add of the same id (pinned tie-break).
+    const addsById = new Map<number, number[]>();
+    for (let a = 0; a < leftoverAdds.length; a++) {
+      const id = (leftoverAdds[a] as { id: number }).id;
+      let q = addsById.get(id);
+      if (!q) {
+        q = [];
+        addsById.set(id, q);
+      }
+      q.push(a);
+    }
+    const addUsed = new Uint8Array(leftoverAdds.length);
+    const pureDeletes: number[] = [];
+    for (let r = 0; r < leftoverRemoves.length; r++) {
+      const rm = leftoverRemoves[r] as { src: number; id: number };
+      const q = addsById.get(rm.id);
+      const a = q && q.length > 0 ? (q.shift() as number) : -1;
+      if (a >= 0) {
+        addUsed[a] = 1;
+        matched.push({
+          src: rm.src,
+          tgt: (leftoverAdds[a] as { tgt: number }).tgt,
+          changed: false,
+        });
+      } else {
+        pureDeletes.push(rm.src);
+      }
+    }
+    const pureInserts: number[] = [];
+    for (let a = 0; a < leftoverAdds.length; a++) {
+      if (!addUsed[a]) pureInserts.push((leftoverAdds[a] as { tgt: number }).tgt);
+    }
+    emitArrayMovesPatch(
+      arr1,
+      arr2,
+      path,
+      patches,
+      matched,
+      pureDeletes,
+      pureInserts,
+      onModification,
+      includeOldValue
+    );
+    return;
   }
 
   // Apply operations and generate patches. currentIndex starts at lo: the

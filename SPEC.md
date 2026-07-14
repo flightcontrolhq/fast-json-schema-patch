@@ -720,6 +720,112 @@ first keeps lower indices valid; modifications are addressed at pre-removal indi
 before any removal shifts them; `/-` appends land after all removals so they target the final
 tail. See §7.
 
+### 5.8 `emitMoves` capability (normative when enabled)
+
+`emitMoves` is an **OPTIONAL** capability (default **off**, §10.4.4). When **off**, every array
+strategy emits exactly the ops specified in §5.4–§5.6 and output is byte-stable versus the
+pre-capability tree. When **on**, all three strategies share **one** machinery that expresses a
+relocated (unchanged) array element as a single RFC 6902 `move` instead of a remove+add pair, and
+makes `unique` and `primaryKey` reconstruct `modified` **order exactly** (§7.2 is upgraded, §7.4).
+This section pins that machinery so a reimplementation emits byte-identical ops.
+
+`5.8.1` **Bijection model.** Each strategy reduces its array diff to: a set of **matched** pairs
+`(src, tgt, changed)` — a bijection between a subset of `original` indices `src` and a subset of
+`modified` indices `tgt`, where `changed` is true iff `original[src]` is **not** deep-equal
+(§2.4.1) to `modified[tgt]`; a set of **pureDeletes** (original indices with no match); and a set
+of **pureInserts** (modified indices with no match). `matched ∪ pureDeletes` partitions
+`0..n-1`; `matched ∪ pureInserts` partitions `0..m-1`. How each strategy computes the bijection is
+§5.8.5–§5.8.7; the emission (§5.8.2–§5.8.4) is shared and identical.
+
+`5.8.2` **LIS (pinned tie-break).** Let `seq` be a permutation of `0..S-1`. `LIS(seq)` is the set
+of **indices into `seq`** forming a longest strictly-increasing subsequence, computed by this
+**exact** canonical procedure (a Go implementer MUST reproduce it verbatim, since which LIS is
+chosen when several tie fixes which elements move):
+
+```
+tails = []            // tails[k] = index into seq of the smallest tail of an increasing
+prev  = [-1] * S      //            subsequence of length k+1
+for i in 0..S-1:
+    // lower_bound: smallest pos with seq[tails[pos]] >= seq[i]
+    lo, hi = 0, len(tails)
+    while lo < hi:
+        mid = (lo + hi) >> 1
+        if seq[tails[mid]] < seq[i]: lo = mid + 1
+        else:                        hi = mid
+    if lo > 0:            prev[i] = tails[lo - 1]
+    if lo == len(tails):  tails.append(i)
+    else:                 tails[lo] = i
+// reconstruct by following prev from the LAST appended tail
+result = []
+k = tails[last]
+while k != -1: result.append(k); k = prev[k]
+reverse(result)
+```
+
+Because `seq` has distinct values, `lower_bound` and `upper_bound` coincide; the reconstruction
+from `tails[last]` realizes the **leftmost/smallest-source-index** LIS (the pinned tie-break).
+
+`5.8.3` **`computeMoves(seq)` (pinned).** `seq` is a permutation of `0..S-1`: the element at
+source position `p` must end at target rank `seq[p]`. The elements whose **source positions** are
+in `LIS(seq)` are the **fixed skeleton** and are NEVER moved; every other element is relocated by
+exactly one `move`. Maintain a `working` list (source positions, initially identity `0..S-1`) and
+`srcOfTarget[t]` = the source position with target rank `t`. Process target ranks **right-to-left**
+(`t` from `S-1` down to `0`); for each non-skeleton `srcOfTarget[t]`: let `from` = its current
+index in `working`; splice it out; let `to` = `working.length` when `t === S-1`, else the current
+index in `working` of `srcOfTarget[t+1]` (insert immediately before the already-final element to
+its right); splice it back at `to`. Emit `{from, to}` **unless `from === to`** (no-op moves are
+dropped). Both indices are in the length-`S` array's own coordinate space.
+
+`5.8.4` **Staged emission (pinned order).** Emit ops in exactly four stages, in this order:
+
+1. **removes** — `pureDeletes` in **descending** index; each `{op:"remove", path: prefix+src,
+   oldValue?}` (`oldValue` per §6.4.2). After this the array is the survivors in original order.
+2. **moves** — build `seq` by ordering `matched` by `src` (ascending) and mapping each to its rank
+   in the `matched`-ordered-by-`tgt` list; emit `computeMoves(seq)` as `{op:"move", from:
+   prefix+from, path: prefix+to}` (moves carry NO `value`/`oldValue`). Indices are in the
+   survivors-only space of this moment (after removes, before inserts).
+3. **inserts** — `pureInserts` in **ascending** target index; each `{op:"add", path: prefix+tgt,
+   value: modified[tgt]}` — an **INDEXED** add, never `/-`.
+4. **replaces** — `matched` with `changed === true`, in **ascending** target index; a same-kind
+   pair (both objects or both arrays) **recurses** (granular descent, §5.5.4.2) at `prefix+tgt`,
+   otherwise a whole-item `{op:"replace", path: prefix+tgt, value: modified[tgt], oldValue?}`. The
+   array is at full `modified` length here, so every target index is final.
+
+`prefix = (path === "" ? "/" : path + "/")`. This sequence reconstructs `modified` **exactly**
+(order and duplicates) under sequential apply (§8.1); verified by exhaustive small-permutation and
+randomized bijection fuzzing against both the reference applier and fast-json-patch.
+
+`5.8.5` **LCS mapping (F22).** With `emitMoves` on, the LCS strategy (§5.5) runs unchanged through
+the trim (§5.5.0), Myers pass (§5.5.2), backtrack, and collapse (§5.5.4.1), then — on the main
+window path only (the move-free fast paths §5.5.0.3/§5.5.1 already emit the staged ops) — builds
+the bijection instead of the §5.5.5 walk: trimmed-prefix indices `i<lo` and trimmed-suffix indices
+are `matched(i, i', changed:false)`; a `common` script entry is `matched(changed:false)`; a
+`replace` entry is `matched(changed:true)`; a leftover `remove` and leftover `add` are **paired
+into a relocation `matched(changed:false)` iff their interned ids are equal** (exact deep-equal,
+§5.5.2 — so a move NEVER pairs non-identical values). Pairing is deterministic: for each interned
+id, leftover adds are queued in ascending target order, and each leftover remove (in script order)
+claims the **earliest unused** add of its id. Unpaired removes are `pureDeletes`; unpaired adds are
+`pureInserts`. Then §5.8.4 emits. Granular descent (§5.5.4.2) still applies via stage 4.
+
+`5.8.6` **unique mapping (F23).** With `emitMoves` on, when the `unique` gate passes (§5.4.4 —
+equal length, no duplicates in either side) **and** the two arrays are **multiset-equal** (same
+value set, hence a pure permutation), the bijection is `matched(src, tgt, changed:false)` for every
+element, where `tgt` is the (unique) index of `original[src]`'s value in `modified`; `pureDeletes`
+and `pureInserts` are empty; §5.8.4 emits pure `move`s (stages 1/3/4 empty). If the arrays are
+**not** multiset-equal, the strategy keeps the §5.6 positional-replace emission unchanged (moves buy
+nothing there and would cost a remove+add per differing element). Equal-length + unique + multiset-
+equal is exactly the reorder case §5.6 handled as `N` positional replaces at HEAD.
+
+`5.8.7` **primaryKey mapping (F07).** With `emitMoves` on, the primaryKey strategy (§5.4), under the
+same applicability gate (§5.4.3), replaces its three-phase emission (§5.4.1) with the bijection:
+index `original` by key (§5.4.1.1); for each `modified[j]`, if its key matches an original index
+`i`, add `matched(i, j, changed: !deepEqual(original[i], modified[j]))`; unmatched `modified[j]`
+are `pureInserts` (`j`); original keys never matched are `pureDeletes`. Then §5.8.4 emits — so
+survivors are **reordered** into `modified` order via `move`s and new keys are **INDEXED** adds at
+their `modified` position (never `/-`), making `applyPatch(original, p)` equal `modified`
+**byte-exactly** (order included). This upgrades §7.2 to §7.4 for this array. The gate still governs:
+non-conforming / duplicate-key arrays fall back to `lcs`, which under `emitMoves` uses §5.8.5.
+
 ---
 
 ## 6. Patch format
@@ -828,6 +934,26 @@ the **exact** contract (§7.1) instead.
 
 `7.3.1` For the original document `D` and `p = execute` output, `applyPatch(applyPatch(D, p),
 invertPatch(D, p))` **deep-equals `D`** (§9). The inverse is computed against the ORIGINAL `D`.
+
+### 7.4 `emitMoves`: exact reconstruction across all strategies
+
+`7.4.1` With `emitMoves` on (§5.8, §10.4.4), **every** strategy reconstructs `modified`
+**exactly** (deep-equal including array order and duplicates) under sequential apply (§8):
+
+| strategy | `emitMoves` off | `emitMoves` on |
+|----------|-----------------|-----------------|
+| LCS (§5.5) | exact (§7.1.1) | exact — relocations become `move`s (§5.8.5) |
+| unique (§5.6) | exact (§7.1.2) | exact — multiset-equal reorders become `move`s (§5.8.6); non-multiset-equal keeps §5.6 positional replaces |
+| primaryKey (§5.4) | keyed-collection, order-insensitive (§7.2) | **exact** — survivors reordered + INDEXED adds (§5.8.7) |
+
+`7.4.2` The upgrade is strict for **primaryKey**: §7.2's contract ("survivors in original relative
+order ++ new keys at the tail", order **not** preserved) becomes byte-exact order equality when the
+capability is on. LCS and unique were already exact (§7.1); `emitMoves` only changes *which ops*
+express the same reconstruction (fewer, smaller ops), never the reconstructed document.
+
+`7.4.3` Verified by exhaustive small-permutation enumeration and >1M randomized bijection trials
+(deletes + inserts + changes + reorders, with duplicate values) against **both** the reference
+applier and fast-json-patch; every trial reproduced `modified` exactly.
 
 ---
 
@@ -1088,7 +1214,7 @@ capabilities.
 | capability | default | status | effect |
 |------------|---------|--------|--------|
 | `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§10.4.2) | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
-| `emitMoves` | off | OPTIONAL (reserved) | emit RFC 6902 `move` for LCS relocations and primaryKey order fidelity |
+| `emitMoves` | off | OPTIONAL — **landing** (§10.4.4) | emit RFC 6902 `move` for relocated elements; exact-order `unique`/`primaryKey` (§5.8) |
 | `wholesaleReplaceFallback` | off | OPTIONAL (reserved) | emit a single container `replace` when the granular patch would exceed the container's own serialized size |
 | `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§10.4.3) | override the auto-detection candidate list (§4.5.5) |
 
@@ -1112,6 +1238,22 @@ so nested ops it emits also honor the flag. The flag changes **only** the presen
 not from `oldValue`; the round-trip identity §9.1.2 holds under either mode. Measured savings on the
 compactness repro shapes: 26–51% on typical remove/replace-heavy diffs, up to ~86x when a large
 subtree is removed (a 2.7 KB removal drops from 2680 B to 31 B).
+
+`10.4.4` **`emitMoves` (F22/F23/F07).** Surfaced as the `JsonSchemaPatcher` constructor option
+`emitMoves?: boolean`, **default `false`** (byte-for-byte identical to the pre-capability output).
+When `true`, all three array strategies route through the shared move machinery (§5.8): a relocated
+**deep-equal** element becomes a single RFC 6902 `move` instead of a remove+add pair, and the
+`unique`/`primaryKey` strategies reconstruct `modified` **order exactly**. The one capability
+defines three landings, each pinned in §5.8: **LCS relocations** (§5.8.5, F22 — a relocated ~596 B
+item drops from 1279 B as remove+add to ~39 B as a move); **unique reorders** (§5.8.6, F23 — a
+50-element rotation drops from 4271 B as 50 replaces to ~40 B as one move); and **primaryKey order
+fidelity** (§5.8.7, F07 — survivors are reordered and insertions are INDEXED adds so the applied
+result equals `modified` byte-exactly, upgrading §7.2 to §7.4). A `move` NEVER pairs non-identical
+values (§5.8.5). The pinned **LIS** tie-break (§5.8.2) and right-to-left move emission (§5.8.3) make
+the emitted op sequence deterministic and Go-reproducible. `move` ops carry no `oldValue`;
+`remove`/`replace` still honor `includeOldValue` (§6.4.2), and `emitMoves` composes with it. The
+apply layer (§8.3) already supports `move`, so emitted patches round-trip through both the reference
+applier and any conforming RFC 6902 applier (verified against fast-json-patch).
 
 `10.4.3` **`primaryKeyCandidates` (F25).** Surfaced as the `buildPlan` option
 `primaryKeyCandidates?: string[]`, **default `["id", "name", "port"]`** (§4.5.3/§4.5.5 —
