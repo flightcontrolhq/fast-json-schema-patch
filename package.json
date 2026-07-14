@@ -77,9 +77,7 @@
     "react": "^19.1.0",
     "rfc6902": "^5.1.2",
     "tinybench": "^4.0.1",
-    "tsdown": "^0.12.9"
-  },
-  "peerDependencies": {
+    "tsdown": "^0.12.9",
     "typescript": "^5"
   }
 }
