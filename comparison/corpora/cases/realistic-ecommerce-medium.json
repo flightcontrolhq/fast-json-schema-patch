@@ -1,0 +1,3532 @@
+{
+  "name": "realistic-ecommerce-medium",
+  "category": "realistic",
+  "description": "Medium e-commerce platform config (keyed products, users, categories, orders) with a realistic edit set",
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ECommercePlatformConfig",
+    "type": "object",
+    "required": [
+      "store",
+      "payments",
+      "shipping",
+      "inventory",
+      "categories",
+      "products",
+      "users"
+    ],
+    "properties": {
+      "store": {
+        "type": "object",
+        "required": [
+          "name",
+          "currency",
+          "locale"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "locale": {
+            "type": "string",
+            "pattern": "^[a-z]{2}-[A-Z]{2}$"
+          },
+          "logoUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "supportEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "additionalProperties": false
+      },
+      "payments": {
+        "type": "object",
+        "required": [
+          "supportedMethods"
+        ],
+        "properties": {
+          "supportedMethods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "credit_card",
+                "paypal",
+                "stripe",
+                "upi"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "stripe": {
+            "type": "object",
+            "properties": {
+              "apiKey": {
+                "type": "string"
+              },
+              "webhookSecret": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "apiKey",
+              "webhookSecret"
+            ],
+            "additionalProperties": false
+          },
+          "paypal": {
+            "type": "object",
+            "properties": {
+              "clientId": {
+                "type": "string"
+              },
+              "clientSecret": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "clientId",
+              "clientSecret"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "shipping": {
+        "type": "object",
+        "required": [
+          "rates"
+        ],
+        "properties": {
+          "rates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "country",
+                "method",
+                "cost"
+              ],
+              "properties": {
+                "country": {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "standard",
+                    "express",
+                    "pickup"
+                  ]
+                },
+                "cost": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "estimatedDays": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "freeOver": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "inventory": {
+        "type": "object",
+        "required": [
+          "thresholdAlert"
+        ],
+        "properties": {
+          "thresholdAlert": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "autoRestock": {
+            "type": "boolean"
+          },
+          "restockLevel": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "features": {
+        "type": "object",
+        "properties": {
+          "reviewsEnabled": {
+            "type": "boolean"
+          },
+          "relatedProducts": {
+            "type": "boolean"
+          },
+          "guestCheckout": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "analytics": {
+        "type": "object",
+        "required": [
+          "googleAnalyticsId"
+        ],
+        "properties": {
+          "googleAnalyticsId": {
+            "type": "string",
+            "pattern": "^UA-[0-9]+-[0-9]+$"
+          },
+          "trackUserBehavior": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "categories": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "slug"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "name": {
+              "type": "string"
+            },
+            "slug": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "parentId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "products": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "sku",
+            "price",
+            "categoryIds"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "name": {
+              "type": "string"
+            },
+            "sku": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "price": {
+              "type": "number",
+              "minimum": 0
+            },
+            "categoryIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "inventoryLevel": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "attributes": {
+              "type": "object",
+              "patternProperties": {
+                "^[A-Za-z0-9_-]+$": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "users": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "email",
+            "roles"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "name": {
+              "type": "string"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "admin",
+                  "manager",
+                  "customer",
+                  "guest"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "roundtrip": "multiset",
+  "measureMemory": false,
+  "tags": [
+    "e-commerce",
+    "medium"
+  ],
+  "original": {
+    "store": {
+      "name": "sunt Lorem in reprehenderit",
+      "currency": "HKS",
+      "locale": "ok-ID"
+    },
+    "payments": {
+      "supportedMethods": [
+        "credit_card",
+        "paypal",
+        "upi"
+      ],
+      "paypal": {
+        "clientId": "quis irure",
+        "clientSecret": "mollit consequat in nisi"
+      }
+    },
+    "shipping": {
+      "rates": [
+        {
+          "country": "GS",
+          "method": "express",
+          "cost": 19810722.16294706,
+          "estimatedDays": 66454903
+        },
+        {
+          "country": "XB",
+          "method": "standard",
+          "cost": 24786887.248046696,
+          "estimatedDays": 51583898
+        },
+        {
+          "country": "YU",
+          "method": "standard",
+          "cost": 1050769.630819559,
+          "estimatedDays": 88313335
+        },
+        {
+          "country": "SK",
+          "method": "pickup",
+          "cost": 10024713.794700801,
+          "estimatedDays": 8479088
+        }
+      ]
+    },
+    "inventory": {
+      "thresholdAlert": 16190212,
+      "restockLevel": 64630968
+    },
+    "features": {
+      "reviewsEnabled": false,
+      "relatedProducts": true
+    },
+    "analytics": {
+      "googleAnalyticsId": "UA-2-35",
+      "trackUserBehavior": false
+    },
+    "categories": [
+      {
+        "id": "sH8n",
+        "name": "nisi id eu deserunt",
+        "slug": "984hake",
+        "parentId": null
+      },
+      {
+        "id": "1kmR",
+        "name": "nostrud est",
+        "slug": "yts4o"
+      },
+      {
+        "id": "YM",
+        "name": "tempor in sed",
+        "slug": "d4mg1ffq0nh",
+        "parentId": "dolore ad ea culpa"
+      },
+      {
+        "id": "PCq1",
+        "name": "Duis enim velit consectetur id",
+        "slug": "zbwko59",
+        "parentId": "aliqua dolore dolor deserunt"
+      },
+      {
+        "id": "sP3ChHuppq",
+        "name": "consequat",
+        "slug": "6zyxny3n",
+        "parentId": "velit"
+      },
+      {
+        "id": "-oG8_KDl08",
+        "name": "officia ea ut sunt",
+        "slug": "fsfnb58",
+        "parentId": "Excepteur non dolore esse"
+      },
+      {
+        "id": "YL1v5",
+        "name": "dolore sed do",
+        "slug": "klbfn8ox"
+      },
+      {
+        "id": "NL",
+        "name": "aliquip ut adipisicing",
+        "slug": "7",
+        "parentId": null
+      },
+      {
+        "id": "k",
+        "name": "proident id veniam ipsum",
+        "slug": "dgx4z0x8je"
+      },
+      {
+        "id": "6GZnMgpGI",
+        "name": "occaecat",
+        "slug": "cf5us",
+        "parentId": "mollit consectetur Excepteur laboris id"
+      },
+      {
+        "id": "MTP",
+        "name": "commodo",
+        "slug": "t"
+      },
+      {
+        "id": "CN4wIrV",
+        "name": "culpa velit consectetur laborum in",
+        "slug": "m",
+        "parentId": "laboris incididunt"
+      },
+      {
+        "id": "07JnOEITYVe",
+        "name": "ad commodo enim pariatur",
+        "slug": "j164pom",
+        "parentId": "sunt"
+      },
+      {
+        "id": "kuW",
+        "name": "proident cillum do est",
+        "slug": "n",
+        "parentId": "tempor id Duis"
+      },
+      {
+        "id": "GNfD",
+        "name": "proident Lorem esse exercitation",
+        "slug": "8mu0947l6m",
+        "parentId": "sed amet"
+      },
+      {
+        "id": "FWs0ufrM",
+        "name": "commodo exercitation officia laborum",
+        "slug": "uf14",
+        "parentId": null
+      },
+      {
+        "id": "qD6",
+        "name": "occaecat",
+        "slug": "zmsh9-",
+        "parentId": null
+      },
+      {
+        "id": "EOxB",
+        "name": "consectetur aliqua",
+        "slug": "ornej",
+        "parentId": "velit"
+      },
+      {
+        "id": "Ok",
+        "name": "elit dolore",
+        "slug": "-",
+        "parentId": "sint est laborum dolore"
+      },
+      {
+        "id": "SYbLcaRz2",
+        "name": "fugiat",
+        "slug": "3jy1k7y",
+        "parentId": "laborum"
+      },
+      {
+        "id": "vmZQsB",
+        "name": "nisi nulla",
+        "slug": "29ksbuv",
+        "parentId": "nulla incididunt"
+      },
+      {
+        "id": "Bkgo6ubB_",
+        "name": "exercitation nulla consequat do",
+        "slug": "uydc",
+        "parentId": null
+      },
+      {
+        "id": "Zx98AN",
+        "name": "ipsum amet in irure consectetur",
+        "slug": "05",
+        "parentId": null
+      },
+      {
+        "id": "V",
+        "name": "in labore",
+        "slug": "rw8j6mwlbv",
+        "parentId": null
+      },
+      {
+        "id": "oK5l-m3",
+        "name": "consequat adipisicing in nulla",
+        "slug": "fqs7koj21e"
+      },
+      {
+        "id": "4RQpNslxpT",
+        "name": "amet",
+        "slug": "8mf02pcte",
+        "parentId": "eu"
+      },
+      {
+        "id": "OI6f95L",
+        "name": "dolore quis occaecat in nisi",
+        "slug": "ej",
+        "parentId": null
+      },
+      {
+        "id": "8",
+        "name": "in",
+        "slug": "fz6g8tgit",
+        "parentId": "eu"
+      },
+      {
+        "id": "A_",
+        "name": "cupidatat nostrud voluptate officia magna",
+        "slug": "kgjarg",
+        "parentId": null
+      },
+      {
+        "id": "m6BR",
+        "name": "anim dolore velit",
+        "slug": "uz2c0atewu",
+        "parentId": "aliqua"
+      },
+      {
+        "id": "67r-h",
+        "name": "Excepteur Duis ad incididunt",
+        "slug": "lcpna6d6jl"
+      },
+      {
+        "id": "QMph01",
+        "name": "qui Excepteur ullamco",
+        "slug": "khfn5puz",
+        "parentId": "sit non elit"
+      },
+      {
+        "id": "YD",
+        "name": "aliqua nisi proident aute nulla",
+        "slug": "os0k6",
+        "parentId": "qui"
+      },
+      {
+        "id": "q6Mj",
+        "name": "sunt amet non eiusmod exercitation",
+        "slug": "j6gpskj"
+      },
+      {
+        "id": "dTmH-9Xv",
+        "name": "dolore commodo qui",
+        "slug": "p5-hhahe",
+        "parentId": "id aliqua"
+      },
+      {
+        "id": "3r5GZye",
+        "name": "minim",
+        "slug": "e6a",
+        "parentId": null
+      },
+      {
+        "id": "djKY",
+        "name": "dolor elit",
+        "slug": "7relo8ky",
+        "parentId": null
+      },
+      {
+        "id": "du88",
+        "name": "qui deserunt cillum amet ut",
+        "slug": "1udhsr",
+        "parentId": null
+      },
+      {
+        "id": "JP6Pj",
+        "name": "ut enim Lorem consequat",
+        "slug": "5x6ni5k2y5",
+        "parentId": "eu aliqua deserunt Ut"
+      },
+      {
+        "id": "g_da7I9pRQ_",
+        "name": "officia reprehenderit sunt",
+        "slug": "fyqqsq",
+        "parentId": "culpa"
+      },
+      {
+        "id": "IZ1s-83-_",
+        "name": "magna sint reprehenderit in",
+        "slug": "i",
+        "parentId": null
+      },
+      {
+        "id": "yJ6Ma4Z",
+        "name": "anim enim dolore Duis nisi",
+        "slug": "stfz2",
+        "parentId": null
+      },
+      {
+        "id": "yuuGSC",
+        "name": "Duis non eiusmod Excepteur",
+        "slug": "s00zh5s6",
+        "parentId": null
+      },
+      {
+        "id": "LJbiIGB",
+        "name": "ex",
+        "slug": "y9p-1afh5q6"
+      },
+      {
+        "id": "koLeGrDG",
+        "name": "qui eu pariatur",
+        "slug": "bby"
+      },
+      {
+        "id": "rqRGV6",
+        "name": "velit et do nisi",
+        "slug": "rbay7c",
+        "parentId": null
+      },
+      {
+        "id": "yKtn",
+        "name": "dolor",
+        "slug": "xgtsf9g0r",
+        "parentId": "minim irure"
+      },
+      {
+        "id": "SMJU1s2h",
+        "name": "qui nulla",
+        "slug": "ilf",
+        "parentId": null
+      },
+      {
+        "id": "8pW6-R",
+        "name": "ut",
+        "slug": "7m7yl6yhb"
+      },
+      {
+        "id": "H",
+        "name": "exercitation aliqua enim culpa",
+        "slug": "g2db",
+        "parentId": null
+      },
+      {
+        "id": "_Jc_iPv",
+        "name": "magna laborum commodo",
+        "slug": "lqvwngy84",
+        "parentId": null
+      },
+      {
+        "id": "Z1H3AZcgv",
+        "name": "dolor in",
+        "slug": "itevuddo8f",
+        "parentId": "ipsum pariatur aliquip nostrud laborum"
+      },
+      {
+        "id": "LwdLBg",
+        "name": "minim",
+        "slug": "ipf00k"
+      },
+      {
+        "id": "RylUNU8mwc",
+        "name": "culpa reprehenderit",
+        "slug": "vn4cc2",
+        "parentId": null
+      },
+      {
+        "id": "SsSJD7C",
+        "name": "commodo tempor ut velit",
+        "slug": "dxhzyg"
+      },
+      {
+        "id": "PhvnoHur",
+        "name": "irure",
+        "slug": "vbl590vdc",
+        "parentId": null
+      },
+      {
+        "id": "DTvjA5h",
+        "name": "proident",
+        "slug": "ddnnpx1mtr",
+        "parentId": "ea Duis eu occaecat"
+      },
+      {
+        "id": "wC",
+        "name": "dolore Ut qui elit mollit",
+        "slug": "nzonpkg"
+      },
+      {
+        "id": "Kpbrt",
+        "name": "sit ad",
+        "slug": "nnb",
+        "parentId": "mollit eu sint do magna"
+      },
+      {
+        "id": "ecwzApUq",
+        "name": "fugiat dolore",
+        "slug": "x0htds70",
+        "parentId": "nulla ad"
+      },
+      {
+        "id": "46yX-_ADD4T",
+        "name": "ut",
+        "slug": "e",
+        "parentId": null
+      },
+      {
+        "id": "JUL-A",
+        "name": "ea culpa mollit adipisicing",
+        "slug": "o8j250khrot",
+        "parentId": null
+      },
+      {
+        "id": "20MvC5Gar7i",
+        "name": "Lorem",
+        "slug": "uenteh-w",
+        "parentId": "voluptate Ut Lorem"
+      },
+      {
+        "id": "zSl",
+        "name": "est occaecat",
+        "slug": "qi5v06nd9",
+        "parentId": "labore"
+      },
+      {
+        "id": "Cd",
+        "name": "ut officia id",
+        "slug": "xmepvt1ay7s"
+      },
+      {
+        "id": "qrN9mR8o",
+        "name": "velit laboris",
+        "slug": "e7h2uz",
+        "parentId": null
+      }
+    ],
+    "products": [
+      {
+        "id": "Xob",
+        "name": "aliquip sed",
+        "sku": "magna mollit",
+        "description": "Excepteur",
+        "price": 75423241.68607593,
+        "categoryIds": [
+          "commodo amet",
+          "cillum ut occaecat"
+        ],
+        "inventoryLevel": 57002563
+      },
+      {
+        "id": "R86b2",
+        "name": "tempor pariatur ea commodo",
+        "sku": "est",
+        "description": "mollit nisi dolore",
+        "price": 26662425.13805628,
+        "categoryIds": [
+          "Ut sed incididunt amet laboris",
+          "non sed in",
+          "proident Lorem amet aute magna"
+        ]
+      },
+      {
+        "id": "lq-556r",
+        "name": "sunt sed",
+        "sku": "esse cillum eu",
+        "description": "in",
+        "price": 91533515.92831314,
+        "categoryIds": [
+          "Lorem nisi"
+        ],
+        "inventoryLevel": 48931011,
+        "attributes": {
+          "AWvhj": 68708813.60955536
+        }
+      },
+      {
+        "id": "YQyjyYmBQ",
+        "name": "sint ut ad ea",
+        "sku": "officia ad qui deserunt",
+        "description": "magna",
+        "price": 35819983.10983181,
+        "categoryIds": [
+          "adipisicing deserunt",
+          "sint aute sunt consectetur",
+          "qui ad exercitation commodo",
+          "incididunt adipisicing elit officia",
+          "laborum consequat Excepteur"
+        ],
+        "inventoryLevel": 77538901,
+        "attributes": {
+          "mJCTVh5t3XM": true
+        }
+      },
+      {
+        "id": "r",
+        "name": "Duis id ex",
+        "sku": "quis",
+        "description": "in veniam aliquip",
+        "price": 4045788.454823196,
+        "categoryIds": [
+          "laboris sit enim",
+          "aute ut in"
+        ],
+        "inventoryLevel": 99342975,
+        "attributes": {
+          "FMyk": -50007159.68199074
+        }
+      },
+      {
+        "id": "aX8baQec5",
+        "name": "eu",
+        "sku": "sit aliqua",
+        "description": "enim dolor consectetur",
+        "price": 15445816.214196384,
+        "categoryIds": [
+          "pariatur eu in",
+          "cillum et deserunt voluptate"
+        ],
+        "attributes": {
+          "b6jhezrUWL": 26370814.815163612
+        }
+      },
+      {
+        "id": "Kv",
+        "name": "sunt sit",
+        "sku": "dolore non esse et",
+        "description": "elit occaecat",
+        "price": 8498352.393507957,
+        "categoryIds": [
+          "dolor cupidatat ad laboris culpa",
+          "in occaecat dolore sed voluptate"
+        ],
+        "inventoryLevel": 67470186,
+        "attributes": {
+          "kYPbSnlPmf": "sunt in reprehenderit Duis"
+        }
+      },
+      {
+        "id": "3kv",
+        "name": "aliquip consequat Lorem est",
+        "sku": "sit aute dolor ipsum",
+        "price": 96803105.94849288,
+        "categoryIds": [
+          "nulla amet mollit veniam officia",
+          "dolor tempor ex aute"
+        ],
+        "inventoryLevel": 29543998
+      },
+      {
+        "id": "gpi",
+        "name": "laborum ad cupidatat",
+        "sku": "nisi minim",
+        "description": "amet",
+        "price": 75312878.21475416,
+        "categoryIds": [
+          "sed ad",
+          "minim sed labore",
+          "quis consectetur culpa exercitation",
+          "mollit et aute voluptate laboris",
+          "adipisicing eiusmod sit dolore occaecat"
+        ],
+        "inventoryLevel": 34589868,
+        "attributes": {
+          "tmvhJkNPre": "do in ut incididunt"
+        }
+      },
+      {
+        "id": "OG",
+        "name": "amet",
+        "sku": "ullamco laborum",
+        "description": "nostrud minim sint adipisicing",
+        "price": 41344079.86421138,
+        "categoryIds": [
+          "culpa",
+          "elit Ut quis"
+        ],
+        "inventoryLevel": 69280065,
+        "attributes": {
+          "MRj-": "amet sed"
+        }
+      },
+      {
+        "id": "jJ",
+        "name": "dolore fugiat minim cillum ut",
+        "sku": "est exercitation",
+        "price": 2482732.036150992,
+        "categoryIds": [
+          "reprehenderit esse",
+          "sed ad ex"
+        ]
+      },
+      {
+        "id": "Pzdw",
+        "name": "anim dolore labore veniam sed",
+        "sku": "in",
+        "description": "ex tempor exercitation reprehenderit Duis",
+        "price": 14792722.929269075,
+        "categoryIds": [
+          "elit",
+          "magna nisi",
+          "Excepteur eiusmod in"
+        ],
+        "inventoryLevel": 73387086,
+        "attributes": {
+          "UjO_MTbgKYD": false
+        }
+      },
+      {
+        "id": "lRO7-4-A1dc",
+        "name": "ut magna ipsum velit",
+        "sku": "consequat laboris ut minim velit",
+        "description": "laborum sunt dolor tempor",
+        "price": 60326464.26465362,
+        "categoryIds": [
+          "aute",
+          "Duis labore mollit pariatur cillum"
+        ],
+        "inventoryLevel": 9794165
+      },
+      {
+        "id": "P0LTB8UD6",
+        "name": "ea nisi ut dolor",
+        "sku": "cillum reprehenderit nulla fugiat",
+        "description": "sunt",
+        "price": 10144316.614605486,
+        "categoryIds": [
+          "reprehenderit mollit elit dolore officia",
+          "esse in fugiat",
+          "quis",
+          "nisi ipsum non elit Excepteur",
+          "magna cillum minim dolor"
+        ]
+      },
+      {
+        "id": "yg",
+        "name": "reprehenderit dolor magna id mollit",
+        "sku": "aute in incididunt sunt nostrud",
+        "description": "minim cillum nisi sit",
+        "price": 17926743.999123573,
+        "categoryIds": [
+          "id"
+        ],
+        "inventoryLevel": 76775381,
+        "attributes": {
+          "S": "et consectetur"
+        }
+      },
+      {
+        "id": "t",
+        "name": "qui cupidatat",
+        "sku": "Ut",
+        "description": "sunt consectetur laborum culpa",
+        "price": 48503363.714553416,
+        "categoryIds": [
+          "aute veniam consectetur",
+          "est non",
+          "amet consectetur"
+        ],
+        "inventoryLevel": 58917940,
+        "attributes": {
+          "QiDd20Cd": "quis"
+        }
+      },
+      {
+        "id": "LoMW7",
+        "name": "in cillum ea exercitation",
+        "sku": "pariatur sint proident",
+        "description": "non",
+        "price": 66580698.6624375,
+        "categoryIds": [
+          "cupidatat culpa et aliquip nulla",
+          "anim elit in officia nostrud",
+          "laboris sit ea dolore mollit",
+          "consectetur"
+        ],
+        "inventoryLevel": 98645701,
+        "attributes": {
+          "f0": true
+        }
+      },
+      {
+        "id": "d",
+        "name": "laboris laborum mollit commodo irure",
+        "sku": "tempor non fugiat exercitation cupidatat",
+        "description": "tempor sed anim",
+        "price": 58820239.338092506,
+        "categoryIds": [
+          "laboris nostrud ipsum velit",
+          "ut"
+        ],
+        "inventoryLevel": 51229771,
+        "attributes": {
+          "ETYKbxQC": 19540704.181417823
+        }
+      },
+      {
+        "id": "Q",
+        "name": "laborum eu qui magna occaecat",
+        "sku": "ad dolore ullamco ut",
+        "description": "dolore sit labore",
+        "price": 12340068.374760449,
+        "categoryIds": [
+          "Ut",
+          "esse adipisicing quis voluptate fugiat",
+          "anim"
+        ],
+        "inventoryLevel": 60679934,
+        "attributes": {
+          "NkgTyDYYZG_": "laboris"
+        }
+      },
+      {
+        "id": "JN5s",
+        "name": "cupidatat aliqua",
+        "sku": "commodo in id nostrud",
+        "description": "dolor",
+        "price": 88548466.33039415,
+        "categoryIds": [
+          "irure magna est laborum",
+          "officia elit ullamco",
+          "magna veniam dolore cupidatat sit",
+          "in quis",
+          "consequat"
+        ],
+        "inventoryLevel": 38379962,
+        "attributes": {
+          "9HU4-5P": false
+        }
+      },
+      {
+        "id": "5yErnY4",
+        "name": "sed incididunt sit laboris sunt",
+        "sku": "mollit",
+        "description": "ex commodo nostrud ut ea",
+        "price": 14300250.448286533,
+        "categoryIds": [
+          "adipisicing irure commodo Ut officia",
+          "officia pariatur eiusmod mollit",
+          "do in aute",
+          "sunt officia consequat"
+        ],
+        "inventoryLevel": 8948859,
+        "attributes": {
+          "48FrPd5u": "sunt commodo occaecat"
+        }
+      },
+      {
+        "id": "8E",
+        "name": "non aliquip dolor",
+        "sku": "consequat sed mollit Lorem exercitation",
+        "price": 18151716.655120254,
+        "categoryIds": [
+          "sint aliquip Ut"
+        ]
+      },
+      {
+        "id": "iPQbLklO0",
+        "name": "consequat",
+        "sku": "nulla amet aliqua ipsum pariatur",
+        "description": "consectetur qui exercitation ullamco sint",
+        "price": 154105.34106194973,
+        "categoryIds": [
+          "velit culpa",
+          "est Lorem aliquip ex aliqua",
+          "in enim ex Excepteur",
+          "reprehenderit occaecat anim incididunt dolor",
+          "culpa do"
+        ],
+        "inventoryLevel": 6389098,
+        "attributes": {
+          "VATSXbBW6": 66245820.466428995
+        }
+      },
+      {
+        "id": "mVK1itgoYF",
+        "name": "in reprehenderit Ut Excepteur",
+        "sku": "ea enim Duis nostrud veniam",
+        "description": "Ut",
+        "price": 55777041.59077257,
+        "categoryIds": [
+          "sint",
+          "culpa cupidatat minim id",
+          "amet aliqua"
+        ],
+        "attributes": {
+          "8": false
+        }
+      },
+      {
+        "id": "0q1",
+        "name": "in",
+        "sku": "Ut exercitation adipisicing aliquip dolore",
+        "description": "in",
+        "price": 17298132.926225662,
+        "categoryIds": [
+          "ipsum consectetur",
+          "aute ipsum esse fugiat dolor"
+        ],
+        "inventoryLevel": 35815159,
+        "attributes": {
+          "8VJpAottYX": "nisi et sed"
+        }
+      },
+      {
+        "id": "r_1V97oC",
+        "name": "et incididunt",
+        "sku": "aliqua nisi",
+        "description": "Excepteur voluptate magna eu consectetur",
+        "price": 60168388.5557577,
+        "categoryIds": [
+          "sint dolore culpa consectetur occaecat",
+          "consequat eiusmod velit",
+          "commodo id Lorem amet"
+        ],
+        "inventoryLevel": 40156358,
+        "attributes": {
+          "1Uwp5": true
+        }
+      },
+      {
+        "id": "R",
+        "name": "ullamco incididunt sint ad nostrud",
+        "sku": "Excepteur",
+        "description": "incididunt sint amet",
+        "price": 10057733.044959605,
+        "categoryIds": [
+          "nostrud mollit Excepteur dolor",
+          "laboris in",
+          "cillum adipisicing dolor"
+        ],
+        "inventoryLevel": 51180061,
+        "attributes": {
+          "pw--": "dolore"
+        }
+      },
+      {
+        "id": "B",
+        "name": "cillum",
+        "sku": "ea anim veniam aliqua",
+        "description": "incididunt fugiat non sed",
+        "price": 32236442.1794191,
+        "categoryIds": [
+          "cillum adipisicing eu",
+          "fugiat aute anim esse",
+          "officia velit dolor irure",
+          "do laborum fugiat non esse",
+          "id nulla pariatur cupidatat consequat"
+        ],
+        "inventoryLevel": 44581025,
+        "attributes": {
+          "jNKaFUp": 12818747.153505683
+        }
+      },
+      {
+        "id": "JVcF-lyWzUw",
+        "name": "officia minim",
+        "sku": "culpa",
+        "description": "sunt aliqua in deserunt eu",
+        "price": 46627530.43230623,
+        "categoryIds": [
+          "dolor ad Ut cupidatat ea",
+          "est",
+          "non",
+          "laboris ipsum incididunt et"
+        ],
+        "inventoryLevel": 26116932,
+        "attributes": {
+          "1qc3ijBe": -78142760.04210114
+        }
+      },
+      {
+        "id": "7",
+        "name": "pariatur magna",
+        "sku": "enim do",
+        "description": "adipisicing",
+        "price": 24915137.118659914,
+        "categoryIds": [
+          "eiusmod elit magna commodo",
+          "proident ea"
+        ],
+        "inventoryLevel": 90734433,
+        "attributes": {
+          "yMfAfvRBk": -56607544.515281916
+        }
+      },
+      {
+        "id": "2",
+        "name": "amet",
+        "sku": "anim",
+        "description": "proident",
+        "price": 28751213.825307786,
+        "categoryIds": [
+          "minim anim proident culpa Excepteur",
+          "eiusmod in eu amet labore",
+          "reprehenderit esse"
+        ],
+        "inventoryLevel": 16094197,
+        "attributes": {
+          "dK": true
+        }
+      },
+      {
+        "id": "9",
+        "name": "labore minim consectetur",
+        "sku": "ullamco adipisicing velit",
+        "description": "ut Duis",
+        "price": 27210058.92381072,
+        "categoryIds": [
+          "aliquip in do est sit",
+          "veniam",
+          "laboris non dolor Lorem deserunt",
+          "exercitation dolor Excepteur"
+        ],
+        "inventoryLevel": 2790274,
+        "attributes": {
+          "hjqdg": "nulla qui ad"
+        }
+      },
+      {
+        "id": "L1lQN",
+        "name": "ut qui aliqua cillum aute",
+        "sku": "commodo consectetur pariatur",
+        "price": 93691355.68849742,
+        "categoryIds": [
+          "veniam eiusmod mollit dolor",
+          "dolor quis eu",
+          "irure aute tempor magna mollit",
+          "consequat",
+          "officia id"
+        ]
+      },
+      {
+        "id": "8OLjARd0S",
+        "name": "in ex ea",
+        "sku": "culpa ut enim aliqua",
+        "description": "do",
+        "price": 34091038.25688362,
+        "categoryIds": [
+          "esse eu irure mollit Excepteur"
+        ],
+        "inventoryLevel": 72371072,
+        "attributes": {
+          "tdAH": 51544929.15607989
+        }
+      }
+    ],
+    "users": [
+      {
+        "id": "8c763a5c-2a11-86ec-bc6d-fd3edd8d2096",
+        "email": "AFOX@waonwcpQNWYcpbuKVRGQsmDnxWEnAEh.hnbk",
+        "roles": [
+          "customer",
+          "admin",
+          "manager",
+          "guest"
+        ]
+      },
+      {
+        "id": "49f6d2f6-0449-6a3f-07de-367252b49f43",
+        "email": "PuepV0OR2Yq2am@rWtIofuTjwdsZevJSPhQNuQ.geo",
+        "name": "pariatur",
+        "roles": [
+          "guest",
+          "customer",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "idb9f": "magna commodo",
+          "officiadd": "laborum"
+        }
+      },
+      {
+        "id": "7c13f9bb-eb82-3a7b-3925-eb8dfc80ad64",
+        "email": "6jYj5@oKfVkbOAnTHgqjouOmgyKzHyjqtAVlQpW.iq",
+        "name": "in ea magna",
+        "roles": [
+          "guest",
+          "manager",
+          "admin",
+          "customer"
+        ],
+        "metadata": {
+          "aute_f": "sit ut nisi",
+          "laboris3": true,
+          "qui_0c": "tempor commodo"
+        }
+      },
+      {
+        "id": "8caacf42-182a-b0d5-e2a4-3a16e15ff8d7",
+        "email": "rO6ptOY5@TXoezoFFFaDrhlBSh.qf",
+        "name": "ea voluptate dolor qui",
+        "roles": [
+          "manager"
+        ],
+        "metadata": {
+          "velit_0": false
+        }
+      },
+      {
+        "id": "02ddc5a9-6a8a-8a59-bac1-c11ac8e3bd83",
+        "email": "SLae6GLsiYdS3Gs@joovZrtoHsWGUs.tti",
+        "roles": [
+          "manager",
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "labore9": true,
+          "consequat08": "dolore eu cupidatat sed commodo",
+          "id3": false,
+          "consequatc2": -31698299.89783466
+        }
+      },
+      {
+        "id": "bb017018-f415-9f2f-791d-3d90ff0f4160",
+        "email": "RI9DVnBayU9H@vjtP.ir",
+        "name": "ex consectetur occaecat aute ipsum",
+        "roles": [
+          "manager",
+          "customer",
+          "admin"
+        ],
+        "metadata": {
+          "elit_61": -96398104.12190855
+        }
+      },
+      {
+        "id": "ce87c5f5-d887-5f6e-6d91-b03b49970ffc",
+        "email": "f7xCO6-Jj9uDa6J@CYCILngiKkoDLGNxVYaWGgTPuxmcuEN.jpfu",
+        "name": "ex cupidatat ea amet magna",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmode48": false
+        }
+      },
+      {
+        "id": "09272f56-545a-25ca-5758-d6da54796555",
+        "email": "mqxPDPdiQvJk-M@yyEROKAOBae.wqu",
+        "roles": [
+          "manager",
+          "guest"
+        ]
+      },
+      {
+        "id": "46db204a-e703-4406-e19b-beff8fd4d268",
+        "email": "syjwwEQgAmws4fV@aUwDGZWTFUDhTBJjItZGOYsx.pnir",
+        "name": "ex sit in tempor",
+        "roles": [
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "incididunt1": 53677769.65722442
+        }
+      },
+      {
+        "id": "0598c84a-2d3f-707b-5c4e-b347531dd636",
+        "email": "UUfqqQx@IvqACzPVXJYxgJZuaFyhK.qhp",
+        "name": "id Duis",
+        "roles": [
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmod1": false,
+          "tempor_d": "eiusmod veniam nostrud ut",
+          "voluptate3c": "incididunt ut ut et do"
+        }
+      },
+      {
+        "id": "21b4c4af-ab88-f7f3-dd01-586fc5090802",
+        "email": "do2dXjRsGD1L48@gqXXdDllvnpmLWUWRUfqmPC.fdd",
+        "roles": [
+          "guest",
+          "customer",
+          "manager",
+          "admin"
+        ]
+      },
+      {
+        "id": "f8d549fd-65da-5372-de47-f02a21e52571",
+        "email": "iwWD4iK3@mUqOFOxBkWsrkAQmeJHZeMLC.fjl",
+        "name": "incididunt",
+        "roles": [
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "sit_cd7": "laboris commodo",
+          "dolor_a5e": 65831629.00060415,
+          "nostrud_789": -50300490.437075496,
+          "nulla26": "deserunt pariatur eu"
+        }
+      },
+      {
+        "id": "1afe9ea4-415f-ef52-5061-a5332fbd0832",
+        "email": "FnNdsQm4Pb25U2Y@qaAxg.ju",
+        "name": "anim consequat elit pariatur",
+        "roles": [
+          "customer",
+          "manager",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "labore_1e": true,
+          "Excepteur_cda": "ad velit nostrud nulla magna",
+          "culpae5a": -28986168.233677745,
+          "dolor3": -61092595.56978941
+        }
+      },
+      {
+        "id": "a03539f7-093e-7cd6-4016-f4329f93ae3d",
+        "email": "JrhJ4eDz@FivQJvRD.tk",
+        "roles": [
+          "manager",
+          "admin",
+          "guest",
+          "customer"
+        ],
+        "metadata": {
+          "culpa1": "in consectetur dolore irure officia",
+          "consectetur_c8": -90552999.73115325,
+          "magna5": false,
+          "et_b": "magna mollit ut ea",
+          "deserunt_bdc": -38621893.80452037
+        }
+      },
+      {
+        "id": "c0acd9f4-90d7-9759-5857-8a095df8dac9",
+        "email": "1gYTx@nKRKNWgGWHtGjPxmRxunn.tdtu",
+        "roles": [
+          "admin",
+          "guest",
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "5e5381e1-09c5-3e6b-772e-e1ff434c1f6d",
+        "email": "T0bxy3N@ZSYzBThhbaObAzLg.ookv",
+        "roles": [
+          "manager",
+          "admin",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "984fba91-6e97-2e4b-3b19-41e858e84f5c",
+        "email": "SVs@hSPFDlOoEdVMzewWWBNrIhPyOAyw.xc",
+        "roles": [
+          "admin",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "61faf96b-7a57-5da5-242b-59012990c659",
+        "email": "W3tq8w@jOQitQcfNGICcfvzOxCUVTd.gxg",
+        "name": "sit minim",
+        "roles": [
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "culpa3": false
+        }
+      },
+      {
+        "id": "23a5d465-349b-5e8f-54c3-e663a37f0575",
+        "email": "1IlD@f.ynt",
+        "name": "velit consectetur dolore",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "17b79b1b-3148-2d8e-f290-f37d727e101f",
+        "email": "dEwxExrsj42GYP@dPSpjYGoxEGLqkXKqIWyLjvwyV.xtdj",
+        "roles": [
+          "admin",
+          "guest",
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "exe_": "ex dolor aute sit minim"
+        }
+      },
+      {
+        "id": "c38e31b3-f6d6-ff87-04f3-be15a6296b60",
+        "email": "HeyT7sRL@nYtNiyObSKlmHoBJjTgYETvoD.tggk",
+        "name": "ullamco dolor ipsum ad",
+        "roles": [
+          "customer",
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "anim26a": "commodo laboris fugiat culpa"
+        }
+      },
+      {
+        "id": "97e80977-ded2-2640-a1cf-36fa0a355223",
+        "email": "6md0qbOp@KqqVTWRXiPhPEdKDazpVAwuISsKYpkCma.fee",
+        "name": "deserunt est adipisicing sint",
+        "roles": [
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "fugiat__": true
+        }
+      },
+      {
+        "id": "203f27d1-21c9-442f-d2ae-9f72a53ea7db",
+        "email": "bYWRINN5n@rXUyUzVGqwdGdNTSXGFkGRyMGPTEsmTHT.bcol",
+        "roles": [
+          "guest",
+          "admin",
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "f20cb603-ab9b-fe6c-ed2e-0d92a61ee690",
+        "email": "2PMD-3ZEnK9@NTemgXltlVsVHDMJWikLKqqHhD.ny",
+        "name": "elit ut in esse nisi",
+        "roles": [
+          "manager"
+        ]
+      },
+      {
+        "id": "efc86fcc-7535-f3ee-14ca-9d93d2995047",
+        "email": "O--takWgQV@EqyajWfvrHpiliTzowHCyMxg.txr",
+        "name": "do deserunt consectetur",
+        "roles": [
+          "manager",
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "dolorab0": true
+        }
+      },
+      {
+        "id": "ef24b1a3-51ed-3c1b-ef90-2daf174d399d",
+        "email": "JHJzH87Kr07d@ffAONz.sf",
+        "name": "aute cillum consectetur ex",
+        "roles": [
+          "guest",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "enim_50": -97431782.6796323
+        }
+      },
+      {
+        "id": "88661175-9394-4d28-70c0-41190d984ebf",
+        "email": "Ik3I@VLxjggckqVXhgzNttPitYvMnstXyq.zx",
+        "name": "sint",
+        "roles": [
+          "customer"
+        ],
+        "metadata": {
+          "anim6": "magna ex"
+        }
+      },
+      {
+        "id": "f378cc0b-797f-5b06-7bdb-16534f275830",
+        "email": "wtGPM@AWdYxvfKbGtYWtuuXEdfLbhS.pj",
+        "name": "veniam Duis",
+        "roles": [
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "qui_804": -53768894.21604574,
+          "anim9d": true,
+          "Excepteur_4ab": 55677875.36419928
+        }
+      },
+      {
+        "id": "91c80b5b-3648-1b2b-9233-c48a57f7d288",
+        "email": "USYaQvpugS@BDtEWX.xuuf",
+        "name": "id Duis eu",
+        "roles": [
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "inf": 60428500.920534134
+        }
+      },
+      {
+        "id": "527be383-c1cc-1487-476a-bcf78eb1cb8d",
+        "email": "GtcwLGESIQ8@EVO.ippe",
+        "name": "Excepteur proident",
+        "roles": [
+          "manager",
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "ullamco_9": true
+        }
+      },
+      {
+        "id": "76e974f3-7cf8-57a0-9f0f-86247540664a",
+        "email": "VIvC8Ig7T5BmC@profGAA.tx",
+        "name": "reprehenderit eu laborum",
+        "roles": [
+          "admin",
+          "guest",
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "irure_5": "ullamco ad proident ut aliqua",
+          "labore_fb3": false,
+          "laborum6c6": false,
+          "laboris_d0f": -40945498.924702406
+        }
+      },
+      {
+        "id": "d06af3f1-a924-6505-ca4a-e92439637cb5",
+        "email": "5MGt@btJFENcuihDgjEyly.cc",
+        "roles": [
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "b2b219bb-defe-3491-f164-fef3d641e151",
+        "email": "tq1MzU8j0z@FPkqmAhkQSfdBIPmNIGUTLYsIm.st",
+        "name": "anim Ut Duis",
+        "roles": [
+          "guest",
+          "customer",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "fugiat_0_7": -72541014.43104446
+        }
+      },
+      {
+        "id": "6be544df-4f30-545d-b2b4-e25627c9e900",
+        "email": "3sa@dsoTSuozUf.ckic",
+        "name": "Excepteur eu incididunt",
+        "roles": [
+          "manager"
+        ],
+        "metadata": {
+          "ade": "sunt deserunt incididunt laborum velit",
+          "occaecat_4d": true,
+          "officia_1": "in ex dolore magna"
+        }
+      },
+      {
+        "id": "12293c1d-eb65-357b-9f69-da644dbb7437",
+        "email": "i4pIa@qTsJiDJruElDYxKFEMVng.rce",
+        "name": "nulla labore",
+        "roles": [
+          "customer",
+          "admin",
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "enim7": true,
+          "in65": -53563312.16171384
+        }
+      },
+      {
+        "id": "a51f1d41-9cc0-ba89-df41-58fa8df90fb9",
+        "email": "RkI6DxUwIcbKFwV@URvTgmfscOWzzJMDnHOQK.cf",
+        "roles": [
+          "guest",
+          "manager",
+          "customer",
+          "admin"
+        ],
+        "metadata": {
+          "Duisda4": false
+        }
+      },
+      {
+        "id": "491ce966-b418-eee4-d04c-5096e0db7589",
+        "email": "QhwnqR@CkItzOasYiElpHvyYPBLXaMvGYZu.jhm",
+        "name": "sunt nisi",
+        "roles": [
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "et5": "qui eiusmod laborum nostrud cillum",
+          "velit915": "qui tempor veniam consequat",
+          "do739": "aliqua Ut",
+          "consequatd2c": false
+        }
+      },
+      {
+        "id": "d3c2ca4b-1e78-5c78-7dd7-25fe801c33f0",
+        "email": "S39is966bK6c@Ng.gkq",
+        "name": "velit ullamco aliquip",
+        "roles": [
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "amet_f": 46865018.4571743
+        }
+      },
+      {
+        "id": "4a2e93ea-f186-2862-3d0f-089aeac9ebab",
+        "email": "QRcJXOndbfW@QlmIPCjpvUbnnFcTNyRLYX.qtuj",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "f5de8de1-8a76-b05b-8028-f88630eec760",
+        "email": "3ZDrvRGlV61w@eEmUyuihwJrhkzWnaVSlne.iq",
+        "name": "nisi do proident cupidatat deserunt",
+        "roles": [
+          "manager",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "dolored": "nulla ut est Duis"
+        }
+      },
+      {
+        "id": "5cb275bc-4e08-89cf-7959-ed55e571b906",
+        "email": "uRmn@jzjaWxJSAgSFIDXI.jte",
+        "roles": [
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmod_d": "laborum dolor Excepteur id in",
+          "id_4": true
+        }
+      },
+      {
+        "id": "000826d6-e279-c969-e123-bf3cf056cba9",
+        "email": "X1mIXNH@mThuFuYGYYPUYnCTRjBGdDvSKL.fy",
+        "name": "Lorem voluptate nulla",
+        "roles": [
+          "manager",
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "tempor_411": true,
+          "tempor438": false,
+          "tempor_b8": "enim in sint non voluptate",
+          "elit4": true
+        }
+      },
+      {
+        "id": "aefb9077-97f4-766a-b90a-7f77a0e019d3",
+        "email": "Q8hcLO@VJPdynxTLPhCDaXfooUyssnAcRvm.kmc",
+        "name": "pariatur",
+        "roles": [
+          "admin",
+          "guest",
+          "manager",
+          "customer"
+        ],
+        "metadata": {
+          "dolor_be0": "cillum",
+          "in_ad3": -54503456.68941736,
+          "elit_733": -56849515.065550804,
+          "dolore_1a6": false,
+          "ut_5": "nostrud ad consectetur ullamco"
+        }
+      },
+      {
+        "id": "f80414a0-cbbd-924b-211a-fe39e82655d2",
+        "email": "iMMEUqQh@DLUOAaveIIAGgqZeNATydGuwDhS.wfpn",
+        "name": "non id anim",
+        "roles": [
+          "admin",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "deserunt9b": -14747153.082862496,
+          "fugiat8": true,
+          "eiusmod775": 34309479.082003236,
+          "cillum64": "ex"
+        }
+      },
+      {
+        "id": "a86b9fb8-f0c3-4fb7-c4ba-66db97a00420",
+        "email": "YqJjx@DJvaHL.rtwe",
+        "name": "cupidatat voluptate incididunt",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "aute7": "adipisicing amet elit Excepteur"
+        }
+      },
+      {
+        "id": "2b46ded8-98b8-30e9-859d-a7428408e92a",
+        "email": "8xjHcJ@RHxLWF.tvh",
+        "roles": [
+          "manager",
+          "guest",
+          "customer"
+        ]
+      },
+      {
+        "id": "e629f65f-f7ed-d427-a9b1-a3f18a8ba712",
+        "email": "JesPB4ztDg45D53@YIsdTVrogoCStaHrBnaQVojHRMgYuJR.hw",
+        "roles": [
+          "admin"
+        ],
+        "metadata": {
+          "Duis_c9a": "dolore pariatur incididunt",
+          "voluptate160": false
+        }
+      },
+      {
+        "id": "9f0a21c8-82ee-5076-84fb-1ab90aac1d33",
+        "email": "mO6OnRKU1y@AV.qtb",
+        "name": "Duis officia",
+        "roles": [
+          "guest",
+          "manager",
+          "admin"
+        ],
+        "metadata": {
+          "aute5f": 57176557.74205923,
+          "Excepteur_c": true
+        }
+      },
+      {
+        "id": "8da89611-b256-ff22-cc7f-a06dc70cb1fd",
+        "email": "ljQwYIyeuIfTP@mjhMGKxbDWnmiweVvhIhdDloUx.irzs",
+        "name": "velit consectetur incididunt sunt",
+        "roles": [
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "ad_58": "fugiat qui",
+          "adipisicing62": true
+        }
+      }
+    ]
+  },
+  "modified": {
+    "store": {
+      "name": "sunt Lorem in reprehenderit",
+      "currency": "HKS",
+      "locale": "ok-ID",
+      "supportEmail": "Santa.Rohan61@yahoo.com"
+    },
+    "payments": {
+      "supportedMethods": [
+        "credit_card",
+        "paypal",
+        "upi"
+      ],
+      "paypal": {
+        "clientId": "quis irure",
+        "clientSecret": "mollit consequat in nisi"
+      }
+    },
+    "shipping": {
+      "rates": [
+        {
+          "country": "GS",
+          "method": "express",
+          "cost": 19810722.16294706,
+          "estimatedDays": 66454903
+        },
+        {
+          "country": "XB",
+          "method": "standard",
+          "cost": 24786887.248046696,
+          "estimatedDays": 51583898
+        },
+        {
+          "country": "YU",
+          "method": "standard",
+          "cost": 1050769.630819559,
+          "estimatedDays": 88313335
+        },
+        {
+          "country": "SK",
+          "method": "pickup",
+          "cost": 10024713.794700801,
+          "estimatedDays": 8479088
+        }
+      ],
+      "freeOver": 187.73030838237761
+    },
+    "inventory": {
+      "thresholdAlert": 41,
+      "restockLevel": 64630968
+    },
+    "features": {
+      "reviewsEnabled": false,
+      "relatedProducts": false,
+      "guestCheckout": true
+    },
+    "analytics": {
+      "googleAnalyticsId": "UA-2-35",
+      "trackUserBehavior": false
+    },
+    "categories": [
+      {
+        "id": "sH8n",
+        "name": "nisi id eu deserunt",
+        "slug": "984hake",
+        "parentId": null
+      },
+      {
+        "id": "1kmR",
+        "name": "nostrud est",
+        "slug": "yts4o"
+      },
+      {
+        "id": "YM",
+        "name": "tempor in sed",
+        "slug": "d4mg1ffq0nh",
+        "parentId": "dolore ad ea culpa"
+      },
+      {
+        "id": "PCq1",
+        "name": "Duis enim velit consectetur id",
+        "slug": "zbwko59",
+        "parentId": "aliqua dolore dolor deserunt"
+      },
+      {
+        "id": "sP3ChHuppq",
+        "name": "consequat",
+        "slug": "6zyxny3n",
+        "parentId": "velit"
+      },
+      {
+        "id": "-oG8_KDl08",
+        "name": "officia ea ut sunt",
+        "slug": "fsfnb58",
+        "parentId": "Excepteur non dolore esse"
+      },
+      {
+        "id": "YL1v5",
+        "name": "dolore sed do",
+        "slug": "klbfn8ox"
+      },
+      {
+        "id": "NL",
+        "name": "aliquip ut adipisicing",
+        "slug": "7",
+        "parentId": null
+      },
+      {
+        "id": "k",
+        "name": "proident id veniam ipsum",
+        "slug": "dgx4z0x8je"
+      },
+      {
+        "id": "6GZnMgpGI",
+        "name": "occaecat",
+        "slug": "cf5us",
+        "parentId": "mollit consectetur Excepteur laboris id"
+      },
+      {
+        "id": "MTP",
+        "name": "commodo",
+        "slug": "t"
+      },
+      {
+        "id": "CN4wIrV",
+        "name": "culpa velit consectetur laborum in",
+        "slug": "m",
+        "parentId": "laboris incididunt"
+      },
+      {
+        "id": "07JnOEITYVe",
+        "name": "ad commodo enim pariatur",
+        "slug": "j164pom",
+        "parentId": "sunt"
+      },
+      {
+        "id": "kuW",
+        "name": "proident cillum do est",
+        "slug": "n",
+        "parentId": "tempor id Duis"
+      },
+      {
+        "id": "GNfD",
+        "name": "proident Lorem esse exercitation",
+        "slug": "8mu0947l6m",
+        "parentId": "sed amet"
+      },
+      {
+        "id": "FWs0ufrM",
+        "name": "commodo exercitation officia laborum",
+        "slug": "uf14",
+        "parentId": null
+      },
+      {
+        "id": "qD6",
+        "name": "occaecat",
+        "slug": "zmsh9-",
+        "parentId": null
+      },
+      {
+        "id": "EOxB",
+        "name": "consectetur aliqua",
+        "slug": "ornej",
+        "parentId": "velit"
+      },
+      {
+        "id": "Ok",
+        "name": "elit dolore",
+        "slug": "-",
+        "parentId": "sint est laborum dolore"
+      },
+      {
+        "id": "SYbLcaRz2",
+        "name": "fugiat",
+        "slug": "3jy1k7y",
+        "parentId": "laborum"
+      },
+      {
+        "id": "vmZQsB",
+        "name": "nisi nulla",
+        "slug": "29ksbuv",
+        "parentId": "nulla incididunt"
+      },
+      {
+        "id": "Bkgo6ubB_",
+        "name": "exercitation nulla consequat do",
+        "slug": "uydc",
+        "parentId": null
+      },
+      {
+        "id": "Zx98AN",
+        "name": "ipsum amet in irure consectetur",
+        "slug": "05",
+        "parentId": null
+      },
+      {
+        "id": "V",
+        "name": "in labore",
+        "slug": "rw8j6mwlbv",
+        "parentId": null
+      },
+      {
+        "id": "oK5l-m3",
+        "name": "consequat adipisicing in nulla",
+        "slug": "fqs7koj21e"
+      },
+      {
+        "id": "4RQpNslxpT",
+        "name": "amet",
+        "slug": "8mf02pcte",
+        "parentId": "eu"
+      },
+      {
+        "id": "OI6f95L",
+        "name": "dolore quis occaecat in nisi",
+        "slug": "ej",
+        "parentId": null
+      },
+      {
+        "id": "8",
+        "name": "in",
+        "slug": "fz6g8tgit",
+        "parentId": "eu"
+      },
+      {
+        "id": "A_",
+        "name": "cupidatat nostrud voluptate officia magna",
+        "slug": "kgjarg",
+        "parentId": null
+      },
+      {
+        "id": "m6BR",
+        "name": "anim dolore velit",
+        "slug": "uz2c0atewu",
+        "parentId": "aliqua"
+      },
+      {
+        "id": "67r-h",
+        "name": "Excepteur Duis ad incididunt",
+        "slug": "lcpna6d6jl"
+      },
+      {
+        "id": "QMph01",
+        "name": "qui Excepteur ullamco",
+        "slug": "khfn5puz",
+        "parentId": "sit non elit"
+      },
+      {
+        "id": "YD",
+        "name": "aliqua nisi proident aute nulla",
+        "slug": "os0k6",
+        "parentId": "qui"
+      },
+      {
+        "id": "q6Mj",
+        "name": "sunt amet non eiusmod exercitation",
+        "slug": "j6gpskj"
+      },
+      {
+        "id": "dTmH-9Xv",
+        "name": "dolore commodo qui",
+        "slug": "p5-hhahe",
+        "parentId": "id aliqua"
+      },
+      {
+        "id": "3r5GZye",
+        "name": "minim",
+        "slug": "e6a",
+        "parentId": null
+      },
+      {
+        "id": "djKY",
+        "name": "dolor elit",
+        "slug": "7relo8ky",
+        "parentId": null
+      },
+      {
+        "id": "du88",
+        "name": "qui deserunt cillum amet ut",
+        "slug": "1udhsr",
+        "parentId": null
+      },
+      {
+        "id": "JP6Pj",
+        "name": "ut enim Lorem consequat",
+        "slug": "5x6ni5k2y5",
+        "parentId": "eu aliqua deserunt Ut"
+      },
+      {
+        "id": "g_da7I9pRQ_",
+        "name": "officia reprehenderit sunt",
+        "slug": "fyqqsq",
+        "parentId": "culpa"
+      },
+      {
+        "id": "IZ1s-83-_",
+        "name": "magna sint reprehenderit in",
+        "slug": "i",
+        "parentId": null
+      },
+      {
+        "id": "yJ6Ma4Z",
+        "name": "anim enim dolore Duis nisi",
+        "slug": "stfz2",
+        "parentId": null
+      },
+      {
+        "id": "yuuGSC",
+        "name": "Duis non eiusmod Excepteur",
+        "slug": "s00zh5s6",
+        "parentId": null
+      },
+      {
+        "id": "LJbiIGB",
+        "name": "ex",
+        "slug": "y9p-1afh5q6"
+      },
+      {
+        "id": "koLeGrDG",
+        "name": "qui eu pariatur",
+        "slug": "bby"
+      },
+      {
+        "id": "rqRGV6",
+        "name": "velit et do nisi",
+        "slug": "rbay7c",
+        "parentId": null
+      },
+      {
+        "id": "yKtn",
+        "name": "dolor",
+        "slug": "xgtsf9g0r",
+        "parentId": "minim irure"
+      },
+      {
+        "id": "SMJU1s2h",
+        "name": "qui nulla",
+        "slug": "ilf",
+        "parentId": null
+      },
+      {
+        "id": "8pW6-R",
+        "name": "ut",
+        "slug": "7m7yl6yhb"
+      },
+      {
+        "id": "H",
+        "name": "exercitation aliqua enim culpa",
+        "slug": "g2db",
+        "parentId": null
+      },
+      {
+        "id": "_Jc_iPv",
+        "name": "magna laborum commodo",
+        "slug": "lqvwngy84",
+        "parentId": null
+      },
+      {
+        "id": "Z1H3AZcgv",
+        "name": "dolor in",
+        "slug": "itevuddo8f",
+        "parentId": "ipsum pariatur aliquip nostrud laborum"
+      },
+      {
+        "id": "LwdLBg",
+        "name": "minim",
+        "slug": "ipf00k"
+      },
+      {
+        "id": "RylUNU8mwc",
+        "name": "culpa reprehenderit",
+        "slug": "vn4cc2",
+        "parentId": null
+      },
+      {
+        "id": "SsSJD7C",
+        "name": "commodo tempor ut velit",
+        "slug": "dxhzyg"
+      },
+      {
+        "id": "PhvnoHur",
+        "name": "irure",
+        "slug": "vbl590vdc",
+        "parentId": null
+      },
+      {
+        "id": "DTvjA5h",
+        "name": "proident",
+        "slug": "ddnnpx1mtr",
+        "parentId": "ea Duis eu occaecat"
+      },
+      {
+        "id": "wC",
+        "name": "dolore Ut qui elit mollit",
+        "slug": "nzonpkg"
+      },
+      {
+        "id": "Kpbrt",
+        "name": "sit ad",
+        "slug": "nnb",
+        "parentId": "mollit eu sint do magna"
+      },
+      {
+        "id": "ecwzApUq",
+        "name": "fugiat dolore",
+        "slug": "x0htds70",
+        "parentId": "nulla ad"
+      },
+      {
+        "id": "46yX-_ADD4T",
+        "name": "ut",
+        "slug": "e",
+        "parentId": null
+      },
+      {
+        "id": "JUL-A",
+        "name": "ea culpa mollit adipisicing",
+        "slug": "o8j250khrot",
+        "parentId": null
+      },
+      {
+        "id": "20MvC5Gar7i",
+        "name": "Lorem",
+        "slug": "uenteh-w",
+        "parentId": "voluptate Ut Lorem"
+      },
+      {
+        "id": "zSl",
+        "name": "est occaecat",
+        "slug": "qi5v06nd9",
+        "parentId": "labore"
+      },
+      {
+        "id": "Cd",
+        "name": "ut officia id",
+        "slug": "xmepvt1ay7s"
+      },
+      {
+        "id": "qrN9mR8o",
+        "name": "velit laboris",
+        "slug": "e7h2uz",
+        "parentId": null
+      }
+    ],
+    "products": [
+      {
+        "id": "Xob",
+        "name": "aliquip sed",
+        "sku": "magna mollit",
+        "description": "Excepteur",
+        "price": 75423241.68607593,
+        "categoryIds": [
+          "commodo amet",
+          "cillum ut occaecat"
+        ],
+        "inventoryLevel": 57002563
+      },
+      {
+        "id": "R86b2",
+        "name": "tempor pariatur ea commodo",
+        "sku": "est",
+        "description": "mollit nisi dolore",
+        "price": 26662425.13805628,
+        "categoryIds": [
+          "Ut sed incididunt amet laboris",
+          "non sed in",
+          "proident Lorem amet aute magna"
+        ]
+      },
+      {
+        "id": "lq-556r",
+        "name": "sunt sed",
+        "sku": "esse cillum eu",
+        "description": "in",
+        "price": 91533515.92831314,
+        "categoryIds": [
+          "Lorem nisi"
+        ],
+        "inventoryLevel": 48931011,
+        "attributes": {
+          "AWvhj": 68708813.60955536
+        }
+      },
+      {
+        "id": "YQyjyYmBQ",
+        "name": "sint ut ad ea",
+        "sku": "officia ad qui deserunt",
+        "description": "magna",
+        "price": 35819983.10983181,
+        "categoryIds": [
+          "adipisicing deserunt",
+          "sint aute sunt consectetur",
+          "qui ad exercitation commodo",
+          "incididunt adipisicing elit officia",
+          "laborum consequat Excepteur"
+        ],
+        "inventoryLevel": 77538901,
+        "attributes": {
+          "mJCTVh5t3XM": true
+        }
+      },
+      {
+        "id": "r",
+        "name": "Duis id ex",
+        "sku": "quis",
+        "description": "in veniam aliquip",
+        "price": 4045788.454823196,
+        "categoryIds": [
+          "laboris sit enim",
+          "aute ut in"
+        ],
+        "inventoryLevel": 99342975,
+        "attributes": {
+          "FMyk": -50007159.68199074
+        }
+      },
+      {
+        "id": "aX8baQec5",
+        "name": "eu",
+        "sku": "sit aliqua",
+        "description": "enim dolor consectetur",
+        "price": 15445816.214196384,
+        "categoryIds": [
+          "pariatur eu in",
+          "cillum et deserunt voluptate"
+        ],
+        "attributes": {
+          "b6jhezrUWL": 26370814.815163612
+        }
+      },
+      {
+        "id": "Kv",
+        "name": "sunt sit",
+        "sku": "dolore non esse et",
+        "description": "elit occaecat",
+        "price": 8498352.393507957,
+        "categoryIds": [
+          "dolor cupidatat ad laboris culpa",
+          "in occaecat dolore sed voluptate"
+        ],
+        "inventoryLevel": 67470186,
+        "attributes": {
+          "kYPbSnlPmf": "sunt in reprehenderit Duis"
+        }
+      },
+      {
+        "id": "3kv",
+        "name": "aliquip consequat Lorem est",
+        "sku": "sit aute dolor ipsum",
+        "price": 96803105.94849288,
+        "categoryIds": [
+          "nulla amet mollit veniam officia",
+          "dolor tempor ex aute"
+        ],
+        "inventoryLevel": 29543998
+      },
+      {
+        "id": "gpi",
+        "name": "laborum ad cupidatat",
+        "sku": "nisi minim",
+        "description": "amet",
+        "price": 75312878.21475416,
+        "categoryIds": [
+          "sed ad",
+          "minim sed labore",
+          "quis consectetur culpa exercitation",
+          "mollit et aute voluptate laboris",
+          "adipisicing eiusmod sit dolore occaecat"
+        ],
+        "inventoryLevel": 34589868,
+        "attributes": {
+          "tmvhJkNPre": "do in ut incididunt"
+        }
+      },
+      {
+        "id": "OG",
+        "name": "amet",
+        "sku": "ullamco laborum",
+        "description": "nostrud minim sint adipisicing",
+        "price": 41344079.86421138,
+        "categoryIds": [
+          "culpa",
+          "elit Ut quis"
+        ],
+        "inventoryLevel": 69280065,
+        "attributes": {
+          "MRj-": "amet sed"
+        }
+      },
+      {
+        "id": "jJ",
+        "name": "dolore fugiat minim cillum ut",
+        "sku": "est exercitation",
+        "price": 2482732.036150992,
+        "categoryIds": [
+          "reprehenderit esse",
+          "sed ad ex"
+        ]
+      },
+      {
+        "id": "Pzdw",
+        "name": "anim dolore labore veniam sed",
+        "sku": "in",
+        "description": "ex tempor exercitation reprehenderit Duis",
+        "price": 14792722.929269075,
+        "categoryIds": [
+          "elit",
+          "magna nisi",
+          "Excepteur eiusmod in"
+        ],
+        "inventoryLevel": 73387086,
+        "attributes": {
+          "UjO_MTbgKYD": false
+        }
+      },
+      {
+        "id": "lRO7-4-A1dc",
+        "name": "ut magna ipsum velit",
+        "sku": "consequat laboris ut minim velit",
+        "description": "laborum sunt dolor tempor",
+        "price": 60326464.26465362,
+        "categoryIds": [
+          "aute",
+          "Duis labore mollit pariatur cillum"
+        ],
+        "inventoryLevel": 9794165
+      },
+      {
+        "id": "P0LTB8UD6",
+        "name": "ea nisi ut dolor",
+        "sku": "cillum reprehenderit nulla fugiat",
+        "description": "sunt",
+        "price": 10144316.614605486,
+        "categoryIds": [
+          "reprehenderit mollit elit dolore officia",
+          "esse in fugiat",
+          "quis",
+          "nisi ipsum non elit Excepteur",
+          "magna cillum minim dolor"
+        ]
+      },
+      {
+        "id": "yg",
+        "name": "reprehenderit dolor magna id mollit",
+        "sku": "aute in incididunt sunt nostrud",
+        "description": "minim cillum nisi sit",
+        "price": 17926743.999123573,
+        "categoryIds": [
+          "id"
+        ],
+        "inventoryLevel": 76775381,
+        "attributes": {
+          "S": "et consectetur"
+        }
+      },
+      {
+        "id": "t",
+        "name": "qui cupidatat",
+        "sku": "Ut",
+        "description": "sunt consectetur laborum culpa",
+        "price": 48503363.714553416,
+        "categoryIds": [
+          "aute veniam consectetur",
+          "est non",
+          "amet consectetur"
+        ],
+        "inventoryLevel": 58917940,
+        "attributes": {
+          "QiDd20Cd": "quis"
+        }
+      },
+      {
+        "id": "LoMW7",
+        "name": "in cillum ea exercitation",
+        "sku": "pariatur sint proident",
+        "description": "non",
+        "price": 66580698.6624375,
+        "categoryIds": [
+          "cupidatat culpa et aliquip nulla",
+          "anim elit in officia nostrud",
+          "laboris sit ea dolore mollit",
+          "consectetur"
+        ],
+        "inventoryLevel": 98645701,
+        "attributes": {
+          "f0": true
+        }
+      },
+      {
+        "id": "d",
+        "name": "laboris laborum mollit commodo irure",
+        "sku": "tempor non fugiat exercitation cupidatat",
+        "description": "tempor sed anim",
+        "price": 58820239.338092506,
+        "categoryIds": [
+          "laboris nostrud ipsum velit",
+          "ut"
+        ],
+        "inventoryLevel": 51229771,
+        "attributes": {
+          "ETYKbxQC": 19540704.181417823
+        }
+      },
+      {
+        "id": "Q",
+        "name": "laborum eu qui magna occaecat",
+        "sku": "ad dolore ullamco ut",
+        "description": "dolore sit labore",
+        "price": 12340068.374760449,
+        "categoryIds": [
+          "Ut",
+          "esse adipisicing quis voluptate fugiat",
+          "anim"
+        ],
+        "inventoryLevel": 60679934,
+        "attributes": {
+          "NkgTyDYYZG_": "laboris"
+        }
+      },
+      {
+        "id": "JN5s",
+        "name": "cupidatat aliqua",
+        "sku": "commodo in id nostrud",
+        "description": "dolor",
+        "price": 88548466.33039415,
+        "categoryIds": [
+          "irure magna est laborum",
+          "officia elit ullamco",
+          "magna veniam dolore cupidatat sit",
+          "in quis",
+          "consequat"
+        ],
+        "inventoryLevel": 38379962,
+        "attributes": {
+          "9HU4-5P": false
+        }
+      },
+      {
+        "id": "5yErnY4",
+        "name": "sed incididunt sit laboris sunt",
+        "sku": "mollit",
+        "description": "ex commodo nostrud ut ea",
+        "price": 14300250.448286533,
+        "categoryIds": [
+          "adipisicing irure commodo Ut officia",
+          "officia pariatur eiusmod mollit",
+          "do in aute",
+          "sunt officia consequat"
+        ],
+        "inventoryLevel": 8948859,
+        "attributes": {
+          "48FrPd5u": "sunt commodo occaecat"
+        }
+      },
+      {
+        "id": "8E",
+        "name": "non aliquip dolor",
+        "sku": "consequat sed mollit Lorem exercitation",
+        "price": 18151716.655120254,
+        "categoryIds": [
+          "sint aliquip Ut"
+        ]
+      },
+      {
+        "id": "iPQbLklO0",
+        "name": "consequat",
+        "sku": "nulla amet aliqua ipsum pariatur",
+        "description": "consectetur qui exercitation ullamco sint",
+        "price": 154105.34106194973,
+        "categoryIds": [
+          "velit culpa",
+          "est Lorem aliquip ex aliqua",
+          "in enim ex Excepteur",
+          "reprehenderit occaecat anim incididunt dolor",
+          "culpa do"
+        ],
+        "inventoryLevel": 6389098,
+        "attributes": {
+          "VATSXbBW6": 66245820.466428995
+        }
+      },
+      {
+        "id": "mVK1itgoYF",
+        "name": "in reprehenderit Ut Excepteur",
+        "sku": "ea enim Duis nostrud veniam",
+        "description": "Ut",
+        "price": 55777041.59077257,
+        "categoryIds": [
+          "sint",
+          "culpa cupidatat minim id",
+          "amet aliqua"
+        ],
+        "attributes": {
+          "8": false
+        }
+      },
+      {
+        "id": "0q1",
+        "name": "in",
+        "sku": "Ut exercitation adipisicing aliquip dolore",
+        "description": "in",
+        "price": 17298132.926225662,
+        "categoryIds": [
+          "ipsum consectetur",
+          "aute ipsum esse fugiat dolor"
+        ],
+        "inventoryLevel": 35815159,
+        "attributes": {
+          "8VJpAottYX": "nisi et sed"
+        }
+      },
+      {
+        "id": "r_1V97oC",
+        "name": "et incididunt",
+        "sku": "aliqua nisi",
+        "description": "Excepteur voluptate magna eu consectetur",
+        "price": 60168388.5557577,
+        "categoryIds": [
+          "sint dolore culpa consectetur occaecat",
+          "consequat eiusmod velit",
+          "commodo id Lorem amet"
+        ],
+        "inventoryLevel": 40156358,
+        "attributes": {
+          "1Uwp5": true
+        }
+      },
+      {
+        "id": "R",
+        "name": "ullamco incididunt sint ad nostrud",
+        "sku": "Excepteur",
+        "description": "incididunt sint amet",
+        "price": 10057733.044959605,
+        "categoryIds": [
+          "nostrud mollit Excepteur dolor",
+          "laboris in",
+          "cillum adipisicing dolor"
+        ],
+        "inventoryLevel": 51180061,
+        "attributes": {
+          "pw--": "dolore"
+        }
+      },
+      {
+        "id": "B",
+        "name": "cillum",
+        "sku": "ea anim veniam aliqua",
+        "description": "incididunt fugiat non sed",
+        "price": 32236442.1794191,
+        "categoryIds": [
+          "cillum adipisicing eu",
+          "fugiat aute anim esse",
+          "officia velit dolor irure",
+          "do laborum fugiat non esse",
+          "id nulla pariatur cupidatat consequat"
+        ],
+        "inventoryLevel": 44581025,
+        "attributes": {
+          "jNKaFUp": 12818747.153505683
+        }
+      },
+      {
+        "id": "JVcF-lyWzUw",
+        "name": "officia minim",
+        "sku": "culpa",
+        "description": "sunt aliqua in deserunt eu",
+        "price": 46627530.43230623,
+        "categoryIds": [
+          "dolor ad Ut cupidatat ea",
+          "est",
+          "non",
+          "laboris ipsum incididunt et"
+        ],
+        "inventoryLevel": 26116932,
+        "attributes": {
+          "1qc3ijBe": -78142760.04210114
+        }
+      },
+      {
+        "id": "7",
+        "name": "pariatur magna",
+        "sku": "enim do",
+        "description": "adipisicing",
+        "price": 24915137.118659914,
+        "categoryIds": [
+          "eiusmod elit magna commodo",
+          "proident ea"
+        ],
+        "inventoryLevel": 90734433,
+        "attributes": {
+          "yMfAfvRBk": -56607544.515281916
+        }
+      },
+      {
+        "id": "2",
+        "name": "amet",
+        "sku": "anim",
+        "description": "proident",
+        "price": 28751213.825307786,
+        "categoryIds": [
+          "minim anim proident culpa Excepteur",
+          "eiusmod in eu amet labore",
+          "reprehenderit esse"
+        ],
+        "inventoryLevel": 16094197,
+        "attributes": {
+          "dK": true
+        }
+      },
+      {
+        "id": "9",
+        "name": "labore minim consectetur",
+        "sku": "ullamco adipisicing velit",
+        "description": "ut Duis",
+        "price": 27210058.92381072,
+        "categoryIds": [
+          "aliquip in do est sit",
+          "veniam",
+          "laboris non dolor Lorem deserunt",
+          "exercitation dolor Excepteur"
+        ],
+        "inventoryLevel": 2790274,
+        "attributes": {
+          "hjqdg": "nulla qui ad"
+        }
+      },
+      {
+        "id": "L1lQN",
+        "name": "ut qui aliqua cillum aute",
+        "sku": "commodo consectetur pariatur",
+        "price": 93691355.68849742,
+        "categoryIds": [
+          "veniam eiusmod mollit dolor",
+          "dolor quis eu",
+          "irure aute tempor magna mollit",
+          "consequat",
+          "officia id"
+        ]
+      },
+      {
+        "id": "8OLjARd0S",
+        "name": "in ex ea",
+        "sku": "culpa ut enim aliqua",
+        "description": "do",
+        "price": 34091038.25688362,
+        "categoryIds": [
+          "esse eu irure mollit Excepteur"
+        ],
+        "inventoryLevel": 72371072,
+        "attributes": {
+          "tdAH": 51544929.15607989
+        }
+      }
+    ],
+    "users": [
+      {
+        "id": "8c763a5c-2a11-86ec-bc6d-fd3edd8d2096",
+        "email": "AFOX@waonwcpQNWYcpbuKVRGQsmDnxWEnAEh.hnbk",
+        "roles": [
+          "customer",
+          "admin",
+          "manager",
+          "guest"
+        ]
+      },
+      {
+        "id": "49f6d2f6-0449-6a3f-07de-367252b49f43",
+        "email": "PuepV0OR2Yq2am@rWtIofuTjwdsZevJSPhQNuQ.geo",
+        "name": "pariatur",
+        "roles": [
+          "guest",
+          "customer",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "idb9f": "magna commodo",
+          "officiadd": "laborum"
+        }
+      },
+      {
+        "id": "7c13f9bb-eb82-3a7b-3925-eb8dfc80ad64",
+        "email": "6jYj5@oKfVkbOAnTHgqjouOmgyKzHyjqtAVlQpW.iq",
+        "name": "in ea magna",
+        "roles": [
+          "guest",
+          "manager",
+          "admin",
+          "customer"
+        ],
+        "metadata": {
+          "aute_f": "sit ut nisi",
+          "laboris3": true,
+          "qui_0c": "tempor commodo"
+        }
+      },
+      {
+        "id": "8caacf42-182a-b0d5-e2a4-3a16e15ff8d7",
+        "email": "rO6ptOY5@TXoezoFFFaDrhlBSh.qf",
+        "name": "ea voluptate dolor qui",
+        "roles": [
+          "manager"
+        ],
+        "metadata": {
+          "velit_0": false
+        }
+      },
+      {
+        "id": "02ddc5a9-6a8a-8a59-bac1-c11ac8e3bd83",
+        "email": "SLae6GLsiYdS3Gs@joovZrtoHsWGUs.tti",
+        "roles": [
+          "manager",
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "labore9": true,
+          "consequat08": "dolore eu cupidatat sed commodo",
+          "id3": false,
+          "consequatc2": -31698299.89783466
+        }
+      },
+      {
+        "id": "bb017018-f415-9f2f-791d-3d90ff0f4160",
+        "email": "RI9DVnBayU9H@vjtP.ir",
+        "name": "ex consectetur occaecat aute ipsum",
+        "roles": [
+          "manager",
+          "customer",
+          "admin"
+        ],
+        "metadata": {
+          "elit_61": -96398104.12190855
+        }
+      },
+      {
+        "id": "ce87c5f5-d887-5f6e-6d91-b03b49970ffc",
+        "email": "f7xCO6-Jj9uDa6J@CYCILngiKkoDLGNxVYaWGgTPuxmcuEN.jpfu",
+        "name": "ex cupidatat ea amet magna",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmode48": false
+        }
+      },
+      {
+        "id": "09272f56-545a-25ca-5758-d6da54796555",
+        "email": "mqxPDPdiQvJk-M@yyEROKAOBae.wqu",
+        "roles": [
+          "manager",
+          "guest"
+        ]
+      },
+      {
+        "id": "46db204a-e703-4406-e19b-beff8fd4d268",
+        "email": "syjwwEQgAmws4fV@aUwDGZWTFUDhTBJjItZGOYsx.pnir",
+        "name": "ex sit in tempor",
+        "roles": [
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "incididunt1": 53677769.65722442
+        }
+      },
+      {
+        "id": "0598c84a-2d3f-707b-5c4e-b347531dd636",
+        "email": "UUfqqQx@IvqACzPVXJYxgJZuaFyhK.qhp",
+        "name": "id Duis",
+        "roles": [
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmod1": false,
+          "tempor_d": "eiusmod veniam nostrud ut",
+          "voluptate3c": "incididunt ut ut et do"
+        }
+      },
+      {
+        "id": "21b4c4af-ab88-f7f3-dd01-586fc5090802",
+        "email": "do2dXjRsGD1L48@gqXXdDllvnpmLWUWRUfqmPC.fdd",
+        "roles": [
+          "guest",
+          "customer",
+          "manager",
+          "admin"
+        ]
+      },
+      {
+        "id": "f8d549fd-65da-5372-de47-f02a21e52571",
+        "email": "iwWD4iK3@mUqOFOxBkWsrkAQmeJHZeMLC.fjl",
+        "name": "incididunt",
+        "roles": [
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "sit_cd7": "laboris commodo",
+          "dolor_a5e": 65831629.00060415,
+          "nostrud_789": -50300490.437075496,
+          "nulla26": "deserunt pariatur eu"
+        }
+      },
+      {
+        "id": "1afe9ea4-415f-ef52-5061-a5332fbd0832",
+        "email": "FnNdsQm4Pb25U2Y@qaAxg.ju",
+        "name": "anim consequat elit pariatur",
+        "roles": [
+          "customer",
+          "manager",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "labore_1e": true,
+          "Excepteur_cda": "ad velit nostrud nulla magna",
+          "culpae5a": -28986168.233677745,
+          "dolor3": -61092595.56978941
+        }
+      },
+      {
+        "id": "a03539f7-093e-7cd6-4016-f4329f93ae3d",
+        "email": "JrhJ4eDz@FivQJvRD.tk",
+        "roles": [
+          "manager",
+          "admin",
+          "guest",
+          "customer"
+        ],
+        "metadata": {
+          "culpa1": "in consectetur dolore irure officia",
+          "consectetur_c8": -90552999.73115325,
+          "magna5": false,
+          "et_b": "magna mollit ut ea",
+          "deserunt_bdc": -38621893.80452037
+        }
+      },
+      {
+        "id": "c0acd9f4-90d7-9759-5857-8a095df8dac9",
+        "email": "1gYTx@nKRKNWgGWHtGjPxmRxunn.tdtu",
+        "roles": [
+          "admin",
+          "guest",
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "5e5381e1-09c5-3e6b-772e-e1ff434c1f6d",
+        "email": "T0bxy3N@ZSYzBThhbaObAzLg.ookv",
+        "roles": [
+          "manager",
+          "admin",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "984fba91-6e97-2e4b-3b19-41e858e84f5c",
+        "email": "SVs@hSPFDlOoEdVMzewWWBNrIhPyOAyw.xc",
+        "roles": [
+          "admin",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "61faf96b-7a57-5da5-242b-59012990c659",
+        "email": "W3tq8w@jOQitQcfNGICcfvzOxCUVTd.gxg",
+        "name": "sit minim",
+        "roles": [
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "culpa3": false
+        }
+      },
+      {
+        "id": "23a5d465-349b-5e8f-54c3-e663a37f0575",
+        "email": "1IlD@f.ynt",
+        "name": "velit consectetur dolore",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "17b79b1b-3148-2d8e-f290-f37d727e101f",
+        "email": "dEwxExrsj42GYP@dPSpjYGoxEGLqkXKqIWyLjvwyV.xtdj",
+        "roles": [
+          "admin",
+          "guest",
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "exe_": "ex dolor aute sit minim"
+        }
+      },
+      {
+        "id": "c38e31b3-f6d6-ff87-04f3-be15a6296b60",
+        "email": "HeyT7sRL@nYtNiyObSKlmHoBJjTgYETvoD.tggk",
+        "name": "ullamco dolor ipsum ad",
+        "roles": [
+          "customer",
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "anim26a": "commodo laboris fugiat culpa"
+        }
+      },
+      {
+        "id": "97e80977-ded2-2640-a1cf-36fa0a355223",
+        "email": "6md0qbOp@KqqVTWRXiPhPEdKDazpVAwuISsKYpkCma.fee",
+        "name": "deserunt est adipisicing sint",
+        "roles": [
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "fugiat__": true
+        }
+      },
+      {
+        "id": "203f27d1-21c9-442f-d2ae-9f72a53ea7db",
+        "email": "bYWRINN5n@rXUyUzVGqwdGdNTSXGFkGRyMGPTEsmTHT.bcol",
+        "roles": [
+          "guest",
+          "admin",
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "f20cb603-ab9b-fe6c-ed2e-0d92a61ee690",
+        "email": "2PMD-3ZEnK9@NTemgXltlVsVHDMJWikLKqqHhD.ny",
+        "name": "elit ut in esse nisi",
+        "roles": [
+          "manager"
+        ]
+      },
+      {
+        "id": "efc86fcc-7535-f3ee-14ca-9d93d2995047",
+        "email": "O--takWgQV@EqyajWfvrHpiliTzowHCyMxg.txr",
+        "name": "do deserunt consectetur",
+        "roles": [
+          "manager",
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "dolorab0": true
+        }
+      },
+      {
+        "id": "ef24b1a3-51ed-3c1b-ef90-2daf174d399d",
+        "email": "JHJzH87Kr07d@ffAONz.sf",
+        "name": "aute cillum consectetur ex",
+        "roles": [
+          "guest",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "enim_50": -97431782.6796323
+        }
+      },
+      {
+        "id": "88661175-9394-4d28-70c0-41190d984ebf",
+        "email": "Ik3I@VLxjggckqVXhgzNttPitYvMnstXyq.zx",
+        "name": "sint",
+        "roles": [
+          "customer"
+        ],
+        "metadata": {
+          "anim6": "magna ex"
+        }
+      },
+      {
+        "id": "f378cc0b-797f-5b06-7bdb-16534f275830",
+        "email": "wtGPM@AWdYxvfKbGtYWtuuXEdfLbhS.pj",
+        "name": "veniam Duis",
+        "roles": [
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "qui_804": -53768894.21604574,
+          "anim9d": true,
+          "Excepteur_4ab": 55677875.36419928
+        }
+      },
+      {
+        "id": "91c80b5b-3648-1b2b-9233-c48a57f7d288",
+        "email": "USYaQvpugS@BDtEWX.xuuf",
+        "name": "id Duis eu",
+        "roles": [
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "inf": 60428500.920534134
+        }
+      },
+      {
+        "id": "527be383-c1cc-1487-476a-bcf78eb1cb8d",
+        "email": "GtcwLGESIQ8@EVO.ippe",
+        "name": "Excepteur proident",
+        "roles": [
+          "manager",
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "ullamco_9": true
+        }
+      },
+      {
+        "id": "76e974f3-7cf8-57a0-9f0f-86247540664a",
+        "email": "VIvC8Ig7T5BmC@profGAA.tx",
+        "name": "reprehenderit eu laborum",
+        "roles": [
+          "admin",
+          "guest",
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "irure_5": "ullamco ad proident ut aliqua",
+          "labore_fb3": false,
+          "laborum6c6": false,
+          "laboris_d0f": -40945498.924702406
+        }
+      },
+      {
+        "id": "d06af3f1-a924-6505-ca4a-e92439637cb5",
+        "email": "5MGt@btJFENcuihDgjEyly.cc",
+        "roles": [
+          "manager",
+          "customer"
+        ]
+      },
+      {
+        "id": "b2b219bb-defe-3491-f164-fef3d641e151",
+        "email": "tq1MzU8j0z@FPkqmAhkQSfdBIPmNIGUTLYsIm.st",
+        "name": "anim Ut Duis",
+        "roles": [
+          "guest",
+          "customer",
+          "admin",
+          "manager"
+        ],
+        "metadata": {
+          "fugiat_0_7": -72541014.43104446
+        }
+      },
+      {
+        "id": "6be544df-4f30-545d-b2b4-e25627c9e900",
+        "email": "3sa@dsoTSuozUf.ckic",
+        "name": "Excepteur eu incididunt",
+        "roles": [
+          "manager"
+        ],
+        "metadata": {
+          "ade": "sunt deserunt incididunt laborum velit",
+          "occaecat_4d": true,
+          "officia_1": "in ex dolore magna"
+        }
+      },
+      {
+        "id": "12293c1d-eb65-357b-9f69-da644dbb7437",
+        "email": "i4pIa@qTsJiDJruElDYxKFEMVng.rce",
+        "name": "nulla labore",
+        "roles": [
+          "customer",
+          "admin",
+          "guest",
+          "manager"
+        ],
+        "metadata": {
+          "enim7": true,
+          "in65": -53563312.16171384
+        }
+      },
+      {
+        "id": "a51f1d41-9cc0-ba89-df41-58fa8df90fb9",
+        "email": "RkI6DxUwIcbKFwV@URvTgmfscOWzzJMDnHOQK.cf",
+        "roles": [
+          "guest",
+          "manager",
+          "customer",
+          "admin"
+        ],
+        "metadata": {
+          "Duisda4": false
+        }
+      },
+      {
+        "id": "491ce966-b418-eee4-d04c-5096e0db7589",
+        "email": "QhwnqR@CkItzOasYiElpHvyYPBLXaMvGYZu.jhm",
+        "name": "sunt nisi",
+        "roles": [
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "et5": "qui eiusmod laborum nostrud cillum",
+          "velit915": "qui tempor veniam consequat",
+          "do739": "aliqua Ut",
+          "consequatd2c": false
+        }
+      },
+      {
+        "id": "d3c2ca4b-1e78-5c78-7dd7-25fe801c33f0",
+        "email": "S39is966bK6c@Ng.gkq",
+        "name": "velit ullamco aliquip",
+        "roles": [
+          "customer",
+          "guest",
+          "admin"
+        ],
+        "metadata": {
+          "amet_f": 46865018.4571743
+        }
+      },
+      {
+        "id": "4a2e93ea-f186-2862-3d0f-089aeac9ebab",
+        "email": "QRcJXOndbfW@QlmIPCjpvUbnnFcTNyRLYX.qtuj",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ]
+      },
+      {
+        "id": "f5de8de1-8a76-b05b-8028-f88630eec760",
+        "email": "3ZDrvRGlV61w@eEmUyuihwJrhkzWnaVSlne.iq",
+        "name": "nisi do proident cupidatat deserunt",
+        "roles": [
+          "manager",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "dolored": "nulla ut est Duis"
+        }
+      },
+      {
+        "id": "5cb275bc-4e08-89cf-7959-ed55e571b906",
+        "email": "uRmn@jzjaWxJSAgSFIDXI.jte",
+        "roles": [
+          "admin",
+          "manager",
+          "guest"
+        ],
+        "metadata": {
+          "eiusmod_d": "laborum dolor Excepteur id in",
+          "id_4": true
+        }
+      },
+      {
+        "id": "000826d6-e279-c969-e123-bf3cf056cba9",
+        "email": "X1mIXNH@mThuFuYGYYPUYnCTRjBGdDvSKL.fy",
+        "name": "Lorem voluptate nulla",
+        "roles": [
+          "manager",
+          "customer",
+          "admin",
+          "guest"
+        ],
+        "metadata": {
+          "tempor_411": true,
+          "tempor438": false,
+          "tempor_b8": "enim in sint non voluptate",
+          "elit4": true
+        }
+      },
+      {
+        "id": "aefb9077-97f4-766a-b90a-7f77a0e019d3",
+        "email": "Q8hcLO@VJPdynxTLPhCDaXfooUyssnAcRvm.kmc",
+        "name": "pariatur",
+        "roles": [
+          "admin",
+          "guest",
+          "manager",
+          "customer"
+        ],
+        "metadata": {
+          "dolor_be0": "cillum",
+          "in_ad3": -54503456.68941736,
+          "elit_733": -56849515.065550804,
+          "dolore_1a6": false,
+          "ut_5": "nostrud ad consectetur ullamco"
+        }
+      },
+      {
+        "id": "f80414a0-cbbd-924b-211a-fe39e82655d2",
+        "email": "iMMEUqQh@DLUOAaveIIAGgqZeNATydGuwDhS.wfpn",
+        "name": "non id anim",
+        "roles": [
+          "admin",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "deserunt9b": -14747153.082862496,
+          "fugiat8": true,
+          "eiusmod775": 34309479.082003236,
+          "cillum64": "ex"
+        }
+      },
+      {
+        "id": "a86b9fb8-f0c3-4fb7-c4ba-66db97a00420",
+        "email": "YqJjx@DJvaHL.rtwe",
+        "name": "cupidatat voluptate incididunt",
+        "roles": [
+          "admin",
+          "manager",
+          "customer",
+          "guest"
+        ],
+        "metadata": {
+          "aute7": "adipisicing amet elit Excepteur"
+        }
+      },
+      {
+        "id": "2b46ded8-98b8-30e9-859d-a7428408e92a",
+        "email": "8xjHcJ@RHxLWF.tvh",
+        "roles": [
+          "manager",
+          "guest",
+          "customer"
+        ]
+      },
+      {
+        "id": "e629f65f-f7ed-d427-a9b1-a3f18a8ba712",
+        "email": "JesPB4ztDg45D53@YIsdTVrogoCStaHrBnaQVojHRMgYuJR.hw",
+        "roles": [
+          "admin"
+        ],
+        "metadata": {
+          "Duis_c9a": "dolore pariatur incididunt",
+          "voluptate160": false
+        }
+      },
+      {
+        "id": "9f0a21c8-82ee-5076-84fb-1ab90aac1d33",
+        "email": "mO6OnRKU1y@AV.qtb",
+        "name": "Duis officia",
+        "roles": [
+          "guest",
+          "manager",
+          "admin"
+        ],
+        "metadata": {
+          "aute5f": 57176557.74205923,
+          "Excepteur_c": true
+        }
+      },
+      {
+        "id": "8da89611-b256-ff22-cc7f-a06dc70cb1fd",
+        "email": "ljQwYIyeuIfTP@mjhMGKxbDWnmiweVvhIhdDloUx.irzs",
+        "name": "velit consectetur incididunt sunt",
+        "roles": [
+          "customer",
+          "manager"
+        ],
+        "metadata": {
+          "ad_58": "fugiat qui",
+          "adipisicing62": true
+        }
+      }
+    ]
+  }
+}

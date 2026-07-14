@@ -1,0 +1,78 @@
+{
+  "name": "edge-duplicate-primary-key",
+  "category": "edge",
+  "description": "Array with two items sharing the primary-key value 'dup' (gate must not silently mutate identical keys)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "qty": {
+              "type": "number"
+            },
+            "tag": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "primaryKeyMap": {
+      "/items": "id"
+    }
+  },
+  "roundtrip": "exact",
+  "measureMemory": false,
+  "tags": [
+    "duplicate-key"
+  ],
+  "original": {
+    "items": [
+      {
+        "id": "dup",
+        "name": "first",
+        "qty": 1
+      },
+      {
+        "id": "dup",
+        "name": "second",
+        "qty": 2
+      },
+      {
+        "id": "uniq",
+        "name": "third",
+        "qty": 3
+      }
+    ]
+  },
+  "modified": {
+    "items": [
+      {
+        "id": "dup",
+        "name": "first",
+        "qty": 10
+      },
+      {
+        "id": "dup",
+        "name": "second",
+        "qty": 2
+      },
+      {
+        "id": "uniq",
+        "name": "third-renamed",
+        "qty": 3
+      }
+    ]
+  }
+}

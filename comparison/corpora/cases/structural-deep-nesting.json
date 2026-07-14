@@ -1,0 +1,259 @@
+{
+  "name": "structural-deep-nesting",
+  "category": "structural",
+  "description": "Object nested 40 levels deep with a change only at the deepest leaf",
+  "schema": null,
+  "roundtrip": "exact",
+  "measureMemory": false,
+  "tags": [
+    "deep-nesting"
+  ],
+  "original": {
+    "level0": {
+      "level1": {
+        "level2": {
+          "level3": {
+            "level4": {
+              "level5": {
+                "level6": {
+                  "level7": {
+                    "level8": {
+                      "level9": {
+                        "level10": {
+                          "level11": {
+                            "level12": {
+                              "level13": {
+                                "level14": {
+                                  "level15": {
+                                    "level16": {
+                                      "level17": {
+                                        "level18": {
+                                          "level19": {
+                                            "level20": {
+                                              "level21": {
+                                                "level22": {
+                                                  "level23": {
+                                                    "level24": {
+                                                      "level25": {
+                                                        "level26": {
+                                                          "level27": {
+                                                            "level28": {
+                                                              "level29": {
+                                                                "level30": {
+                                                                  "level31": {
+                                                                    "level32": {
+                                                                      "level33": {
+                                                                        "level34": {
+                                                                          "level35": {
+                                                                            "level36": {
+                                                                              "level37": {
+                                                                                "level38": {
+                                                                                  "level39": {
+                                                                                    "value": "original-leaf",
+                                                                                    "n": 1
+                                                                                  },
+                                                                                  "sibling": 39
+                                                                                },
+                                                                                "sibling": 38
+                                                                              },
+                                                                              "sibling": 37
+                                                                            },
+                                                                            "sibling": 36
+                                                                          },
+                                                                          "sibling": 35
+                                                                        },
+                                                                        "sibling": 34
+                                                                      },
+                                                                      "sibling": 33
+                                                                    },
+                                                                    "sibling": 32
+                                                                  },
+                                                                  "sibling": 31
+                                                                },
+                                                                "sibling": 30
+                                                              },
+                                                              "sibling": 29
+                                                            },
+                                                            "sibling": 28
+                                                          },
+                                                          "sibling": 27
+                                                        },
+                                                        "sibling": 26
+                                                      },
+                                                      "sibling": 25
+                                                    },
+                                                    "sibling": 24
+                                                  },
+                                                  "sibling": 23
+                                                },
+                                                "sibling": 22
+                                              },
+                                              "sibling": 21
+                                            },
+                                            "sibling": 20
+                                          },
+                                          "sibling": 19
+                                        },
+                                        "sibling": 18
+                                      },
+                                      "sibling": 17
+                                    },
+                                    "sibling": 16
+                                  },
+                                  "sibling": 15
+                                },
+                                "sibling": 14
+                              },
+                              "sibling": 13
+                            },
+                            "sibling": 12
+                          },
+                          "sibling": 11
+                        },
+                        "sibling": 10
+                      },
+                      "sibling": 9
+                    },
+                    "sibling": 8
+                  },
+                  "sibling": 7
+                },
+                "sibling": 6
+              },
+              "sibling": 5
+            },
+            "sibling": 4
+          },
+          "sibling": 3
+        },
+        "sibling": 2
+      },
+      "sibling": 1
+    },
+    "sibling": 0
+  },
+  "modified": {
+    "level0": {
+      "level1": {
+        "level2": {
+          "level3": {
+            "level4": {
+              "level5": {
+                "level6": {
+                  "level7": {
+                    "level8": {
+                      "level9": {
+                        "level10": {
+                          "level11": {
+                            "level12": {
+                              "level13": {
+                                "level14": {
+                                  "level15": {
+                                    "level16": {
+                                      "level17": {
+                                        "level18": {
+                                          "level19": {
+                                            "level20": {
+                                              "level21": {
+                                                "level22": {
+                                                  "level23": {
+                                                    "level24": {
+                                                      "level25": {
+                                                        "level26": {
+                                                          "level27": {
+                                                            "level28": {
+                                                              "level29": {
+                                                                "level30": {
+                                                                  "level31": {
+                                                                    "level32": {
+                                                                      "level33": {
+                                                                        "level34": {
+                                                                          "level35": {
+                                                                            "level36": {
+                                                                              "level37": {
+                                                                                "level38": {
+                                                                                  "level39": {
+                                                                                    "value": "modified-leaf",
+                                                                                    "n": 2
+                                                                                  },
+                                                                                  "sibling": 39
+                                                                                },
+                                                                                "sibling": 38
+                                                                              },
+                                                                              "sibling": 37
+                                                                            },
+                                                                            "sibling": 36
+                                                                          },
+                                                                          "sibling": 35
+                                                                        },
+                                                                        "sibling": 34
+                                                                      },
+                                                                      "sibling": 33
+                                                                    },
+                                                                    "sibling": 32
+                                                                  },
+                                                                  "sibling": 31
+                                                                },
+                                                                "sibling": 30
+                                                              },
+                                                              "sibling": 29
+                                                            },
+                                                            "sibling": 28
+                                                          },
+                                                          "sibling": 27
+                                                        },
+                                                        "sibling": 26
+                                                      },
+                                                      "sibling": 25
+                                                    },
+                                                    "sibling": 24
+                                                  },
+                                                  "sibling": 23
+                                                },
+                                                "sibling": 22
+                                              },
+                                              "sibling": 21
+                                            },
+                                            "sibling": 20
+                                          },
+                                          "sibling": 19
+                                        },
+                                        "sibling": 18
+                                      },
+                                      "sibling": 17
+                                    },
+                                    "sibling": 16
+                                  },
+                                  "sibling": 15
+                                },
+                                "sibling": 14
+                              },
+                              "sibling": 13
+                            },
+                            "sibling": 12
+                          },
+                          "sibling": 11
+                        },
+                        "sibling": 10
+                      },
+                      "sibling": 9
+                    },
+                    "sibling": 8
+                  },
+                  "sibling": 7
+                },
+                "sibling": 6
+              },
+              "sibling": 5
+            },
+            "sibling": 4
+          },
+          "sibling": 3
+        },
+        "sibling": 2
+      },
+      "sibling": 1
+    },
+    "sibling": 0
+  }
+}

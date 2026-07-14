@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "seed": 20240521,
+  "generatedBy": "comparison/corpora/generate.ts",
+  "count": 19,
+  "cases": [
+    {
+      "name": "realistic-cloud-config-small",
+      "file": "cases/realistic-cloud-config-small.json",
+      "category": "realistic",
+      "description": "Small FlightControl cloud config (~1 env, a handful of keyed services) with a low-complexity edit set",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "low"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3987,
+      "bytesModified": 4037
+    },
+    {
+      "name": "realistic-cloud-config-medium",
+      "file": "cases/realistic-cloud-config-medium.json",
+      "category": "realistic",
+      "description": "Medium cloud config (dozens of keyed services across envs) with a medium-complexity edit set",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "medium"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 48973,
+      "bytesModified": 49203
+    },
+    {
+      "name": "realistic-cloud-config-large",
+      "file": "cases/realistic-cloud-config-large.json",
+      "category": "realistic",
+      "description": "Large cloud config (~100 keyed services) with a high-complexity edit set",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "high"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 243411,
+      "bytesModified": 243999
+    },
+    {
+      "name": "realistic-ecommerce-medium",
+      "file": "cases/realistic-ecommerce-medium.json",
+      "category": "realistic",
+      "description": "Medium e-commerce platform config (keyed products, users, categories, orders) with a realistic edit set",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "e-commerce",
+        "medium"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 24700,
+      "bytesModified": 24787
+    },
+    {
+      "name": "keyed-modify-only",
+      "file": "cases/keyed-modify-only.json",
+      "category": "keyed",
+      "description": "60 keyed items, one field changed on every third item, order preserved",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3071,
+      "bytesModified": 3115
+    },
+    {
+      "name": "keyed-add-only",
+      "file": "cases/keyed-add-only.json",
+      "category": "keyed",
+      "description": "60 keyed items plus 20 appended new keys",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "add"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3071,
+      "bytesModified": 4161
+    },
+    {
+      "name": "keyed-remove-only",
+      "file": "cases/keyed-remove-only.json",
+      "category": "keyed",
+      "description": "60 keyed items with every fourth key removed",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "remove"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3071,
+      "bytesModified": 2300
+    },
+    {
+      "name": "keyed-reorder-only",
+      "file": "cases/keyed-reorder-only.json",
+      "category": "keyed",
+      "description": "60 keyed items reversed with identical content (order-insensitive no-op territory)",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "reorder",
+        "noop"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 3071,
+      "bytesModified": 3071
+    },
+    {
+      "name": "keyed-mixed-modify-add-remove-reorder",
+      "file": "cases/keyed-mixed-modify-add-remove-reorder.json",
+      "category": "keyed",
+      "description": "80 keyed items with a combined remove/modify/reorder/add workload",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify",
+        "add",
+        "remove",
+        "reorder",
+        "mixed"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 4101,
+      "bytesModified": 3493
+    },
+    {
+      "name": "lcs-10k-single-edit",
+      "file": "cases/lcs-10k-single-edit.json",
+      "category": "lcs",
+      "description": "10,000-element sequence with a single mid-array element change",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 110009,
+      "bytesModified": 110009
+    },
+    {
+      "name": "lcs-70k-single-edit",
+      "file": "cases/lcs-70k-single-edit.json",
+      "category": "lcs",
+      "description": "70,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 770009,
+      "bytesModified": 770009
+    },
+    {
+      "name": "lcs-100k-single-edit",
+      "file": "cases/lcs-100k-single-edit.json",
+      "category": "lcs",
+      "description": "100,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 1100009,
+      "bytesModified": 1100009
+    },
+    {
+      "name": "lcs-4k-disjoint",
+      "file": "cases/lcs-4k-disjoint.json",
+      "category": "lcs",
+      "description": "Two 4,000-element sequences with zero common elements (worst-case LCS diagonal)",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "disjoint",
+        "worst-case"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 40009,
+      "bytesModified": 40009
+    },
+    {
+      "name": "structural-root-array",
+      "file": "cases/structural-root-array.json",
+      "category": "structural",
+      "description": "A root-level array (not wrapped in an object) with an insert and a change",
+      "hasSchema": true,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "root-array"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 2201,
+      "bytesModified": 2215
+    },
+    {
+      "name": "structural-root-keyed-array",
+      "file": "cases/structural-root-keyed-array.json",
+      "category": "structural",
+      "description": "A root-level array keyed by id (primaryKeyMap '') with a remove + modify workload",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "root-array",
+        "keyed"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 2031,
+      "bytesModified": 1984
+    },
+    {
+      "name": "structural-deep-nesting",
+      "file": "cases/structural-deep-nesting.json",
+      "category": "structural",
+      "description": "Object nested 40 levels deep with a change only at the deepest leaf",
+      "hasSchema": false,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "deep-nesting"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 1011,
+      "bytesModified": 1011
+    },
+    {
+      "name": "edge-pointer-escaping-keys",
+      "file": "cases/edge-pointer-escaping-keys.json",
+      "category": "edge",
+      "description": "Object keys containing '/' and '~' (RFC 6901 ~1/~0 escapes) changed at several depths",
+      "hasSchema": false,
+      "options": null,
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "pointer-escaping"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 124,
+      "bytesModified": 124
+    },
+    {
+      "name": "edge-duplicate-primary-key",
+      "file": "cases/edge-duplicate-primary-key.json",
+      "category": "edge",
+      "description": "Array with two items sharing the primary-key value 'dup' (gate must not silently mutate identical keys)",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "duplicate-key"
+      ],
+      "isStalenessDescriptor": false,
+      "bytesOriginal": 121,
+      "bytesModified": 130
+    },
+    {
+      "name": "staleness-mutate-rediff",
+      "file": "cases/staleness-mutate-rediff.json",
+      "category": "staleness",
+      "description": "Diff a keyed array, then mutate the SAME original object in place and re-diff; a correct engine must not reuse stale per-run memoised state across the two diffs",
+      "hasSchema": true,
+      "options": {
+        "primaryKeyMap": {
+          "/items": "id"
+        }
+      },
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "staleness",
+        "cache"
+      ],
+      "isStalenessDescriptor": true,
+      "bytesOriginal": 1526,
+      "bytesModified": 1526
+    }
+  ]
+}

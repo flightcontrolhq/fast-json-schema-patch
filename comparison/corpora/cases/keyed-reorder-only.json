@@ -1,0 +1,769 @@
+{
+  "name": "keyed-reorder-only",
+  "category": "keyed",
+  "description": "60 keyed items reversed with identical content (order-insensitive no-op territory)",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "qty": {
+              "type": "number"
+            },
+            "tag": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "primaryKeyMap": {
+      "/items": "id"
+    }
+  },
+  "roundtrip": "multiset",
+  "measureMemory": false,
+  "tags": [
+    "reorder",
+    "noop"
+  ],
+  "original": {
+    "items": [
+      {
+        "id": "k0",
+        "name": "item-0",
+        "qty": 0,
+        "tag": "even"
+      },
+      {
+        "id": "k1",
+        "name": "item-1",
+        "qty": 1,
+        "tag": "odd"
+      },
+      {
+        "id": "k2",
+        "name": "item-2",
+        "qty": 2,
+        "tag": "even"
+      },
+      {
+        "id": "k3",
+        "name": "item-3",
+        "qty": 3,
+        "tag": "odd"
+      },
+      {
+        "id": "k4",
+        "name": "item-4",
+        "qty": 4,
+        "tag": "even"
+      },
+      {
+        "id": "k5",
+        "name": "item-5",
+        "qty": 5,
+        "tag": "odd"
+      },
+      {
+        "id": "k6",
+        "name": "item-6",
+        "qty": 6,
+        "tag": "even"
+      },
+      {
+        "id": "k7",
+        "name": "item-7",
+        "qty": 7,
+        "tag": "odd"
+      },
+      {
+        "id": "k8",
+        "name": "item-8",
+        "qty": 8,
+        "tag": "even"
+      },
+      {
+        "id": "k9",
+        "name": "item-9",
+        "qty": 9,
+        "tag": "odd"
+      },
+      {
+        "id": "k10",
+        "name": "item-10",
+        "qty": 10,
+        "tag": "even"
+      },
+      {
+        "id": "k11",
+        "name": "item-11",
+        "qty": 11,
+        "tag": "odd"
+      },
+      {
+        "id": "k12",
+        "name": "item-12",
+        "qty": 12,
+        "tag": "even"
+      },
+      {
+        "id": "k13",
+        "name": "item-13",
+        "qty": 13,
+        "tag": "odd"
+      },
+      {
+        "id": "k14",
+        "name": "item-14",
+        "qty": 14,
+        "tag": "even"
+      },
+      {
+        "id": "k15",
+        "name": "item-15",
+        "qty": 15,
+        "tag": "odd"
+      },
+      {
+        "id": "k16",
+        "name": "item-16",
+        "qty": 16,
+        "tag": "even"
+      },
+      {
+        "id": "k17",
+        "name": "item-17",
+        "qty": 17,
+        "tag": "odd"
+      },
+      {
+        "id": "k18",
+        "name": "item-18",
+        "qty": 18,
+        "tag": "even"
+      },
+      {
+        "id": "k19",
+        "name": "item-19",
+        "qty": 19,
+        "tag": "odd"
+      },
+      {
+        "id": "k20",
+        "name": "item-20",
+        "qty": 20,
+        "tag": "even"
+      },
+      {
+        "id": "k21",
+        "name": "item-21",
+        "qty": 21,
+        "tag": "odd"
+      },
+      {
+        "id": "k22",
+        "name": "item-22",
+        "qty": 22,
+        "tag": "even"
+      },
+      {
+        "id": "k23",
+        "name": "item-23",
+        "qty": 23,
+        "tag": "odd"
+      },
+      {
+        "id": "k24",
+        "name": "item-24",
+        "qty": 24,
+        "tag": "even"
+      },
+      {
+        "id": "k25",
+        "name": "item-25",
+        "qty": 25,
+        "tag": "odd"
+      },
+      {
+        "id": "k26",
+        "name": "item-26",
+        "qty": 26,
+        "tag": "even"
+      },
+      {
+        "id": "k27",
+        "name": "item-27",
+        "qty": 27,
+        "tag": "odd"
+      },
+      {
+        "id": "k28",
+        "name": "item-28",
+        "qty": 28,
+        "tag": "even"
+      },
+      {
+        "id": "k29",
+        "name": "item-29",
+        "qty": 29,
+        "tag": "odd"
+      },
+      {
+        "id": "k30",
+        "name": "item-30",
+        "qty": 30,
+        "tag": "even"
+      },
+      {
+        "id": "k31",
+        "name": "item-31",
+        "qty": 31,
+        "tag": "odd"
+      },
+      {
+        "id": "k32",
+        "name": "item-32",
+        "qty": 32,
+        "tag": "even"
+      },
+      {
+        "id": "k33",
+        "name": "item-33",
+        "qty": 33,
+        "tag": "odd"
+      },
+      {
+        "id": "k34",
+        "name": "item-34",
+        "qty": 34,
+        "tag": "even"
+      },
+      {
+        "id": "k35",
+        "name": "item-35",
+        "qty": 35,
+        "tag": "odd"
+      },
+      {
+        "id": "k36",
+        "name": "item-36",
+        "qty": 36,
+        "tag": "even"
+      },
+      {
+        "id": "k37",
+        "name": "item-37",
+        "qty": 37,
+        "tag": "odd"
+      },
+      {
+        "id": "k38",
+        "name": "item-38",
+        "qty": 38,
+        "tag": "even"
+      },
+      {
+        "id": "k39",
+        "name": "item-39",
+        "qty": 39,
+        "tag": "odd"
+      },
+      {
+        "id": "k40",
+        "name": "item-40",
+        "qty": 40,
+        "tag": "even"
+      },
+      {
+        "id": "k41",
+        "name": "item-41",
+        "qty": 41,
+        "tag": "odd"
+      },
+      {
+        "id": "k42",
+        "name": "item-42",
+        "qty": 42,
+        "tag": "even"
+      },
+      {
+        "id": "k43",
+        "name": "item-43",
+        "qty": 43,
+        "tag": "odd"
+      },
+      {
+        "id": "k44",
+        "name": "item-44",
+        "qty": 44,
+        "tag": "even"
+      },
+      {
+        "id": "k45",
+        "name": "item-45",
+        "qty": 45,
+        "tag": "odd"
+      },
+      {
+        "id": "k46",
+        "name": "item-46",
+        "qty": 46,
+        "tag": "even"
+      },
+      {
+        "id": "k47",
+        "name": "item-47",
+        "qty": 47,
+        "tag": "odd"
+      },
+      {
+        "id": "k48",
+        "name": "item-48",
+        "qty": 48,
+        "tag": "even"
+      },
+      {
+        "id": "k49",
+        "name": "item-49",
+        "qty": 49,
+        "tag": "odd"
+      },
+      {
+        "id": "k50",
+        "name": "item-50",
+        "qty": 50,
+        "tag": "even"
+      },
+      {
+        "id": "k51",
+        "name": "item-51",
+        "qty": 51,
+        "tag": "odd"
+      },
+      {
+        "id": "k52",
+        "name": "item-52",
+        "qty": 52,
+        "tag": "even"
+      },
+      {
+        "id": "k53",
+        "name": "item-53",
+        "qty": 53,
+        "tag": "odd"
+      },
+      {
+        "id": "k54",
+        "name": "item-54",
+        "qty": 54,
+        "tag": "even"
+      },
+      {
+        "id": "k55",
+        "name": "item-55",
+        "qty": 55,
+        "tag": "odd"
+      },
+      {
+        "id": "k56",
+        "name": "item-56",
+        "qty": 56,
+        "tag": "even"
+      },
+      {
+        "id": "k57",
+        "name": "item-57",
+        "qty": 57,
+        "tag": "odd"
+      },
+      {
+        "id": "k58",
+        "name": "item-58",
+        "qty": 58,
+        "tag": "even"
+      },
+      {
+        "id": "k59",
+        "name": "item-59",
+        "qty": 59,
+        "tag": "odd"
+      }
+    ]
+  },
+  "modified": {
+    "items": [
+      {
+        "id": "k59",
+        "name": "item-59",
+        "qty": 59,
+        "tag": "odd"
+      },
+      {
+        "id": "k58",
+        "name": "item-58",
+        "qty": 58,
+        "tag": "even"
+      },
+      {
+        "id": "k57",
+        "name": "item-57",
+        "qty": 57,
+        "tag": "odd"
+      },
+      {
+        "id": "k56",
+        "name": "item-56",
+        "qty": 56,
+        "tag": "even"
+      },
+      {
+        "id": "k55",
+        "name": "item-55",
+        "qty": 55,
+        "tag": "odd"
+      },
+      {
+        "id": "k54",
+        "name": "item-54",
+        "qty": 54,
+        "tag": "even"
+      },
+      {
+        "id": "k53",
+        "name": "item-53",
+        "qty": 53,
+        "tag": "odd"
+      },
+      {
+        "id": "k52",
+        "name": "item-52",
+        "qty": 52,
+        "tag": "even"
+      },
+      {
+        "id": "k51",
+        "name": "item-51",
+        "qty": 51,
+        "tag": "odd"
+      },
+      {
+        "id": "k50",
+        "name": "item-50",
+        "qty": 50,
+        "tag": "even"
+      },
+      {
+        "id": "k49",
+        "name": "item-49",
+        "qty": 49,
+        "tag": "odd"
+      },
+      {
+        "id": "k48",
+        "name": "item-48",
+        "qty": 48,
+        "tag": "even"
+      },
+      {
+        "id": "k47",
+        "name": "item-47",
+        "qty": 47,
+        "tag": "odd"
+      },
+      {
+        "id": "k46",
+        "name": "item-46",
+        "qty": 46,
+        "tag": "even"
+      },
+      {
+        "id": "k45",
+        "name": "item-45",
+        "qty": 45,
+        "tag": "odd"
+      },
+      {
+        "id": "k44",
+        "name": "item-44",
+        "qty": 44,
+        "tag": "even"
+      },
+      {
+        "id": "k43",
+        "name": "item-43",
+        "qty": 43,
+        "tag": "odd"
+      },
+      {
+        "id": "k42",
+        "name": "item-42",
+        "qty": 42,
+        "tag": "even"
+      },
+      {
+        "id": "k41",
+        "name": "item-41",
+        "qty": 41,
+        "tag": "odd"
+      },
+      {
+        "id": "k40",
+        "name": "item-40",
+        "qty": 40,
+        "tag": "even"
+      },
+      {
+        "id": "k39",
+        "name": "item-39",
+        "qty": 39,
+        "tag": "odd"
+      },
+      {
+        "id": "k38",
+        "name": "item-38",
+        "qty": 38,
+        "tag": "even"
+      },
+      {
+        "id": "k37",
+        "name": "item-37",
+        "qty": 37,
+        "tag": "odd"
+      },
+      {
+        "id": "k36",
+        "name": "item-36",
+        "qty": 36,
+        "tag": "even"
+      },
+      {
+        "id": "k35",
+        "name": "item-35",
+        "qty": 35,
+        "tag": "odd"
+      },
+      {
+        "id": "k34",
+        "name": "item-34",
+        "qty": 34,
+        "tag": "even"
+      },
+      {
+        "id": "k33",
+        "name": "item-33",
+        "qty": 33,
+        "tag": "odd"
+      },
+      {
+        "id": "k32",
+        "name": "item-32",
+        "qty": 32,
+        "tag": "even"
+      },
+      {
+        "id": "k31",
+        "name": "item-31",
+        "qty": 31,
+        "tag": "odd"
+      },
+      {
+        "id": "k30",
+        "name": "item-30",
+        "qty": 30,
+        "tag": "even"
+      },
+      {
+        "id": "k29",
+        "name": "item-29",
+        "qty": 29,
+        "tag": "odd"
+      },
+      {
+        "id": "k28",
+        "name": "item-28",
+        "qty": 28,
+        "tag": "even"
+      },
+      {
+        "id": "k27",
+        "name": "item-27",
+        "qty": 27,
+        "tag": "odd"
+      },
+      {
+        "id": "k26",
+        "name": "item-26",
+        "qty": 26,
+        "tag": "even"
+      },
+      {
+        "id": "k25",
+        "name": "item-25",
+        "qty": 25,
+        "tag": "odd"
+      },
+      {
+        "id": "k24",
+        "name": "item-24",
+        "qty": 24,
+        "tag": "even"
+      },
+      {
+        "id": "k23",
+        "name": "item-23",
+        "qty": 23,
+        "tag": "odd"
+      },
+      {
+        "id": "k22",
+        "name": "item-22",
+        "qty": 22,
+        "tag": "even"
+      },
+      {
+        "id": "k21",
+        "name": "item-21",
+        "qty": 21,
+        "tag": "odd"
+      },
+      {
+        "id": "k20",
+        "name": "item-20",
+        "qty": 20,
+        "tag": "even"
+      },
+      {
+        "id": "k19",
+        "name": "item-19",
+        "qty": 19,
+        "tag": "odd"
+      },
+      {
+        "id": "k18",
+        "name": "item-18",
+        "qty": 18,
+        "tag": "even"
+      },
+      {
+        "id": "k17",
+        "name": "item-17",
+        "qty": 17,
+        "tag": "odd"
+      },
+      {
+        "id": "k16",
+        "name": "item-16",
+        "qty": 16,
+        "tag": "even"
+      },
+      {
+        "id": "k15",
+        "name": "item-15",
+        "qty": 15,
+        "tag": "odd"
+      },
+      {
+        "id": "k14",
+        "name": "item-14",
+        "qty": 14,
+        "tag": "even"
+      },
+      {
+        "id": "k13",
+        "name": "item-13",
+        "qty": 13,
+        "tag": "odd"
+      },
+      {
+        "id": "k12",
+        "name": "item-12",
+        "qty": 12,
+        "tag": "even"
+      },
+      {
+        "id": "k11",
+        "name": "item-11",
+        "qty": 11,
+        "tag": "odd"
+      },
+      {
+        "id": "k10",
+        "name": "item-10",
+        "qty": 10,
+        "tag": "even"
+      },
+      {
+        "id": "k9",
+        "name": "item-9",
+        "qty": 9,
+        "tag": "odd"
+      },
+      {
+        "id": "k8",
+        "name": "item-8",
+        "qty": 8,
+        "tag": "even"
+      },
+      {
+        "id": "k7",
+        "name": "item-7",
+        "qty": 7,
+        "tag": "odd"
+      },
+      {
+        "id": "k6",
+        "name": "item-6",
+        "qty": 6,
+        "tag": "even"
+      },
+      {
+        "id": "k5",
+        "name": "item-5",
+        "qty": 5,
+        "tag": "odd"
+      },
+      {
+        "id": "k4",
+        "name": "item-4",
+        "qty": 4,
+        "tag": "even"
+      },
+      {
+        "id": "k3",
+        "name": "item-3",
+        "qty": 3,
+        "tag": "odd"
+      },
+      {
+        "id": "k2",
+        "name": "item-2",
+        "qty": 2,
+        "tag": "even"
+      },
+      {
+        "id": "k1",
+        "name": "item-1",
+        "qty": 1,
+        "tag": "odd"
+      },
+      {
+        "id": "k0",
+        "name": "item-0",
+        "qty": 0,
+        "tag": "even"
+      }
+    ]
+  }
+}
