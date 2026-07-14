@@ -1,0 +1,5270 @@
+{
+  "adapters": [
+    {
+      "hasApplier": true,
+      "id": "ours",
+      "kind": "schema-aware",
+      "label": "ours (Go engine, default)",
+      "role": "diff"
+    },
+    {
+      "hasApplier": true,
+      "id": "ours-moves",
+      "kind": "schema-aware",
+      "label": "ours (Go engine, emitMoves)",
+      "role": "diff"
+    },
+    {
+      "hasApplier": true,
+      "id": "jsondiff",
+      "kind": "generic",
+      "label": "wI2L/jsondiff",
+      "role": "diff"
+    },
+    {
+      "hasApplier": true,
+      "id": "snorwin",
+      "kind": "generic",
+      "label": "snorwin/jsonpatch",
+      "role": "diff"
+    },
+    {
+      "hasApplier": true,
+      "id": "mattbaird",
+      "kind": "generic",
+      "label": "mattbaird/jsonpatch",
+      "role": "diff"
+    },
+    {
+      "hasApplier": true,
+      "id": "ours-apply",
+      "kind": "apply-only",
+      "label": "ours (Go engine ApplyPatch)",
+      "role": "apply"
+    },
+    {
+      "hasApplier": true,
+      "id": "evanphx",
+      "kind": "apply-only",
+      "label": "evanphx/json-patch v5 (apply)",
+      "role": "apply"
+    }
+  ],
+  "branch": "feat/deep-dive-overhaul",
+  "commit": "729d82df410c310a0780398b394f72f1accace1c",
+  "corpus": {
+    "caseCount": 19,
+    "manifestSha256": "1fd566d5dc7059c4",
+    "note": "identical shared corpus as the TS runner; manifestSha256 must match analysis/results/bench-v2.json",
+    "seed": 20240521
+  },
+  "engines": {
+    "evanphx/json-patch": {
+      "role": "apply (neutral applier)",
+      "source": "github.com/evanphx/json-patch/v5",
+      "version": "v5.9.11"
+    },
+    "mattbaird/jsonpatch": {
+      "role": "diff (historic)",
+      "source": "github.com/mattbaird/jsonpatch",
+      "version": "v0.0.0-20240118010651-0ba75a80ca38"
+    },
+    "ours": {
+      "source": "this branch (go/)",
+      "version": "0.4.0"
+    },
+    "snorwin/jsonpatch": {
+      "role": "diff",
+      "source": "github.com/snorwin/jsonpatch",
+      "version": "v1.5.0"
+    },
+    "wI2L/jsondiff": {
+      "role": "diff",
+      "source": "github.com/wI2L/jsondiff",
+      "version": "v0.7.1"
+    }
+  },
+  "generatedAt": "2026-07-14T08:52:20Z",
+  "methodology": {
+    "alloc": "bytes/op and allocs/op for the diff op (Go analogue of b.ReportAllocs)",
+    "apply": "diff rows apply their OWN patch (ours=our ApplyPatch, competitors=evanphx neutral applier); the ours-apply/evanphx rows race on the IDENTICAL jsondiff canonical patch",
+    "competitors": "wI2L/jsondiff and snorwin/jsonpatch take any; mattbaird takes []byte; none are schema/primary-key aware, so keyed reorders differ structurally from our planned output",
+    "decode": "bytes -\u003e parsed input form; null for byte-only libraries (mattbaird) whose diff already embeds the parse",
+    "diff": "patch produced from PRE-PARSED inputs (our Value model / competitors' any); excludes decode \u0026 marshal",
+    "e2e": "bytes -\u003e patch(-\u003e bytes); the fair cross-input end-to-end comparison",
+    "memory": "measureMemory cases add an in-process live-heap proxy; NOT comparable to the TS subprocess RSS probe",
+    "timing": "manual warmup + adaptive-budget sample loop (mean/p99/min), budgets matched to the TS tinybench runner",
+    "verdict": "PASS/CORRUPT/CRASH/NO-APPLIER/SKIPPED; competitor patches judged by evanphx (neutral), our patches by our applier; multiset cases use an order-normalized contract (verdictDetail=multiset-canonical)"
+  },
+  "platform": {
+    "arch": "arm64",
+    "cpus": "Apple M4 Pro",
+    "go": "go1.26.2",
+    "os": "darwin"
+  },
+  "results": [
+    {
+      "case": "realistic-cloud-config-small",
+      "category": "realistic",
+      "description": "Small FlightControl cloud config (~1 env, a handful of keyed services) with a low-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "low"
+      ],
+      "maxArrayLen": 17,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 8087,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.0111024256926953,
+            "p99Ms": 1.24175,
+            "minMs": 0.829375,
+            "samples": 397
+          },
+          "decode": {
+            "meanMs": 0.14983624850074975,
+            "p99Ms": 0.385,
+            "minMs": 0.126208,
+            "samples": 2668
+          },
+          "e2e": {
+            "meanMs": 1.2887445048231507,
+            "p99Ms": 1.559333,
+            "minMs": 1.076208,
+            "samples": 311
+          },
+          "apply": {
+            "meanMs": 0.000619714508001253,
+            "p99Ms": 0.001625,
+            "minMs": 0.000375,
+            "samples": 500000
+          },
+          "alloc": {
+            "bytesPerOp": 1058788,
+            "allocsPerOp": 7536,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 8087,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.1372749325842693,
+            "p99Ms": 1.786125,
+            "minMs": 0.8985,
+            "samples": 356
+          },
+          "decode": {
+            "meanMs": 0.14746368978236793,
+            "p99Ms": 0.362792,
+            "minMs": 0.125583,
+            "samples": 2711
+          },
+          "e2e": {
+            "meanMs": 1.2309584831804283,
+            "p99Ms": 1.503375,
+            "minMs": 1.015875,
+            "samples": 327
+          },
+          "apply": {
+            "meanMs": 0.0006234009860013786,
+            "p99Ms": 0.001625,
+            "minMs": 0.000375,
+            "samples": 500000
+          },
+          "alloc": {
+            "bytesPerOp": 1058559,
+            "allocsPerOp": 7534,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.10122987718409703,
+            "p99Ms": 0.292833,
+            "minMs": 0.085417,
+            "samples": 3949
+          },
+          "decode": {
+            "meanMs": 0.051815894251978925,
+            "p99Ms": 0.160125,
+            "minMs": 0.043583,
+            "samples": 7707
+          },
+          "e2e": {
+            "meanMs": 0.06557068685376692,
+            "p99Ms": 0.208833,
+            "minMs": 0.05075,
+            "samples": 6093
+          },
+          "apply": {
+            "meanMs": 0.1910943248924991,
+            "p99Ms": 0.434167,
+            "minMs": 0.162625,
+            "samples": 2093
+          },
+          "alloc": {
+            "bytesPerOp": 76850,
+            "allocsPerOp": 1707,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.035723187360128784,
+            "p99Ms": 0.142834,
+            "minMs": 0.029,
+            "samples": 11171
+          },
+          "decode": {
+            "meanMs": 0.05191265795971403,
+            "p99Ms": 0.159542,
+            "minMs": 0.041917,
+            "samples": 7695
+          },
+          "e2e": {
+            "meanMs": 0.09029529304112044,
+            "p99Ms": 0.289,
+            "minMs": 0.076292,
+            "samples": 4426
+          },
+          "apply": {
+            "meanMs": 0.1849232103559872,
+            "p99Ms": 0.391708,
+            "minMs": 0.160959,
+            "samples": 2163
+          },
+          "alloc": {
+            "bytesPerOp": 30465,
+            "allocsPerOp": 1303,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.07399694999999984,
+            "p99Ms": 0.215875,
+            "minMs": 0.0595,
+            "samples": 5400
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.07450804512399808,
+            "p99Ms": 0.217792,
+            "minMs": 0.061458,
+            "samples": 5363
+          },
+          "apply": {
+            "meanMs": 0.20295053323186196,
+            "p99Ms": 0.462208,
+            "minMs": 0.162958,
+            "samples": 1971
+          },
+          "alloc": {
+            "bytesPerOp": 54253,
+            "allocsPerOp": 1501,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.007039245813332431,
+            "p99Ms": 0.024709,
+            "minMs": 0.005417,
+            "samples": 56250
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.004021757645541909,
+            "p99Ms": 0.0285,
+            "minMs": 0.002666,
+            "samples": 97704
+          },
+          "alloc": {
+            "bytesPerOp": 8328,
+            "allocsPerOp": 109,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.005042874440493256,
+            "p99Ms": 0.011708,
+            "minMs": 0.003791,
+            "samples": 78194
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.17958763852716675,
+            "p99Ms": 0.418791,
+            "minMs": 0.1575,
+            "samples": 2227
+          },
+          "alloc": {
+            "bytesPerOp": 112819,
+            "allocsPerOp": 2982,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-cloud-config-medium",
+      "category": "realistic",
+      "description": "Medium cloud config (dozens of keyed services across envs) with a medium-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "medium"
+      ],
+      "maxArrayLen": 68,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 488,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.4734367022058825,
+            "p99Ms": 3.78625,
+            "minMs": 0.9845,
+            "samples": 272
+          },
+          "decode": {
+            "meanMs": 1.9032620900473947,
+            "p99Ms": 2.100833,
+            "minMs": 1.623041,
+            "samples": 211
+          },
+          "e2e": {
+            "meanMs": 3.3719573025210106,
+            "p99Ms": 3.716708,
+            "minMs": 3.011,
+            "samples": 119
+          },
+          "apply": {
+            "meanMs": 0.005379551750463653,
+            "p99Ms": 0.0435,
+            "minMs": 0.002917,
+            "samples": 73352
+          },
+          "alloc": {
+            "bytesPerOp": 1114256,
+            "allocsPerOp": 8239,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 488,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.3516736891891887,
+            "p99Ms": 1.600708,
+            "minMs": 1.0535,
+            "samples": 296
+          },
+          "decode": {
+            "meanMs": 2.055997194871796,
+            "p99Ms": 2.728791,
+            "minMs": 1.613166,
+            "samples": 195
+          },
+          "e2e": {
+            "meanMs": 3.3383888666666675,
+            "p99Ms": 3.658208,
+            "minMs": 2.988625,
+            "samples": 120
+          },
+          "apply": {
+            "meanMs": 0.005424947534809578,
+            "p99Ms": 0.044125,
+            "minMs": 0.002959,
+            "samples": 72753
+          },
+          "alloc": {
+            "bytesPerOp": 1147708,
+            "allocsPerOp": 8328,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.243568037267081,
+            "p99Ms": 1.530583,
+            "minMs": 1.044167,
+            "samples": 322
+          },
+          "decode": {
+            "meanMs": 0.6514028631921813,
+            "p99Ms": 0.953292,
+            "minMs": 0.550916,
+            "samples": 614
+          },
+          "e2e": {
+            "meanMs": 0.7591147438330171,
+            "p99Ms": 1.068375,
+            "minMs": 0.642292,
+            "samples": 527
+          },
+          "apply": {
+            "meanMs": 1.987874777227722,
+            "p99Ms": 2.250958,
+            "minMs": 1.704875,
+            "samples": 202
+          },
+          "alloc": {
+            "bytesPerOp": 919171,
+            "allocsPerOp": 20079,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.4417337339955845,
+            "p99Ms": 0.76775,
+            "minMs": 0.359667,
+            "samples": 906
+          },
+          "decode": {
+            "meanMs": 0.665360493355482,
+            "p99Ms": 0.944125,
+            "minMs": 0.553083,
+            "samples": 602
+          },
+          "e2e": {
+            "meanMs": 1.1617042463768117,
+            "p99Ms": 1.74475,
+            "minMs": 0.932875,
+            "samples": 345
+          },
+          "apply": {
+            "meanMs": 1.9532496634146346,
+            "p99Ms": 2.213667,
+            "minMs": 1.701458,
+            "samples": 205
+          },
+          "alloc": {
+            "bytesPerOp": 352693,
+            "allocsPerOp": 15477,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.8978774058295965,
+            "p99Ms": 1.194084,
+            "minMs": 0.757333,
+            "samples": 446
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.9035237787810378,
+            "p99Ms": 1.211875,
+            "minMs": 0.764875,
+            "samples": 443
+          },
+          "apply": {
+            "meanMs": 2.1429089144385025,
+            "p99Ms": 8.150083,
+            "minMs": 1.696917,
+            "samples": 187
+          },
+          "alloc": {
+            "bytesPerOp": 639932,
+            "allocsPerOp": 17946,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.01097751676108904,
+            "p99Ms": 0.054334,
+            "minMs": 0.007958,
+            "samples": 36185
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.005384980012551889,
+            "p99Ms": 0.042958,
+            "minMs": 0.003,
+            "samples": 73296
+          },
+          "alloc": {
+            "bytesPerOp": 11720,
+            "allocsPerOp": 119,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.00653468958512305,
+            "p99Ms": 0.02275,
+            "minMs": 0.004833,
+            "samples": 60548
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 1.9357327101449278,
+            "p99Ms": 2.173833,
+            "minMs": 1.698791,
+            "samples": 207
+          },
+          "alloc": {
+            "bytesPerOp": 1250782,
+            "allocsPerOp": 31094,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-cloud-config-large",
+      "category": "realistic",
+      "description": "Large cloud config (~100 keyed services) with a high-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "high"
+      ],
+      "maxArrayLen": 146,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1060,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 1.4968654440298519,
+            "p99Ms": 2.107292,
+            "minMs": 1.247209,
+            "samples": 268
+          },
+          "decode": {
+            "meanMs": 9.055976844444446,
+            "p99Ms": 9.683917,
+            "minMs": 8.660084,
+            "samples": 45
+          },
+          "e2e": {
+            "meanMs": 10.722794842105266,
+            "p99Ms": 11.237959,
+            "minMs": 10.290916,
+            "samples": 38
+          },
+          "apply": {
+            "meanMs": 0.01188603991747382,
+            "p99Ms": 0.068,
+            "minMs": 0.006875,
+            "samples": 33444
+          },
+          "alloc": {
+            "bytesPerOp": 1174073,
+            "allocsPerOp": 9036,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1061,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 1.5914133095238099,
+            "p99Ms": 2.264083,
+            "minMs": 1.334167,
+            "samples": 252
+          },
+          "decode": {
+            "meanMs": 9.4836695,
+            "p99Ms": 21.380375,
+            "minMs": 8.620292,
+            "samples": 44
+          },
+          "e2e": {
+            "meanMs": 14.439197892857143,
+            "p99Ms": 36.609666,
+            "minMs": 10.281667,
+            "samples": 28
+          },
+          "apply": {
+            "meanMs": 0.013218469578523894,
+            "p99Ms": 0.0725,
+            "minMs": 0.007708,
+            "samples": 30061
+          },
+          "alloc": {
+            "bytesPerOp": 1252920,
+            "allocsPerOp": 9140,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1044,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 6.576669360655736,
+            "p99Ms": 7.099625,
+            "minMs": 5.785208,
+            "samples": 61
+          },
+          "decode": {
+            "meanMs": 3.454280870689656,
+            "p99Ms": 5.61375,
+            "minMs": 2.998583,
+            "samples": 116
+          },
+          "e2e": {
+            "meanMs": 3.576187508928571,
+            "p99Ms": 4.079542,
+            "minMs": 3.183333,
+            "samples": 112
+          },
+          "apply": {
+            "meanMs": 8.330528897959184,
+            "p99Ms": 8.829541,
+            "minMs": 7.804834,
+            "samples": 49
+          },
+          "alloc": {
+            "bytesPerOp": 4625458,
+            "allocsPerOp": 99714,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1045,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 2.1055847999999995,
+            "p99Ms": 2.668958,
+            "minMs": 1.868667,
+            "samples": 190
+          },
+          "decode": {
+            "meanMs": 3.30206243442623,
+            "p99Ms": 5.118958,
+            "minMs": 2.868667,
+            "samples": 122
+          },
+          "e2e": {
+            "meanMs": 5.902721191176471,
+            "p99Ms": 14.384125,
+            "minMs": 5.135417,
+            "samples": 68
+          },
+          "apply": {
+            "meanMs": 8.754633043478261,
+            "p99Ms": 9.211084,
+            "minMs": 8.051458,
+            "samples": 46
+          },
+          "alloc": {
+            "bytesPerOp": 1749435,
+            "allocsPerOp": 77129,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1036,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 5.035843174999999,
+            "p99Ms": 5.696916,
+            "minMs": 4.401,
+            "samples": 80
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 4.79222769047619,
+            "p99Ms": 5.413208,
+            "minMs": 4.273667,
+            "samples": 84
+          },
+          "apply": {
+            "meanMs": 8.466880041666668,
+            "p99Ms": 8.878375,
+            "minMs": 7.8105,
+            "samples": 48
+          },
+          "alloc": {
+            "bytesPerOp": 3353435,
+            "allocsPerOp": 92023,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1044,
+          "patchOps": 8,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.022849319903719353,
+            "p99Ms": 0.068417,
+            "minMs": 0.018792,
+            "samples": 17449
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.012395503415364599,
+            "p99Ms": 0.0675,
+            "minMs": 0.007375,
+            "samples": 32061
+          },
+          "alloc": {
+            "bytesPerOp": 32072,
+            "allocsPerOp": 234,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1044,
+          "patchOps": 8,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.01449604569138258,
+            "p99Ms": 0.036167,
+            "minMs": 0.01225,
+            "samples": 27445
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 9.350293627906977,
+            "p99Ms": 18.45325,
+            "minMs": 8.38475,
+            "samples": 43
+          },
+          "alloc": {
+            "bytesPerOp": 5669640,
+            "allocsPerOp": 150476,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-ecommerce-medium",
+      "category": "realistic",
+      "description": "Medium e-commerce platform config (keyed products, users, categories, orders) with a realistic edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "e-commerce",
+        "medium"
+      ],
+      "maxArrayLen": 66,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 369,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.08249706669419771,
+            "p99Ms": 0.272,
+            "minMs": 0.06475,
+            "samples": 4843
+          },
+          "decode": {
+            "meanMs": 1.0799775283018866,
+            "p99Ms": 1.375459,
+            "minMs": 0.970209,
+            "samples": 371
+          },
+          "e2e": {
+            "meanMs": 1.1672626326530617,
+            "p99Ms": 1.422584,
+            "minMs": 1.008791,
+            "samples": 343
+          },
+          "apply": {
+            "meanMs": 0.004103694742348708,
+            "p99Ms": 0.020875,
+            "minMs": 0.002875,
+            "samples": 95575
+          },
+          "alloc": {
+            "bytesPerOp": 42864,
+            "allocsPerOp": 793,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 369,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.08457390516511432,
+            "p99Ms": 0.224666,
+            "minMs": 0.072083,
+            "samples": 4724
+          },
+          "decode": {
+            "meanMs": 0.9962451393034827,
+            "p99Ms": 1.225167,
+            "minMs": 0.881375,
+            "samples": 402
+          },
+          "e2e": {
+            "meanMs": 1.2474297663551397,
+            "p99Ms": 2.252625,
+            "minMs": 0.983375,
+            "samples": 321
+          },
+          "apply": {
+            "meanMs": 0.0066174231342905464,
+            "p99Ms": 0.04075,
+            "minMs": 0.002958,
+            "samples": 59669
+          },
+          "alloc": {
+            "bytesPerOp": 81438,
+            "allocsPerOp": 889,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.8025819458917822,
+            "p99Ms": 1.167667,
+            "minMs": 0.639583,
+            "samples": 499
+          },
+          "decode": {
+            "meanMs": 0.43011484317937765,
+            "p99Ms": 0.696584,
+            "minMs": 0.381542,
+            "samples": 931
+          },
+          "e2e": {
+            "meanMs": 0.453686242630386,
+            "p99Ms": 0.741708,
+            "minMs": 0.397042,
+            "samples": 882
+          },
+          "apply": {
+            "meanMs": 0.9092933499999997,
+            "p99Ms": 1.238708,
+            "minMs": 0.807625,
+            "samples": 440
+          },
+          "alloc": {
+            "bytesPerOp": 450599,
+            "allocsPerOp": 10815,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.28785905399568046,
+            "p99Ms": 0.59125,
+            "minMs": 0.2465,
+            "samples": 1389
+          },
+          "decode": {
+            "meanMs": 0.4551045988636367,
+            "p99Ms": 0.927958,
+            "minMs": 0.359208,
+            "samples": 880
+          },
+          "e2e": {
+            "meanMs": 0.7247326726943946,
+            "p99Ms": 1.051167,
+            "minMs": 0.613542,
+            "samples": 553
+          },
+          "apply": {
+            "meanMs": 0.9014794707207217,
+            "p99Ms": 1.272125,
+            "minMs": 0.808375,
+            "samples": 444
+          },
+          "alloc": {
+            "bytesPerOp": 214233,
+            "allocsPerOp": 7945,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.6011454414414412,
+            "p99Ms": 1.150791,
+            "minMs": 0.5025,
+            "samples": 666
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.5823652023289668,
+            "p99Ms": 0.911792,
+            "minMs": 0.503291,
+            "samples": 687
+          },
+          "apply": {
+            "meanMs": 0.9372784777517554,
+            "p99Ms": 1.221333,
+            "minMs": 0.802542,
+            "samples": 427
+          },
+          "alloc": {
+            "bytesPerOp": 309678,
+            "allocsPerOp": 10009,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.010289915029278337,
+            "p99Ms": 0.031208,
+            "minMs": 0.00825,
+            "samples": 38425
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.004775283424607727,
+            "p99Ms": 0.023208,
+            "minMs": 0.003375,
+            "samples": 82170
+          },
+          "alloc": {
+            "bytesPerOp": 7296,
+            "allocsPerOp": 96,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.00684444051023281,
+            "p99Ms": 0.014375,
+            "minMs": 0.005666,
+            "samples": 57699
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.8894151444444444,
+            "p99Ms": 1.202541,
+            "minMs": 0.797417,
+            "samples": 450
+          },
+          "alloc": {
+            "bytesPerOp": 499767,
+            "allocsPerOp": 16171,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-modify-only",
+      "category": "keyed",
+      "description": "60 keyed items, one field changed on every third item, order preserved",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1333,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.028819098077479188,
+            "p99Ms": 0.104333,
+            "minMs": 0.024875,
+            "samples": 13836
+          },
+          "decode": {
+            "meanMs": 0.2693147905723902,
+            "p99Ms": 0.651083,
+            "minMs": 0.218417,
+            "samples": 1485
+          },
+          "e2e": {
+            "meanMs": 0.35313278729037934,
+            "p99Ms": 0.78175,
+            "minMs": 0.27825,
+            "samples": 1133
+          },
+          "apply": {
+            "meanMs": 0.01835301892802741,
+            "p99Ms": 0.126208,
+            "minMs": 0.011916,
+            "samples": 21661
+          },
+          "alloc": {
+            "bytesPerOp": 24472,
+            "allocsPerOp": 415,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1333,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.04549882696475426,
+            "p99Ms": 0.182292,
+            "minMs": 0.035458,
+            "samples": 8767
+          },
+          "decode": {
+            "meanMs": 0.30954363544891667,
+            "p99Ms": 0.75575,
+            "minMs": 0.251875,
+            "samples": 1292
+          },
+          "e2e": {
+            "meanMs": 0.44482805005561743,
+            "p99Ms": 0.980083,
+            "minMs": 0.334083,
+            "samples": 899
+          },
+          "apply": {
+            "meanMs": 0.017734150006690704,
+            "p99Ms": 0.111875,
+            "minMs": 0.012,
+            "samples": 22419
+          },
+          "alloc": {
+            "bytesPerOp": 38112,
+            "allocsPerOp": 447,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.19831865228174617,
+            "p99Ms": 0.869875,
+            "minMs": 0.135625,
+            "samples": 2016
+          },
+          "decode": {
+            "meanMs": 0.08288841108113736,
+            "p99Ms": 0.347542,
+            "minMs": 0.065041,
+            "samples": 4819
+          },
+          "e2e": {
+            "meanMs": 0.11481925079000277,
+            "p99Ms": 0.373333,
+            "minMs": 0.093875,
+            "samples": 3481
+          },
+          "apply": {
+            "meanMs": 0.36445046812386145,
+            "p99Ms": 1.0915,
+            "minMs": 0.274083,
+            "samples": 1098
+          },
+          "alloc": {
+            "bytesPerOp": 105768,
+            "allocsPerOp": 2836,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.09684487224242419,
+            "p99Ms": 0.31725,
+            "minMs": 0.079125,
+            "samples": 4125
+          },
+          "decode": {
+            "meanMs": 0.0935833896438614,
+            "p99Ms": 0.376458,
+            "minMs": 0.071042,
+            "samples": 4268
+          },
+          "e2e": {
+            "meanMs": 0.20455083469805505,
+            "p99Ms": 0.594125,
+            "minMs": 0.169875,
+            "samples": 1954
+          },
+          "apply": {
+            "meanMs": 0.39447463116370884,
+            "p99Ms": 0.766417,
+            "minMs": 0.327542,
+            "samples": 1014
+          },
+          "alloc": {
+            "bytesPerOp": 52716,
+            "allocsPerOp": 2200,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.14466959015206401,
+            "p99Ms": 0.4255,
+            "minMs": 0.124125,
+            "samples": 2762
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.18822661658031112,
+            "p99Ms": 0.73,
+            "minMs": 0.136917,
+            "samples": 2123
+          },
+          "apply": {
+            "meanMs": 0.44141736092715217,
+            "p99Ms": 1.708959,
+            "minMs": 0.294209,
+            "samples": 906
+          },
+          "alloc": {
+            "bytesPerOp": 68651,
+            "allocsPerOp": 2534,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.05944359266984464,
+            "p99Ms": 0.243875,
+            "minMs": 0.0415,
+            "samples": 6712
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.02342736760198041,
+            "p99Ms": 0.150625,
+            "minMs": 0.016416,
+            "samples": 16964
+          },
+          "alloc": {
+            "bytesPerOp": 41280,
+            "allocsPerOp": 380,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.036811115072035536,
+            "p99Ms": 0.118125,
+            "minMs": 0.03,
+            "samples": 10828
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.3580986239855725,
+            "p99Ms": 0.6535,
+            "minMs": 0.266166,
+            "samples": 1109
+          },
+          "alloc": {
+            "bytesPerOp": 143044,
+            "allocsPerOp": 5574,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-add-only",
+      "category": "keyed",
+      "description": "60 keyed items plus 20 appended new keys",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "add"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.030482339155750167,
+            "p99Ms": 0.119959,
+            "minMs": 0.025417,
+            "samples": 13053
+          },
+          "decode": {
+            "meanMs": 0.4208020956887484,
+            "p99Ms": 0.828417,
+            "minMs": 0.356291,
+            "samples": 951
+          },
+          "e2e": {
+            "meanMs": 0.4851268254545457,
+            "p99Ms": 0.805583,
+            "minMs": 0.419208,
+            "samples": 825
+          },
+          "apply": {
+            "meanMs": 0.018713991192124694,
+            "p99Ms": 0.1295,
+            "minMs": 0.010959,
+            "samples": 21231
+          },
+          "alloc": {
+            "bytesPerOp": 20824,
+            "allocsPerOp": 335,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1891,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.031788843914500105,
+            "p99Ms": 0.145416,
+            "minMs": 0.02475,
+            "samples": 12538
+          },
+          "decode": {
+            "meanMs": 0.3437834006878758,
+            "p99Ms": 0.574917,
+            "minMs": 0.297,
+            "samples": 1163
+          },
+          "e2e": {
+            "meanMs": 0.47111854888103677,
+            "p99Ms": 0.807416,
+            "minMs": 0.380125,
+            "samples": 849
+          },
+          "apply": {
+            "meanMs": 0.018797192591541393,
+            "p99Ms": 0.130292,
+            "minMs": 0.011083,
+            "samples": 21138
+          },
+          "alloc": {
+            "bytesPerOp": 33608,
+            "allocsPerOp": 362,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.24765420693928128,
+            "p99Ms": 0.907583,
+            "minMs": 0.190625,
+            "samples": 1614
+          },
+          "decode": {
+            "meanMs": 0.1245933499688085,
+            "p99Ms": 0.373042,
+            "minMs": 0.103667,
+            "samples": 3206
+          },
+          "e2e": {
+            "meanMs": 0.15430744517374517,
+            "p99Ms": 0.455792,
+            "minMs": 0.130375,
+            "samples": 2590
+          },
+          "apply": {
+            "meanMs": 0.35104601403508795,
+            "p99Ms": 0.693584,
+            "minMs": 0.309917,
+            "samples": 1140
+          },
+          "alloc": {
+            "bytesPerOp": 122412,
+            "allocsPerOp": 3249,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1891,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.12388300619962811,
+            "p99Ms": 0.474084,
+            "minMs": 0.088625,
+            "samples": 3226
+          },
+          "decode": {
+            "meanMs": 0.11580749507246367,
+            "p99Ms": 0.346625,
+            "minMs": 0.104584,
+            "samples": 3450
+          },
+          "e2e": {
+            "meanMs": 0.23518685058823519,
+            "p99Ms": 0.652625,
+            "minMs": 0.175375,
+            "samples": 1700
+          },
+          "apply": {
+            "meanMs": 0.38659739458413894,
+            "p99Ms": 0.953084,
+            "minMs": 0.312125,
+            "samples": 1034
+          },
+          "alloc": {
+            "bytesPerOp": 60340,
+            "allocsPerOp": 2361,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1891,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.2742099060356655,
+            "p99Ms": 0.690834,
+            "minMs": 0.222083,
+            "samples": 1458
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.32322917219078423,
+            "p99Ms": 0.746458,
+            "minMs": 0.250792,
+            "samples": 1237
+          },
+          "apply": {
+            "meanMs": 0.3781315434782611,
+            "p99Ms": 0.700834,
+            "minMs": 0.31175,
+            "samples": 1058
+          },
+          "alloc": {
+            "bytesPerOp": 104486,
+            "allocsPerOp": 3473,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.09068670465380274,
+            "p99Ms": 0.329291,
+            "minMs": 0.079625,
+            "samples": 4405
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.017148750377692513,
+            "p99Ms": 0.118666,
+            "minMs": 0.009125,
+            "samples": 23167
+          },
+          "alloc": {
+            "bytesPerOp": 58208,
+            "allocsPerOp": 300,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.04812197406513866,
+            "p99Ms": 0.153167,
+            "minMs": 0.039042,
+            "samples": 8290
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.31460303383162835,
+            "p99Ms": 0.650083,
+            "minMs": 0.270542,
+            "samples": 1271
+          },
+          "alloc": {
+            "bytesPerOp": 161581,
+            "allocsPerOp": 5977,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-remove-only",
+      "category": "keyed",
+      "description": "60 keyed items with every fourth key removed",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "remove"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1459,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.022650011723195654,
+            "p99Ms": 0.08475,
+            "minMs": 0.018875,
+            "samples": 17572
+          },
+          "decode": {
+            "meanMs": 0.29690062286562763,
+            "p99Ms": 0.574875,
+            "minMs": 0.242125,
+            "samples": 1347
+          },
+          "e2e": {
+            "meanMs": 0.34797461618798925,
+            "p99Ms": 0.637667,
+            "minMs": 0.309833,
+            "samples": 1149
+          },
+          "apply": {
+            "meanMs": 0.012271444975037913,
+            "p99Ms": 0.092834,
+            "minMs": 0.007583,
+            "samples": 32249
+          },
+          "alloc": {
+            "bytesPerOp": 15432,
+            "allocsPerOp": 260,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1459,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.02733947059227227,
+            "p99Ms": 0.11625,
+            "minMs": 0.022041,
+            "samples": 14571
+          },
+          "decode": {
+            "meanMs": 0.2756716781529982,
+            "p99Ms": 0.520084,
+            "minMs": 0.244042,
+            "samples": 1451
+          },
+          "e2e": {
+            "meanMs": 0.3176143796664024,
+            "p99Ms": 0.572667,
+            "minMs": 0.281542,
+            "samples": 1259
+          },
+          "apply": {
+            "meanMs": 0.011050351187174411,
+            "p99Ms": 0.082792,
+            "minMs": 0.00675,
+            "samples": 36052
+          },
+          "alloc": {
+            "bytesPerOp": 24336,
+            "allocsPerOp": 285,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 9108,
+          "patchOps": 174,
+          "diff": {
+            "meanMs": 0.19426431146744372,
+            "p99Ms": 0.4595,
+            "minMs": 0.142958,
+            "samples": 2058
+          },
+          "decode": {
+            "meanMs": 0.08245826574437336,
+            "p99Ms": 0.277708,
+            "minMs": 0.068375,
+            "samples": 4843
+          },
+          "e2e": {
+            "meanMs": 0.22770582517084315,
+            "p99Ms": 0.470625,
+            "minMs": 0.205583,
+            "samples": 1756
+          },
+          "apply": {
+            "meanMs": 0.644134658615137,
+            "p99Ms": 0.91075,
+            "minMs": 0.588792,
+            "samples": 621
+          },
+          "alloc": {
+            "bytesPerOp": 141340,
+            "allocsPerOp": 2655,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 9108,
+          "patchOps": 174,
+          "diff": {
+            "meanMs": 0.1181734075717242,
+            "p99Ms": 0.359833,
+            "minMs": 0.088541,
+            "samples": 3381
+          },
+          "decode": {
+            "meanMs": 0.06930573481430034,
+            "p99Ms": 0.210584,
+            "minMs": 0.061584,
+            "samples": 5762
+          },
+          "e2e": {
+            "meanMs": 0.18261981818181824,
+            "p99Ms": 0.407916,
+            "minMs": 0.162416,
+            "samples": 2189
+          },
+          "apply": {
+            "meanMs": 0.6459972612903226,
+            "p99Ms": 0.89675,
+            "minMs": 0.592,
+            "samples": 620
+          },
+          "alloc": {
+            "bytesPerOp": 94325,
+            "allocsPerOp": 2279,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 523,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.330830989256198,
+            "p99Ms": 0.572,
+            "minMs": 0.308708,
+            "samples": 1210
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.350721296231376,
+            "p99Ms": 0.629292,
+            "minMs": 0.315416,
+            "samples": 1141
+          },
+          "apply": {
+            "meanMs": 0.21077470954138114,
+            "p99Ms": 0.428292,
+            "minMs": 0.189625,
+            "samples": 1897
+          },
+          "alloc": {
+            "bytesPerOp": 113936,
+            "allocsPerOp": 4862,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 9108,
+          "patchOps": 174,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.3958038308605341,
+            "p99Ms": 0.651084,
+            "minMs": 0.32375,
+            "samples": 1011
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.16621860390689963,
+            "p99Ms": 0.38475,
+            "minMs": 0.129791,
+            "samples": 2406
+          },
+          "alloc": {
+            "bytesPerOp": 322904,
+            "allocsPerOp": 3246,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 9108,
+          "patchOps": 174,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.2668377838559038,
+            "p99Ms": 0.511208,
+            "minMs": 0.234875,
+            "samples": 1499
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.4238981737288131,
+            "p99Ms": 0.692084,
+            "minMs": 0.350709,
+            "samples": 944
+          },
+          "alloc": {
+            "bytesPerOp": 184831,
+            "allocsPerOp": 7897,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-reorder-only",
+      "category": "keyed",
+      "description": "60 keyed items reversed with identical content (order-insensitive no-op territory)",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "reorder",
+        "noop"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 4,
+          "patchOps": 0,
+          "diff": {
+            "meanMs": 0.024814259958855747,
+            "p99Ms": 0.053667,
+            "minMs": 0.020167,
+            "samples": 16041
+          },
+          "decode": {
+            "meanMs": 0.330988745033112,
+            "p99Ms": 0.58625,
+            "minMs": 0.277375,
+            "samples": 1208
+          },
+          "e2e": {
+            "meanMs": 0.3448866836206899,
+            "p99Ms": 0.617875,
+            "minMs": 0.302333,
+            "samples": 1160
+          },
+          "apply": {
+            "meanMs": 0.000030249078000121683,
+            "p99Ms": 0.000042,
+            "minMs": 0,
+            "samples": 500000
+          },
+          "alloc": {
+            "bytesPerOp": 12552,
+            "allocsPerOp": 268,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 3001,
+          "patchOps": 59,
+          "diff": {
+            "meanMs": 0.03918260288915054,
+            "p99Ms": 0.148583,
+            "minMs": 0.032917,
+            "samples": 10176
+          },
+          "decode": {
+            "meanMs": 0.3644228460837887,
+            "p99Ms": 0.743,
+            "minMs": 0.305208,
+            "samples": 1098
+          },
+          "e2e": {
+            "meanMs": 0.4385068925438596,
+            "p99Ms": 0.728209,
+            "minMs": 0.387458,
+            "samples": 912
+          },
+          "apply": {
+            "meanMs": 0.1060976950863212,
+            "p99Ms": 0.346375,
+            "minMs": 0.074,
+            "samples": 3765
+          },
+          "alloc": {
+            "bytesPerOp": 41368,
+            "allocsPerOp": 422,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": {
+            "meanMs": 0.22671386224489806,
+            "p99Ms": 0.48225,
+            "minMs": 0.201208,
+            "samples": 1764
+          },
+          "decode": {
+            "meanMs": 0.08698467835365803,
+            "p99Ms": 0.216042,
+            "minMs": 0.077917,
+            "samples": 4592
+          },
+          "e2e": {
+            "meanMs": 0.2928586508052713,
+            "p99Ms": 0.559292,
+            "minMs": 0.264791,
+            "samples": 1366
+          },
+          "apply": {
+            "meanMs": 0.950534821852732,
+            "p99Ms": 1.285333,
+            "minMs": 0.877042,
+            "samples": 421
+          },
+          "alloc": {
+            "bytesPerOp": 155068,
+            "allocsPerOp": 3100,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": {
+            "meanMs": 0.16512508384964858,
+            "p99Ms": 0.417167,
+            "minMs": 0.146334,
+            "samples": 2421
+          },
+          "decode": {
+            "meanMs": 0.08690381375108781,
+            "p99Ms": 0.218625,
+            "minMs": 0.077084,
+            "samples": 4596
+          },
+          "e2e": {
+            "meanMs": 0.25485962038216575,
+            "p99Ms": 0.530125,
+            "minMs": 0.208583,
+            "samples": 1570
+          },
+          "apply": {
+            "meanMs": 0.9464948817966903,
+            "p99Ms": 1.240084,
+            "minMs": 0.870666,
+            "samples": 423
+          },
+          "alloc": {
+            "bytesPerOp": 114892,
+            "allocsPerOp": 3082,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": {
+            "meanMs": 0.14163277321048898,
+            "p99Ms": 0.311542,
+            "minMs": 0.126959,
+            "samples": 2822
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.3023501534391538,
+            "p99Ms": 0.577667,
+            "minMs": 0.270584,
+            "samples": 1323
+          },
+          "apply": {
+            "meanMs": 0.9643784192771084,
+            "p99Ms": 1.3595,
+            "minMs": 0.875333,
+            "samples": 415
+          },
+          "alloc": {
+            "bytesPerOp": 97191,
+            "allocsPerOp": 2532,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.6298545858267718,
+            "p99Ms": 0.934459,
+            "minMs": 0.573084,
+            "samples": 635
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.28379142938254087,
+            "p99Ms": 0.558292,
+            "minMs": 0.214375,
+            "samples": 1409
+          },
+          "alloc": {
+            "bytesPerOp": 495362,
+            "allocsPerOp": 4560,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.40072323146292527,
+            "p99Ms": 0.828916,
+            "minMs": 0.3255,
+            "samples": 998
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.6044006359516615,
+            "p99Ms": 0.898542,
+            "minMs": 0.504917,
+            "samples": 662
+          },
+          "alloc": {
+            "bytesPerOp": 235733,
+            "allocsPerOp": 10635,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-mixed-modify-add-remove-reorder",
+      "category": "keyed",
+      "description": "80 keyed items with a combined remove/modify/reorder/add workload",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify",
+        "add",
+        "remove",
+        "reorder",
+        "mixed"
+      ],
+      "maxArrayLen": 80,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 5052,
+          "patchOps": 63,
+          "diff": {
+            "meanMs": 0.05622095998309145,
+            "p99Ms": 0.204292,
+            "minMs": 0.042833,
+            "samples": 7097
+          },
+          "decode": {
+            "meanMs": 0.4411082392502752,
+            "p99Ms": 0.728792,
+            "minMs": 0.373083,
+            "samples": 907
+          },
+          "e2e": {
+            "meanMs": 0.6157972876923078,
+            "p99Ms": 1.631083,
+            "minMs": 0.494625,
+            "samples": 650
+          },
+          "apply": {
+            "meanMs": 0.06638001562500014,
+            "p99Ms": 0.278083,
+            "minMs": 0.046375,
+            "samples": 6016
+          },
+          "alloc": {
+            "bytesPerOp": 45784,
+            "allocsPerOp": 513,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 8257,
+          "patchOps": 126,
+          "diff": {
+            "meanMs": 0.06382033850335804,
+            "p99Ms": 0.205792,
+            "minMs": 0.051667,
+            "samples": 6254
+          },
+          "decode": {
+            "meanMs": 0.42924761695278946,
+            "p99Ms": 0.691791,
+            "minMs": 0.378208,
+            "samples": 932
+          },
+          "e2e": {
+            "meanMs": 0.6255585234375006,
+            "p99Ms": 0.933875,
+            "minMs": 0.547833,
+            "samples": 640
+          },
+          "apply": {
+            "meanMs": 0.2043660414110431,
+            "p99Ms": 0.482375,
+            "minMs": 0.133583,
+            "samples": 1956
+          },
+          "alloc": {
+            "bytesPerOp": 60960,
+            "allocsPerOp": 671,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 13116,
+          "patchOps": 246,
+          "diff": {
+            "meanMs": 0.3056581001529057,
+            "p99Ms": 0.844875,
+            "minMs": 0.244,
+            "samples": 1308
+          },
+          "decode": {
+            "meanMs": 0.12168443923240922,
+            "p99Ms": 0.366708,
+            "minMs": 0.108292,
+            "samples": 3283
+          },
+          "e2e": {
+            "meanMs": 0.42815449678800843,
+            "p99Ms": 0.994,
+            "minMs": 0.33,
+            "samples": 934
+          },
+          "apply": {
+            "meanMs": 1.3274245331125818,
+            "p99Ms": 1.929458,
+            "minMs": 1.07875,
+            "samples": 302
+          },
+          "alloc": {
+            "bytesPerOp": 179701,
+            "allocsPerOp": 3719,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 13116,
+          "patchOps": 246,
+          "diff": {
+            "meanMs": 0.243527814137721,
+            "p99Ms": 0.641625,
+            "minMs": 0.20475,
+            "samples": 1641
+          },
+          "decode": {
+            "meanMs": 0.14556734426229512,
+            "p99Ms": 0.442583,
+            "minMs": 0.126291,
+            "samples": 2745
+          },
+          "e2e": {
+            "meanMs": 0.38241391873804925,
+            "p99Ms": 0.76225,
+            "minMs": 0.336667,
+            "samples": 1046
+          },
+          "apply": {
+            "meanMs": 1.1955288716417913,
+            "p99Ms": 1.632625,
+            "minMs": 1.058875,
+            "samples": 335
+          },
+          "alloc": {
+            "bytesPerOp": 121813,
+            "allocsPerOp": 3339,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 3657,
+          "patchOps": 63,
+          "diff": {
+            "meanMs": 2.170777702702702,
+            "p99Ms": 2.731958,
+            "minMs": 2.012625,
+            "samples": 185
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 2.214644563535911,
+            "p99Ms": 2.696875,
+            "minMs": 2.06525,
+            "samples": 181
+          },
+          "apply": {
+            "meanMs": 0.5251133740157478,
+            "p99Ms": 0.960875,
+            "minMs": 0.452916,
+            "samples": 762
+          },
+          "alloc": {
+            "bytesPerOp": 430758,
+            "allocsPerOp": 23030,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 13116,
+          "patchOps": 246,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.6468396591276249,
+            "p99Ms": 0.982917,
+            "minMs": 0.579417,
+            "samples": 619
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.2844249523809519,
+            "p99Ms": 0.616875,
+            "minMs": 0.219459,
+            "samples": 1407
+          },
+          "alloc": {
+            "bytesPerOp": 549962,
+            "allocsPerOp": 4622,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 13116,
+          "patchOps": 246,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.4415815275938194,
+            "p99Ms": 0.729084,
+            "minMs": 0.373209,
+            "samples": 906
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.6476594093851131,
+            "p99Ms": 0.973167,
+            "minMs": 0.569833,
+            "samples": 618
+          },
+          "alloc": {
+            "bytesPerOp": 268882,
+            "allocsPerOp": 11555,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "lcs-10k-single-edit",
+      "category": "lcs",
+      "description": "10,000-element sequence with a single mid-array element change",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit"
+      ],
+      "maxArrayLen": 10000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 2.301130931034482,
+            "p99Ms": 2.903083,
+            "minMs": 1.67525,
+            "samples": 174
+          },
+          "decode": {
+            "meanMs": 7.709458403846152,
+            "p99Ms": 8.595708,
+            "minMs": 6.885417,
+            "samples": 52
+          },
+          "e2e": {
+            "meanMs": 9.848373926829264,
+            "p99Ms": 10.988458,
+            "minMs": 8.718333,
+            "samples": 41
+          },
+          "apply": {
+            "meanMs": 0.044046890987408806,
+            "p99Ms": 0.253833,
+            "minMs": 0.0055,
+            "samples": 9054
+          },
+          "alloc": {
+            "bytesPerOp": 2474555,
+            "allocsPerOp": 40081,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5300224,
+            "allocBytesPerOp": 2474555,
+            "allocsPerOp": 40081,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 4.651572232558138,
+            "p99Ms": 5.309542,
+            "minMs": 3.642083,
+            "samples": 86
+          },
+          "decode": {
+            "meanMs": 8.569625744680852,
+            "p99Ms": 9.7655,
+            "minMs": 7.679708,
+            "samples": 47
+          },
+          "e2e": {
+            "meanMs": 12.45068812121212,
+            "p99Ms": 24.554917,
+            "minMs": 11.353792,
+            "samples": 33
+          },
+          "apply": {
+            "meanMs": 0.05778571902622817,
+            "p99Ms": 0.407791,
+            "minMs": 0.005958,
+            "samples": 6901
+          },
+          "alloc": {
+            "bytesPerOp": 4357271,
+            "allocsPerOp": 70117,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 7184384,
+            "allocBytesPerOp": 4357271,
+            "allocsPerOp": 70117,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 4.481550933333332,
+            "p99Ms": 4.987792,
+            "minMs": 3.843208,
+            "samples": 90
+          },
+          "decode": {
+            "meanMs": 3.1329694687500003,
+            "p99Ms": 3.655625,
+            "minMs": 2.461167,
+            "samples": 128
+          },
+          "e2e": {
+            "meanMs": 3.061454458015266,
+            "p99Ms": 3.909375,
+            "minMs": 2.23425,
+            "samples": 131
+          },
+          "apply": {
+            "meanMs": 9.538095285714286,
+            "p99Ms": 15.762959,
+            "minMs": 7.902792,
+            "samples": 42
+          },
+          "alloc": {
+            "bytesPerOp": 2180853,
+            "allocsPerOp": 40078,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5890048,
+            "allocBytesPerOp": 2180853,
+            "allocsPerOp": 40078,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 1.097579098630138,
+            "p99Ms": 1.505125,
+            "minMs": 0.868125,
+            "samples": 365
+          },
+          "decode": {
+            "meanMs": 2.608034337662338,
+            "p99Ms": 3.166708,
+            "minMs": 2.124666,
+            "samples": 154
+          },
+          "e2e": {
+            "meanMs": 4.218576757894735,
+            "p99Ms": 4.83775,
+            "minMs": 3.496625,
+            "samples": 95
+          },
+          "apply": {
+            "meanMs": 9.366267441860463,
+            "p99Ms": 14.462084,
+            "minMs": 7.989042,
+            "samples": 43
+          },
+          "alloc": {
+            "bytesPerOp": 680024,
+            "allocsPerOp": 19921,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 4227072,
+            "allocBytesPerOp": 680024,
+            "allocsPerOp": 19921,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 4.155164948453607,
+            "p99Ms": 4.815375,
+            "minMs": 3.296459,
+            "samples": 97
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 4.43309623076923,
+            "p99Ms": 5.211334,
+            "minMs": 3.409834,
+            "samples": 91
+          },
+          "apply": {
+            "meanMs": 9.588215238095236,
+            "p99Ms": 11.095917,
+            "minMs": 9.10175,
+            "samples": 42
+          },
+          "alloc": {
+            "bytesPerOp": 2124512,
+            "allocsPerOp": 69792,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5693440,
+            "allocBytesPerOp": 2124512,
+            "allocsPerOp": 69792,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.00377710108676366,
+            "p99Ms": 0.008208,
+            "minMs": 0.002833,
+            "samples": 101586
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.06655871266477557,
+            "p99Ms": 0.48275,
+            "minMs": 0.006834,
+            "samples": 5993
+          },
+          "alloc": {
+            "bytesPerOp": 164352,
+            "allocsPerOp": 13,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.0029721667254823054,
+            "p99Ms": 0.006917,
+            "minMs": 0.002,
+            "samples": 127515
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 8.89259908888889,
+            "p99Ms": 18.106542,
+            "minMs": 7.853708,
+            "samples": 45
+          },
+          "alloc": {
+            "bytesPerOp": 3748484,
+            "allocsPerOp": 110141,
+            "iterations": 20
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "lcs-70k-single-edit",
+      "category": "lcs",
+      "description": "70,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "maxArrayLen": 70000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 26.90613333333333,
+            "p99Ms": 51.431042,
+            "minMs": 17.808,
+            "samples": 15
+          },
+          "decode": {
+            "meanMs": 62.0060666,
+            "p99Ms": 63.018667,
+            "minMs": 61.199458,
+            "samples": 5
+          },
+          "e2e": {
+            "meanMs": 71.52385425,
+            "p99Ms": 75.979875,
+            "minMs": 66.281834,
+            "samples": 4
+          },
+          "apply": {
+            "meanMs": 0.2786869186369958,
+            "p99Ms": 2.019084,
+            "minMs": 0.035542,
+            "samples": 1438
+          },
+          "alloc": {
+            "bytesPerOp": 18190899,
+            "allocsPerOp": 280529,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 31735808,
+            "allocBytesPerOp": 18190899,
+            "allocsPerOp": 280529,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 45.71052066666667,
+            "p99Ms": 58.391083,
+            "minMs": 41.519208,
+            "samples": 6
+          },
+          "decode": {
+            "meanMs": 60.95628359999999,
+            "p99Ms": 62.521834,
+            "minMs": 58.572208,
+            "samples": 5
+          },
+          "e2e": {
+            "meanMs": 99.98562500000001,
+            "p99Ms": 102.137333,
+            "minMs": 97.910667,
+            "samples": 3
+          },
+          "apply": {
+            "meanMs": 0.28755761726618706,
+            "p99Ms": 2.091,
+            "minMs": 0.041042,
+            "samples": 1390
+          },
+          "alloc": {
+            "bytesPerOp": 31773572,
+            "allocsPerOp": 490789,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 42786816,
+            "allocBytesPerOp": 31773572,
+            "allocsPerOp": 490789,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 30.62863866666667,
+            "p99Ms": 31.801791,
+            "minMs": 29.4515,
+            "samples": 9
+          },
+          "decode": {
+            "meanMs": 17.665610608695655,
+            "p99Ms": 20.676459,
+            "minMs": 14.028584,
+            "samples": 23
+          },
+          "e2e": {
+            "meanMs": 21.267155684210525,
+            "p99Ms": 24.330834,
+            "minMs": 17.523625,
+            "samples": 19
+          },
+          "apply": {
+            "meanMs": 58.3400918,
+            "p99Ms": 65.626625,
+            "minMs": 50.41425,
+            "samples": 5
+          },
+          "alloc": {
+            "bytesPerOp": 17976762,
+            "allocsPerOp": 280110,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 25624576,
+            "allocBytesPerOp": 17976762,
+            "allocsPerOp": 280110,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 8.07133082,
+            "p99Ms": 9.335417,
+            "minMs": 7.432375,
+            "samples": 50
+          },
+          "decode": {
+            "meanMs": 20.7889833,
+            "p99Ms": 33.386708,
+            "minMs": 17.820541,
+            "samples": 20
+          },
+          "e2e": {
+            "meanMs": 29.50476492857143,
+            "p99Ms": 37.373708,
+            "minMs": 25.335916,
+            "samples": 14
+          },
+          "apply": {
+            "meanMs": 68.51182275,
+            "p99Ms": 69.575416,
+            "minMs": 66.959792,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 4840162,
+            "allocsPerOp": 139921,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 21217280,
+            "allocBytesPerOp": 4840162,
+            "allocsPerOp": 139921,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 30.631772999999995,
+            "p99Ms": 32.965208,
+            "minMs": 27.459625,
+            "samples": 9
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 31.153682692307694,
+            "p99Ms": 33.387667,
+            "minMs": 27.625333,
+            "samples": 13
+          },
+          "apply": {
+            "meanMs": 77.41325,
+            "p99Ms": 88.6505,
+            "minMs": 72.527875,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 16673463,
+            "allocsPerOp": 489809,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 24371200,
+            "allocBytesPerOp": 16673463,
+            "allocsPerOp": 489809,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.003789684718360967,
+            "p99Ms": 0.008416,
+            "minMs": 0.002833,
+            "samples": 102188
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.3346471907949788,
+            "p99Ms": 2.284667,
+            "minMs": 0.040959,
+            "samples": 1195
+          },
+          "alloc": {
+            "bytesPerOp": 1122816,
+            "allocsPerOp": 13,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.002606645267444894,
+            "p99Ms": 0.0055,
+            "minMs": 0.002,
+            "samples": 144647
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 65.196698,
+            "p99Ms": 66.51925,
+            "minMs": 63.241125,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 27464033,
+            "allocsPerOp": 770165,
+            "iterations": 20
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "lcs-100k-single-edit",
+      "category": "lcs",
+      "description": "100,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "maxArrayLen": 100000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 23.673338235294114,
+            "p99Ms": 25.659,
+            "minMs": 21.398333,
+            "samples": 17
+          },
+          "decode": {
+            "meanMs": 52.498741800000005,
+            "p99Ms": 54.638625,
+            "minMs": 50.878833,
+            "samples": 5
+          },
+          "e2e": {
+            "meanMs": 87.23015299999999,
+            "p99Ms": 91.51,
+            "minMs": 81.612792,
+            "samples": 3
+          },
+          "apply": {
+            "meanMs": 0.28395771753016325,
+            "p99Ms": 2.065416,
+            "minMs": 0.040417,
+            "samples": 1409
+          },
+          "alloc": {
+            "bytesPerOp": 22993744,
+            "allocsPerOp": 400529,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 37445632,
+            "allocBytesPerOp": 22993744,
+            "allocsPerOp": 400529,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 49.48038866666667,
+            "p99Ms": 53.539333,
+            "minMs": 43.876792,
+            "samples": 6
+          },
+          "decode": {
+            "meanMs": 64.067,
+            "p99Ms": 67.215125,
+            "minMs": 61.415166,
+            "samples": 4
+          },
+          "e2e": {
+            "meanMs": 108.423389,
+            "p99Ms": 112.001333,
+            "minMs": 104.850625,
+            "samples": 3
+          },
+          "apply": {
+            "meanMs": 0.3044372873388931,
+            "p99Ms": 2.692583,
+            "minMs": 0.05025,
+            "samples": 1319
+          },
+          "alloc": {
+            "bytesPerOp": 40889120,
+            "allocsPerOp": 700789,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 56713216,
+            "allocBytesPerOp": 40889120,
+            "allocsPerOp": 700789,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 31.162326923076918,
+            "p99Ms": 36.875541,
+            "minMs": 26.451167,
+            "samples": 13
+          },
+          "decode": {
+            "meanMs": 22.267009277777774,
+            "p99Ms": 35.928042,
+            "minMs": 18.644541,
+            "samples": 18
+          },
+          "e2e": {
+            "meanMs": 22.36728227777778,
+            "p99Ms": 23.347916,
+            "minMs": 20.592292,
+            "samples": 18
+          },
+          "apply": {
+            "meanMs": 56.8585334,
+            "p99Ms": 58.336417,
+            "minMs": 55.605167,
+            "samples": 5
+          },
+          "alloc": {
+            "bytesPerOp": 28637783,
+            "allocsPerOp": 400114,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 41926656,
+            "allocBytesPerOp": 28637783,
+            "allocsPerOp": 400114,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 7.497463703703703,
+            "p99Ms": 8.699583,
+            "minMs": 6.750666,
+            "samples": 54
+          },
+          "decode": {
+            "meanMs": 18.017605086956518,
+            "p99Ms": 19.846333,
+            "minMs": 16.734458,
+            "samples": 23
+          },
+          "e2e": {
+            "meanMs": 27.828780399999996,
+            "p99Ms": 42.619625,
+            "minMs": 24.843458,
+            "samples": 15
+          },
+          "apply": {
+            "meanMs": 63.45204199999999,
+            "p99Ms": 64.720959,
+            "minMs": 61.952417,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 6920146,
+            "allocsPerOp": 199921,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 31670272,
+            "allocBytesPerOp": 6920146,
+            "allocsPerOp": 199921,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 27.37168326666667,
+            "p99Ms": 29.668791,
+            "minMs": 24.73675,
+            "samples": 15
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 27.384494466666663,
+            "p99Ms": 34.959625,
+            "minMs": 24.364417,
+            "samples": 15
+          },
+          "apply": {
+            "meanMs": 57.0618834,
+            "p99Ms": 58.050459,
+            "minMs": 56.37225,
+            "samples": 5
+          },
+          "alloc": {
+            "bytesPerOp": 25840169,
+            "allocsPerOp": 699813,
+            "iterations": 20
+          },
+          "memory": {
+            "heapInuseBytes": 37986304,
+            "allocBytesPerOp": 25840169,
+            "allocsPerOp": 699813,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.00232390440521909,
+            "p99Ms": 0.005209,
+            "minMs": 0.00175,
+            "samples": 165145
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.29158985309090923,
+            "p99Ms": 2.67225,
+            "minMs": 0.044667,
+            "samples": 1375
+          },
+          "alloc": {
+            "bytesPerOp": 1606144,
+            "allocsPerOp": 13,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.0021314798735411846,
+            "p99Ms": 0.004541,
+            "minMs": 0.001541,
+            "samples": 177130
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 85.34525000000001,
+            "p99Ms": 94.097,
+            "minMs": 75.244292,
+            "samples": 3
+          },
+          "alloc": {
+            "bytesPerOp": 41542484,
+            "allocsPerOp": 1100170,
+            "iterations": 20
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "lcs-4k-disjoint",
+      "category": "lcs",
+      "description": "Two 4,000-element sequences with zero common elements (worst-case LCS diagonal)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "disjoint",
+        "worst-case"
+      ],
+      "maxArrayLen": 4000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 298891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 1.3998798048780492,
+            "p99Ms": 10.441333,
+            "minMs": 0.822042,
+            "samples": 287
+          },
+          "decode": {
+            "meanMs": 2.501996831250001,
+            "p99Ms": 3.1355,
+            "minMs": 2.046833,
+            "samples": 160
+          },
+          "e2e": {
+            "meanMs": 8.576753617021279,
+            "p99Ms": 10.47325,
+            "minMs": 7.732459,
+            "samples": 47
+          },
+          "apply": {
+            "meanMs": 70.57620849999999,
+            "p99Ms": 73.642042,
+            "minMs": 65.604792,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 2590664,
+            "allocsPerOp": 23962,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5685248,
+            "allocBytesPerOp": 2590664,
+            "allocsPerOp": 23962,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 298891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 1.596984689243028,
+            "p99Ms": 2.230167,
+            "minMs": 1.187792,
+            "samples": 251
+          },
+          "decode": {
+            "meanMs": 2.403400449101796,
+            "p99Ms": 2.904,
+            "minMs": 2.038208,
+            "samples": 167
+          },
+          "e2e": {
+            "meanMs": 9.43039920930233,
+            "p99Ms": 20.747125,
+            "minMs": 8.050458,
+            "samples": 43
+          },
+          "apply": {
+            "meanMs": 82.25116625,
+            "p99Ms": 91.746166,
+            "minMs": 76.497833,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 3227485,
+            "allocsPerOp": 31982,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 4333568,
+            "allocBytesPerOp": 3227485,
+            "allocsPerOp": 31982,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 1.7299351767241384,
+            "p99Ms": 2.467625,
+            "minMs": 1.318958,
+            "samples": 232
+          },
+          "decode": {
+            "meanMs": 0.854429299145299,
+            "p99Ms": 1.648291,
+            "minMs": 0.645,
+            "samples": 468
+          },
+          "e2e": {
+            "meanMs": 4.27500934042553,
+            "p99Ms": 7.203625,
+            "minMs": 3.666292,
+            "samples": 94
+          },
+          "apply": {
+            "meanMs": 10.398134589743593,
+            "p99Ms": 11.219083,
+            "minMs": 9.802291,
+            "samples": 39
+          },
+          "alloc": {
+            "bytesPerOp": 2413162,
+            "allocsPerOp": 20103,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5537792,
+            "allocBytesPerOp": 2413162,
+            "allocsPerOp": 20103,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 1.4833874925925918,
+            "p99Ms": 2.671708,
+            "minMs": 1.050833,
+            "samples": 270
+          },
+          "decode": {
+            "meanMs": 1.1720113040935667,
+            "p99Ms": 4.139083,
+            "minMs": 0.649541,
+            "samples": 342
+          },
+          "e2e": {
+            "meanMs": 2.9141506884057975,
+            "p99Ms": 6.371417,
+            "minMs": 2.119083,
+            "samples": 138
+          },
+          "apply": {
+            "meanMs": 10.615298210526312,
+            "p99Ms": 11.774917,
+            "minMs": 9.93025,
+            "samples": 38
+          },
+          "alloc": {
+            "bytesPerOp": 1994549,
+            "allocsPerOp": 23953,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 5316608,
+            "allocBytesPerOp": 1994549,
+            "allocsPerOp": 23953,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 1.4660033699633706,
+            "p99Ms": 3.089708,
+            "minMs": 1.044416,
+            "samples": 273
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 4.123433602040817,
+            "p99Ms": 4.724291,
+            "minMs": 3.499041,
+            "samples": 98
+          },
+          "apply": {
+            "meanMs": 12.283887696969694,
+            "p99Ms": 13.465166,
+            "minMs": 11.355792,
+            "samples": 33
+          },
+          "alloc": {
+            "bytesPerOp": 1471778,
+            "allocsPerOp": 27801,
+            "iterations": 50
+          },
+          "memory": {
+            "heapInuseBytes": 4448256,
+            "allocBytesPerOp": 1471778,
+            "allocsPerOp": 27801,
+            "note": "in-process live-heap proxy (HeapInuse after one diff); the TS side reports subprocess peak RSS — the two memory columns are not directly comparable across engines"
+          }
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": null,
+          "decode": {
+            "meanMs": 8.935968599999999,
+            "p99Ms": 9.774542,
+            "minMs": 8.364834,
+            "samples": 45
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 69.292979,
+            "p99Ms": 70.576083,
+            "minMs": 67.417125,
+            "samples": 4
+          },
+          "alloc": {
+            "bytesPerOp": 264194676,
+            "allocsPerOp": 52023,
+            "iterations": 20
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": null,
+          "decode": {
+            "meanMs": 6.893183661016948,
+            "p99Ms": 7.558916,
+            "minMs": 5.922417,
+            "samples": 59
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 5.9931442835820885,
+            "p99Ms": 6.500792,
+            "minMs": 4.981959,
+            "samples": 67
+          },
+          "alloc": {
+            "bytesPerOp": 2218510,
+            "allocsPerOp": 92100,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "structural-root-array",
+      "category": "structural",
+      "description": "A root-level array (not wrapped in an object) with an insert and a change",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "root-array"
+      ],
+      "maxArrayLen": 200,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 121,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.053923328689300686,
+            "p99Ms": 0.488084,
+            "minMs": 0.019208,
+            "samples": 7393
+          },
+          "decode": {
+            "meanMs": 0.13989135036751818,
+            "p99Ms": 0.410875,
+            "minMs": 0.123167,
+            "samples": 2857
+          },
+          "e2e": {
+            "meanMs": 0.17245852200172554,
+            "p99Ms": 0.457792,
+            "minMs": 0.133125,
+            "samples": 2318
+          },
+          "apply": {
+            "meanMs": 0.002533005849836095,
+            "p99Ms": 0.037584,
+            "minMs": 0.00075,
+            "samples": 149064
+          },
+          "alloc": {
+            "bytesPerOp": 58184,
+            "allocsPerOp": 401,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 121,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.060590686721361066,
+            "p99Ms": 0.252709,
+            "minMs": 0.044875,
+            "samples": 6582
+          },
+          "decode": {
+            "meanMs": 0.16396058842839537,
+            "p99Ms": 0.553084,
+            "minMs": 0.123083,
+            "samples": 2437
+          },
+          "e2e": {
+            "meanMs": 0.19226447186147144,
+            "p99Ms": 0.480084,
+            "minMs": 0.149,
+            "samples": 2079
+          },
+          "apply": {
+            "meanMs": 0.002227214004910955,
+            "p99Ms": 0.03325,
+            "minMs": 0.000625,
+            "samples": 169412
+          },
+          "alloc": {
+            "bytesPerOp": 101000,
+            "allocsPerOp": 434,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5097,
+          "patchOps": 102,
+          "diff": {
+            "meanMs": 0.08998990151002959,
+            "p99Ms": 0.288375,
+            "minMs": 0.07125,
+            "samples": 4437
+          },
+          "decode": {
+            "meanMs": 0.05343183130108483,
+            "p99Ms": 0.197375,
+            "minMs": 0.037709,
+            "samples": 7463
+          },
+          "e2e": {
+            "meanMs": 0.12147806780176333,
+            "p99Ms": 0.401125,
+            "minMs": 0.098125,
+            "samples": 3289
+          },
+          "apply": {
+            "meanMs": 0.3121080515222478,
+            "p99Ms": 0.710875,
+            "minMs": 0.251917,
+            "samples": 1281
+          },
+          "alloc": {
+            "bytesPerOp": 58736,
+            "allocsPerOp": 942,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5099,
+          "patchOps": 102,
+          "diff": {
+            "meanMs": 0.0379965831665233,
+            "p99Ms": 0.148417,
+            "minMs": 0.030208,
+            "samples": 10491
+          },
+          "decode": {
+            "meanMs": 0.04506574519774015,
+            "p99Ms": 0.15325,
+            "minMs": 0.037584,
+            "samples": 8850
+          },
+          "e2e": {
+            "meanMs": 0.0986594710968382,
+            "p99Ms": 0.347292,
+            "minMs": 0.085166,
+            "samples": 4048
+          },
+          "apply": {
+            "meanMs": 0.37900398767772564,
+            "p99Ms": 0.761166,
+            "minMs": 0.30575,
+            "samples": 1055
+          },
+          "alloc": {
+            "bytesPerOp": 37779,
+            "allocsPerOp": 720,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 124,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.42746853418803427,
+            "p99Ms": 0.677959,
+            "minMs": 0.405667,
+            "samples": 936
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.5093987707006371,
+            "p99Ms": 0.822958,
+            "minMs": 0.475292,
+            "samples": 785
+          },
+          "apply": {
+            "meanMs": 0.188628528328612,
+            "p99Ms": 0.491584,
+            "minMs": 0.163,
+            "samples": 2118
+          },
+          "alloc": {
+            "bytesPerOp": 48893,
+            "allocsPerOp": 851,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5097,
+          "patchOps": 102,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.3139942765121758,
+            "p99Ms": 0.713417,
+            "minMs": 0.269791,
+            "samples": 1273
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.09807951819075723,
+            "p99Ms": 0.484833,
+            "minMs": 0.043208,
+            "samples": 4068
+          },
+          "alloc": {
+            "bytesPerOp": 365790,
+            "allocsPerOp": 716,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5097,
+          "patchOps": 102,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.20550027403599005,
+            "p99Ms": 0.59175,
+            "minMs": 0.164833,
+            "samples": 1945
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.16644572689425446,
+            "p99Ms": 0.418375,
+            "minMs": 0.137959,
+            "samples": 2402
+          },
+          "alloc": {
+            "bytesPerOp": 77882,
+            "allocsPerOp": 3168,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "structural-root-keyed-array",
+      "category": "structural",
+      "description": "A root-level array keyed by id (primaryKeyMap '') with a remove + modify workload",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "root-array",
+        "keyed"
+      ],
+      "maxArrayLen": 40,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 670,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 0.023253501519401382,
+            "p99Ms": 0.096917,
+            "minMs": 0.016833,
+            "samples": 17112
+          },
+          "decode": {
+            "meanMs": 0.23526610647058827,
+            "p99Ms": 0.510375,
+            "minMs": 0.201667,
+            "samples": 1700
+          },
+          "e2e": {
+            "meanMs": 0.275540157822191,
+            "p99Ms": 0.602125,
+            "minMs": 0.21225,
+            "samples": 1451
+          },
+          "apply": {
+            "meanMs": 0.006475146093685464,
+            "p99Ms": 0.057875,
+            "minMs": 0.003875,
+            "samples": 60735
+          },
+          "alloc": {
+            "bytesPerOp": 14176,
+            "allocsPerOp": 258,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 670,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 0.023471868867924347,
+            "p99Ms": 0.109208,
+            "minMs": 0.019333,
+            "samples": 16960
+          },
+          "decode": {
+            "meanMs": 0.1870899012634535,
+            "p99Ms": 0.457292,
+            "minMs": 0.155041,
+            "samples": 2137
+          },
+          "e2e": {
+            "meanMs": 0.288941755057804,
+            "p99Ms": 1.724416,
+            "minMs": 0.196792,
+            "samples": 1384
+          },
+          "apply": {
+            "meanMs": 0.006962998566600253,
+            "p99Ms": 0.060541,
+            "minMs": 0.004167,
+            "samples": 56509
+          },
+          "alloc": {
+            "bytesPerOp": 21712,
+            "allocsPerOp": 288,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 6994,
+          "patchOps": 146,
+          "diff": {
+            "meanMs": 0.13997118984238174,
+            "p99Ms": 0.422709,
+            "minMs": 0.118875,
+            "samples": 2855
+          },
+          "decode": {
+            "meanMs": 0.05337733288752158,
+            "p99Ms": 0.189625,
+            "minMs": 0.046208,
+            "samples": 7477
+          },
+          "e2e": {
+            "meanMs": 0.15769817396449695,
+            "p99Ms": 0.44125,
+            "minMs": 0.133041,
+            "samples": 2535
+          },
+          "apply": {
+            "meanMs": 0.47210723966942186,
+            "p99Ms": 0.816708,
+            "minMs": 0.422791,
+            "samples": 847
+          },
+          "alloc": {
+            "bytesPerOp": 118150,
+            "allocsPerOp": 2019,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 6994,
+          "patchOps": 146,
+          "diff": {
+            "meanMs": 0.095294136711281,
+            "p99Ms": 0.366875,
+            "minMs": 0.077208,
+            "samples": 4184
+          },
+          "decode": {
+            "meanMs": 0.05221865087053294,
+            "p99Ms": 0.207,
+            "minMs": 0.042291,
+            "samples": 7639
+          },
+          "e2e": {
+            "meanMs": 0.16139904483037132,
+            "p99Ms": 0.531542,
+            "minMs": 0.132875,
+            "samples": 2476
+          },
+          "apply": {
+            "meanMs": 0.5231725555555552,
+            "p99Ms": 0.868209,
+            "minMs": 0.468416,
+            "samples": 765
+          },
+          "alloc": {
+            "bytesPerOp": 75387,
+            "allocsPerOp": 2115,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 1156,
+          "patchOps": 21,
+          "diff": {
+            "meanMs": 0.3105059976708074,
+            "p99Ms": 0.605958,
+            "minMs": 0.287167,
+            "samples": 1288
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.3307431091811415,
+            "p99Ms": 0.655833,
+            "minMs": 0.304292,
+            "samples": 1209
+          },
+          "apply": {
+            "meanMs": 0.17645457262693176,
+            "p99Ms": 0.459375,
+            "minMs": 0.149667,
+            "samples": 2265
+          },
+          "alloc": {
+            "bytesPerOp": 106014,
+            "allocsPerOp": 4820,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 6994,
+          "patchOps": 146,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.2841269737215914,
+            "p99Ms": 0.577625,
+            "minMs": 0.250208,
+            "samples": 1408
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.09120761429550125,
+            "p99Ms": 0.3685,
+            "minMs": 0.06625,
+            "samples": 4379
+          },
+          "alloc": {
+            "bytesPerOp": 184746,
+            "allocsPerOp": 1894,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 6994,
+          "patchOps": 146,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.20262715408008103,
+            "p99Ms": 0.479,
+            "minMs": 0.179166,
+            "samples": 1973
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.2794806345213125,
+            "p99Ms": 0.61675,
+            "minMs": 0.240666,
+            "samples": 1431
+          },
+          "alloc": {
+            "bytesPerOp": 137105,
+            "allocsPerOp": 6223,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "structural-deep-nesting",
+      "category": "structural",
+      "description": "Object nested 40 levels deep with a change only at the deepest leaf",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "deep-nesting"
+      ],
+      "maxArrayLen": 0,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 757,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.011754968830629995,
+            "p99Ms": 0.049208,
+            "minMs": 0.008958,
+            "samples": 33719
+          },
+          "decode": {
+            "meanMs": 0.08390275635370728,
+            "p99Ms": 0.296666,
+            "minMs": 0.071958,
+            "samples": 4761
+          },
+          "e2e": {
+            "meanMs": 0.1010351368234696,
+            "p99Ms": 0.345458,
+            "minMs": 0.081208,
+            "samples": 3954
+          },
+          "apply": {
+            "meanMs": 0.02105321637055806,
+            "p99Ms": 0.115333,
+            "minMs": 0.016042,
+            "samples": 18912
+          },
+          "alloc": {
+            "bytesPerOp": 13984,
+            "allocsPerOp": 86,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "decode": null,
+          "e2e": null,
+          "apply": null,
+          "alloc": null,
+          "memory": null,
+          "skippedReason": "no schema -\u003e no plan; emitMoves not applicable"
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.09969880788423113,
+            "p99Ms": 0.336708,
+            "minMs": 0.089583,
+            "samples": 4008
+          },
+          "decode": {
+            "meanMs": 0.028699152189570584,
+            "p99Ms": 0.1455,
+            "minMs": 0.020708,
+            "samples": 13884
+          },
+          "e2e": {
+            "meanMs": 0.1027726201131688,
+            "p99Ms": 0.420792,
+            "minMs": 0.0835,
+            "samples": 3888
+          },
+          "apply": {
+            "meanMs": 0.28126872925457114,
+            "p99Ms": 0.665542,
+            "minMs": 0.232,
+            "samples": 1422
+          },
+          "alloc": {
+            "bytesPerOp": 48596,
+            "allocsPerOp": 912,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.03364514954848508,
+            "p99Ms": 0.126459,
+            "minMs": 0.027541,
+            "samples": 11849
+          },
+          "decode": {
+            "meanMs": 0.027585062954498158,
+            "p99Ms": 0.12275,
+            "minMs": 0.02225,
+            "samples": 14439
+          },
+          "e2e": {
+            "meanMs": 0.06117359148023322,
+            "p99Ms": 0.269875,
+            "minMs": 0.051208,
+            "samples": 6526
+          },
+          "apply": {
+            "meanMs": 0.23225411730545897,
+            "p99Ms": 0.586208,
+            "minMs": 0.19825,
+            "samples": 1722
+          },
+          "alloc": {
+            "bytesPerOp": 20681,
+            "allocsPerOp": 764,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.0512046986143189,
+            "p99Ms": 0.257667,
+            "minMs": 0.037584,
+            "samples": 7794
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.05480295249862713,
+            "p99Ms": 0.276834,
+            "minMs": 0.040833,
+            "samples": 7284
+          },
+          "apply": {
+            "meanMs": 0.24257277487864082,
+            "p99Ms": 0.576,
+            "minMs": 0.21425,
+            "samples": 1648
+          },
+          "alloc": {
+            "bytesPerOp": 48197,
+            "allocsPerOp": 735,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.00815563202032535,
+            "p99Ms": 0.030125,
+            "minMs": 0.006084,
+            "samples": 48413
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.026475153119595723,
+            "p99Ms": 0.142,
+            "minMs": 0.019125,
+            "samples": 15034
+          },
+          "alloc": {
+            "bytesPerOp": 36944,
+            "allocsPerOp": 500,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.006108033101368592,
+            "p99Ms": 0.010958,
+            "minMs": 0.00525,
+            "samples": 64378
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.2325648710052292,
+            "p99Ms": 0.601416,
+            "minMs": 0.191833,
+            "samples": 1721
+          },
+          "alloc": {
+            "bytesPerOp": 113642,
+            "allocsPerOp": 2481,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "edge-pointer-escaping-keys",
+      "category": "edge",
+      "description": "Object keys containing '/' and '~' (RFC 6901 ~1/~0 escapes) changed at several depths",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "pointer-escaping"
+      ],
+      "maxArrayLen": 3,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 236,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.002689197469855522,
+            "p99Ms": 0.008625,
+            "minMs": 0.001541,
+            "samples": 141652
+          },
+          "decode": {
+            "meanMs": 0.01178080374832713,
+            "p99Ms": 0.041125,
+            "minMs": 0.009042,
+            "samples": 33615
+          },
+          "e2e": {
+            "meanMs": 0.015692176029074675,
+            "p99Ms": 0.043292,
+            "minMs": 0.012708,
+            "samples": 25314
+          },
+          "apply": {
+            "meanMs": 0.0025143770418838527,
+            "p99Ms": 0.007166,
+            "minMs": 0.001584,
+            "samples": 152800
+          },
+          "alloc": {
+            "bytesPerOp": 1624,
+            "allocsPerOp": 34,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "decode": null,
+          "e2e": null,
+          "apply": null,
+          "alloc": null,
+          "memory": null,
+          "skippedReason": "no schema -\u003e no plan; emitMoves not applicable"
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.011024584917228235,
+            "p99Ms": 0.031208,
+            "minMs": 0.007958,
+            "samples": 35882
+          },
+          "decode": {
+            "meanMs": 0.004154989264620755,
+            "p99Ms": 0.011,
+            "minMs": 0.002833,
+            "samples": 93802
+          },
+          "e2e": {
+            "meanMs": 0.008964951541150533,
+            "p99Ms": 0.027917,
+            "minMs": 0.006292,
+            "samples": 44058
+          },
+          "apply": {
+            "meanMs": 0.020188319849768634,
+            "p99Ms": 0.047792,
+            "minMs": 0.015916,
+            "samples": 19703
+          },
+          "alloc": {
+            "bytesPerOp": 7103,
+            "allocsPerOp": 127,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.007026151451092557,
+            "p99Ms": 0.018917,
+            "minMs": 0.00425,
+            "samples": 55820
+          },
+          "decode": {
+            "meanMs": 0.004216214504386801,
+            "p99Ms": 0.01175,
+            "minMs": 0.002833,
+            "samples": 92441
+          },
+          "e2e": {
+            "meanMs": 0.009777066067849567,
+            "p99Ms": 0.031417,
+            "minMs": 0.007708,
+            "samples": 40413
+          },
+          "apply": {
+            "meanMs": 0.021455244943092918,
+            "p99Ms": 0.043375,
+            "minMs": 0.017541,
+            "samples": 18539
+          },
+          "alloc": {
+            "bytesPerOp": 3173,
+            "allocsPerOp": 109,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.007049461595007602,
+            "p99Ms": 0.01525,
+            "minMs": 0.005,
+            "samples": 55774
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.010156901221865043,
+            "p99Ms": 0.017709,
+            "minMs": 0.007791,
+            "samples": 38875
+          },
+          "apply": {
+            "meanMs": 0.02515620036694887,
+            "p99Ms": 0.067417,
+            "minMs": 0.0195,
+            "samples": 15806
+          },
+          "alloc": {
+            "bytesPerOp": 5167,
+            "allocsPerOp": 104,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.007296153499832842,
+            "p99Ms": 0.018459,
+            "minMs": 0.005792,
+            "samples": 53974
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.0025688089315050134,
+            "p99Ms": 0.006292,
+            "minMs": 0.001791,
+            "samples": 149135
+          },
+          "alloc": {
+            "bytesPerOp": 3000,
+            "allocsPerOp": 56,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.006478123384254113,
+            "p99Ms": 0.023708,
+            "minMs": 0.004625,
+            "samples": 60421
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.020075508716082893,
+            "p99Ms": 0.096958,
+            "minMs": 0.012959,
+            "samples": 19791
+          },
+          "alloc": {
+            "bytesPerOp": 8785,
+            "allocsPerOp": 284,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "edge-duplicate-primary-key",
+      "category": "edge",
+      "description": "Array with two items sharing the primary-key value 'dup' (gate must not silently mutate identical keys)",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "duplicate-key"
+      ],
+      "maxArrayLen": 3,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 147,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.006266154301152505,
+            "p99Ms": 0.013292,
+            "minMs": 0.004458,
+            "samples": 62553
+          },
+          "decode": {
+            "meanMs": 0.01670471752768306,
+            "p99Ms": 0.038208,
+            "minMs": 0.014125,
+            "samples": 23751
+          },
+          "e2e": {
+            "meanMs": 0.029593531647452848,
+            "p99Ms": 0.152667,
+            "minMs": 0.023,
+            "samples": 13445
+          },
+          "apply": {
+            "meanMs": 0.002216835736598587,
+            "p99Ms": 0.004792,
+            "minMs": 0.001291,
+            "samples": 168382
+          },
+          "alloc": {
+            "bytesPerOp": 3960,
+            "allocsPerOp": 64,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 147,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.00878541639256327,
+            "p99Ms": 0.017333,
+            "minMs": 0.006375,
+            "samples": 44691
+          },
+          "decode": {
+            "meanMs": 0.01727615607993396,
+            "p99Ms": 0.034125,
+            "minMs": 0.01425,
+            "samples": 22969
+          },
+          "e2e": {
+            "meanMs": 0.0334881687841819,
+            "p99Ms": 0.193709,
+            "minMs": 0.02325,
+            "samples": 11885
+          },
+          "apply": {
+            "meanMs": 0.0025557734141866194,
+            "p99Ms": 0.009625,
+            "minMs": 0.001416,
+            "samples": 146439
+          },
+          "alloc": {
+            "bytesPerOp": 4688,
+            "allocsPerOp": 82,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.01670780936511302,
+            "p99Ms": 0.105542,
+            "minMs": 0.012041,
+            "samples": 23705
+          },
+          "decode": {
+            "meanMs": 0.006902734850765548,
+            "p99Ms": 0.04725,
+            "minMs": 0.004833,
+            "samples": 56455
+          },
+          "e2e": {
+            "meanMs": 0.013968354195347855,
+            "p99Ms": 0.074959,
+            "minMs": 0.008208,
+            "samples": 28329
+          },
+          "apply": {
+            "meanMs": 0.025957831266318367,
+            "p99Ms": 0.045125,
+            "minMs": 0.021417,
+            "samples": 15320
+          },
+          "alloc": {
+            "bytesPerOp": 6420,
+            "allocsPerOp": 145,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.0057297077972566805,
+            "p99Ms": 0.010375,
+            "minMs": 0.004791,
+            "samples": 68165
+          },
+          "decode": {
+            "meanMs": 0.005072676144062335,
+            "p99Ms": 0.009792,
+            "minMs": 0.004167,
+            "samples": 76744
+          },
+          "e2e": {
+            "meanMs": 0.010942739583332927,
+            "p99Ms": 0.018125,
+            "minMs": 0.009375,
+            "samples": 36096
+          },
+          "apply": {
+            "meanMs": 0.021782394895388378,
+            "p99Ms": 0.036792,
+            "minMs": 0.019042,
+            "samples": 18258
+          },
+          "alloc": {
+            "bytesPerOp": 2679,
+            "allocsPerOp": 106,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.007877265420597832,
+            "p99Ms": 0.013917,
+            "minMs": 0.006583,
+            "samples": 49917
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.009374210776507286,
+            "p99Ms": 0.014958,
+            "minMs": 0.007334,
+            "samples": 42073
+          },
+          "apply": {
+            "meanMs": 0.02412988398058249,
+            "p99Ms": 0.042667,
+            "minMs": 0.0215,
+            "samples": 16480
+          },
+          "alloc": {
+            "bytesPerOp": 4349,
+            "allocsPerOp": 120,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.005650015513505078,
+            "p99Ms": 0.010666,
+            "minMs": 0.004375,
+            "samples": 69230
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.0018143010030334755,
+            "p99Ms": 0.00375,
+            "minMs": 0.00125,
+            "samples": 205277
+          },
+          "alloc": {
+            "bytesPerOp": 2112,
+            "allocsPerOp": 38,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.0038382012625300514,
+            "p99Ms": 0.005,
+            "minMs": 0.003083,
+            "samples": 101067
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.019742569284293493,
+            "p99Ms": 0.032625,
+            "minMs": 0.017459,
+            "samples": 20120
+          },
+          "alloc": {
+            "bytesPerOp": 9089,
+            "allocsPerOp": 312,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "staleness-mutate-rediff",
+      "category": "staleness",
+      "description": "Diff a keyed array, then mutate the SAME original object in place and re-diff; a correct engine must not reuse stale per-run memoised state across the two diffs",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "staleness",
+        "cache"
+      ],
+      "maxArrayLen": 30,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (Go engine, default)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 63,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.01590012681812682,
+            "p99Ms": 0.02775,
+            "minMs": 0.012666,
+            "samples": 24957
+          },
+          "decode": {
+            "meanMs": 0.19432770102090444,
+            "p99Ms": 0.487625,
+            "minMs": 0.157375,
+            "samples": 2057
+          },
+          "e2e": {
+            "meanMs": 0.2883796385281385,
+            "p99Ms": 2.170292,
+            "minMs": 0.15425,
+            "samples": 1386
+          },
+          "apply": {
+            "meanMs": 0.0018479323753417456,
+            "p99Ms": 0.004625,
+            "minMs": 0.000542,
+            "samples": 198123
+          },
+          "alloc": {
+            "bytesPerOp": 7320,
+            "allocsPerOp": 157,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours (Go engine, emitMoves)",
+          "kind": "schema-aware",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 63,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.019855477306807673,
+            "p99Ms": 0.092708,
+            "minMs": 0.014,
+            "samples": 20006
+          },
+          "decode": {
+            "meanMs": 0.2001013143143144,
+            "p99Ms": 0.490083,
+            "minMs": 0.155083,
+            "samples": 1998
+          },
+          "e2e": {
+            "meanMs": 0.21325482346666702,
+            "p99Ms": 0.55775,
+            "minMs": 0.157666,
+            "samples": 1875
+          },
+          "apply": {
+            "meanMs": 0.0011234021890385486,
+            "p99Ms": 0.003625,
+            "minMs": 0.0005,
+            "samples": 319775
+          },
+          "alloc": {
+            "bytesPerOp": 14264,
+            "allocsPerOp": 181,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiff",
+          "label": "wI2L/jsondiff",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.11355606253553162,
+            "p99Ms": 0.600958,
+            "minMs": 0.076084,
+            "samples": 3518
+          },
+          "decode": {
+            "meanMs": 0.05997013899323812,
+            "p99Ms": 0.443083,
+            "minMs": 0.032125,
+            "samples": 6655
+          },
+          "e2e": {
+            "meanMs": 0.11592083101045282,
+            "p99Ms": 0.723208,
+            "minMs": 0.054458,
+            "samples": 3444
+          },
+          "apply": {
+            "meanMs": 0.36303528428701176,
+            "p99Ms": 2.177542,
+            "minMs": 0.160958,
+            "samples": 1101
+          },
+          "alloc": {
+            "bytesPerOp": 49804,
+            "allocsPerOp": 1403,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "snorwin",
+          "label": "snorwin/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.08792219228224926,
+            "p99Ms": 0.512083,
+            "minMs": 0.053833,
+            "samples": 4535
+          },
+          "decode": {
+            "meanMs": 0.08687082465693743,
+            "p99Ms": 0.654625,
+            "minMs": 0.050791,
+            "samples": 4591
+          },
+          "e2e": {
+            "meanMs": 0.17351070199826216,
+            "p99Ms": 1.240209,
+            "minMs": 0.107583,
+            "samples": 2302
+          },
+          "apply": {
+            "meanMs": 0.21135769645690092,
+            "p99Ms": 1.083084,
+            "minMs": 0.137084,
+            "samples": 1891
+          },
+          "alloc": {
+            "bytesPerOp": 23636,
+            "allocsPerOp": 1070,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "mattbaird",
+          "label": "mattbaird/jsonpatch",
+          "kind": "generic",
+          "role": "diff",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.0694796015312337,
+            "p99Ms": 0.227708,
+            "minMs": 0.055833,
+            "samples": 5747
+          },
+          "decode": null,
+          "e2e": {
+            "meanMs": 0.06278421540880531,
+            "p99Ms": 0.268833,
+            "minMs": 0.047916,
+            "samples": 6360
+          },
+          "apply": {
+            "meanMs": 0.1138784158388518,
+            "p99Ms": 0.312083,
+            "minMs": 0.087209,
+            "samples": 3624
+          },
+          "alloc": {
+            "bytesPerOp": 33037,
+            "allocsPerOp": 1262,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-apply",
+          "label": "ours (Go engine ApplyPatch)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.001983876365819102,
+            "p99Ms": 0.004208,
+            "minMs": 0.001458,
+            "samples": 193199
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.0006580888220006185,
+            "p99Ms": 0.001792,
+            "minMs": 0.000333,
+            "samples": 500000
+          },
+          "alloc": {
+            "bytesPerOp": 1520,
+            "allocsPerOp": 19,
+            "iterations": 50
+          },
+          "memory": null
+        },
+        {
+          "library": "evanphx",
+          "label": "evanphx/json-patch v5 (apply)",
+          "kind": "apply-only",
+          "role": "apply",
+          "verdict": "PASS",
+          "verdictDetail": "multiset-canonical",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": null,
+          "decode": {
+            "meanMs": 0.0011314095207170022,
+            "p99Ms": 0.001708,
+            "minMs": 0.000875,
+            "samples": 332391
+          },
+          "e2e": null,
+          "apply": {
+            "meanMs": 0.08035344531564162,
+            "p99Ms": 0.225125,
+            "minMs": 0.066875,
+            "samples": 4974
+          },
+          "alloc": {
+            "bytesPerOp": 62437,
+            "allocsPerOp": 2270,
+            "iterations": 50
+          },
+          "memory": null
+        }
+      ]
+    }
+  ],
+  "runner": "go-bench/ (go run .)",
+  "schemaVersion": 1,
+  "wallClockMs": 252771
+}
