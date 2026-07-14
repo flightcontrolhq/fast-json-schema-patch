@@ -30,8 +30,10 @@
     "url": "git+https://github.com/flightcontrolhq/fast-json-schema-patch.git"
   },
   "main": "dist/index.js",
+  "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "aggregators"
   ],
   "scripts": {
     "compare": "bun run comparison/index.ts",
@@ -39,7 +41,7 @@
     "check-exports": "attw --pack .",
     "release": "bun test && bun run build && bun changeset version && changeset publish",
     "prepublishOnly": "bun test",
-    "build": "tsc && tsdown src/index.ts --dts --format esm --format cjs -d ./dist --platform neutral --sourcemap"
+    "build": "tsc && tsdown"
   },
   "exports": {
     "./package.json": "./package.json",

@@ -1,0 +1,5 @@
+{
+  "main": "../dist/aggregators/index.cjs",
+  "module": "../dist/aggregators/index.js",
+  "types": "../dist/aggregators/index.d.cts"
+}

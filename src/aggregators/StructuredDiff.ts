@@ -15,7 +15,11 @@ import type {
 } from "../types";
 import { getValueByPath } from "../utils/pathUtils";
 import { DiffFormatter } from "../formatting/DiffFormatter";
-import { JsonSchemaPatcher } from "..";
+// Import JsonSchemaPatcher's own module directly rather than the root barrel
+// (`..` / src/index.ts), which re-exports StructuredDiff itself — going
+// through the barrel created an index.ts <-> StructuredDiff.ts import cycle
+// (F26).
+import { JsonSchemaPatcher } from "../core/JsonSchemaPatcher";
 
 function countChangedLines(diff: FormattedDiffLines): {
   addCount: number;

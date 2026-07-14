@@ -1,5 +1,11 @@
 import type {JsonObject} from "../types"
-import { cachedJsonStringify } from "./cache"
+
+// F26: use plain JSON.stringify rather than cache.ts's cachedJsonStringify.
+// fastHash only needs a stable string to feed the FNV-1a hash (never surfaced
+// in emitted patches, so the exact formatting is immaterial) — routing it
+// through cache.ts pulled the entire json-source-map dependency into the core
+// diff/patch path via deepEqual.ts, even for consumers who only import
+// JsonSchemaPatcher and never touch the `./aggregators` formatting stack.
 
 /**
  * A simple, non-cryptographic FNV-1a hash function.
@@ -29,7 +35,7 @@ export function fastHash(obj: JsonObject, fields: string[]): string {
     const value = obj[key]
     if (value !== undefined) {
       // Create a string representation with field position to avoid collision from reordering
-      const str = typeof value === "string" ? value : cachedJsonStringify(value)
+      const str = typeof value === "string" ? value : JSON.stringify(value)
       combined += `${i}:${key}=${str}|`
     }
   }
