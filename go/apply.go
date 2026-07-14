@@ -1,5 +1,85 @@
 package schemapatch
 
+import "reflect"
+
+// ownedSet records the containers cloned during a single [ApplyPatch] (or invert
+// simulation) invocation — those the call freshly owns and may therefore mutate
+// in place. Threading it makes application copy-on-write with structural sharing
+// (SPEC §8.7.1): the first op that touches a container clones it once and marks
+// it owned; every later op under the same subtree reuses that clone instead of
+// re-cloning from the root down. Without it, a patch of N ops under one large
+// object re-cloned that object N times.
+//
+// Identity is per-container:
+//   - *Object by pointer (map key keeps the clone alive; identity is exact).
+//   - []Value by its backing-array data pointer ([sliceID]). Only non-empty
+//     arrays are tracked: an empty array has nothing to mutate in place (every
+//     splice allocates a fresh slice), and distinct empty slices share one
+//     sentinel address, so tracking them would be both pointless and ambiguous.
+//
+// The set is created per invocation and never shared, so two concurrent
+// ApplyPatch calls each own a private set and neither ever writes the shared
+// input — only reads it. A cloned array can only lose its last reference when a
+// length-changing splice replaces it; its address could then be reused, but an
+// INPUT array is live for the whole call (held by the caller's document), so a
+// reused address can never coincide with an input array's. A false "owned" can
+// therefore only ever land on another fresh clone, which was safe to reuse
+// anyway — it can never cause an input container to be mutated.
+type ownedSet struct {
+	objs map[*Object]struct{}
+	arrs map[uintptr]struct{}
+}
+
+func newOwnedSet() *ownedSet {
+	return &ownedSet{
+		objs: make(map[*Object]struct{}),
+		arrs: make(map[uintptr]struct{}),
+	}
+}
+
+// clone returns a mutable copy of container v — or v unchanged when it was
+// already cloned this invocation (already owned) or is an immutable scalar. A
+// freshly made copy is recorded as owned. This is the copy-on-write primitive
+// resolveParent walks with.
+func (s *ownedSet) clone(v Value) Value {
+	switch x := v.(type) {
+	case *Object:
+		if _, ok := s.objs[x]; ok {
+			return x
+		}
+		c := x.shallowClone()
+		s.objs[c] = struct{}{}
+		return c
+	case []Value:
+		if len(x) > 0 {
+			if _, ok := s.arrs[sliceID(x)]; ok {
+				return x
+			}
+		}
+		c := make([]Value, len(x))
+		copy(c, x)
+		if len(c) > 0 {
+			s.arrs[sliceID(c)] = struct{}{}
+		}
+		return c
+	default:
+		return v
+	}
+}
+
+// own records an array produced out-of-band — by a length-changing splice
+// ([arrInsert]/[arrRemoveAt]) rather than by [ownedSet.clone] — as owned, so a
+// later op that reaches it reuses it instead of cloning again.
+func (s *ownedSet) own(v Value) {
+	if a, ok := v.([]Value); ok && len(a) > 0 {
+		s.arrs[sliceID(a)] = struct{}{}
+	}
+}
+
+// sliceID is the identity of a non-empty []Value: the address of its first
+// element, which is unique per live backing array.
+func sliceID(a []Value) uintptr { return reflect.ValueOf(a).Pointer() }
+
 // ApplyOptions configures [ApplyPatch] (SPEC §8.7). All fields default to their
 // zero value (false), reproducing RFC 6902 immutable-apply semantics.
 type ApplyOptions struct {
@@ -35,15 +115,15 @@ type ApplyOptions struct {
 // reordered, batched, or deduplicated. The empty patch returns doc itself
 // (§8.7.5) unless CloneResult forces an independent copy.
 //
-// Note on structural sharing: unlike the reference, which clones each container
-// at most once across the whole patch via a per-call cloned-set, this port
-// re-clones the touched path per op. That is coarser sharing but produces a
-// document deep-equal to the reference result for the same input+patch
-// (SPEC §8.7.4), which is all conformance requires.
+// Structural sharing matches the reference: a per-invocation cloned-container
+// set ([ownedSet]) clones each touched container at most once across the whole
+// patch, so N ops under one subtree clone it once rather than N times, and
+// untouched subtrees stay shared by reference with the input.
 func ApplyPatch(doc Value, patch []Operation, opts ApplyOptions) (Value, error) {
+	owned := newOwnedSet()
 	root := doc
 	for i := range patch {
-		next, err := applyOp(root, &patch[i], i, opts)
+		next, err := applyOp(root, &patch[i], i, opts, owned)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +138,7 @@ func ApplyPatch(doc Value, patch []Operation, opts ApplyOptions) (Value, error) 
 // applyOp applies one op against root and returns the new root (or a
 // *PatchError). It is the shared core used by both [ApplyPatch] and the invert
 // simulation (SPEC §9.2). It never mutates root's original containers.
-func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *PatchError) {
+func applyOp(root Value, op *Operation, idx int, opts ApplyOptions, owned *ownedSet) (Value, *PatchError) {
 	parts, perr := splitPathW(op.Path, op, idx)
 	if perr != nil {
 		return nil, perr
@@ -76,7 +156,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		if len(parts) == 0 { // root add replaces the whole document (§8.5.1)
 			return value, nil
 		}
-		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx)
+		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx, owned)
 		if perr != nil {
 			return nil, perr
 		}
@@ -86,7 +166,9 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 			if perr != nil {
 				return nil, perr
 			}
-			assign(arrInsert(p, n, value))
+			spliced := arrInsert(p, n, value)
+			owned.own(spliced)
+			assign(spliced)
 		case *Object:
 			p.Set(key, value)
 		}
@@ -96,7 +178,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		if len(parts) == 0 { // root remove is invalid (§8.5.2)
 			return nil, opErr(CodeInvalidOperation, `cannot "remove" the document root`, idx, op)
 		}
-		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx)
+		rootPtr, parent, key, assign, perr := resolveParent(root, parts, op, idx, owned)
 		if perr != nil {
 			return nil, perr
 		}
@@ -109,7 +191,9 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 			if opts.ValidateOldValues && op.HasOldValue && !DeepEqual(p[n], op.OldValue) {
 				return nil, opErr(CodeOldValueMismatch, `"oldValue" mismatch`, idx, op)
 			}
-			assign(arrRemoveAt(p, n))
+			spliced := arrRemoveAt(p, n)
+			owned.own(spliced)
+			assign(spliced)
 		case *Object:
 			cur, ok := p.Get(key)
 			if !ok {
@@ -133,7 +217,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		if len(parts) == 0 { // root replace swaps the document (§8.5.1)
 			return value, nil
 		}
-		rootPtr, parent, key, _, perr := resolveParent(root, parts, op, idx)
+		rootPtr, parent, key, _, perr := resolveParent(root, parts, op, idx, owned)
 		if perr != nil {
 			return nil, perr
 		}
@@ -174,11 +258,11 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		if !exists {
 			return nil, opErr(CodePathUnresolvable, `"move" source does not exist`, idx, op)
 		}
-		afterRemove, perr := applyOp(root, &Operation{Op: OpRemove, Path: op.From}, idx, opts)
+		afterRemove, perr := applyOp(root, &Operation{Op: OpRemove, Path: op.From}, idx, opts, owned)
 		if perr != nil {
 			return nil, perr
 		}
-		return applyOp(afterRemove, &Operation{Op: OpAdd, Path: op.Path, Value: val, HasValue: true}, idx, opts)
+		return applyOp(afterRemove, &Operation{Op: OpAdd, Path: op.Path, Value: val, HasValue: true}, idx, opts, owned)
 
 	case OpCopy:
 		if !op.HasFrom {
@@ -194,7 +278,7 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 		}
 		// Deep-clone so the result never aliases the source (SPEC §8.3.3).
 		copied := Clone(val)
-		return applyOp(root, &Operation{Op: OpAdd, Path: op.Path, Value: copied, HasValue: true}, idx, opts)
+		return applyOp(root, &Operation{Op: OpAdd, Path: op.Path, Value: copied, HasValue: true}, idx, opts, owned)
 
 	case OpTest:
 		// D4 (SPEC §8.3/§8.3.5, RFC 6902 §4.6): `test` MUST carry `value`. An
@@ -231,8 +315,8 @@ func applyOp(root Value, op *Operation, idx int, opts ApplyOptions) (Value, *Pat
 // The write-side prototype-pollution guard (SPEC §8.6.1) is enforced on every
 // object segment traversed and on the final object segment; it does not apply
 // to array-index segments.
-func resolveParent(root Value, parts []string, op *Operation, idx int) (rootPtr *Value, parent Value, key string, assign func(Value), err *PatchError) {
-	rt := cloneNode(root)
+func resolveParent(root Value, parts []string, op *Operation, idx int, owned *ownedSet) (rootPtr *Value, parent Value, key string, assign func(Value), err *PatchError) {
+	rt := owned.clone(root)
 	rootPtr = &rt
 	current := rt
 	assignCurrent := func(v Value) { *rootPtr = v }
@@ -245,7 +329,7 @@ func resolveParent(root Value, parts []string, op *Operation, idx int) (rootPtr 
 			if perr != nil {
 				return nil, nil, "", nil, perr
 			}
-			child := cloneNode(c[n])
+			child := owned.clone(c[n])
 			c[n] = child
 			arr, ni := c, n
 			assignCurrent = func(v Value) { arr[ni] = v }
@@ -263,7 +347,7 @@ func resolveParent(root Value, parts []string, op *Operation, idx int) (rootPtr 
 			if !ok {
 				return nil, nil, "", nil, opErr(CodePathUnresolvable, `path does not exist`, idx, op)
 			}
-			cloned := cloneNode(child)
+			cloned := owned.clone(child)
 			c.Set(part, cloned)
 			obj, pk := c, part
 			assignCurrent = func(v Value) { obj.Set(pk, v) }
@@ -389,22 +473,6 @@ func isProperPrefix(from, path []string) bool {
 		}
 	}
 	return true
-}
-
-// cloneNode returns a shallow copy of a container (so its slot can be mutated
-// without touching the input), or the value itself for immutable scalars. It is
-// the copy-on-write primitive used by resolveParent (SPEC §8.7.1).
-func cloneNode(v Value) Value {
-	switch x := v.(type) {
-	case []Value:
-		out := make([]Value, len(x))
-		copy(out, x)
-		return out
-	case *Object:
-		return x.shallowClone()
-	default:
-		return v
-	}
 }
 
 // arrInsert returns a new slice with v inserted at index at (0 <= at <= len).

@@ -60,6 +60,31 @@ language-neutral oracle, and the Go engine in [`go/`](./go) is verified against 
 spec + vector update first; the TypeScript reference (`src/`) and the Go port (`go/`) both follow
 from the vectors, so neither engine is the source of truth — the spec is.
 
+### Go engine checks
+
+From `go/`, before opening a PR that touches the Go engine, make sure all of these are clean —
+CI runs the same set:
+
+```sh
+go vet ./...
+go test -race -count=1 ./...   # -race guards the concurrency-safety claims
+gofmt -l .                     # must print nothing
+```
+
+**Perf-check.** The apply engine (cloned-container set) and the diff engine (LCS/keyed
+strategies) are guarded by benchmarks in [`go/bench_test.go`](./go/bench_test.go). When you touch
+either hot path, run the benchmarks before and after your change and put the numbers in the PR:
+
+```sh
+go test -run '^$' -bench . -benchmem ./...
+```
+
+`BenchmarkApply100OpsUnderOneObject` reports `allocs/op` and `B/op` — the metric the per-invocation
+clone-set protects (N ops under one subtree must clone it once, not N times). The three
+`BenchmarkDiff*` shapes (trimmed single edit, 4k disjoint, keyed modify) mirror the shared corpus
+so a diff regression shows up as a benchmark regression. A perf-neutral change should keep these
+flat; a perf change should quote the before/after delta.
+
 ## Releasing (changesets)
 
 This repo uses [Changesets](https://github.com/changesets/changesets) for versioning and

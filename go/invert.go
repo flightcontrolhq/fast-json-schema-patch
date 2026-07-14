@@ -22,6 +22,7 @@ import "strconv"
 func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 	inverse := make([]Operation, 0, len(patch))
 	root := doc
+	owned := newOwnedSet() // COW set for the forward simulation
 
 	for i := range patch {
 		op := &patch[i]
@@ -82,7 +83,7 @@ func InvertPatch(doc Value, patch []Operation) ([]Operation, error) {
 
 		// Advance the simulated document so later ops invert against post-op
 		// state. Uses default options (no oldValue validation).
-		next, perr := applyOp(root, op, i, ApplyOptions{})
+		next, perr := applyOp(root, op, i, ApplyOptions{}, owned)
 		if perr != nil {
 			return nil, perr
 		}
