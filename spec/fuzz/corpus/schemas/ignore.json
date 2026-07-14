@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "number"
+          },
+          "score": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "ts": {
+          "type": "number"
+        },
+        "rev": {
+          "type": "number"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -136,6 +136,7 @@ interface CapsBlock {
 	includeOldValue?: boolean;
 	emitMoves?: boolean;
 	wholesaleReplaceFallback?: boolean;
+	ignorePaths?: string[];
 }
 interface DiffOptionsBlock {
 	primaryKeyMap?: Record<string, string>;
@@ -266,6 +267,7 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 				includeOldValue: caps.includeOldValue,
 				emitMoves: caps.emitMoves,
 				wholesaleReplaceFallback: caps.wholesaleReplaceFallback,
+				ignorePaths: caps.ignorePaths,
 			});
 
 			const actualPatch = patcher.execute({
@@ -284,15 +286,21 @@ describe("conformance: diff vectors (SPEC §10.1/§10.3)", () => {
 				vector.expectedPatch as unknown as typeof actualPatch,
 			);
 
-			// (a) §10.3.1 round-trip, per the strategy's contract (§7).
-			const applied = applyPatch(vector.original, actualPatch);
-			checkRoundTrip(
-				vector.name,
-				applied,
-				vector.modified,
-				plan,
-				caps.emitMoves === true,
-			);
+			// (a) §10.3.1 round-trip, per the strategy's contract (§7). ignorePaths
+			// vectors reconstruct `modified` only MODULO the ignored subtrees (§7.6),
+			// so the whole-document round-trip gate does not apply — structural op
+			// equality above is the gate, and apply is cross-checked by the
+			// differential corpus (spec/fuzz). Skip when ignorePaths is in effect.
+			if (!caps.ignorePaths || caps.ignorePaths.length === 0) {
+				const applied = applyPatch(vector.original, actualPatch);
+				checkRoundTrip(
+					vector.name,
+					applied,
+					vector.modified,
+					plan,
+					caps.emitMoves === true,
+				);
+			}
 		});
 	}
 });

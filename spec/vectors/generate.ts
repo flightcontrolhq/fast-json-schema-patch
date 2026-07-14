@@ -104,6 +104,7 @@ type Caps = {
   includeOldValue?: boolean;
   emitMoves?: boolean;
   wholesaleReplaceFallback?: boolean;
+  ignorePaths?: string[];
 };
 type PlanOpts = {
   primaryKeyMap?: Record<string, string>;
@@ -217,6 +218,8 @@ function buildDiffRecord(spec: DiffSpec): Record<string, unknown> {
   if (spec.capabilities?.emitMoves === true) caps.emitMoves = true;
   if (spec.capabilities?.wholesaleReplaceFallback === true)
     caps.wholesaleReplaceFallback = true;
+  if (spec.capabilities?.ignorePaths && spec.capabilities.ignorePaths.length)
+    caps.ignorePaths = spec.capabilities.ignorePaths;
   if (Object.keys(caps).length) options.capabilities = caps;
 
   const rec: Record<string, unknown> = { name: spec.name, comment: spec.comment };
@@ -522,6 +525,34 @@ D("capabilities-wholesale", { name: "wrf-off-default-is-granular", comment: "§5
 D("capabilities-wholesale", { name: "wrf-small-diff-keeps-granular", comment: "§5.9.3: a one-field change in a 6-item array stays far under threshold -> granular kept", schema: REWRITE_SCHEMA, capabilities: WRF, original: smallOrig, modified: smallMod, roundtrip: "exact" });
 const NESTED_ARR_SCHEMA = { type: "object", properties: { outer: { type: "array", items: { type: "object", properties: { id: { type: "string" }, inner: { type: "array", items: { type: "string" } } } } } } };
 D("capabilities-wholesale", { name: "wrf-nested-inner-triggers-outer-keeps", comment: "§5.9.1 bottom-up: the inner array crosses its own threshold and goes wholesale while the outer array keeps granular descent", schema: NESTED_ARR_SCHEMA, capabilities: WRF_IOV, original: { outer: [{ id: "g", inner: ["AAAAAAAAAAA", "u1ccccccccc", "u2cccccccc"] }, { id: "h", inner: ["z"] }] }, modified: { outer: [{ id: "g", inner: ["BBBBBBBBBBB", "u1ccccccccc", "u2cccccccc"] }, { id: "h", inner: ["z"] }] }, roundtrip: "exact" });
+
+// --- diff/capabilities-ignore-paths: §5.10/§10.4.6 ignorePaths — subtrees treated as equal ---
+// Round-trip is checked modulo the ignored subtrees (§7.6): a vector whose
+// ignored fields DRIFT reconstructs `modified` only up to the ignore projection,
+// so its self-check uses roundtrip:"none" (structural op equality is the gate,
+// and apply is cross-checked by the differential corpus). A vector with no
+// ignored drift stays exact. Construction-time validation errors (§5.10.1/
+// §5.10.7) are not expressible as diff vectors and live in the engine unit tests
+// (§10.5.2: test/ignore-paths.test.ts, go/ignore_paths_test.go).
+const IP_TS = (paths: string[]): Caps => ({ ignorePaths: paths });
+const PK_USERS_TS = { type: "object", properties: { users: { type: "array", items: { type: "object", properties: { id: { type: "string" }, name: { type: "string" }, updatedAt: { type: "number" } }, required: ["id"] } } } };
+const LCS_ITEMS_TS = { type: "object", properties: { items: { type: "array", items: { type: "object", properties: { v: { type: "string" }, ts: { type: "number" } } } } } };
+const UNIQ_PLUS_META = { type: "object", properties: { tags: { type: "array", items: { type: "string" } }, meta: { type: "object", properties: { ts: { type: "number" } } } } };
+const RW_TS_SCHEMA = { type: "object", properties: { a: { type: "array", items: { type: "object", properties: { t: { type: "string" }, ts: { type: "number" } } } } } };
+D("capabilities-ignore-paths", { name: "ip-object-member-ignored-noop", comment: "§5.10.4: an ignored object member changing alone yields NO ops", schema: null, capabilities: IP_TS(["/meta/ts"]), original: { meta: { ts: 1, n: "a" } }, modified: { meta: { ts: 2, n: "a" } }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-object-member-real-change-survives", comment: "§5.10.4: a real sibling change survives while the ignored member is suppressed", schema: null, capabilities: IP_TS(["/meta/ts"]), original: { meta: { ts: 1, n: "a" } }, modified: { meta: { ts: 2, n: "b" } }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-real-change-no-ignored-drift-exact", comment: "§7.6: with the ignored field unchanged, reconstruction is exact", schema: null, capabilities: IP_TS(["/meta/ts"]), original: { meta: { ts: 1, n: "a" } }, modified: { meta: { ts: 1, n: "b" } }, roundtrip: "exact" });
+D("capabilities-ignore-paths", { name: "ip-wildcard-any-member-at-level", comment: "§5.10.3: a `/*/ts` wildcard ignores `ts` under any top-level member", schema: null, capabilities: IP_TS(["/*/ts"]), original: { a: { ts: 1 }, b: { ts: 1, k: 2 } }, modified: { a: { ts: 9 }, b: { ts: 9, k: 3 } }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-modified-only-ignored-member-not-added", comment: "§5.10.4: a modified-only ignored member emits no add", schema: null, capabilities: IP_TS(["/meta/ts"]), original: { meta: {} }, modified: { meta: { ts: 5 } }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-whole-array-ignored-noop", comment: "§5.10.4: ignoring `/arr` treats the whole array as equal -> no ops", schema: null, capabilities: IP_TS(["/arr"]), original: { arr: [1, 2, 3] }, modified: { arr: [4, 5] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-every-element-ignored-noop", comment: "§5.10.4: `/arr/*` ignores every element (item node terminal) -> no ops", schema: null, capabilities: IP_TS(["/arr/*"]), original: { arr: [{ a: 1 }] }, modified: { arr: [{ a: 2 }, { b: 3 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-lcs-ignored-field-only-noop", comment: "§5.10.5: LCS items differing only in an ignored field intern equal -> no ops", schema: LCS_ITEMS_TS, capabilities: IP_TS(["/items/*/ts"]), original: { items: [{ v: "a", ts: 1 }, { v: "b", ts: 1 }] }, modified: { items: [{ v: "a", ts: 9 }, { v: "b", ts: 1 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-lcs-real-and-ignored-mixed", comment: "§5.10.5: a real field change descends granularly; ignored drift is dropped", schema: LCS_ITEMS_TS, capabilities: IP_TS(["/items/*/ts"]), original: { items: [{ v: "a", ts: 1 }] }, modified: { items: [{ v: "A", ts: 9 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-pk-wildcard-under-keyed-items", comment: "§5.10.3: `/users/*/updatedAt` ignores updatedAt in each keyed item", schema: PK_USERS_TS, capabilities: IP_TS(["/users/*/updatedAt"]), original: { users: [{ id: "a", name: "A", updatedAt: 1 }, { id: "b", name: "B", updatedAt: 1 }] }, modified: { users: [{ id: "a", name: "A", updatedAt: 2 }, { id: "b", name: "B", updatedAt: 1 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-pk-real-field-survives-ignored-drift", comment: "§5.10.3/§5.10.5: a keyed item's real field change survives while updatedAt drifts", schema: PK_USERS_TS, capabilities: IP_TS(["/users/*/updatedAt"]), original: { users: [{ id: "a", name: "A", updatedAt: 1 }] }, modified: { users: [{ id: "a", name: "A2", updatedAt: 2 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-unique-coexists-with-unrelated-ignore", comment: "§5.10: an unrelated ignore leaves a unique array's positional replaces intact", schema: UNIQ_PLUS_META, capabilities: IP_TS(["/meta/ts"]), original: { tags: ["a", "b"], meta: { ts: 1 } }, modified: { tags: ["a", "x"], meta: { ts: 2 } }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-emitmoves-move-pairing-with-drift", comment: "§5.10.5: under emitMoves, a relocated item whose ignored field drifted is ONE move, not remove+add", schema: LCS_ITEMS_TS, capabilities: { emitMoves: true, ignorePaths: ["/items/*/ts"] }, original: { items: [{ v: "X", ts: 1 }, { v: "Y", ts: 1 }] }, modified: { items: [{ v: "Y", ts: 9 }, { v: "X", ts: 1 }] }, roundtrip: "none" });
+D("capabilities-ignore-paths", { name: "ip-wholesale-disabled-by-ignore-beneath", comment: "§5.10.6: wholesaleReplaceFallback is DISABLED for an array with an ignore path beneath it (no leaked ignored content)", schema: RW_TS_SCHEMA, capabilities: { wholesaleReplaceFallback: true, ignorePaths: ["/a/*/ts"] }, original: { a: [{ t: "AAAAAAAAAA", ts: 1 }, { t: "BBBBBBBBBB", ts: 2 }] }, modified: { a: [{ t: "ZZZZZZZZZZ", ts: 5 }, { t: "YYYYYYYYYY", ts: 6 }] }, roundtrip: "none" });
 
 // ===========================================================================
 // PLAN-SNAPSHOT VECTORS (§10.6): buildPlan derivation, falsifiable per-path.

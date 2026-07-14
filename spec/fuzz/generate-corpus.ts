@@ -308,6 +308,170 @@ for (const config of configs) {
 }
 
 // ---------------------------------------------------------------------------
+// ignorePaths differential corpus (SPEC §5.10). A dedicated, self-contained
+// family: a fixed schema (keyed users + unique tags + a meta object) and
+// deterministically-generated doc pairs whose modifications DELIBERATELY include
+// ignored-field drift, reorders (for move-pairing under emitMoves), and real
+// changes. Crossed with ignore-path sets (none of which covers the `id` key,
+// §5.10.7) and capability toggles. The Go differential test replays each record
+// with the same ignorePaths and asserts structural op equality + apply equality
+// (§10.3.2/§8.7.4). A SEPARATE seeded PRNG is used so the faker/jsf-driven
+// corpus above stays byte-identical.
+// ---------------------------------------------------------------------------
+interface IgnoreVariant {
+  ignorePaths: string[];
+  includeOldValue: boolean;
+  emitMoves: boolean;
+  wholesaleReplaceFallback: boolean;
+}
+const IGNORE_SCHEMA = {
+  type: "object",
+  properties: {
+    users: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["id"],
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" },
+          updatedAt: { type: "number" },
+          score: { type: "number" },
+        },
+      },
+    },
+    tags: { type: "array", items: { type: "string" } },
+    meta: {
+      type: "object",
+      properties: { ts: { type: "number" }, rev: { type: "number" }, note: { type: "string" } },
+    },
+  },
+};
+writeFileSync(join(schemaDir, "ignore.json"), `${JSON.stringify(IGNORE_SCHEMA, null, 2)}\n`);
+
+const ignoreVariants: IgnoreVariant[] = [
+  { ignorePaths: ["/users/*/updatedAt", "/meta/ts"], includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: false },
+  { ignorePaths: ["/users/*/updatedAt"], includeOldValue: false, emitMoves: true, wholesaleReplaceFallback: false },
+  { ignorePaths: ["/meta/ts", "/meta/rev"], includeOldValue: true, emitMoves: false, wholesaleReplaceFallback: true },
+  { ignorePaths: ["/users/*/updatedAt", "/meta/ts", "/meta/rev"], includeOldValue: true, emitMoves: true, wholesaleReplaceFallback: false },
+];
+
+const irng = mulberry32(SEED ^ 0x1970);
+const iri = (n: number) => Math.floor(irng() * n);
+const WORDS = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel"];
+const TAGPOOL = ["x", "y", "z", "p", "q", "r", "s", "t"];
+
+interface IgnoreUser {
+  id: string;
+  name: string;
+  updatedAt: number;
+  score: number;
+}
+interface IgnoreDoc {
+  users: IgnoreUser[];
+  tags: string[];
+  meta: { ts: number; rev: number; note: string };
+}
+
+function makeIgnoreDoc(nUsers: number): IgnoreDoc {
+  const users: IgnoreUser[] = [];
+  for (let i = 0; i < nUsers; i++) {
+    users.push({ id: `u${i}`, name: WORDS[iri(WORDS.length)] as string, updatedAt: iri(1000), score: iri(100) });
+  }
+  const tags: string[] = [];
+  const nt = 2 + iri(4);
+  const used = new Set<string>();
+  for (let i = 0; i < nt; i++) {
+    const t = TAGPOOL[iri(TAGPOOL.length)] as string;
+    if (used.has(t)) continue;
+    used.add(t);
+    tags.push(t);
+  }
+  return { users, tags, meta: { ts: iri(10000), rev: iri(50), note: WORDS[iri(WORDS.length)] as string } };
+}
+
+function mutateIgnoreDoc(doc: IgnoreDoc): IgnoreDoc {
+  const m: IgnoreDoc = clone(doc);
+  // Per-user: ignored drift (updatedAt), real changes (name/score).
+  for (const u of m.users) {
+    if (iri(2) === 0) u.updatedAt = iri(1000); // ignored under most variants
+    if (iri(3) === 0) u.name = WORDS[iri(WORDS.length)] as string; // real
+    if (iri(3) === 0) u.score = iri(100); // real
+  }
+  // Reorder (exercises move-pairing under emitMoves).
+  if (m.users.length > 1 && iri(2) === 0) {
+    const i = iri(m.users.length);
+    const j = iri(m.users.length);
+    const tmp = m.users[i] as IgnoreUser;
+    m.users[i] = m.users[j] as IgnoreUser;
+    m.users[j] = tmp;
+  }
+  // Add / remove a keyed user.
+  if (iri(3) === 0) m.users.push({ id: `u${100 + iri(50)}`, name: WORDS[iri(WORDS.length)] as string, updatedAt: iri(1000), score: iri(100) });
+  if (m.users.length > 1 && iri(3) === 0) m.users.splice(iri(m.users.length), 1);
+  // tags (unique/lcs): tweak one.
+  if (m.tags.length > 0 && iri(2) === 0) m.tags[iri(m.tags.length)] = TAGPOOL[iri(TAGPOOL.length)] as string;
+  // meta: ignored (ts/rev) + real (note).
+  if (iri(2) === 0) m.meta.ts = iri(10000);
+  if (iri(2) === 0) m.meta.rev = iri(50);
+  if (iri(2) === 0) m.meta.note = WORDS[iri(WORDS.length)] as string;
+  return m;
+}
+
+{
+  const lines: string[] = [];
+  let seq = 0;
+  const ignorePlanCache = new Map<string, ReturnType<typeof buildPlan>>();
+  for (let d = 0; d < 14; d++) {
+    const original = makeIgnoreDoc(2 + iri(6)) as unknown as JsonValue;
+    const modified = mutateIgnoreDoc(original as unknown as IgnoreDoc) as unknown as JsonValue;
+    for (const v of ignoreVariants) {
+      let plan = ignorePlanCache.get("ignore");
+      if (!plan) {
+        plan = buildPlan({ schema: IGNORE_SCHEMA as never });
+        ignorePlanCache.set("ignore", plan);
+      }
+      const patcher = new JsonSchemaPatcher({
+        plan,
+        includeOldValue: v.includeOldValue,
+        emitMoves: v.emitMoves,
+        wholesaleReplaceFallback: v.wholesaleReplaceFallback,
+        ignorePaths: v.ignorePaths,
+      });
+      const tsPatch = patcher.execute({ original, modified });
+      const tsApplied = applyPatch(clone(original), tsPatch, {});
+      const capLabel = `ig=${v.ignorePaths.length},iov=${v.includeOldValue ? 1 : 0},mov=${
+        v.emitMoves ? 1 : 0
+      },whole=${v.wholesaleReplaceFallback ? 1 : 0}`;
+      lines.push(
+        JSON.stringify({
+          name: `ignore-paths/${seq}/${capLabel}`,
+          schemaRef: "ignore",
+          options: {
+            includeOldValue: v.includeOldValue,
+            emitMoves: v.emitMoves,
+            wholesaleReplaceFallback: v.wholesaleReplaceFallback,
+            ignorePaths: v.ignorePaths,
+          },
+          original,
+          modified,
+          tsPatch,
+          tsApplied,
+        }),
+      );
+      stats.total++;
+      stats.byConfig.set("ignore-paths", (stats.byConfig.get("ignore-paths") ?? 0) + 1);
+      stats.byCapability.set(capLabel, (stats.byCapability.get(capLabel) ?? 0) + 1);
+      if (tsPatch.length === 0) stats.emptyPatches++;
+      stats.totalOps += tsPatch.length;
+      for (const op of tsPatch) stats.opCounts.set(op.op, (stats.opCounts.get(op.op) ?? 0) + 1);
+      seq++;
+    }
+  }
+  writeFileSync(join(outDir, "ignore-paths.jsonl"), `${lines.join("\n")}\n`);
+}
+
+// ---------------------------------------------------------------------------
 // Run summary (also useful as a commit-message reference).
 // ---------------------------------------------------------------------------
 const sorted = (m: Map<string, number>) => [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));

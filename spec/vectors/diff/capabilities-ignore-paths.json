@@ -1,0 +1,632 @@
+[
+  {
+    "name": "ip-object-member-ignored-noop",
+    "comment": "§5.10.4: an ignored object member changing alone yields NO ops",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/meta/ts"
+        ]
+      }
+    },
+    "original": {
+      "meta": {
+        "ts": 1,
+        "n": "a"
+      }
+    },
+    "modified": {
+      "meta": {
+        "ts": 2,
+        "n": "a"
+      }
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-object-member-real-change-survives",
+    "comment": "§5.10.4: a real sibling change survives while the ignored member is suppressed",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/meta/ts"
+        ]
+      }
+    },
+    "original": {
+      "meta": {
+        "ts": 1,
+        "n": "a"
+      }
+    },
+    "modified": {
+      "meta": {
+        "ts": 2,
+        "n": "b"
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/meta/n",
+        "value": "b",
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "ip-real-change-no-ignored-drift-exact",
+    "comment": "§7.6: with the ignored field unchanged, reconstruction is exact",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/meta/ts"
+        ]
+      }
+    },
+    "original": {
+      "meta": {
+        "ts": 1,
+        "n": "a"
+      }
+    },
+    "modified": {
+      "meta": {
+        "ts": 1,
+        "n": "b"
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/meta/n",
+        "value": "b",
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "ip-wildcard-any-member-at-level",
+    "comment": "§5.10.3: a `/*/ts` wildcard ignores `ts` under any top-level member",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/*/ts"
+        ]
+      }
+    },
+    "original": {
+      "a": {
+        "ts": 1
+      },
+      "b": {
+        "ts": 1,
+        "k": 2
+      }
+    },
+    "modified": {
+      "a": {
+        "ts": 9
+      },
+      "b": {
+        "ts": 9,
+        "k": 3
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/b/k",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "ip-modified-only-ignored-member-not-added",
+    "comment": "§5.10.4: a modified-only ignored member emits no add",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/meta/ts"
+        ]
+      }
+    },
+    "original": {
+      "meta": {}
+    },
+    "modified": {
+      "meta": {
+        "ts": 5
+      }
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-whole-array-ignored-noop",
+    "comment": "§5.10.4: ignoring `/arr` treats the whole array as equal -> no ops",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/arr"
+        ]
+      }
+    },
+    "original": {
+      "arr": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "arr": [
+        4,
+        5
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-every-element-ignored-noop",
+    "comment": "§5.10.4: `/arr/*` ignores every element (item node terminal) -> no ops",
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/arr/*"
+        ]
+      }
+    },
+    "original": {
+      "arr": [
+        {
+          "a": 1
+        }
+      ]
+    },
+    "modified": {
+      "arr": [
+        {
+          "a": 2
+        },
+        {
+          "b": 3
+        }
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-lcs-ignored-field-only-noop",
+    "comment": "§5.10.5: LCS items differing only in an ignored field intern equal -> no ops",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/items/*/ts"
+        ]
+      }
+    },
+    "original": {
+      "items": [
+        {
+          "v": "a",
+          "ts": 1
+        },
+        {
+          "v": "b",
+          "ts": 1
+        }
+      ]
+    },
+    "modified": {
+      "items": [
+        {
+          "v": "a",
+          "ts": 9
+        },
+        {
+          "v": "b",
+          "ts": 1
+        }
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-lcs-real-and-ignored-mixed",
+    "comment": "§5.10.5: a real field change descends granularly; ignored drift is dropped",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/items/*/ts"
+        ]
+      }
+    },
+    "original": {
+      "items": [
+        {
+          "v": "a",
+          "ts": 1
+        }
+      ]
+    },
+    "modified": {
+      "items": [
+        {
+          "v": "A",
+          "ts": 9
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/items/0/v",
+        "value": "A",
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "ip-pk-wildcard-under-keyed-items",
+    "comment": "§5.10.3: `/users/*/updatedAt` ignores updatedAt in each keyed item",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/users/*/updatedAt"
+        ]
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A",
+          "updatedAt": 1
+        },
+        {
+          "id": "b",
+          "name": "B",
+          "updatedAt": 1
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A",
+          "updatedAt": 2
+        },
+        {
+          "id": "b",
+          "name": "B",
+          "updatedAt": 1
+        }
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "ip-pk-real-field-survives-ignored-drift",
+    "comment": "§5.10.3/§5.10.5: a keyed item's real field change survives while updatedAt drifts",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/users/*/updatedAt"
+        ]
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A",
+          "updatedAt": 1
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A2",
+          "updatedAt": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "A2",
+        "oldValue": "A"
+      }
+    ]
+  },
+  {
+    "name": "ip-unique-coexists-with-unrelated-ignore",
+    "comment": "§5.10: an unrelated ignore leaves a unique array's positional replaces intact",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "ts": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "ignorePaths": [
+          "/meta/ts"
+        ]
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b"
+      ],
+      "meta": {
+        "ts": 1
+      }
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "x"
+      ],
+      "meta": {
+        "ts": 2
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "x",
+        "oldValue": "b"
+      }
+    ]
+  },
+  {
+    "name": "ip-emitmoves-move-pairing-with-drift",
+    "comment": "§5.10.5: under emitMoves, a relocated item whose ignored field drifted is ONE move, not remove+add",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "v": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true,
+        "ignorePaths": [
+          "/items/*/ts"
+        ]
+      }
+    },
+    "original": {
+      "items": [
+        {
+          "v": "X",
+          "ts": 1
+        },
+        {
+          "v": "Y",
+          "ts": 1
+        }
+      ]
+    },
+    "modified": {
+      "items": [
+        {
+          "v": "Y",
+          "ts": 9
+        },
+        {
+          "v": "X",
+          "ts": 1
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/items/0",
+        "path": "/items/1"
+      }
+    ]
+  },
+  {
+    "name": "ip-wholesale-disabled-by-ignore-beneath",
+    "comment": "§5.10.6: wholesaleReplaceFallback is DISABLED for an array with an ignore path beneath it (no leaked ignored content)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string"
+              },
+              "ts": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "wholesaleReplaceFallback": true,
+        "ignorePaths": [
+          "/a/*/ts"
+        ]
+      }
+    },
+    "original": {
+      "a": [
+        {
+          "t": "AAAAAAAAAA",
+          "ts": 1
+        },
+        {
+          "t": "BBBBBBBBBB",
+          "ts": 2
+        }
+      ]
+    },
+    "modified": {
+      "a": [
+        {
+          "t": "ZZZZZZZZZZ",
+          "ts": 5
+        },
+        {
+          "t": "YYYYYYYYYY",
+          "ts": 6
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/a/0",
+        "oldValue": {
+          "t": "AAAAAAAAAA",
+          "ts": 1
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/a/0/t",
+        "value": "ZZZZZZZZZZ",
+        "oldValue": "BBBBBBBBBB"
+      },
+      {
+        "op": "add",
+        "path": "/a/1",
+        "value": {
+          "t": "YYYYYYYYYY",
+          "ts": 6
+        }
+      }
+    ]
+  }
+]
