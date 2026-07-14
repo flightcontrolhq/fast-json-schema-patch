@@ -1,7 +1,7 @@
 import { describe, it, expect } from "bun:test";
 import { buildPlan, JsonSchemaPatcher } from "../src";
 import { StructuredDiff } from "../src/aggregators/StructuredDiff";
-import type { JsonObject } from "../src/types";
+import type { JsonObject, Operation } from "../src/types";
 import schema from "../schema/schema.json";
 
 describe("StructuredDiff", () => {
@@ -1368,5 +1368,96 @@ describe("StructuredDiff remove-fallback index extraction (F17)", () => {
     // would spuriously match `^/users/(d+)`; a real numeric index would not.
     expect(sd.extractIndexAfterPrefix("/users/ddd", "/users")).toBeUndefined();
     expect(sd.extractIndexAfterPrefix("/users/name", "/users")).toBeUndefined();
+  });
+});
+
+// F31 gap coverage: a precomputed `config.patches` option and the
+// non-array-`pathPrefix` guard had no direct tests. Uses a small, purpose-built
+// schema rather than the large fixture above so each case stays cheap.
+describe("StructuredDiff config options (F31)", () => {
+  const smallSchema = {
+    type: "object",
+    properties: {
+      name: { type: "string" },
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            value: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+  };
+  const plan = buildPlan({ schema: smallSchema as any });
+
+  describe("precomputed `patches` option", () => {
+    const original = { name: "a", items: [{ id: "x", value: 1 }] };
+    const modified = { name: "a", items: [{ id: "x", value: 2 }] };
+
+    it("accepts precomputed patches and skips its own JsonSchemaPatcher.execute call", () => {
+      const realPatches = new JsonSchemaPatcher({ plan }).execute({
+        original,
+        modified,
+      });
+      expect(realPatches.length).toBeGreaterThan(0);
+
+      const sd = new StructuredDiff({ plan });
+      const result = sd.execute({
+        pathPrefix: "/items",
+        original,
+        modified,
+        patches: realPatches,
+      });
+
+      expect(result.childDiffs.x).toBeDefined();
+      expect(
+        result.childDiffs.x?.patches.some((p) => p.path.endsWith("/value"))
+      ).toBe(true);
+    });
+
+    it("uses the supplied patches verbatim rather than recomputing them", () => {
+      // A fabricated patch that does not correspond to any real difference
+      // between `original` and `modified`. If StructuredDiff recomputed
+      // patches internally instead of trusting `config.patches`, this
+      // fabricated value would never surface in the result.
+      const fabricated: Operation[] = [
+        { op: "replace", path: "/items/0/value", value: 999, oldValue: 1 },
+      ];
+
+      const sd = new StructuredDiff({ plan });
+      const result = sd.execute({
+        pathPrefix: "/items",
+        original,
+        modified,
+        patches: fabricated,
+      });
+
+      expect(result.childDiffs.x?.patches).toHaveLength(1);
+      expect(result.childDiffs.x?.patches[0]?.value).toBe(999);
+      expect(result.childDiffs.x?.patches[0]?.path).toBe("/value");
+    });
+  });
+
+  describe("non-array pathPrefix", () => {
+    const original = { name: "a", items: [] };
+    const modified = { name: "b", items: [] };
+
+    it("throws when pathPrefix resolves to neither a schema array nor array data", () => {
+      const sd = new StructuredDiff({ plan });
+      expect(() =>
+        sd.execute({ pathPrefix: "/name", original, modified })
+      ).toThrow(/does not represent an array/);
+    });
+
+    it("throws for a pathPrefix absent from both the schema and the data", () => {
+      const sd = new StructuredDiff({ plan });
+      expect(() =>
+        sd.execute({ pathPrefix: "/nonexistent", original, modified })
+      ).toThrow(/does not represent an array/);
+    });
   });
 });

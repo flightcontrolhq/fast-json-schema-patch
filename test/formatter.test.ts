@@ -1,6 +1,7 @@
 import { describe, test, expect } from "bun:test";
 import { buildPlan, JsonSchemaPatcher } from "../src/index";
 import { DiffFormatter } from "../src/formatting/DiffFormatter";
+import type { FormattedDiffLines } from "../src/types";
 import { faker } from "@faker-js/faker";
 
 const userSchema = {
@@ -85,5 +86,64 @@ describe("DiffFormatter E2E Integration", () => {
     const sideBySideDiff = formatter.format(patch);
 
     expect(sideBySideDiff).toMatchSnapshot("side-by-side-diff");
+  });
+});
+
+// F31: DiffFormatter memoizes format() results in a module-level cache keyed
+// by (content hash, patches hash, plan fingerprint), evicting the oldest half
+// of entries once size exceeds 1000 (DiffFormatter.ts `format()`). That
+// eviction boundary had no direct coverage. The cache is module-private (not
+// exported), so this drives it black-box: reuse a single DiffFormatter (fixed
+// original/modified, so the content-hash portion of the key is constant) and
+// vary only the patch path per call so every call is a distinct cache key.
+// Pushing well past 1000 distinct keys forces at least one eviction pass;
+// correctness is checked by confirming every call - whether served from
+// cache or recomputed after being evicted - still returns a result that
+// reflects its own distinct patch and not a neighboring cache entry's.
+describe("DiffFormatter cache eviction boundary (F31)", () => {
+  test("results stay correct across the >1000-entry eviction boundary", () => {
+    const fieldCount = 1010;
+    const original: Record<string, number> = {};
+    const modified: Record<string, number> = {};
+    for (let i = 0; i < fieldCount; i++) {
+      original[`f${i}`] = i;
+      modified[`f${i}`] = i + 1;
+    }
+
+    const formatter = new DiffFormatter(original, modified);
+
+    const results = [];
+    for (let i = 0; i < fieldCount; i++) {
+      results.push(
+        formatter.format([
+          { op: "replace", path: `/f${i}`, value: i + 1, oldValue: i },
+        ])
+      );
+    }
+
+    // Spot-check early (likely evicted), middle, and late (likely still
+    // cached) entries: each must reflect only its own field's change.
+    for (const i of [0, 1, 499, 500, 501, 999, 1000, 1009]) {
+      const result = results[i];
+      const changedOriginal = result?.originalLines.filter(
+        (l) => l.type === "removed"
+      );
+      const changedNew = result?.newLines.filter((l) => l.type === "added");
+
+      expect(
+        changedOriginal?.every((l) => l.content.includes(`"f${i}":`))
+      ).toBe(true);
+      expect(
+        changedNew?.every((l) => l.content.includes(`"f${i}":`))
+      ).toBe(true);
+    }
+
+    // Re-running the very first call's patch (near-guaranteed to have been
+    // evicted by now) must recompute rather than return another entry's
+    // stale/corrupted result.
+    const recomputed = formatter.format([
+      { op: "replace", path: "/f0", value: 1, oldValue: 0 },
+    ]);
+    expect(recomputed).toEqual(results[0] as FormattedDiffLines);
   });
 });
