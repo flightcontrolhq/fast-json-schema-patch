@@ -462,7 +462,9 @@ match in modified. Collect their original indices, **sort descending**, and for 
 2. **removals** — in **descending original index** order;
 3. **additions** — `/-` appends, in modified appearance order.
 
-This ordering is REQUIRED (§5.7 explains why it is round-trip-correct under sequential apply).
+This ordering is REQUIRED (§5.7 explains why it is round-trip-correct under sequential apply). It
+is the **default** emission; with the optional `emitMoves` capability on, the three-phase emission
+is replaced by the move machinery (§5.8.7) that reconstructs `modified` order exactly.
 
 `5.4.1.5` **Key equality (normative).** Index construction (Phase 1) and lookup (Phase 2) MUST
 treat two primaryKey values as the same key **iff they are equal by JSON type AND value** (§2.4.3):
@@ -934,6 +936,10 @@ arrays (keyed arrays inside keyed arrays) inherit the same per-level contract.
 `7.2.5` Under the §5.4.3 gate, arrays that would violate keyed-collection assumptions (non-object
 / keyless / non-string-number-key elements, or duplicate keys) fall back to LCS and therefore get
 the **exact** contract (§7.1) instead.
+
+`7.2.6` `7.2.1`–`7.2.4` describe the **default** (`emitMoves` off). With the optional `emitMoves`
+capability on (§5.8.7, §10.4.4), this contract is **upgraded to exact byte-for-byte reconstruction**
+(order included): survivors are reordered via `move`s and new keys are INDEXED adds. See §7.4.
 
 ### 7.3 Invert round-trip
 

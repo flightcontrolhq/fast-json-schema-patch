@@ -270,6 +270,65 @@ export function diffArrayByPrimaryKey(
   }
 }
 
+/**
+ * primaryKey-strategy emitMoves path (F07, SPEC §5.8.7). The caller guarantees
+ * the §5.4.3 gate passed (every element an object with a unique string/number
+ * key). Instead of the order-insensitive three-phase emission (§5.4.1), build
+ * the key bijection and hand it to the shared staged emitter, so survivors are
+ * REORDERED into `modified` order via `move`s and new keys are INDEXED adds —
+ * making `applyPatch(original, p)` equal `modified` byte-exactly (§7.4).
+ */
+export function diffArrayByPrimaryKeyMoves(
+  arr1: JsonArray,
+  arr2: JsonArray,
+  primaryKey: string,
+  path: string,
+  patches: Operation[],
+  onModification: ModificationCallback,
+  includeOldValue: boolean = true
+): void {
+  // Phase 1: index original by key (§5.4.1.1). The gate guarantees each item is
+  // an object with a string|number key, so no conforming check is needed here.
+  const keyToIndex = new Map<string | number, number>();
+  for (let i = 0; i < arr1.length; i++) {
+    const item = arr1[i] as JsonObject;
+    keyToIndex.set(item[primaryKey] as string | number, i);
+  }
+
+  const matched: MatchedPair[] = [];
+  const pureInserts: number[] = [];
+  for (let j = 0; j < arr2.length; j++) {
+    const item = arr2[j] as JsonObject;
+    const key = item[primaryKey] as string | number;
+    const src = keyToIndex.get(key);
+    if (src !== undefined) {
+      keyToIndex.delete(key);
+      matched.push({
+        src,
+        tgt: j,
+        changed: !deepEqual(arr1[src], arr2[j]),
+      });
+    } else {
+      pureInserts.push(j);
+    }
+  }
+
+  // Keys left in the index are original items with no match -> pure deletes.
+  const pureDeletes = Array.from(keyToIndex.values());
+
+  emitArrayMovesPatch(
+    arr1,
+    arr2,
+    path,
+    patches,
+    matched,
+    pureDeletes,
+    pureInserts,
+    onModification,
+    includeOldValue
+  );
+}
+
 export function diffArrayLCS(
   arr1: JsonArray,
   arr2: JsonArray,

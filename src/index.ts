@@ -2,6 +2,7 @@ import {
   checkArraysUnique,
   checkPrimaryKeyApplicable,
   diffArrayByPrimaryKey,
+  diffArrayByPrimaryKeyMoves,
   diffArrayLCS,
   diffArrayUnique,
   diffArrayUniqueMoves,
@@ -355,6 +356,20 @@ export class JsonSchemaPatcher {
       plan?.primaryKey &&
       checkPrimaryKeyApplicable(arr1, arr2, plan.primaryKey)
     ) {
+      // emitMoves (SPEC §5.8.7 / F07): reorder survivors + indexed adds for exact
+      // order fidelity, upgrading the §7.2 keyed-collection contract to §7.4.
+      if (this.emitMoves) {
+        diffArrayByPrimaryKeyMoves(
+          arr1,
+          arr2,
+          plan.primaryKey,
+          path,
+          patches,
+          createModificationCallback(plan.hashFields || []),
+          this.includeOldValue
+        );
+        return;
+      }
       diffArrayByPrimaryKey(
         arr1,
         arr2,

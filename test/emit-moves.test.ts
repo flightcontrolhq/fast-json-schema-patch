@@ -288,3 +288,167 @@ describe("emitMoves unique reorders (F23, SPEC §5.8.6)", () => {
     }
   });
 });
+
+describe("emitMoves primaryKey order fidelity (F07, SPEC §5.8.7)", () => {
+  const keyedSchema = {
+    type: "object",
+    properties: {
+      users: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: { id: { type: "string" }, v: { type: "number" } },
+          required: ["id"],
+        },
+      },
+    },
+  };
+  const plan = () => buildPlan({ schema: keyedSchema });
+
+  test("plan assigns the primaryKey strategy on id", () => {
+    const p = plan().get("/users");
+    expect(p?.strategy).toBe("primaryKey");
+    expect(p?.primaryKey).toBe("id");
+  });
+
+  test("default-off keeps the order-insensitive keyed-collection contract", () => {
+    // A pure reorder emits ZERO ops off (SPEC §7.2.3); the applied result is a
+    // permutation of modified, NOT byte-equal.
+    const original = {
+      users: [
+        { id: "a", v: 1 },
+        { id: "b", v: 2 },
+        { id: "c", v: 3 },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "c", v: 3 },
+        { id: "a", v: 1 },
+        { id: "b", v: 2 },
+      ],
+    };
+    const off = new JsonSchemaPatcher({ plan: plan() }).execute({
+      original,
+      modified,
+    });
+    expect(off).toEqual([]); // order-insensitive: zero ops
+    const applied = applyPatch(structuredClone(original), off);
+    expect(stableStringify(applied)).toBe(stableStringify(original)); // NOT modified
+  });
+
+  test("emitMoves upgrades a pure reorder to EXACT reconstruction", () => {
+    const original = {
+      users: [
+        { id: "a", v: 1 },
+        { id: "b", v: 2 },
+        { id: "c", v: 3 },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "c", v: 3 },
+        { id: "a", v: 1 },
+        { id: "b", v: 2 },
+      ],
+    };
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    expect(on.filter((o) => o.op === "move").length).toBeGreaterThan(0);
+    assertRoundTrip(original, on, modified); // byte-exact, order included
+  });
+
+  test("reorder + modify + add + remove reconstructs modified byte-exactly", () => {
+    const original = {
+      users: [
+        { id: "a", v: 1 },
+        { id: "b", v: 2 },
+        { id: "c", v: 3 },
+        { id: "d", v: 4 },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "c", v: 3 },
+        { id: "a", v: 99 }, // modified
+        { id: "e", v: 5 }, // added mid-array (INDEXED add, not /-)
+        { id: "b", v: 2 },
+      ], // d removed
+    };
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    // Additions are indexed, never "/-".
+    for (const op of on) {
+      if (op.op === "add") expect(op.path.endsWith("/-")).toBe(false);
+    }
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("granular descent still applies to modified keyed items", () => {
+    const original = {
+      users: [
+        { id: "a", v: 1, meta: { x: 1, y: 2 } },
+        { id: "b", v: 2, meta: { x: 3, y: 4 } },
+      ],
+    };
+    const modified = {
+      users: [
+        { id: "b", v: 2, meta: { x: 3, y: 4 } },
+        { id: "a", v: 1, meta: { x: 9, y: 2 } }, // only meta.x changed
+      ],
+    };
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    // The change is a granular replace of meta/x, not a whole-item replace.
+    expect(on.some((o) => o.path.endsWith("/meta/x"))).toBe(true);
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("gate-failing arrays fall back to LCS moves (still exact)", () => {
+    // A keyless element trips the §5.4.3 gate -> LCS fallback (§5.8.5).
+    const original = { users: [{ id: "a", v: 1 }, { v: 2 }] };
+    const modified = { users: [{ v: 2 }, { id: "a", v: 1 }] };
+    const on = new JsonSchemaPatcher({
+      plan: plan(),
+      emitMoves: true,
+    }).execute({ original, modified });
+    assertRoundTrip(original, on, modified);
+  });
+
+  test("randomized keyed fuzz reconstructs modified EXACTLY through both appliers", () => {
+    let seed = 4242;
+    const rnd = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    for (let iter = 0; iter < 3000; iter++) {
+      const keyPool = ["a", "b", "c", "d", "e", "f", "g", "h"];
+      const pickKeys = (k: number) => {
+        const p = [...keyPool];
+        const out: string[] = [];
+        for (let i = 0; i < k; i++)
+          out.push(p.splice(Math.floor(rnd() * p.length), 1)[0]!);
+        return out;
+      };
+      const n = 1 + Math.floor(rnd() * 6);
+      const m = 1 + Math.floor(rnd() * 6);
+      const original = {
+        users: pickKeys(n).map((id) => ({ id, v: Math.floor(rnd() * 5) })),
+      };
+      const modified = {
+        users: pickKeys(m).map((id) => ({ id, v: Math.floor(rnd() * 5) })),
+      };
+      const on = new JsonSchemaPatcher({
+        plan: plan(),
+        emitMoves: true,
+      }).execute({ original, modified });
+      assertRoundTrip(original, on, modified);
+    }
+  });
+});
