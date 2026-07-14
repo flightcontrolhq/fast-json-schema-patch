@@ -1,0 +1,290 @@
+[
+  {
+    "name": "obj-add-member",
+    "comment": "§5.2.3: modified-only key -> add (no oldValue)",
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": 1,
+      "b": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "obj-remove-member",
+    "comment": "§5.2.3: original-only key -> remove with oldValue",
+    "original": {
+      "a": 1,
+      "b": 2
+    },
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/b",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "obj-replace-member",
+    "comment": "§5.2.3/§5.1.4: present-in-both primitive change -> replace",
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "obj-nested-change",
+    "comment": "§5.2.3: recurse into nested object member",
+    "original": {
+      "a": {
+        "b": {
+          "c": 1
+        }
+      }
+    },
+    "modified": {
+      "a": {
+        "b": {
+          "c": 2
+        }
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a/b/c",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "obj-key-visitation-order",
+    "comment": "§5.2.2: original keys in original order, then modified-only keys in modified order",
+    "original": {
+      "b": 1,
+      "a": 1
+    },
+    "modified": {
+      "b": 2,
+      "a": 2,
+      "c": 3
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/c",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "obj-mixed-add-remove-replace",
+    "comment": "§5.2.2/§5.2.3: mixed member operations in visitation order",
+    "original": {
+      "keep": 1,
+      "drop": 2,
+      "chg": 3
+    },
+    "modified": {
+      "keep": 1,
+      "chg": 4,
+      "gain": 5
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/drop",
+        "oldValue": 2
+      },
+      {
+        "op": "replace",
+        "path": "/chg",
+        "value": 4,
+        "oldValue": 3
+      },
+      {
+        "op": "add",
+        "path": "/gain",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "obj-empty-to-populated",
+    "comment": "§5.2.3: all members added",
+    "original": {},
+    "modified": {
+      "a": 1,
+      "b": 2,
+      "c": 3
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 1
+      },
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "path": "/c",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "obj-populated-to-empty",
+    "comment": "§5.2.3: all members removed (visitation = original order)",
+    "original": {
+      "a": 1,
+      "b": 2,
+      "c": 3
+    },
+    "modified": {},
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/a",
+        "oldValue": 1
+      },
+      {
+        "op": "remove",
+        "path": "/b",
+        "oldValue": 2
+      },
+      {
+        "op": "remove",
+        "path": "/c",
+        "oldValue": 3
+      }
+    ]
+  },
+  {
+    "name": "obj-replaced-by-different-object",
+    "comment": "§5.2.3: recurse into object-vs-object member yielding nested ops",
+    "original": {
+      "a": {
+        "x": 1,
+        "y": 2
+      }
+    },
+    "modified": {
+      "a": {
+        "x": 1,
+        "y": 9
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a/y",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "obj-identical-noop",
+    "comment": "§5.1: deep-equal objects (key order differs) emit nothing",
+    "original": {
+      "a": 1,
+      "b": 2
+    },
+    "modified": {
+      "b": 2,
+      "a": 1
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "obj-add-object-valued-member",
+    "comment": "§5.2.3: adding a whole subtree is a single add",
+    "original": {},
+    "modified": {
+      "a": {
+        "deep": {
+          "tree": [
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": {
+          "deep": {
+            "tree": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "name": "obj-remove-then-add-different-keys",
+    "comment": "§5.2.2: remove of original-only precedes add of modified-only",
+    "original": {
+      "x": 1
+    },
+    "modified": {
+      "y": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/x",
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/y",
+        "value": 2
+      }
+    ]
+  }
+]

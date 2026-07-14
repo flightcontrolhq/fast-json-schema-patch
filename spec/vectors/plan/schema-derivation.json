@@ -1,0 +1,831 @@
+[
+  {
+    "name": "plan-primaryKey-id",
+    "comment": "§4.5.3: default candidate 'id' selected; requiredFields/hashFields populated",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/users",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-primaryKey-name",
+    "comment": "§4.5.3: 'name' is a default candidate",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "name",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "name"
+        ],
+        "hashFields": [
+          "name"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-primaryKey-numeric-id",
+    "comment": "§4.5.3: a number-typed id still qualifies",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/users",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-unique-primitive-items",
+    "comment": "§4.4.2: string item schema -> unique strategy, no primaryKey",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/tags",
+        "primaryKey": null,
+        "strategy": "unique",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  },
+  {
+    "name": "plan-lcs-plain-objects",
+    "comment": "§4.4.1: object items with no candidate key -> lcs",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "q": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  },
+  {
+    "name": "plan-allOf-merge-key",
+    "comment": "§4.5.1.1: a key declared only in an allOf branch is detected",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-anyOf-first-branch-key",
+    "comment": "§4.5.1: anyOf branches examined in order; first branch yielding a key wins",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "type": "number"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-oneOf-branch-key",
+    "comment": "§4.5.1: oneOf branch order; the keyed branch supplies the primaryKey",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-additionalProperties-wildcard-at-depth",
+    "comment": "§4.3.2: additionalProperties registers a /envs/* wildcard array plan",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "envs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "v": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/envs/*",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-additionalProperties-top-level",
+    "comment": "§4.3.2: a top-level additionalProperties array -> /* plan",
+    "schema": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "v": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/*",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-nested-arrays-distinct-paths",
+    "comment": "§4.3.5: array-of-arrays gives outer /matrix (lcs) and inner /matrix/* (keyed) distinct paths",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "v": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/matrix",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": []
+      },
+      {
+        "path": "/matrix/*",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-nested-keyed-arrays",
+    "comment": "§4.3.3: keyed array within keyed array -> /groups and /groups/members",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "members": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "role": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/groups",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      },
+      {
+        "path": "/groups/members",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-typeless-node-traversed",
+    "comment": "§4.3.1: nodes with properties/items but no `type` are still traversed",
+    "schema": {
+      "properties": {
+        "list": {
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-hashFields-multiple-required",
+    "comment": "§4.5.4: hashFields = required string/number fields (sorted, order-insensitive compare)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "port": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "port"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id",
+          "name",
+          "port"
+        ],
+        "hashFields": [
+          "id",
+          "name",
+          "port"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-hashFields-excludes-non-primitive",
+    "comment": "§4.5.4: a required object-typed field is in requiredFields but NOT hashFields",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "id",
+              "meta"
+            ]
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id",
+          "meta"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-root-level-array",
+    "comment": "§5.4.5.1: a root array schema registers at path '' (empty key)",
+    "schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-basePath-relativized",
+    "comment": "§4.6.2: basePath '/config' relativizes the key to '/servers'",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "servers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "basePath": "/config"
+    },
+    "expectedPlan": [
+      {
+        "path": "/servers",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-primaryKeyMap-override",
+    "comment": "§4.4.3: primaryKeyMap sets primaryKey+strategy without auto-detect (no requiredFields/hashFields)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/items": "id"
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/items",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  },
+  {
+    "name": "plan-primaryKeyCandidates-override-sku",
+    "comment": "§4.5.5: candidate list ['sku'] selects a non-default key",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sku": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sku"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyCandidates": [
+        "sku"
+      ]
+    },
+    "expectedPlan": [
+      {
+        "path": "/rows",
+        "primaryKey": "sku",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "sku"
+        ],
+        "hashFields": [
+          "sku"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-primaryKeyCandidates-empty-disables",
+    "comment": "§4.5.5: empty candidate list -> no auto-detected key, base lcs strategy",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyCandidates": []
+    },
+    "expectedPlan": [
+      {
+        "path": "/users",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  }
+]

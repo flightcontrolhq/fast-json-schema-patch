@@ -1,0 +1,315 @@
+[
+  {
+    "name": "num-1-vs-1.0-equal",
+    "comment": "§2.2.2: 1 and 1.0 are equal at f64 -> no ops",
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "num-neg-zero-vs-zero-equal",
+    "comment": "§2.2.2: -0 and 0 are equal -> no ops (JSON serialises -0 as 0)",
+    "original": {
+      "a": 0
+    },
+    "modified": {
+      "a": 0
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "num-2pow53-collapse-equal",
+    "comment": "§2.2.2: 2^53 and 2^53+1 share one f64 image -> equal, no ops",
+    "original": {
+      "a": 9007199254740992
+    },
+    "modified": {
+      "a": 9007199254740992
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "num-2pow53-distinct-replace",
+    "comment": "§2.2.2: 2^53 vs 2^53+2 are distinct f64 -> replace",
+    "original": {
+      "a": 9007199254740992
+    },
+    "modified": {
+      "a": 9007199254740994
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 9007199254740994,
+        "oldValue": 9007199254740992
+      }
+    ]
+  },
+  {
+    "name": "num-large-int-replace",
+    "comment": "§2.2.3: large-int replace carries value/oldValue verbatim",
+    "original": {
+      "a": 9007199254740992
+    },
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 1,
+        "oldValue": 9007199254740992
+      }
+    ]
+  },
+  {
+    "name": "num-simple-replace",
+    "comment": "§5.1.4: primitive number replace",
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "null-to-absent-remove",
+    "comment": "§2.4.3: null != absent; dropping a null member is a remove with oldValue:null",
+    "original": {
+      "a": null
+    },
+    "modified": {},
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/a",
+        "oldValue": null
+      }
+    ]
+  },
+  {
+    "name": "absent-to-null-add",
+    "comment": "§2.4.3: adding a null member is an add with value:null",
+    "original": {},
+    "modified": {
+      "a": null
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "null-to-value-replace",
+    "comment": "§5.1.4: null -> number is a primitive replace, oldValue null",
+    "original": {
+      "a": null
+    },
+    "modified": {
+      "a": 5
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 5,
+        "oldValue": null
+      }
+    ]
+  },
+  {
+    "name": "value-to-null-replace",
+    "comment": "§5.1.4: number -> null is a primitive replace",
+    "original": {
+      "a": 5
+    },
+    "modified": {
+      "a": null
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": null,
+        "oldValue": 5
+      }
+    ]
+  },
+  {
+    "name": "num-vs-string-no-coercion",
+    "comment": "§2.4.3: 1 != \"1\"; type change is a replace",
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": "1"
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": "1",
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "bool-vs-num-no-coercion",
+    "comment": "§2.4.3: true != 1; replace",
+    "original": {
+      "a": true
+    },
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 1,
+        "oldValue": true
+      }
+    ]
+  },
+  {
+    "name": "string-replace",
+    "comment": "§5.1.4: string replace",
+    "original": {
+      "a": "x"
+    },
+    "modified": {
+      "a": "y"
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": "y",
+        "oldValue": "x"
+      }
+    ]
+  },
+  {
+    "name": "kind-object-to-array-replace",
+    "comment": "§5.1.4: object vs array is a whole replace, never a structural merge",
+    "original": {
+      "a": {
+        "x": 1
+      }
+    },
+    "modified": {
+      "a": [
+        1
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": [
+          1
+        ],
+        "oldValue": {
+          "x": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "kind-array-to-object-replace",
+    "comment": "§5.1.4: array vs object is a whole replace",
+    "original": {
+      "a": [
+        1
+      ]
+    },
+    "modified": {
+      "a": {
+        "x": 1
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": {
+          "x": 1
+        },
+        "oldValue": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "kind-array-to-primitive-replace",
+    "comment": "§5.1.4: array vs primitive is a whole replace",
+    "original": {
+      "a": [
+        1
+      ]
+    },
+    "modified": {
+      "a": 5
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 5,
+        "oldValue": [
+          1
+        ]
+      }
+    ]
+  },
+  {
+    "name": "root-primitive-replace",
+    "comment": "§5.1.4: root-level primitive change replaces at path ''",
+    "original": 1,
+    "modified": 2,
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "root-null-to-object-replace",
+    "comment": "§5.1.4: root null vs object is a whole replace at ''",
+    "original": null,
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "",
+        "value": {
+          "a": 1
+        },
+        "oldValue": null
+      }
+    ]
+  }
+]

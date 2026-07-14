@@ -1,0 +1,122 @@
+[
+  {
+    "name": "prec-missing-field-before-pointer",
+    "comment": "§8.3.5(1 before 2): add missing value AND a malformed index -> INVALID_OPERATION, not INVALID_POINTER",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/01"
+      }
+    ],
+    "error": {
+      "code": "INVALID_OPERATION",
+      "index": 0
+    }
+  },
+  {
+    "name": "prec-pointer-before-existence",
+    "comment": "§8.3.5(2 before 3): a malformed array index outranks the target being out of range -> INVALID_POINTER",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/01",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "prec-unsafe-key-before-existence",
+    "comment": "§8.3.5(2 before 3): the UNSAFE_KEY guard is a pointer-stage check, ahead of existence",
+    "doc": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/__proto__",
+        "value": 1
+      }
+    ],
+    "error": {
+      "code": "UNSAFE_KEY",
+      "index": 0
+    }
+  },
+  {
+    "name": "prec-existence-before-value",
+    "comment": "§8.3.5(3 before 4): a nonexistent target outranks OLD_VALUE_MISMATCH -> PATH_UNRESOLVABLE",
+    "doc": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 9,
+        "oldValue": 5
+      }
+    ],
+    "options": {
+      "validateOldValues": true
+    },
+    "error": {
+      "code": "PATH_UNRESOLVABLE",
+      "index": 0
+    }
+  },
+  {
+    "name": "prec-index-bounds-before-value",
+    "comment": "§8.3.5(2/3 before 4): an out-of-range index outranks the value check",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/5",
+        "value": 9,
+        "oldValue": 1
+      }
+    ],
+    "options": {
+      "validateOldValues": true
+    },
+    "error": {
+      "code": "INDEX_OUT_OF_BOUNDS",
+      "index": 0
+    }
+  },
+  {
+    "name": "prec-later-op-index-reported",
+    "comment": "§8.6.2: operationIndex is the 0-based index of the FAILING op",
+    "doc": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2
+      },
+      {
+        "op": "test",
+        "path": "/a",
+        "value": 99
+      }
+    ],
+    "error": {
+      "code": "TEST_FAILED",
+      "index": 1
+    }
+  }
+]

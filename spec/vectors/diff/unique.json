@@ -1,0 +1,344 @@
+[
+  {
+    "name": "uniq-single-replace",
+    "comment": "§5.6.1: equal-length unique arrays -> positional replace at differing index",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "x",
+        "c"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "x",
+        "oldValue": "b"
+      }
+    ]
+  },
+  {
+    "name": "uniq-multiple-replaces",
+    "comment": "§5.6.1: one replace per differing position",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/0",
+        "value": "x",
+        "oldValue": "a"
+      },
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "y",
+        "oldValue": "b"
+      },
+      {
+        "op": "replace",
+        "path": "/tags/2",
+        "value": "z",
+        "oldValue": "c"
+      }
+    ]
+  },
+  {
+    "name": "uniq-noop",
+    "comment": "§5.6.1: identical unique arrays emit nothing",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "expectedPatch": []
+  },
+  {
+    "name": "uniq-reorder-as-replaces",
+    "comment": "§5.6.1/§5.8.6: default mode emits a permutation as positional replaces (NOT moves)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "c",
+        "b",
+        "a"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/0",
+        "value": "c",
+        "oldValue": "a"
+      },
+      {
+        "op": "replace",
+        "path": "/tags/2",
+        "value": "a",
+        "oldValue": "c"
+      }
+    ]
+  },
+  {
+    "name": "uniq-numbers",
+    "comment": "§4.4.2: number-typed items get the unique strategy",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "tags": [
+        1,
+        9,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "uniq-booleans",
+    "comment": "§4.4.2/§5.6.1: boolean items, positional replaces",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        true,
+        false
+      ]
+    },
+    "modified": {
+      "tags": [
+        false,
+        true
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/0",
+        "value": false,
+        "oldValue": true
+      },
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": true,
+        "oldValue": false
+      }
+    ]
+  },
+  {
+    "name": "uniq-unequal-length-lcs-fallback",
+    "comment": "§5.6.2: unequal lengths fail checkArraysUnique -> LCS (add)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/tags/2",
+        "value": "c"
+      }
+    ]
+  },
+  {
+    "name": "uniq-dup-in-modified-lcs-fallback",
+    "comment": "§5.4.4: duplicate in modified fails uniqueness -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "a"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "a",
+        "oldValue": "b"
+      }
+    ]
+  },
+  {
+    "name": "uniq-dup-in-original-lcs-fallback",
+    "comment": "§5.4.4: duplicate in original fails uniqueness -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "a"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "b"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "b",
+        "oldValue": "a"
+      }
+    ]
+  }
+]

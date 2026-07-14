@@ -1,0 +1,328 @@
+[
+  {
+    "name": "iov-object-remove-no-oldvalue",
+    "comment": "§6.4.2: remove carries no oldValue under includeOldValue=false",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "a": 1,
+      "b": 2
+    },
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/b"
+      }
+    ]
+  },
+  {
+    "name": "iov-object-replace-no-oldvalue",
+    "comment": "§6.4.2: replace carries value but no oldValue",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "a": 1
+    },
+    "modified": {
+      "a": 2
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "iov-large-subtree-removal",
+    "comment": "§10.4.2: removing a large subtree drops to a tiny op (no oldValue payload)",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "big": {
+        "deep": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "more": {
+          "x": "yyyyyyyy"
+        }
+      },
+      "keep": 1
+    },
+    "modified": {
+      "keep": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/big"
+      }
+    ]
+  },
+  {
+    "name": "iov-array-lcs-remove",
+    "comment": "§6.4.2: LCS remove suppresses oldValue",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": [
+      1,
+      2,
+      3
+    ],
+    "modified": [
+      1,
+      3
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/1"
+      }
+    ]
+  },
+  {
+    "name": "iov-kind-mismatch-replace",
+    "comment": "§5.1.4/§6.4.2: opaque-kind replace suppresses oldValue",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "a": [
+        1
+      ]
+    },
+    "modified": {
+      "a": 5
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "iov-primaryKey-removal",
+    "comment": "§5.4/§6.4.2: primaryKey removal suppresses oldValue",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/users/1"
+      }
+    ]
+  },
+  {
+    "name": "iov-lcs-whole-item-replace",
+    "comment": "§5.5/§6.4.2: LCS whole-item (primitive) replace suppresses oldValue",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": [
+      1
+    ],
+    "modified": [
+      2
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "iov-unique-replace",
+    "comment": "§5.6/§6.4.2: unique positional replace suppresses oldValue",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "tags": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "modified": {
+      "tags": [
+        "a",
+        "x",
+        "c"
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": "x"
+      }
+    ]
+  },
+  {
+    "name": "iov-add-unaffected",
+    "comment": "§6.3.2: add never carries oldValue in either mode (identical to default)",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {},
+    "modified": {
+      "a": 1
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "iov-mixed-only-remove-replace-suppressed",
+    "comment": "§6.4.2: only remove/replace lose oldValue; add and paths/values unchanged",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": {
+      "keep": 1,
+      "drop": 2,
+      "chg": 3
+    },
+    "modified": {
+      "keep": 1,
+      "chg": 4,
+      "gain": 5
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/drop"
+      },
+      {
+        "op": "replace",
+        "path": "/chg",
+        "value": 4
+      },
+      {
+        "op": "add",
+        "path": "/gain",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "iov-granular-descent-honored",
+    "comment": "§10.4.2: nested ops from granular descent also honor the flag",
+    "options": {
+      "capabilities": {
+        "includeOldValue": false
+      }
+    },
+    "original": [
+      {
+        "a": 1,
+        "b": 2
+      }
+    ],
+    "modified": [
+      {
+        "a": 1
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/0/b"
+      }
+    ]
+  }
+]

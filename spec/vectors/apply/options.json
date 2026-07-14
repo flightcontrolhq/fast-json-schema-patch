@@ -1,0 +1,62 @@
+[
+  {
+    "name": "opt-clone-values-value-equal",
+    "comment": "§8.7.2: cloneValues yields the same document value (aliasing only differs)",
+    "doc": {},
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": {
+          "n": 1
+        }
+      }
+    ],
+    "options": {
+      "cloneValues": true
+    },
+    "expected": {
+      "a": {
+        "n": 1
+      }
+    }
+  },
+  {
+    "name": "opt-clone-result-value-equal",
+    "comment": "§8.7.3: cloneResult yields the same document value (independent copy)",
+    "doc": {
+      "a": {
+        "x": 1
+      }
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/a/x",
+        "value": 2
+      }
+    ],
+    "options": {
+      "cloneResult": true
+    },
+    "expected": {
+      "a": {
+        "x": 2
+      }
+    }
+  },
+  {
+    "name": "opt-clone-result-empty-patch",
+    "comment": "§8.7.5/§8.7.3: empty patch under cloneResult still returns the document value",
+    "doc": {
+      "a": 1
+    },
+    "patch": [],
+    "options": {
+      "cloneResult": true
+    },
+    "expected": {
+      "a": 1
+    }
+  }
+]

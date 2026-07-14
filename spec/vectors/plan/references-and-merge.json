@@ -1,0 +1,122 @@
+[
+  {
+    "name": "plan-merge-anyOf-ranking",
+    "comment": "§4.7.1: same /list reached via two anyOf branches; primaryKey(3) outranks lcs(1)",
+    "schema": {
+      "type": "object",
+      "anyOf": [
+        {
+          "properties": {
+            "list": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "list": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "q": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-local-ref-resolved",
+    "comment": "§4.3.4: a local #/$defs/item $ref is resolved -> keyed plan",
+    "schema": {
+      "$defs": {
+        "item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/item"
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "plan-non-local-ref-skipped",
+    "comment": "§4.3.4: a non-local $ref is unresolvable; the array falls back to lcs (no key)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "http://example.com/item"
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/list",
+        "primaryKey": null,
+        "strategy": "lcs",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  }
+]

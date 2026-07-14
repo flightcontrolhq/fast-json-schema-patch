@@ -1,0 +1,312 @@
+[
+  {
+    "name": "inv-add-new-member",
+    "comment": "§9.2: add of a new object member inverts to remove",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/b",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-add-new-array-index",
+    "comment": "§9.2: add at a new array index inverts to remove at that index",
+    "document": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 3
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/2",
+        "oldValue": 3
+      }
+    ]
+  },
+  {
+    "name": "inv-add-append-dash",
+    "comment": "§9.1.1/§9.2: /- append inverts to remove at the resolved concrete index",
+    "document": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/-",
+        "value": 3
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/2",
+        "oldValue": 3
+      }
+    ]
+  },
+  {
+    "name": "inv-add-overwrite-member",
+    "comment": "§9.2: add OVERWRITING an existing member inverts to replace restoring the pre-op value",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 9
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 1,
+        "oldValue": 9
+      }
+    ]
+  },
+  {
+    "name": "inv-remove-member-no-oldvalue",
+    "comment": "§9.2: remove (no oldValue) inverts to add with the value recovered from the document",
+    "document": {
+      "a": 1,
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/b"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-remove-array-element",
+    "comment": "§9.2: array remove inverts to add restoring the spliced element",
+    "document": [
+      1,
+      2,
+      3
+    ],
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/1"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "add",
+        "path": "/1",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-remove-subtree-no-oldvalue",
+    "comment": "§9.1.1: a whole-subtree remove is recovered from the document even without oldValue",
+    "document": {
+      "a": {
+        "deep": [
+          1,
+          2
+        ]
+      },
+      "keep": 0
+    },
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/a"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": {
+          "deep": [
+            1,
+            2
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "inv-replace-member",
+    "comment": "§9.2: replace inverts to replace restoring the pre-op value",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 9
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 1,
+        "oldValue": 9
+      }
+    ]
+  },
+  {
+    "name": "inv-replace-array-element",
+    "comment": "§9.2: array replace inverts to replace at the same index",
+    "document": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": 9
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": 1,
+        "oldValue": 9
+      }
+    ]
+  },
+  {
+    "name": "inv-replace-with-oldvalue-present",
+    "comment": "§9.2.2: oldValue is sufficient but not necessary; inverse recovered from the document",
+    "document": {
+      "a": {
+        "x": 1
+      }
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2,
+        "oldValue": {
+          "x": 1
+        }
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": {
+          "x": 1
+        },
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-root-add-replaces-document",
+    "comment": "§8.5.1/§9.2: add at '' replaces the whole document; inverts to replace '' restoring the root",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "",
+        "value": {
+          "b": 2
+        }
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "",
+        "value": {
+          "a": 1
+        },
+        "oldValue": {
+          "b": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "inv-root-replace",
+    "comment": "§9.2: replace at '' inverts to replace '' with the pre-op root",
+    "document": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "",
+        "value": "x"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "",
+        "value": [
+          1,
+          2
+        ],
+        "oldValue": "x"
+      }
+    ]
+  },
+  {
+    "name": "inv-add-nested-member",
+    "comment": "§9.2: nested add inverts to nested remove",
+    "document": {
+      "a": {}
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a/b",
+        "value": 1
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/a/b",
+        "oldValue": 1
+      }
+    ]
+  }
+]

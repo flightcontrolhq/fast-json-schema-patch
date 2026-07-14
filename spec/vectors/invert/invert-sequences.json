@@ -1,0 +1,344 @@
+[
+  {
+    "name": "inv-seq-add-then-replace",
+    "comment": "§9.2: each inverse computed against the correct pre-op state, then reversed",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      },
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 3
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2,
+        "oldValue": 3
+      },
+      {
+        "op": "remove",
+        "path": "/b",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-remove-then-readd-same-path",
+    "comment": "§9.2: remove then add at the same path; intermediate state distinguishes the inverses",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/a"
+      },
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 9
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/a",
+        "oldValue": 9
+      },
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-two-array-removes",
+    "comment": "§9.2: two removes; inverses reversed reconstruct the original array",
+    "document": [
+      10,
+      20,
+      30
+    ],
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/2"
+      },
+      {
+        "op": "remove",
+        "path": "/0"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "add",
+        "path": "/0",
+        "value": 10
+      },
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 30
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-non-trailing-dash-interleave",
+    "comment": "§9.2.2: a /- append resolved mid-sequence, then a subsequent index op, inverts correctly",
+    "document": [
+      10,
+      20
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/-",
+        "value": 30
+      },
+      {
+        "op": "replace",
+        "path": "/2",
+        "value": 99
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/2",
+        "value": 30,
+        "oldValue": 99
+      },
+      {
+        "op": "remove",
+        "path": "/2",
+        "oldValue": 30
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-add-remove-replace-mixed",
+    "comment": "§9.2: mixed op sequence inverts as the reversed per-op inverses",
+    "document": {
+      "a": 1,
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/a"
+      },
+      {
+        "op": "add",
+        "path": "/c",
+        "value": 3
+      },
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 9
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2,
+        "oldValue": 9
+      },
+      {
+        "op": "remove",
+        "path": "/c",
+        "oldValue": 3
+      },
+      {
+        "op": "add",
+        "path": "/a",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-move-then-modify",
+    "comment": "§9.2: move then edit the moved subtree; simulation tracks the live state",
+    "document": {
+      "a": {
+        "x": 1
+      },
+      "keep": 0
+    },
+    "patch": [
+      {
+        "op": "move",
+        "from": "/a",
+        "path": "/b"
+      },
+      {
+        "op": "replace",
+        "path": "/b/x",
+        "value": 2
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/b/x",
+        "value": 1,
+        "oldValue": 2
+      },
+      {
+        "op": "move",
+        "path": "/a",
+        "from": "/b"
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-with-test-passthrough",
+    "comment": "§9.2: a test op is passed through unchanged in the inverse",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "test",
+        "path": "/a",
+        "value": 1
+      },
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 2
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/a",
+        "value": 1,
+        "oldValue": 2
+      },
+      {
+        "op": "test",
+        "path": "/a",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-build-nested-object",
+    "comment": "§9.2: building a nested object step by step inverts to staged removes",
+    "document": {},
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a",
+        "value": {}
+      },
+      {
+        "op": "add",
+        "path": "/a/b",
+        "value": 1
+      },
+      {
+        "op": "add",
+        "path": "/a/c",
+        "value": 2
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/a/c",
+        "oldValue": 2
+      },
+      {
+        "op": "remove",
+        "path": "/a/b",
+        "oldValue": 1
+      },
+      {
+        "op": "remove",
+        "path": "/a",
+        "oldValue": {}
+      }
+    ]
+  },
+  {
+    "name": "inv-seq-generated-primaryKey-patch",
+    "comment": "§7.3/§9: a real generated keyed patch (mods ++ removals ++ /- appends) round-trips through invert",
+    "document": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/users/2/name",
+        "value": "C2",
+        "oldValue": "C"
+      },
+      {
+        "op": "remove",
+        "path": "/users/1",
+        "oldValue": {
+          "id": "b",
+          "name": "B"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/users/-",
+        "value": {
+          "id": "d",
+          "name": "D"
+        }
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/users/2",
+        "oldValue": {
+          "id": "d",
+          "name": "D"
+        }
+      },
+      {
+        "op": "add",
+        "path": "/users/1",
+        "value": {
+          "id": "b",
+          "name": "B"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/users/2/name",
+        "value": "C",
+        "oldValue": "C2"
+      }
+    ]
+  }
+]

@@ -1,0 +1,137 @@
+[
+  {
+    "name": "inv-move-member",
+    "comment": "§9.2: move inverts to the reverse move (from<->path)",
+    "document": {
+      "a": 1,
+      "keep": 0
+    },
+    "patch": [
+      {
+        "op": "move",
+        "from": "/a",
+        "path": "/b"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "move",
+        "path": "/a",
+        "from": "/b"
+      }
+    ]
+  },
+  {
+    "name": "inv-move-array-element",
+    "comment": "§9.2: array move inverts to the reverse move",
+    "document": [
+      1,
+      2,
+      3
+    ],
+    "patch": [
+      {
+        "op": "move",
+        "from": "/0",
+        "path": "/2"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "move",
+        "path": "/0",
+        "from": "/2"
+      }
+    ]
+  },
+  {
+    "name": "inv-move-overwrite-member",
+    "comment": "§9.2: move overwriting an existing member inverts to reverse move + restore the overwritten value",
+    "document": {
+      "a": 1,
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "move",
+        "from": "/a",
+        "path": "/b"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "move",
+        "path": "/a",
+        "from": "/b"
+      },
+      {
+        "op": "add",
+        "path": "/b",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-copy-member",
+    "comment": "§9.2: copy of a value to a new member inverts to remove",
+    "document": {
+      "a": 1
+    },
+    "patch": [
+      {
+        "op": "copy",
+        "from": "/a",
+        "path": "/b"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/b"
+      }
+    ]
+  },
+  {
+    "name": "inv-copy-overwrite-member",
+    "comment": "§9.2: copy overwriting an existing member inverts to replace restoring it",
+    "document": {
+      "a": 1,
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "copy",
+        "from": "/a",
+        "path": "/b"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "replace",
+        "path": "/b",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "inv-copy-array-append",
+    "comment": "§9.1.1/§9.2: copy to /- inverts to remove at the resolved index",
+    "document": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "copy",
+        "from": "/0",
+        "path": "/-"
+      }
+    ],
+    "expectedInverse": [
+      {
+        "op": "remove",
+        "path": "/2"
+      }
+    ]
+  }
+]

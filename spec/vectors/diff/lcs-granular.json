@@ -1,0 +1,286 @@
+[
+  {
+    "name": "gran-object-item-field-change",
+    "comment": "§5.5.4.2: collapsed object<->object replace recurses to a field-level op",
+    "original": [
+      {
+        "x": 1,
+        "y": 2
+      }
+    ],
+    "modified": [
+      {
+        "x": 1,
+        "y": 9
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/y",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-nested-array-in-item",
+    "comment": "§5.5.4.2: recurse into item then into its nested array (LCS)",
+    "original": [
+      {
+        "list": [
+          1,
+          2
+        ]
+      }
+    ],
+    "modified": [
+      {
+        "list": [
+          1,
+          3
+        ]
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/list/1",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-primitive-stays-whole",
+    "comment": "§5.5.4.2: a primitive collapsed pair stays a whole-item replace",
+    "original": [
+      1
+    ],
+    "modified": [
+      2
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "gran-kind-mismatch-stays-whole",
+    "comment": "§5.5.4.2: object vs array (mismatched kind) stays a whole-item replace, no descent",
+    "original": [
+      {
+        "x": 1
+      }
+    ],
+    "modified": [
+      [
+        1
+      ]
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": [
+          1
+        ],
+        "oldValue": {
+          "x": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "gran-arrays-of-arrays",
+    "comment": "§5.5.4.2: both-array collapsed pair recurses (array-of-arrays via default LCS)",
+    "original": [
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "modified": [
+      [
+        1,
+        9
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/1",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-object-add-in-item",
+    "comment": "§5.5.4.2: descent yields an add inside a changed item",
+    "original": [
+      {
+        "a": 1
+      }
+    ],
+    "modified": [
+      {
+        "a": 1,
+        "b": 2
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/0/b",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-object-remove-in-item",
+    "comment": "§5.5.4.2: descent yields a remove inside a changed item",
+    "original": [
+      {
+        "a": 1,
+        "b": 2
+      }
+    ],
+    "modified": [
+      {
+        "a": 1
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/0/b",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-deep-nested-descent",
+    "comment": "§5.5.4.2: descent recurses arbitrarily deep",
+    "original": [
+      {
+        "o": {
+          "p": 1
+        }
+      }
+    ],
+    "modified": [
+      {
+        "o": {
+          "p": 2
+        }
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/o/p",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "gran-changed-and-appended",
+    "comment": "§5.5.4.2 + §5.5.5: item 0 descends granularly, item 1 is a fresh add",
+    "original": [
+      {
+        "x": 1
+      }
+    ],
+    "modified": [
+      {
+        "x": 2
+      },
+      {
+        "z": 3
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/x",
+        "value": 2,
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/1",
+        "value": {
+          "z": 3
+        }
+      }
+    ]
+  },
+  {
+    "name": "gran-nested-array-add-in-item",
+    "comment": "§5.5.4.2: descent into item then add into its nested array",
+    "original": [
+      {
+        "arr": [
+          1
+        ]
+      }
+    ],
+    "modified": [
+      {
+        "arr": [
+          1,
+          2
+        ]
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/0/arr/1",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "gran-two-items-first-changed",
+    "comment": "§5.5.4.2: only the differing item descends; the equal one is trimmed",
+    "original": [
+      {
+        "x": 1
+      },
+      {
+        "y": 1
+      }
+    ],
+    "modified": [
+      {
+        "x": 2
+      },
+      {
+        "y": 1
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/0/x",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  }
+]

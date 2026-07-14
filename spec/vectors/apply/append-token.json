@@ -1,0 +1,204 @@
+[
+  {
+    "name": "dash-add-nested-array",
+    "comment": "§3.5: add at /- appends to a nested array",
+    "doc": {
+      "a": [
+        1
+      ]
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a/-",
+        "value": 2
+      }
+    ],
+    "expected": {
+      "a": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "name": "dash-add-root-array",
+    "comment": "§3.5/§6.2.1: add at /- appends at the array root",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/-",
+        "value": 2
+      }
+    ],
+    "expected": [
+      1,
+      2
+    ]
+  },
+  {
+    "name": "dash-add-into-empty-array",
+    "comment": "§3.5: /- on an empty array lands at index 0",
+    "doc": {
+      "a": []
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a/-",
+        "value": 9
+      }
+    ],
+    "expected": {
+      "a": [
+        9
+      ]
+    }
+  },
+  {
+    "name": "dash-remove-invalid-pointer",
+    "comment": "§3.5: '-' final on remove (write-side) -> INVALID_POINTER",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/-"
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "dash-replace-invalid-pointer",
+    "comment": "§3.5: '-' final on replace (write-side) -> INVALID_POINTER",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/-",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "dash-test-read-side-unresolvable",
+    "comment": "§3.5/§8.3.1: '-' final on test (read-side) fails own-index resolution -> PATH_UNRESOLVABLE",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "test",
+        "path": "/-",
+        "value": 1
+      }
+    ],
+    "error": {
+      "code": "PATH_UNRESOLVABLE",
+      "index": 0
+    }
+  },
+  {
+    "name": "dash-move-source-read-side-unresolvable",
+    "comment": "§3.5: '-' as a move SOURCE final (read-side) -> PATH_UNRESOLVABLE",
+    "doc": {
+      "a": [
+        1
+      ],
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "move",
+        "from": "/a/-",
+        "path": "/c"
+      }
+    ],
+    "error": {
+      "code": "PATH_UNRESOLVABLE",
+      "index": 0
+    }
+  },
+  {
+    "name": "dash-move-dest-appends",
+    "comment": "§3.5/§8.3: '-' as a move DESTINATION appends",
+    "doc": {
+      "a": [
+        1
+      ],
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "move",
+        "from": "/b",
+        "path": "/a/-"
+      }
+    ],
+    "expected": {
+      "a": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "name": "dash-copy-dest-appends",
+    "comment": "§3.5/§8.3: '-' as a copy DESTINATION appends a clone",
+    "doc": {
+      "a": [
+        1
+      ],
+      "b": 2
+    },
+    "patch": [
+      {
+        "op": "copy",
+        "from": "/b",
+        "path": "/a/-"
+      }
+    ],
+    "expected": {
+      "a": [
+        1,
+        2
+      ],
+      "b": 2
+    }
+  },
+  {
+    "name": "dash-non-final-invalid-pointer",
+    "comment": "§3.5: '-' in a NON-final segment (write-side) -> INVALID_POINTER",
+    "doc": {
+      "a": [
+        [
+          1
+        ]
+      ]
+    },
+    "patch": [
+      {
+        "op": "add",
+        "path": "/a/-/0",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  }
+]

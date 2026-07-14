@@ -1,0 +1,679 @@
+[
+  {
+    "name": "sel-additionalProperties-at-depth",
+    "comment": "§5.4.5.3: a /envs/* wildcard plan matches a concrete /envs/prod keyed array",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "envs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "v": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "envs": {
+        "prod": [
+          {
+            "id": "a",
+            "v": 1
+          }
+        ]
+      }
+    },
+    "modified": {
+      "envs": {
+        "prod": [
+          {
+            "id": "a",
+            "v": 2
+          }
+        ]
+      }
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/envs/prod/0/v",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-additionalProperties-top-level",
+    "comment": "§5.4.5.3: a TOP-LEVEL /* plan matches a root object's member array /foo",
+    "schema": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "v": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "id"
+          ]
+        }
+      }
+    },
+    "original": {
+      "foo": [
+        {
+          "id": "a",
+          "v": 1
+        }
+      ]
+    },
+    "modified": {
+      "foo": [
+        {
+          "id": "a",
+          "v": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/foo/0/v",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-allOf-merged-primary-key",
+    "comment": "§4.5.1.1: a primaryKey declared only in an allOf branch is detected",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "list": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "list": [
+        {
+          "id": "a",
+          "name": "A2"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/list/0/name",
+        "value": "A2",
+        "oldValue": "A"
+      }
+    ]
+  },
+  {
+    "name": "sel-typeless-schema-node",
+    "comment": "§4.3.1: nodes with properties/items but no `type` are still traversed -> keyed",
+    "schema": {
+      "properties": {
+        "list": {
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "list": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "b",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "list": [
+        {
+          "id": "a",
+          "v": 9
+        },
+        {
+          "id": "b",
+          "v": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/list/0/v",
+        "value": 9,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-basePath-relativized",
+    "comment": "§4.6.2: basePath '/config' relativizes the plan key to '/servers'; diffing the subtree matches",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "servers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "v": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "basePath": "/config"
+    },
+    "original": {
+      "servers": [
+        {
+          "id": "a",
+          "v": 1
+        }
+      ]
+    },
+    "modified": {
+      "servers": [
+        {
+          "id": "a",
+          "v": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/servers/0/v",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-primaryKeyCandidates-override",
+    "comment": "§4.5.5: primaryKeyCandidates ['sku'] selects a key the default list would miss",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sku": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sku"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyCandidates": [
+        "sku"
+      ]
+    },
+    "original": {
+      "rows": [
+        {
+          "sku": "s1",
+          "qty": 1
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "sku": "s1",
+          "qty": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/0/qty",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-primaryKeyCandidates-default-misses-sku",
+    "comment": "§4.5.5: without the option, 'sku' is not a default candidate -> LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sku": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sku"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "sku": "s1",
+          "qty": 1
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "sku": "s1",
+          "qty": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/0/qty",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-primaryKeyCandidates-empty-disables",
+    "comment": "§4.5.5: empty candidate list disables auto-detection even with a required id -> LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyCandidates": []
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A9"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "A9",
+        "oldValue": "A"
+      }
+    ]
+  },
+  {
+    "name": "sel-name-candidate-default",
+    "comment": "§4.5.3: 'name' is a default candidate and is selected when required string",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "rows": [
+        {
+          "name": "a",
+          "qty": 1
+        }
+      ]
+    },
+    "modified": {
+      "rows": [
+        {
+          "name": "a",
+          "qty": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/rows/0/qty",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-nested-array-of-arrays-wildcard",
+    "comment": "§4.3.5/§5.4.5.2: outer array-of-arrays is LCS; inner /matrix/* keyed plan applies on descent",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "matrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "v": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "matrix": [
+        [
+          {
+            "id": "a",
+            "v": 1
+          }
+        ]
+      ]
+    },
+    "modified": {
+      "matrix": [
+        [
+          {
+            "id": "a",
+            "v": 2
+          }
+        ]
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/matrix/0/0/v",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-exact-beats-wildcard",
+    "comment": "§5.4.5.2: an exact property edge (/special keyed) wins over additionalProperties (wildcard lcs)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "special": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "special": [
+        {
+          "id": "a",
+          "v": 1
+        }
+      ]
+    },
+    "modified": {
+      "special": [
+        {
+          "id": "a",
+          "v": 2
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/special/0/v",
+        "value": 2,
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "sel-wildcard-sibling-is-lcs",
+    "comment": "§5.4.5.2: a non-special member routes to the wildcard (plain) plan -> LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "special": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "other": [
+        {
+          "q": 1
+        },
+        {
+          "q": 2
+        }
+      ]
+    },
+    "modified": {
+      "other": [
+        {
+          "q": 1
+        },
+        {
+          "q": 9
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/other/1/q",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  }
+]

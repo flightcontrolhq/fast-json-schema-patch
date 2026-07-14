@@ -1,0 +1,222 @@
+[
+  {
+    "name": "idx-add-at-length-appends",
+    "comment": "§8.3.1: add index == length appends",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 3
+      }
+    ],
+    "expected": [
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "name": "idx-add-beyond-length",
+    "comment": "§8.3.1: add index > length -> INDEX_OUT_OF_BOUNDS",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/5",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INDEX_OUT_OF_BOUNDS",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-replace-at-length",
+    "comment": "§8.3.1: replace requires index < length",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/2",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INDEX_OUT_OF_BOUNDS",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-remove-at-length",
+    "comment": "§8.3.1: remove requires index < length",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "remove",
+        "path": "/2"
+      }
+    ],
+    "error": {
+      "code": "INDEX_OUT_OF_BOUNDS",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-leading-zero-invalid",
+    "comment": "§3.6: '01' is not a valid index (write-side) -> INVALID_POINTER",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/01",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-plus-sign-invalid",
+    "comment": "§3.6: '+1' is not a valid index -> INVALID_POINTER",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/+1",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-decimal-invalid",
+    "comment": "§3.6: '1.5' is not a valid index -> INVALID_POINTER",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/1.5",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-negative-invalid",
+    "comment": "§3.6: '-1' is a signed (malformed) index, not the '-' token -> INVALID_POINTER",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/-1",
+        "value": 9
+      }
+    ],
+    "error": {
+      "code": "INVALID_POINTER",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-test-oob-read-side",
+    "comment": "§8.3.1: a test at an out-of-range index fails existence -> PATH_UNRESOLVABLE",
+    "doc": [
+      1
+    ],
+    "patch": [
+      {
+        "op": "test",
+        "path": "/5",
+        "value": 1
+      }
+    ],
+    "error": {
+      "code": "PATH_UNRESOLVABLE",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-test-leading-zero-read-side",
+    "comment": "§3.6: a malformed index on read-side (test) -> PATH_UNRESOLVABLE, not INVALID_POINTER",
+    "doc": [
+      1,
+      2
+    ],
+    "patch": [
+      {
+        "op": "test",
+        "path": "/01",
+        "value": 1
+      }
+    ],
+    "error": {
+      "code": "PATH_UNRESOLVABLE",
+      "index": 0
+    }
+  },
+  {
+    "name": "idx-numeric-key-on-object",
+    "comment": "§8.2.3: a decimal-digit segment against an OBJECT is a member key, not an index",
+    "doc": {
+      "0": "x"
+    },
+    "patch": [
+      {
+        "op": "replace",
+        "path": "/0",
+        "value": "y"
+      }
+    ],
+    "expected": {
+      "0": "y"
+    }
+  },
+  {
+    "name": "idx-add-index-0-empty-array",
+    "comment": "§8.3.1: add /0 to an empty array is index == length (append)",
+    "doc": [],
+    "patch": [
+      {
+        "op": "add",
+        "path": "/0",
+        "value": 9
+      }
+    ],
+    "expected": [
+      9
+    ]
+  }
+]

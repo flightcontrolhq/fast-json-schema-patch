@@ -1,0 +1,369 @@
+[
+  {
+    "name": "lcs-all-equal-noop",
+    "comment": "§5.5.0.3: identical arrays trim to empty window -> no ops",
+    "original": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "modified": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "expectedPatch": []
+  },
+  {
+    "name": "lcs-pure-append",
+    "comment": "§5.5.0.3: prefix trims all common; window is pure insertion",
+    "original": [
+      1,
+      2,
+      3
+    ],
+    "modified": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/3",
+        "value": 4
+      },
+      {
+        "op": "add",
+        "path": "/4",
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "lcs-pure-prepend",
+    "comment": "§5.5.0.3: suffix trims all common; inserts at head",
+    "original": [
+      3,
+      4,
+      5
+    ],
+    "modified": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/0",
+        "value": 1
+      },
+      {
+        "op": "add",
+        "path": "/1",
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "lcs-pure-truncate-tail",
+    "comment": "§5.5.0.3: wm=0 window -> descending removes at the tail",
+    "original": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "modified": [
+      1,
+      2,
+      3
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/4",
+        "oldValue": 5
+      },
+      {
+        "op": "remove",
+        "path": "/3",
+        "oldValue": 4
+      }
+    ]
+  },
+  {
+    "name": "lcs-pure-truncate-head",
+    "comment": "§5.5.0.3: suffix-trim leaves a head-only removal window",
+    "original": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "modified": [
+      3,
+      4,
+      5
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/1",
+        "oldValue": 2
+      },
+      {
+        "op": "remove",
+        "path": "/0",
+        "oldValue": 1
+      }
+    ]
+  },
+  {
+    "name": "lcs-interior-insert",
+    "comment": "§5.5.0: prefix+suffix trim isolate an interior insertion",
+    "original": [
+      1,
+      4
+    ],
+    "modified": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/1",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "name": "lcs-interior-remove",
+    "comment": "§5.5.0: prefix+suffix trim isolate an interior deletion",
+    "original": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "modified": [
+      1,
+      4
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/2",
+        "oldValue": 3
+      },
+      {
+        "op": "remove",
+        "path": "/1",
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "lcs-abab-to-aa",
+    "comment": "§5.5.0.1 pinned: [a,b,a]->[a,a] fixes prefix a (lo=1) then suffix a (hi=1) -> single remove at index 1",
+    "original": [
+      "a",
+      "b",
+      "a"
+    ],
+    "modified": [
+      "a",
+      "a"
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/1",
+        "oldValue": "b"
+      }
+    ]
+  },
+  {
+    "name": "lcs-prefix-and-suffix-trim",
+    "comment": "§5.5.0.1: shared ends trimmed, only the middle primitive replaces",
+    "original": [
+      "a",
+      "X",
+      "c"
+    ],
+    "modified": [
+      "a",
+      "Y",
+      "c"
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/1",
+        "value": "Y",
+        "oldValue": "X"
+      }
+    ]
+  },
+  {
+    "name": "lcs-replace-in-middle",
+    "comment": "§5.5.4: single interior primitive replace",
+    "original": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "modified": [
+      1,
+      2,
+      9,
+      4,
+      5
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/2",
+        "value": 9,
+        "oldValue": 3
+      }
+    ]
+  },
+  {
+    "name": "lcs-swap-adjacent",
+    "comment": "§5.5.2: adjacent swap has no common window element; Myers picks the pinned shortest script",
+    "original": [
+      1,
+      2
+    ],
+    "modified": [
+      2,
+      1
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/0",
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/1",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "lcs-full-reversal",
+    "comment": "§5.5.2: full reversal exercises the Myers tie-break",
+    "original": [
+      1,
+      2,
+      3
+    ],
+    "modified": [
+      3,
+      2,
+      1
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/0",
+        "oldValue": 1
+      },
+      {
+        "op": "remove",
+        "path": "/0",
+        "oldValue": 2
+      },
+      {
+        "op": "add",
+        "path": "/1",
+        "value": 2
+      },
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "lcs-mixed-add-remove",
+    "comment": "§5.5.5: interleaved insertions and deletions in one window",
+    "original": [
+      "a",
+      "b",
+      "c",
+      "d"
+    ],
+    "modified": [
+      "a",
+      "x",
+      "c",
+      "y",
+      "d"
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/1",
+        "value": "x",
+        "oldValue": "b"
+      },
+      {
+        "op": "add",
+        "path": "/3",
+        "value": "y"
+      }
+    ]
+  },
+  {
+    "name": "lcs-duplicates-preserved",
+    "comment": "§7.1.1: LCS reconstructs duplicates exactly",
+    "original": [
+      1,
+      1,
+      2,
+      1
+    ],
+    "modified": [
+      1,
+      2,
+      1,
+      1
+    ],
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/1",
+        "oldValue": 1
+      },
+      {
+        "op": "add",
+        "path": "/2",
+        "value": 1
+      }
+    ]
+  }
+]

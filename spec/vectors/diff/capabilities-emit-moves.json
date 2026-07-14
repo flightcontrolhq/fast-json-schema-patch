@@ -1,0 +1,729 @@
+[
+  {
+    "name": "em-lcs-relocation-primitive",
+    "comment": "§5.8.5: a relocated deep-equal element becomes a single move (front->back)",
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "modified": [
+      2,
+      3,
+      4,
+      1
+    ],
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/0",
+        "path": "/3"
+      }
+    ]
+  },
+  {
+    "name": "em-lcs-relocation-object",
+    "comment": "§5.8.5: an object element relocated intact becomes a move (no value/oldValue)",
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": [
+      {
+        "id": "x",
+        "n": 1
+      },
+      {
+        "id": "y",
+        "n": 2
+      },
+      {
+        "id": "z",
+        "n": 3
+      }
+    ],
+    "modified": [
+      {
+        "id": "y",
+        "n": 2
+      },
+      {
+        "id": "z",
+        "n": 3
+      },
+      {
+        "id": "x",
+        "n": 1
+      }
+    ],
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/0",
+        "path": "/2"
+      }
+    ]
+  },
+  {
+    "name": "em-lcs-non-relocation-stays-replace",
+    "comment": "§5.8.5: a changed (non-identical) element is NOT a move; stays a replace",
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": [
+      1,
+      2
+    ],
+    "modified": [
+      1,
+      9
+    ],
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/1",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "em-unique-rotation",
+    "comment": "§5.8.6: a multiset-equal unique reorder collapses to moves (5 replaces -> moves)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "tags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "modified": {
+      "tags": [
+        2,
+        3,
+        4,
+        5,
+        1
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/tags/0",
+        "path": "/tags/4"
+      }
+    ]
+  },
+  {
+    "name": "em-unique-non-multiset-keeps-replaces",
+    "comment": "§5.8.6: a non-permutation unique diff keeps §5.6 positional replaces",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "tags": [
+        1,
+        2,
+        3
+      ]
+    },
+    "modified": {
+      "tags": [
+        1,
+        9,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/tags/1",
+        "value": 9,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "em-primaryKey-reorder-exact",
+    "comment": "§5.8.7: primaryKey survivors reordered via moves -> exact order (upgrades §7.2 to §7.4)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "c",
+          "name": "C"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/users/2",
+        "path": "/users/0"
+      }
+    ]
+  },
+  {
+    "name": "em-primaryKey-reorder-and-modify",
+    "comment": "§5.8.7: reordered survivors plus a field change, exact order",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "c",
+          "name": "C"
+        },
+        {
+          "id": "b",
+          "name": "B2"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/2"
+      },
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/1"
+      },
+      {
+        "op": "replace",
+        "path": "/users/1/name",
+        "value": "B2",
+        "oldValue": "B"
+      }
+    ]
+  },
+  {
+    "name": "em-primaryKey-indexed-add",
+    "comment": "§5.8.7: a new key is an INDEXED add at its modified position (never /-)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "n",
+          "name": "N"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/1"
+      },
+      {
+        "op": "add",
+        "path": "/users/1",
+        "value": {
+          "id": "n",
+          "name": "N"
+        }
+      }
+    ]
+  },
+  {
+    "name": "em-primaryKey-full-mixed",
+    "comment": "§5.8.7: reorder + modify + add + remove together reconstruct modified exactly",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        },
+        {
+          "id": "d",
+          "name": "D"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "c",
+          "name": "C2"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "e",
+          "name": "E"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/users/3",
+        "oldValue": {
+          "id": "d",
+          "name": "D"
+        }
+      },
+      {
+        "op": "remove",
+        "path": "/users/1",
+        "oldValue": {
+          "id": "b",
+          "name": "B"
+        }
+      },
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/1"
+      },
+      {
+        "op": "add",
+        "path": "/users/2",
+        "value": {
+          "id": "e",
+          "name": "E"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "C2",
+        "oldValue": "C"
+      }
+    ]
+  },
+  {
+    "name": "em-primaryKey-duplicate-content-distinct-keys",
+    "comment": "§5.8.7: items with duplicate non-key content but distinct keys reorder exactly",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "SAME"
+        },
+        {
+          "id": "b",
+          "name": "SAME"
+        },
+        {
+          "id": "c",
+          "name": "SAME"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "c",
+          "name": "SAME"
+        },
+        {
+          "id": "b",
+          "name": "SAME"
+        },
+        {
+          "id": "a",
+          "name": "SAME"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/2"
+      },
+      {
+        "op": "move",
+        "from": "/users/0",
+        "path": "/users/1"
+      }
+    ]
+  },
+  {
+    "name": "em-compose-with-include-old-value-false",
+    "comment": "§10.4.4: emitMoves composes with includeOldValue=false (moves already carry none; replaces drop oldValue)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "includeOldValue": false,
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        },
+        {
+          "id": "c",
+          "name": "C"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "c",
+          "name": "C2"
+        },
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "move",
+        "from": "/users/2",
+        "path": "/users/0"
+      },
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "C2"
+      }
+    ]
+  },
+  {
+    "name": "em-gate-failure-uses-lcs-moves",
+    "comment": "§5.8.7: a gate-failing keyed array falls back to LCS, which under emitMoves uses §5.8.5",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "options": {
+      "capabilities": {
+        "emitMoves": true
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        99,
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/users/0",
+        "value": 99
+      }
+    ]
+  }
+]

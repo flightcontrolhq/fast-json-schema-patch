@@ -1,0 +1,442 @@
+[
+  {
+    "name": "gate-non-object-element",
+    "comment": "§10.5.1(a): a non-object array element fails the gate -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "b",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        99
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/1",
+        "value": 99,
+        "oldValue": {
+          "id": "b",
+          "name": "B"
+        }
+      }
+    ]
+  },
+  {
+    "name": "gate-non-object-both-numbers",
+    "comment": "§10.5.1(a): all-primitive arrays under a keyed schema fall back to LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        1,
+        2
+      ]
+    },
+    "modified": {
+      "users": [
+        1,
+        3
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/1",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  },
+  {
+    "name": "gate-missing-key",
+    "comment": "§10.5.1(b): an element whose primaryKey is absent -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "name": "orphan"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/users/1",
+        "value": {
+          "name": "orphan"
+        }
+      }
+    ]
+  },
+  {
+    "name": "gate-null-key",
+    "comment": "§10.5.1(b): a null primaryKey value -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": null,
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/id",
+        "value": null,
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "gate-non-string-number-key",
+    "comment": "§10.5.1(b): a boolean primaryKey value (not string/number) -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": true,
+          "name": "A"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/id",
+        "value": true,
+        "oldValue": "a"
+      }
+    ]
+  },
+  {
+    "name": "gate-duplicate-in-original",
+    "comment": "§10.5.1(c): duplicate key within ORIGINAL -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "a",
+          "name": "B"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "C"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/users/0",
+        "oldValue": {
+          "id": "a",
+          "name": "A"
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/users/0/name",
+        "value": "C",
+        "oldValue": "B"
+      }
+    ]
+  },
+  {
+    "name": "gate-duplicate-in-modified",
+    "comment": "§10.5.1(c): duplicate key within MODIFIED -> LCS fallback",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "id": "a",
+          "name": "A"
+        },
+        {
+          "id": "a",
+          "name": "B"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "add",
+        "path": "/users/1",
+        "value": {
+          "id": "a",
+          "name": "B"
+        }
+      }
+    ]
+  },
+  {
+    "name": "gate-override-does-not-bypass",
+    "comment": "§5.4.3/§10.5.1: a primaryKeyMap override does NOT bypass the gate; duplicate keys still fall back to LCS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "v": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/items": "id"
+      }
+    },
+    "original": {
+      "items": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "a",
+          "v": 2
+        }
+      ]
+    },
+    "modified": {
+      "items": [
+        {
+          "id": "a",
+          "v": 3
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/items/0",
+        "oldValue": {
+          "id": "a",
+          "v": 1
+        }
+      },
+      {
+        "op": "replace",
+        "path": "/items/0/v",
+        "value": 3,
+        "oldValue": 2
+      }
+    ]
+  }
+]
