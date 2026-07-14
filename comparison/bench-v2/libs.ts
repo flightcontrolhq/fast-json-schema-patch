@@ -37,6 +37,7 @@ export type CorpusCase = {
     primaryKeyMap?: Record<string, string>;
     basePath?: string;
     primaryKeyCandidates?: string[];
+    ignorePaths?: string[];
   };
   roundtrip: "exact" | "multiset";
   measureMemory: boolean;
@@ -93,10 +94,58 @@ function oldPlan(c: CorpusCase) {
   return (fjspOld as any).buildPlan(opts);
 }
 
-/** Compare reconstructed vs modified honouring the case's round-trip contract. */
+/**
+ * Compare reconstructed vs modified honouring the case's round-trip contract.
+ *
+ * ignorePaths cases (CORE §7.6): apply(original, patch) equals modified
+ * EVERYWHERE except at or beneath a matched ignore location, where it retains
+ * original's value. We therefore compare MODULO the ignored subtrees — strip the
+ * ignored members from both sides before comparing — so a schema-aware engine
+ * that (correctly) emitted no op for a volatile field is not judged CORRUPT, and
+ * a generic engine that DID rewrite it still passes (both agree off the ignored
+ * projection). Our corpus keeps every ignore pointer terminal a literal object-
+ * member name (only intermediate segments use the `*` array/member wildcard), so
+ * stripping is a straightforward member delete.
+ */
 export function reconstructs(c: CorpusCase, applied: unknown): boolean {
-  if (c.roundtrip === "exact") return JSON.stringify(applied) === JSON.stringify(c.modified);
-  return JSON.stringify(canonSort(applied)) === JSON.stringify(canonSort(c.modified));
+  const ignore = c.options?.ignorePaths;
+  let a = applied;
+  let b: unknown = c.modified;
+  if (ignore && ignore.length) {
+    a = stripIgnored(clone(a), ignore);
+    b = stripIgnored(clone(b), ignore);
+  }
+  if (c.roundtrip === "exact") return JSON.stringify(a) === JSON.stringify(b);
+  return JSON.stringify(canonSort(a)) === JSON.stringify(canonSort(b));
+}
+
+/**
+ * Delete the subtrees addressed by `pointers` from `value` (mutating it).
+ * Segment rules mirror GEN §10.3: a `*` segment matches every array element or
+ * every object member at that level; any other segment is an exact object-member
+ * key (unescaped per RFC 6901). Every corpus ignore pointer terminates on a
+ * literal member name, so the terminal is always an object-member delete.
+ */
+function stripIgnored(value: unknown, pointers: string[]): unknown {
+  for (const ptr of pointers) {
+    const segs = ptr.split("/").slice(1).map((s) => s.replace(/~1/g, "/").replace(/~0/g, "~"));
+    del(value, segs);
+  }
+  return value;
+}
+function del(node: unknown, segs: string[]): void {
+  if (segs.length === 0) return;
+  const [seg, ...rest] = segs as [string, ...string[]];
+  if (rest.length === 0) {
+    if (node && typeof node === "object" && !Array.isArray(node)) delete (node as Record<string, unknown>)[seg];
+    return;
+  }
+  if (seg === "*") {
+    if (Array.isArray(node)) for (const el of node) del(el, rest);
+    else if (node && typeof node === "object") for (const v of Object.values(node)) del(v, rest);
+    return;
+  }
+  if (node && typeof node === "object" && !Array.isArray(node)) del((node as Record<string, unknown>)[seg], rest);
 }
 function canonSort(v: any): any {
   if (Array.isArray(v))
@@ -123,7 +172,7 @@ export const ADAPTERS: Adapter[] = [
     hasApplier: true,
     diff(c) {
       const plan = oursPlan(c);
-      return new JsonSchemaPatcher({ plan }).execute({
+      return new JsonSchemaPatcher({ plan, ignorePaths: c.options?.ignorePaths }).execute({
         original: c.original as never,
         modified: c.modified as never,
       });
@@ -139,7 +188,7 @@ export const ADAPTERS: Adapter[] = [
     hasApplier: true,
     diff(c) {
       const plan = oursPlan(c);
-      return new JsonSchemaPatcher({ plan, emitMoves: true }).execute({
+      return new JsonSchemaPatcher({ plan, emitMoves: true, ignorePaths: c.options?.ignorePaths }).execute({
         original: c.original as never,
         modified: c.modified as never,
       });
