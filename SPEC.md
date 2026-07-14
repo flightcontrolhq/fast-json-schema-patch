@@ -305,9 +305,13 @@ single object view, `mergeAllOf(s)`:
 `4.5.2` For the merged candidate view `s` (§4.5.1.1): require `s.type === "object"` **and**
 `s.properties` present, else no key. Let `required = new Set(s.required || [])`.
 
-`4.5.3` **Candidate key list.** Check the ordered list **`["id", "name", "port"]`** (§4.5.5). For
+`4.5.3` **Candidate key list.** Check the ordered candidate list — the `primaryKeyCandidates`
+option, **defaulting to `["id", "name", "port"]`** when the option is omitted (§4.5.5). For
 each candidate `key` in order: if `required.has(key)` **and** `properties[key].type` is `"string"`
 or `"number"`, select it as the primary key and stop. If none qualifies, there is no primary key.
+An **empty** candidate list checks nothing, so auto-detection never selects a key (the array keeps
+its base strategy); a `primaryKeyMap` override (§4.4.3) is applied **before** this step and does
+not consult the list, so it still wins under any candidate list, empty included.
 
 `4.5.4` **Effect of selection.** If a primary key is found, set `primaryKey = key`,
 `strategy = "primaryKey"`, `requiredFields = required`, and `hashFields` = the required fields
@@ -315,11 +319,13 @@ whose `properties[f].type` is `"string"` or `"number"` (built by iterating `requ
 order; §5.4.4 uses these only as a prefilter). If no key is found, the plan keeps its base
 strategy from §4.4.1/§4.4.2.
 
-`4.5.5` The candidate list `["id","name","port"]` is the **DEFAULT** of a configurable option.
-A `primaryKeyCandidates` option to override the list ships in a later phase; spec-v1 pins the
-default list. Because `name` and `port` are commonly user-editable, editing the chosen key field
-turns an in-place edit into a remove+append under the primaryKey strategy (§7.2) — a known
-compactness cost, not an error.
+`4.5.5` *(draft-pending — F25)* The candidate list `["id","name","port"]` is the **DEFAULT** of
+the `primaryKeyCandidates` build-plan option (§10.4, capability registry). Passing an ordered list
+replaces the default wholesale (no merge); passing `[]` disables auto-detection. `primaryKeyMap`
+takes precedence over any candidate list (§4.5.3). Because `name` and `port` are commonly
+user-editable, editing the chosen key field turns an in-place edit into a remove+append under the
+primaryKey strategy (§7.2) — a known compactness cost, not an error; overriding the list (e.g. to
+`["id"]`) avoids it.
 
 ### 4.6 `basePath`
 
@@ -1084,7 +1090,7 @@ capabilities.
 | `includeOldValue=false` | on (oldValue present) | OPTIONAL — **landed** (§10.4.2) | suppress `oldValue` on all remove/replace (§6.4.2); disables document-free invert |
 | `emitMoves` | off | OPTIONAL (reserved) | emit RFC 6902 `move` for LCS relocations and primaryKey order fidelity |
 | `wholesaleReplaceFallback` | off | OPTIONAL (reserved) | emit a single container `replace` when the granular patch would exceed the container's own serialized size |
-| `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL (reserved) | override the auto-detection candidate list (§4.5.5) |
+| `primaryKeyCandidates` | `["id","name","port"]` | OPTIONAL — **landed** (§10.4.3) | override the auto-detection candidate list (§4.5.5) |
 
 `10.4.1` **Granular LCS descent (§5.5.4.2) is NOT a capability** — it is normative default
 behavior in `spec-v1`, landed in the compactness phase (F10). It is always on; there is no flag to
@@ -1106,6 +1112,15 @@ so nested ops it emits also honor the flag. The flag changes **only** the presen
 not from `oldValue`; the round-trip identity §9.1.2 holds under either mode. Measured savings on the
 compactness repro shapes: 26–51% on typical remove/replace-heavy diffs, up to ~86x when a large
 subtree is removed (a 2.7 KB removal drops from 2680 B to 31 B).
+
+`10.4.3` **`primaryKeyCandidates` (F25).** Surfaced as the `buildPlan` option
+`primaryKeyCandidates?: string[]`, **default `["id", "name", "port"]`** (§4.5.3/§4.5.5 —
+byte-for-byte identical plans when omitted). It replaces the ordered candidate list consulted by
+primary-key auto-detection **wholesale** (no merge with the default). `[]` disables auto-detection
+so every object array keeps its base strategy (`lcs`/`unique`). A `primaryKeyMap` entry is applied
+before auto-detection and bypasses the candidate list, so it wins under any list, empty included
+(§4.5.3). Only strategy **selection** is affected; the diff/apply algorithms and every emitted op
+are unchanged given the resulting plan.
 
 ### 10.5 Vector provenance
 

@@ -43,7 +43,20 @@ export interface BuildPlanOptions {
   schema: Schema
   primaryKeyMap?: Record<string, string>
   basePath?: string
+  /**
+   * F25 (SPEC §4.5.3, §4.5.5): override the ordered candidate list consulted by
+   * primary-key auto-detection. The first candidate that is a `required`
+   * `string`/`number` property of the (allOf-merged) item schema is selected.
+   * Defaults to `["id", "name", "port"]` when omitted. An **empty array**
+   * disables auto-detection entirely (every object array falls back to `lcs`);
+   * a `primaryKeyMap` entry still wins because it is applied before
+   * auto-detection and bypasses the candidate list (§4.4.3).
+   */
+  primaryKeyCandidates?: string[]
 }
+
+/** SPEC §4.5.3 default primary-key candidate list (the default of `primaryKeyCandidates`). */
+const DEFAULT_PRIMARY_KEY_CANDIDATES = ["id", "name", "port"]
 
 export function _resolveRef(ref: string, schema: Schema): JSONSchema | null {
   if (!ref.startsWith("#/")) {
@@ -211,7 +224,11 @@ export function _traverseSchema(
           }
         }
 
-        const potentialKeys = ["id", "name", "port"]
+        // F25: the candidate list is configurable (§4.5.5); default when the
+        // option is omitted. An explicit empty array iterates zero candidates,
+        // disabling auto-detection so the array keeps its base strategy.
+        const potentialKeys =
+          options?.primaryKeyCandidates ?? DEFAULT_PRIMARY_KEY_CANDIDATES
         for (const key of potentialKeys) {
           if (required.has(key)) {
             const prop = props[key]
