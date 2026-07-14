@@ -70,6 +70,7 @@
     "cli-progress": "^3.12.0",
     "csv-formatter": "^1.1.0",
     "fast-json-patch": "^3.1.1",
+    "fjsp-v040": "npm:fast-json-schema-patch@0.4.0",
     "json-diff-kit": "^1.0.31",
     "json-schema-faker": "^0.5.9",
     "json-source-map": "^0.6.1",

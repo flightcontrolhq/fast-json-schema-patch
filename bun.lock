@@ -19,6 +19,7 @@
         "cli-progress": "^3.12.0",
         "csv-formatter": "^1.1.0",
         "fast-json-patch": "^3.1.1",
+        "fjsp-v040": "npm:fast-json-schema-patch@0.4.0",
         "json-diff-kit": "^1.0.31",
         "json-schema-faker": "^0.5.9",
         "json-source-map": "^0.6.1",
@@ -27,8 +28,6 @@
         "rfc6902": "^5.1.2",
         "tinybench": "^4.0.1",
         "tsdown": "^0.12.9",
-      },
-      "peerDependencies": {
         "typescript": "^5",
       },
     },
@@ -309,6 +308,8 @@
     "fill-range": ["fill-range@7.1.1", "", { "dependencies": { "to-regex-range": "^5.0.1" } }, "sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg=="],
 
     "find-up": ["find-up@4.1.0", "", { "dependencies": { "locate-path": "^5.0.0", "path-exists": "^4.0.0" } }, "sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw=="],
+
+    "fjsp-v040": ["fast-json-schema-patch@0.4.0", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-OzrFvJoGayXEKIerGTb+p3RfR5dOCAIMCoLrhEwnkqGQTqTKieYD6+mqndYoPZzzcOTRBRO/m+8Z1QOn7WqXHA=="],
 
     "format-util": ["format-util@1.0.5", "", {}, "sha512-varLbTj0e0yVyRpqQhuWV+8hlePAgaoFRhNFj50BNjEIrw1/DphHSObtqwskVCPWNgzwPoQrZAbfa/SBiicNeg=="],
 

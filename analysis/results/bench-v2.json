@@ -1,0 +1,2929 @@
+{
+  "schemaVersion": 1,
+  "runner": "comparison/bench-v2/run.ts",
+  "generatedAt": "2026-07-14T08:14:46.184Z",
+  "wallClockMs": 185640,
+  "commit": "4f377c4a1662008718fc3ac24e941d7547264e77",
+  "branch": "feat/deep-dive-overhaul",
+  "corpus": {
+    "seed": 20240521,
+    "caseCount": 19,
+    "manifestSha256": "1fd566d5dc7059c4"
+  },
+  "engines": {
+    "ours": {
+      "source": "this branch (src/)",
+      "version": "0.4.0"
+    },
+    "fjsp-v040": {
+      "source": "npm:fast-json-schema-patch",
+      "version": "0.4.0"
+    }
+  },
+  "platform": {
+    "os": "darwin",
+    "arch": "arm64",
+    "bun": "1.2.5",
+    "node": "v22.6.0",
+    "cpus": "Apple M4 Pro"
+  },
+  "adapters": [
+    {
+      "id": "ours",
+      "label": "ours (this branch)",
+      "kind": "schema-aware",
+      "hasApplier": true
+    },
+    {
+      "id": "ours-moves",
+      "label": "ours + emitMoves",
+      "kind": "schema-aware",
+      "hasApplier": true
+    },
+    {
+      "id": "fjsp-v040",
+      "label": "fjsp v0.4.0 (old published)",
+      "kind": "schema-aware",
+      "hasApplier": false
+    },
+    {
+      "id": "fast-json-patch",
+      "label": "fast-json-patch",
+      "kind": "generic",
+      "hasApplier": true
+    },
+    {
+      "id": "rfc6902",
+      "label": "rfc6902",
+      "kind": "generic",
+      "hasApplier": true
+    },
+    {
+      "id": "jsondiffpatch",
+      "label": "jsondiffpatch",
+      "kind": "generic",
+      "hasApplier": true
+    },
+    {
+      "id": "json-diff-kit",
+      "label": "json-diff-kit",
+      "kind": "generic",
+      "hasApplier": false
+    }
+  ],
+  "results": [
+    {
+      "case": "realistic-cloud-config-small",
+      "category": "realistic",
+      "description": "Small FlightControl cloud config (~1 env, a handful of keyed services) with a low-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "low"
+      ],
+      "maxArrayLen": 17,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 8087,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.8389604174311895,
+            "p99Ms": 2.545892640000013,
+            "minMs": 1.547791000000018
+          },
+          "apply": {
+            "meanMs": 0.008166108200804111,
+            "p99Ms": 0.015792000000033113,
+            "minMs": 0.0060409999999819775
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 8087,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.8267199132420142,
+            "p99Ms": 2.5323174999999627,
+            "minMs": 1.5397499999999127
+          },
+          "apply": {
+            "meanMs": 0.008200047334003856,
+            "p99Ms": 0.015666000000010172,
+            "minMs": 0.0060829999999896245
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 8087,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.781298675555556,
+            "p99Ms": 2.6142030000001615,
+            "minMs": 1.5286660000001575
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.004040116465336915,
+            "p99Ms": 0.0061670000000049185,
+            "minMs": 0.0032499999997526174
+          },
+          "apply": {
+            "meanMs": 0.016620987742040797,
+            "p99Ms": 0.025750000000243745,
+            "minMs": 0.01224999999976717
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 352,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 2.216068856353569,
+            "p99Ms": 2.867617199999949,
+            "minMs": 1.9312909999998737
+          },
+          "apply": {
+            "meanMs": 0.009381785679105182,
+            "p99Ms": 0.01749999999992724,
+            "minMs": 0.006916999999702966
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 8032,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.00040687932079745394,
+            "p99Ms": 0.0013340000004973263,
+            "minMs": 0.00020799999947485048
+          },
+          "apply": {
+            "meanMs": 0.008866366862461887,
+            "p99Ms": 0.023559760000171178,
+            "minMs": 0.006000000000312866
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 34170,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.10189955272542038,
+            "p99Ms": 0.17632274999982656,
+            "minMs": 0.0796249999993961
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-cloud-config-medium",
+      "category": "realistic",
+      "description": "Medium cloud config (dozens of keyed services across envs) with a medium-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "medium"
+      ],
+      "maxArrayLen": 68,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 488,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.937295280193229,
+            "p99Ms": 2.6045875199999498,
+            "minMs": 1.6694590000006428
+          },
+          "apply": {
+            "meanMs": 0.10473977323907388,
+            "p99Ms": 0.17060744000009448,
+            "minMs": 0.0860000000002401
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 488,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.968535318627453,
+            "p99Ms": 2.549528030000092,
+            "minMs": 1.7225409999991825
+          },
+          "apply": {
+            "meanMs": 0.10510625873391344,
+            "p99Ms": 0.1717735400005404,
+            "minMs": 0.08645799999976589
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 488,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 1.8979340710900778,
+            "p99Ms": 2.607771199999843,
+            "minMs": 1.6078749999996944
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.044933785104482614,
+            "p99Ms": 0.0760349099987978,
+            "minMs": 0.0371660000000702
+          },
+          "apply": {
+            "meanMs": 0.20471862947797695,
+            "p99Ms": 0.3391345200000617,
+            "minMs": 0.16974999999911233
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 470,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 183.8945917499999,
+            "p99Ms": 217.9163242499985,
+            "minMs": 176.04574999999932
+          },
+          "apply": {
+            "meanMs": 0.10482922064994384,
+            "p99Ms": 0.1709875499986083,
+            "minMs": 0.08545799999774317
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 404,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.13798907933768562,
+            "p99Ms": 0.47025834000211036,
+            "minMs": 0.1092499999977008
+          },
+          "apply": {
+            "meanMs": 0.10890153429503328,
+            "p99Ms": 0.18704892999918224,
+            "minMs": 0.08754100000078324
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 413856,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1.55646625581397,
+            "p99Ms": 2.4937033799991704,
+            "minMs": 1.2677919999987353
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-cloud-config-large",
+      "category": "realistic",
+      "description": "Large cloud config (~100 keyed services) with a high-complexity edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "cloud-config",
+        "high"
+      ],
+      "maxArrayLen": 146,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1060,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 2.217392281768072,
+            "p99Ms": 2.9150668000016595,
+            "minMs": 1.895875000001979
+          },
+          "apply": {
+            "meanMs": 0.5027931218592495,
+            "p99Ms": 0.9453163500022126,
+            "minMs": 0.4289169999974547
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1061,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 2.2357893687149044,
+            "p99Ms": 3.0097252400006256,
+            "minMs": 1.9406250000029104
+          },
+          "apply": {
+            "meanMs": 0.5032368616351994,
+            "p99Ms": 0.9756925399972528,
+            "minMs": 0.4269590000003518
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1060,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 2.1883033060109627,
+            "p99Ms": 3.0212768200022424,
+            "minMs": 1.8459169999987353
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1045,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 0.22077706622509485,
+            "p99Ms": 0.3003474999991885,
+            "minMs": 0.18995800000266172
+          },
+          "apply": {
+            "meanMs": 1.0444342715405492,
+            "p99Ms": 2.016259559998289,
+            "minMs": 0.902750000001106
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1044,
+          "patchOps": 8,
+          "diff": {
+            "meanMs": 1927.7203333333357,
+            "p99Ms": 1936.9935323200066,
+            "minMs": 1922.9224160000012
+          },
+          "apply": {
+            "meanMs": 0.5131299858975138,
+            "p99Ms": 1.0072019299991373,
+            "minMs": 0.42691699999704724
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 731,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.7378963351749471,
+            "p99Ms": 1.5411793600012618,
+            "minMs": 0.5954579999961425
+          },
+          "apply": {
+            "meanMs": 0.4982004259030939,
+            "p99Ms": 0.8875423200037039,
+            "minMs": 0.4248330000045826
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 2079872,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 10.888221359374938,
+            "p99Ms": 12.766787830002649,
+            "minMs": 9.69999999999709
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "realistic-ecommerce-medium",
+      "category": "realistic",
+      "description": "Medium e-commerce platform config (keyed products, users, categories, orders) with a realistic edit set",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "e-commerce",
+        "medium"
+      ],
+      "maxArrayLen": 66,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 369,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.06871868046721395,
+            "p99Ms": 0.13978320000169342,
+            "minMs": 0.05195800000365125
+          },
+          "apply": {
+            "meanMs": 0.09641193950342333,
+            "p99Ms": 0.17357132000411973,
+            "minMs": 0.07624999999825377
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 369,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.07769127772378606,
+            "p99Ms": 0.4806498400011307,
+            "minMs": 0.056917000001703855
+          },
+          "apply": {
+            "meanMs": 0.09725585193293586,
+            "p99Ms": 0.18693807999865386,
+            "minMs": 0.07679199999984121
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 369,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.06443407119845523,
+            "p99Ms": 0.12869768999604314,
+            "minMs": 0.05004199999530101
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.04195893895531887,
+            "p99Ms": 0.0613611399976071,
+            "minMs": 0.03437500000291038
+          },
+          "apply": {
+            "meanMs": 0.19137852845524356,
+            "p99Ms": 0.32232920000460574,
+            "minMs": 0.1534170000013546
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 333,
+          "patchOps": 5,
+          "diff": {
+            "meanMs": 0.2436784963459444,
+            "p99Ms": 0.8036329700020713,
+            "minMs": 0.18341599999985192
+          },
+          "apply": {
+            "meanMs": 0.09625541770931935,
+            "p99Ms": 0.16901060000018284,
+            "minMs": 0.0772919999944861
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 211,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.11710263758782415,
+            "p99Ms": 0.49356260000240576,
+            "minMs": 0.09133299999666633
+          },
+          "apply": {
+            "meanMs": 0.09619745924501383,
+            "p99Ms": 0.168712780004862,
+            "minMs": 0.07804200000100536
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 253643,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.9757111654499521,
+            "p99Ms": 1.7740294000017456,
+            "minMs": 0.7802919999958249
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-modify-only",
+      "category": "keyed",
+      "description": "60 keyed items, one field changed on every third item, order preserved",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1333,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.016130202467833463,
+            "p99Ms": 0.0290000000022701,
+            "minMs": 0.011708999998518266
+          },
+          "apply": {
+            "meanMs": 0.01719011186079022,
+            "p99Ms": 0.025292000000699772,
+            "minMs": 0.013291000002936926
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1333,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.01953512868721882,
+            "p99Ms": 0.030822499997157138,
+            "minMs": 0.014666999995824881
+          },
+          "apply": {
+            "meanMs": 0.017170916895617047,
+            "p99Ms": 0.025127100000099715,
+            "minMs": 0.013584000000264496
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1333,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.015315405429218172,
+            "p99Ms": 0.02475000000289583,
+            "minMs": 0.011208000003534835
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.0073747255162122305,
+            "p99Ms": 0.011166609999636421,
+            "minMs": 0.005875000002561137
+          },
+          "apply": {
+            "meanMs": 0.025074097849956786,
+            "p99Ms": 0.03829147999727866,
+            "minMs": 0.019707999999809545
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1057,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 8.071020796875132,
+            "p99Ms": 9.024204579997603,
+            "minMs": 6.6692499999990105
+          },
+          "apply": {
+            "meanMs": 0.016508909657450124,
+            "p99Ms": 0.026208000002952758,
+            "minMs": 0.012750000001688022
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 472,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.025294495383842017,
+            "p99Ms": 0.052250000000640284,
+            "minMs": 0.018667000003915746
+          },
+          "apply": {
+            "meanMs": 0.016682185419964725,
+            "p99Ms": 0.02858017999955329,
+            "minMs": 0.012666999995417427
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 53229,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.2205647067255869,
+            "p99Ms": 0.6638947099971828,
+            "minMs": 0.17095799999515293
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-add-only",
+      "category": "keyed",
+      "description": "60 keyed items plus 20 appended new keys",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "add"
+      ],
+      "maxArrayLen": 80,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.01446763650174229,
+            "p99Ms": 0.021605260001379016,
+            "minMs": 0.010000000002037268
+          },
+          "apply": {
+            "meanMs": 0.015309600428658051,
+            "p99Ms": 0.02277993000323475,
+            "minMs": 0.011582999999518506
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1891,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.01898279214122008,
+            "p99Ms": 0.030750000005355105,
+            "minMs": 0.013082999998005107
+          },
+          "apply": {
+            "meanMs": 0.01583903274596419,
+            "p99Ms": 0.023042000000714324,
+            "minMs": 0.012125000001105946
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.010940452929270867,
+            "p99Ms": 0.01849036999825325,
+            "minMs": 0.007707999997364823
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1891,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 0.012970788287553877,
+            "p99Ms": 0.020500000003230524,
+            "minMs": 0.010125000000698492
+          },
+          "apply": {
+            "meanMs": 0.025481367626435256,
+            "p99Ms": 0.03575252000271581,
+            "minMs": 0.02008399999613175
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1871,
+          "patchOps": 20,
+          "diff": {
+            "meanMs": 7.127813124999761,
+            "p99Ms": 11.593190499996988,
+            "minMs": 5.905624999999418
+          },
+          "apply": {
+            "meanMs": 0.01586673599873474,
+            "p99Ms": 0.02306474000026346,
+            "minMs": 0.012374999998428393
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1250,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.02370381297778114,
+            "p99Ms": 0.03176091999994235,
+            "minMs": 0.018125000002328306
+          },
+          "apply": {
+            "meanMs": 0.013685230866570025,
+            "p99Ms": 0.020583000002952757,
+            "minMs": 0.010458000004291534
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 66595,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.28913052817933615,
+            "p99Ms": 0.7482132499989536,
+            "minMs": 0.2338339999987511
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-remove-only",
+      "category": "keyed",
+      "description": "60 keyed items with every fourth key removed",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "remove"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1459,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.01108411322321916,
+            "p99Ms": 0.01658313000327325,
+            "minMs": 0.007958999995025806
+          },
+          "apply": {
+            "meanMs": 0.01425125769558633,
+            "p99Ms": 0.022069389994139627,
+            "minMs": 0.011041999998269603
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1459,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.014563908359427159,
+            "p99Ms": 0.021141450001595997,
+            "minMs": 0.009749999997438863
+          },
+          "apply": {
+            "meanMs": 0.01438953705310584,
+            "p99Ms": 0.021710230007593007,
+            "minMs": 0.011083000004873611
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 1459,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 0.008858222960429577,
+            "p99Ms": 0.013917000003857538,
+            "minMs": 0.006333999990602024
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 9108,
+          "patchOps": 174,
+          "diff": {
+            "meanMs": 0.008603548104031553,
+            "p99Ms": 0.013375000009546056,
+            "minMs": 0.006290999997872859
+          },
+          "apply": {
+            "meanMs": 0.04814318580013306,
+            "p99Ms": 0.06597372000513128,
+            "minMs": 0.03908299999602605
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 522,
+          "patchOps": 15,
+          "diff": {
+            "meanMs": 2.6779111333342733,
+            "p99Ms": 3.5023955000007114,
+            "minMs": 2.1647500000108266
+          },
+          "apply": {
+            "meanMs": 0.014577871168749893,
+            "p99Ms": 0.02198442000924838,
+            "minMs": 0.011249999995925464
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 968,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.051060900051027015,
+            "p99Ms": 0.07847361000094684,
+            "minMs": 0.04120900000270922
+          },
+          "apply": {
+            "meanMs": 0.01265180513639507,
+            "p99Ms": 0.019951439993456013,
+            "minMs": 0.009749999997438863
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 50238,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.19795563582363257,
+            "p99Ms": 0.6181417999934637,
+            "minMs": 0.1557910000119591
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-reorder-only",
+      "category": "keyed",
+      "description": "60 keyed items reversed with identical content (order-insensitive no-op territory)",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "reorder",
+        "noop"
+      ],
+      "maxArrayLen": 60,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 2,
+          "patchOps": 0,
+          "diff": {
+            "meanMs": 0.012335697844383575,
+            "p99Ms": 0.01858374000294134,
+            "minMs": 0.008832999999867752
+          },
+          "apply": {
+            "meanMs": 0.010909686129632844,
+            "p99Ms": 0.016250000000582077,
+            "minMs": 0.008457999996608123
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 3001,
+          "patchOps": 59,
+          "diff": {
+            "meanMs": 0.021274886554631015,
+            "p99Ms": 0.032958580003760354,
+            "minMs": 0.015749999991385266
+          },
+          "apply": {
+            "meanMs": 0.05279205622278879,
+            "p99Ms": 0.08173876000510061,
+            "minMs": 0.041666999997687526
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 2,
+          "patchOps": 0,
+          "diff": {
+            "meanMs": 0.010034813556790213,
+            "p99Ms": 0.015390989999577845,
+            "minMs": 0.007499999992433004
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 12981,
+          "patchOps": 240,
+          "diff": {
+            "meanMs": 0.009604965494855327,
+            "p99Ms": 0.015666999999666587,
+            "minMs": 0.007083999997121282
+          },
+          "apply": {
+            "meanMs": 0.05888550493144723,
+            "p99Ms": 0.08742364000179804,
+            "minMs": 0.047040999997989275
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 11092,
+          "patchOps": 205,
+          "diff": {
+            "meanMs": 8.624066437500005,
+            "p99Ms": 9.681518459996004,
+            "minMs": 7.314417000001413
+          },
+          "apply": {
+            "meanMs": 0.06691640628663141,
+            "p99Ms": 0.10652500000142014,
+            "minMs": 0.05283299999427982
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 945,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.14042771042464308,
+            "p99Ms": 0.22872015999862924,
+            "minMs": 0.11504199999035336
+          },
+          "apply": {
+            "meanMs": 0.018328936033772298,
+            "p99Ms": 0.027532339999597772,
+            "minMs": 0.013999999995576218
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 53625,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.22482894269633108,
+            "p99Ms": 0.6292406099956134,
+            "minMs": 0.1718330000003334
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "keyed-mixed-modify-add-remove-reorder",
+      "category": "keyed",
+      "description": "80 keyed items with a combined remove/modify/reorder/add workload",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "modify",
+        "add",
+        "remove",
+        "reorder",
+        "mixed"
+      ],
+      "maxArrayLen": 80,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5052,
+          "patchOps": 63,
+          "diff": {
+            "meanMs": 0.02237520926337214,
+            "p99Ms": 0.037436920001055245,
+            "minMs": 0.014999999999417923
+          },
+          "apply": {
+            "meanMs": 0.0308969914266653,
+            "p99Ms": 0.04618968000751916,
+            "minMs": 0.024957999994512647
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 8257,
+          "patchOps": 126,
+          "diff": {
+            "meanMs": 0.030390089113449554,
+            "p99Ms": 0.04624999999941792,
+            "minMs": 0.02179199999955017
+          },
+          "apply": {
+            "meanMs": 0.07541751564850922,
+            "p99Ms": 0.18487375999771866,
+            "minMs": 0.05958300000929739
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5052,
+          "patchOps": 63,
+          "diff": {
+            "meanMs": 0.01870587953610643,
+            "p99Ms": 0.028999999997467968,
+            "minMs": 0.013250000003608875
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 13116,
+          "patchOps": 246,
+          "diff": {
+            "meanMs": 0.011900159015841611,
+            "p99Ms": 0.016833000001497567,
+            "minMs": 0.009124999996856786
+          },
+          "apply": {
+            "meanMs": 0.06777957793958862,
+            "p99Ms": 0.11195691000160873,
+            "minMs": 0.05545799998799339
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 13280,
+          "patchOps": 249,
+          "diff": {
+            "meanMs": 13.309950531249115,
+            "p99Ms": 14.588793420005384,
+            "minMs": 12.038249999997788
+          },
+          "apply": {
+            "meanMs": 0.08189432098252719,
+            "p99Ms": 0.1396352800022577,
+            "minMs": 0.06679199999780394
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 3334,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.21622786270281477,
+            "p99Ms": 0.33934958999292575,
+            "minMs": 0.18637500000477303
+          },
+          "apply": {
+            "meanMs": 0.03708902466387945,
+            "p99Ms": 0.05722143999824765,
+            "minMs": 0.029209000000264496
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 68563,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.30569078227683355,
+            "p99Ms": 0.7459719199995744,
+            "minMs": 0.2537080000038259
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "lcs-10k-single-edit",
+      "category": "lcs",
+      "description": "10,000-element sequence with a single mid-array element change",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit"
+      ],
+      "maxArrayLen": 10000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.31803736775211544,
+            "p99Ms": 0.875864860004804,
+            "minMs": 0.23883299999579322
+          },
+          "apply": {
+            "meanMs": 0.3908980214842188,
+            "p99Ms": 0.8981235699946409,
+            "minMs": 0.34024999999383
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 63225856,
+            "maxRss": 63225856,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.5807599420292072,
+            "p99Ms": 1.2385982500104005,
+            "minMs": 0.41849999999976717
+          },
+          "apply": {
+            "meanMs": 0.3906070829268045,
+            "p99Ms": 0.9192861600016475,
+            "minMs": 0.3387500000098953
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 62980096,
+            "maxRss": 62980096,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.9611047985609322,
+            "p99Ms": 2.20571144000627,
+            "minMs": 0.7510000000038417
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 67977216,
+            "maxRss": 67977216,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 56,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 1.0879603586958895,
+            "p99Ms": 3.9404558299969357,
+            "minMs": 0.914083000010578
+          },
+          "apply": {
+            "meanMs": 0.758979424242694,
+            "p99Ms": 1.1084287699990092,
+            "minMs": 0.6908330000005662
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 63733760,
+            "maxRss": 63733760,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 10000 > 2000 (O(n^2); would hang)"
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 63,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.5523486041374994,
+            "p99Ms": 1.102960999997449,
+            "minMs": 0.4541249999892898
+          },
+          "apply": {
+            "meanMs": 0.38859800097115227,
+            "p99Ms": 0.9056373199958765,
+            "minMs": 0.32987499999580905
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 66682880,
+            "maxRss": 66682880,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 1598243,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 1079.8787083333348,
+            "p99Ms": 1109.9229814800005,
+            "minMs": 1048.3010829999985
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 1018783351,
+            "heapDeltaBytes": 1017559533,
+            "rssBytes": 1825964032,
+            "maxRss": 1825964032,
+            "rssUnit": "bytes"
+          }
+        }
+      ]
+    },
+    {
+      "case": "lcs-70k-single-edit",
+      "category": "lcs",
+      "description": "70,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "maxArrayLen": 70000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 2.2359368826819366,
+            "p99Ms": 3.0054479999982866,
+            "minMs": 1.8757080000068527
+          },
+          "apply": {
+            "meanMs": 2.703873945946209,
+            "p99Ms": 4.4537102799913555,
+            "minMs": 2.2713330000115093
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 76464128,
+            "maxRss": 76464128,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 4.878333277108831,
+            "p99Ms": 7.693592059992066,
+            "minMs": 3.5944579999923008
+          },
+          "apply": {
+            "meanMs": 2.6624720993376414,
+            "p99Ms": 3.7264165000015055,
+            "minMs": 2.2647909999941476
+          },
+          "memory": {
+            "heapUsedBytes": 1225581,
+            "heapDeltaBytes": 0,
+            "rssBytes": 83673088,
+            "maxRss": 83673088,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 8.159247374999495,
+            "p99Ms": 10.5038337900021,
+            "minMs": 6.390583000000333
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 1223482,
+            "heapDeltaBytes": 0,
+            "rssBytes": 87654400,
+            "maxRss": 87654400,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 9.456809874998726,
+            "p99Ms": 14.477426460007116,
+            "minMs": 6.836541999990004
+          },
+          "apply": {
+            "meanMs": 5.134369641025282,
+            "p99Ms": 8.765048909995397,
+            "minMs": 4.031291999999667
+          },
+          "memory": {
+            "heapUsedBytes": 1225549,
+            "heapDeltaBytes": 0,
+            "rssBytes": 81756160,
+            "maxRss": 81756160,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 70000 > 2000 (O(n^2); would hang)"
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 65,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 4.187612875000771,
+            "p99Ms": 5.948666999990382,
+            "minMs": 3.443041999998968
+          },
+          "apply": {
+            "meanMs": 2.5678304102559477,
+            "p99Ms": 4.052800149996619,
+            "minMs": 1.9994169999990845
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 89800704,
+            "maxRss": 89800704,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 70000 > 15000 (O(n^2); would hang)"
+        }
+      ]
+    },
+    {
+      "case": "lcs-100k-single-edit",
+      "category": "lcs",
+      "description": "100,000-element sequence with a single mid-array element change (past the old 65,536 interning cliff)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "single-edit",
+        "past-65536-cliff"
+      ],
+      "maxArrayLen": 100000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 5.43039749999986,
+            "p99Ms": 9.180346909998041,
+            "minMs": 3.6838750000024447
+          },
+          "apply": {
+            "meanMs": 4.107913714285782,
+            "p99Ms": 5.858981979999954,
+            "minMs": 3.163125000006403
+          },
+          "memory": {
+            "heapUsedBytes": 1486203,
+            "heapDeltaBytes": 0,
+            "rssBytes": 101466112,
+            "maxRss": 101466112,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 9.538918640625525,
+            "p99Ms": 14.944961459996698,
+            "minMs": 6.7124170000024606
+          },
+          "apply": {
+            "meanMs": 3.96716328712911,
+            "p99Ms": 5.654040999987046,
+            "minMs": 3.1472499999945285
+          },
+          "memory": {
+            "heapUsedBytes": 32981153,
+            "heapDeltaBytes": 31757335,
+            "rssBytes": 117538816,
+            "maxRss": 117538816,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 79,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 14.36015356249959,
+            "p99Ms": 21.687443579997193,
+            "minMs": 12.006874999991851
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 25412252,
+            "heapDeltaBytes": 24188434,
+            "rssBytes": 117178368,
+            "maxRss": 117178368,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 57,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 14.798775437499671,
+            "p99Ms": 23.73096378999718,
+            "minMs": 11.492417000001296
+          },
+          "apply": {
+            "meanMs": 8.561220062501661,
+            "p99Ms": 11.997538869995907,
+            "minMs": 6.547000000005937
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 91537408,
+            "maxRss": 91537408,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 100000 > 2000 (O(n^2); would hang)"
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 65,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 5.999590746268896,
+            "p99Ms": 8.583432500003548,
+            "minMs": 5.027332999990904
+          },
+          "apply": {
+            "meanMs": 4.113795510203071,
+            "p99Ms": 5.859671479999961,
+            "minMs": 3.1722500000032596
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 101679104,
+            "maxRss": 101679104,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 100000 > 15000 (O(n^2); would hang)"
+        }
+      ]
+    },
+    {
+      "case": "lcs-4k-disjoint",
+      "category": "lcs",
+      "description": "Two 4,000-element sequences with zero common elements (worst-case LCS diagonal)",
+      "roundtrip": "exact",
+      "measureMemory": true,
+      "tags": [
+        "disjoint",
+        "worst-case"
+      ],
+      "maxArrayLen": 4000,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 298891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 0.23214070301622228,
+            "p99Ms": 0.7351896600042527,
+            "minMs": 0.18204200000036508
+          },
+          "apply": {
+            "meanMs": 1.0560867176779747,
+            "p99Ms": 1.939884479998434,
+            "minMs": 0.8592920000082813
+          },
+          "memory": {
+            "heapUsedBytes": 1223482,
+            "heapDeltaBytes": 0,
+            "rssBytes": 62291968,
+            "maxRss": 62291968,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 298891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 0.3000548756552977,
+            "p99Ms": 0.8265218799954165,
+            "minMs": 0.22154199999931734
+          },
+          "apply": {
+            "meanMs": 1.0729052439675246,
+            "p99Ms": 1.996086279998998,
+            "minMs": 0.8728750000009313
+          },
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 58064896,
+            "maxRss": 58064896,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 298891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 0.4497397932584667,
+            "p99Ms": 1.0076208699954448,
+            "minMs": 0.3487500000046566
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 1223818,
+            "heapDeltaBytes": 0,
+            "rssBytes": 61882368,
+            "maxRss": 61882368,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 214891,
+          "patchOps": 4000,
+          "diff": {
+            "meanMs": 0.5266227631582105,
+            "p99Ms": 1.9390779700002143,
+            "minMs": 0.41908300000068266
+          },
+          "apply": {
+            "meanMs": 0.9002910269660747,
+            "p99Ms": 1.8046185199904723,
+            "minMs": 0.7832080000080168
+          },
+          "memory": {
+            "heapUsedBytes": 1226618,
+            "heapDeltaBytes": 0,
+            "rssBytes": 61423616,
+            "maxRss": 61423616,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "array length 4000 > 2000 (O(n^2); would hang)"
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 169798,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 1289.793902666662,
+            "p99Ms": 1300.363611340001,
+            "minMs": 1274.6411249999946
+          },
+          "apply": {
+            "meanMs": 1.2030686756752675,
+            "p99Ms": 1.541595119998674,
+            "minMs": 1.0904169999994338
+          },
+          "memory": {
+            "heapUsedBytes": 131253739,
+            "heapDeltaBytes": 130030257,
+            "rssBytes": 494419968,
+            "maxRss": 494419968,
+            "rssUnit": "bytes"
+          }
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 922231,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 233.84933065624864,
+            "p99Ms": 254.42258028998242,
+            "minMs": 222.97704100000556
+          },
+          "apply": null,
+          "memory": {
+            "heapUsedBytes": 204965661,
+            "heapDeltaBytes": 203742179,
+            "rssBytes": 346390528,
+            "maxRss": 346390528,
+            "rssUnit": "bytes"
+          }
+        }
+      ]
+    },
+    {
+      "case": "structural-root-array",
+      "category": "structural",
+      "description": "A root-level array (not wrapped in an object) with an insert and a change",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "root-array"
+      ],
+      "maxArrayLen": 201,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 121,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.018321318279541976,
+            "p99Ms": 0.03070800000568852,
+            "minMs": 0.012749999994412065
+          },
+          "apply": {
+            "meanMs": 0.00849327441234794,
+            "p99Ms": 0.014374999998835847,
+            "minMs": 0.006290999997872859
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 121,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.045871636238704896,
+            "p99Ms": 0.16285200000216668,
+            "minMs": 0.03095799998845905
+          },
+          "apply": {
+            "meanMs": 0.00870649448238437,
+            "p99Ms": 0.015375000005005858,
+            "minMs": 0.006292000005487353
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 121,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.011350656366186627,
+            "p99Ms": 0.018125000002328306,
+            "minMs": 0.008292000013170764
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 5099,
+          "patchOps": 102,
+          "diff": {
+            "meanMs": 0.011496695513430561,
+            "p99Ms": 0.017958999992115424,
+            "minMs": 0.008958999998867512
+          },
+          "apply": {
+            "meanMs": 0.02714184733353629,
+            "p99Ms": 0.03923483000457051,
+            "minMs": 0.021124999999301508
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 99,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 3.654511745458215,
+            "p99Ms": 4.912107029982141,
+            "minMs": 3.1711249999934807
+          },
+          "apply": {
+            "meanMs": 0.007171767117899242,
+            "p99Ms": 0.011916000017663464,
+            "minMs": 0.005250000016530976
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 73,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.08274779478705861,
+            "p99Ms": 0.13429166999994777,
+            "minMs": 0.06766699999570847
+          },
+          "apply": {
+            "meanMs": 0.007530253877911743,
+            "p99Ms": 0.01316699999733828,
+            "minMs": 0.005540999991353601
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 31702,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.528966587846565,
+            "p99Ms": 0.7070945200044644,
+            "minMs": 0.4532080000208225
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "structural-root-keyed-array",
+      "category": "structural",
+      "description": "A root-level array keyed by id (primaryKeyMap '') with a remove + modify workload",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "root-array",
+        "keyed"
+      ],
+      "maxArrayLen": 40,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 670,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 0.009707463354879105,
+            "p99Ms": 0.015458000007492955,
+            "minMs": 0.0072499999951105565
+          },
+          "apply": {
+            "meanMs": 0.009483084801099138,
+            "p99Ms": 0.015666999999666587,
+            "minMs": 0.0072499999951105565
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 670,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 0.013229994361356474,
+            "p99Ms": 0.020125000010011718,
+            "minMs": 0.009666999976616353
+          },
+          "apply": {
+            "meanMs": 0.009337507458062035,
+            "p99Ms": 0.015083000005688518,
+            "minMs": 0.007291999994777143
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 670,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 0.008915786024747636,
+            "p99Ms": 0.014139760013204092,
+            "minMs": 0.006500000017695129
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 6994,
+          "patchOps": 146,
+          "diff": {
+            "meanMs": 0.00640125617722129,
+            "p99Ms": 0.01087500000721775,
+            "minMs": 0.004874999984167516
+          },
+          "apply": {
+            "meanMs": 0.03028603301044551,
+            "p99Ms": 0.052415249997575485,
+            "minMs": 0.0242910000088159
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 474,
+          "patchOps": 11,
+          "diff": {
+            "meanMs": 2.5037903312491836,
+            "p99Ms": 3.192424780002618,
+            "minMs": 2.2351250000065193
+          },
+          "apply": {
+            "meanMs": 0.00900688849610939,
+            "p99Ms": 0.01554199997917749,
+            "minMs": 0.006999999983236194
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 271,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.015359626464049168,
+            "p99Ms": 0.02333399999770336,
+            "minMs": 0.01187499999650754
+          },
+          "apply": {
+            "meanMs": 0.009757254219882109,
+            "p99Ms": 0.01629200001480058,
+            "minMs": 0.007333000015933067
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 35074,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.12351367582631408,
+            "p99Ms": 0.20397353999724133,
+            "minMs": 0.09837500000139698
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "structural-deep-nesting",
+      "category": "structural",
+      "description": "Object nested 40 levels deep with a change only at the deepest leaf",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "deep-nesting"
+      ],
+      "maxArrayLen": 0,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 757,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.0031263240663537474,
+            "p99Ms": 0.006416999996872619,
+            "minMs": 0.0024160000029951334
+          },
+          "apply": {
+            "meanMs": 0.01158586065168661,
+            "p99Ms": 0.025406159991398537,
+            "minMs": 0.008540999988326803
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "no schema -> no plan; emitMoves not applicable"
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 757,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.005382959264725315,
+            "p99Ms": 0.00870900001609698,
+            "minMs": 0.0038330000243149698
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.001828978198680707,
+            "p99Ms": 0.00366700001177378,
+            "minMs": 0.0013749999925494194
+          },
+          "apply": {
+            "meanMs": 0.010514025233379916,
+            "p99Ms": 0.017749999999068677,
+            "minMs": 0.008333000005222857
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 717,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.023169180133151144,
+            "p99Ms": 0.04083335999865085,
+            "minMs": 0.01791699999012053
+          },
+          "apply": {
+            "meanMs": 0.00870369265413517,
+            "p99Ms": 0.01518462998501492,
+            "minMs": 0.006667000008746982
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 523,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.008966148544066197,
+            "p99Ms": 0.014416879997588691,
+            "minMs": 0.006832999992184341
+          },
+          "apply": {
+            "meanMs": 0.00847561663307783,
+            "p99Ms": 0.01445899999816902,
+            "minMs": 0.006374999997206032
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 16877,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.044886484403084737,
+            "p99Ms": 0.07590236000018187,
+            "minMs": 0.03504099999554455
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "edge-pointer-escaping-keys",
+      "category": "edge",
+      "description": "Object keys containing '/' and '~' (RFC 6901 ~1/~0 escapes) changed at several depths",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "pointer-escaping"
+      ],
+      "maxArrayLen": 3,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 236,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.001869608425388613,
+            "p99Ms": 0.005541999998968095,
+            "minMs": 0.0009579999896232039
+          },
+          "apply": {
+            "meanMs": 0.0016217625382166977,
+            "p99Ms": 0.004625000001396984,
+            "minMs": 0.0011249999806750566
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "SKIPPED",
+          "verdictDetail": "",
+          "patchBytes": null,
+          "patchOps": null,
+          "diff": null,
+          "apply": null,
+          "memory": null,
+          "skippedReason": "no schema -> no plan; emitMoves not applicable"
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "CORRUPT",
+          "verdictDetail": "patch unappliable: Path \"/a/b/note\" does not exist (at segment \"a\")",
+          "patchBytes": 229,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.0010770940840462177,
+            "p99Ms": 0.0023330000112764537,
+            "minMs": 0.000707999977748841
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.0007973667542558157,
+            "p99Ms": 0.002583999972557649,
+            "minMs": 0.0005409999866969883
+          },
+          "apply": {
+            "meanMs": 0.0016825543759178378,
+            "p99Ms": 0.007582999998703599,
+            "minMs": 0.0012080000014975667
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 178,
+          "patchOps": 3,
+          "diff": {
+            "meanMs": 0.008015245887157858,
+            "p99Ms": 0.017791999998735264,
+            "minMs": 0.0058330000028945506
+          },
+          "apply": {
+            "meanMs": 0.001557677039496482,
+            "p99Ms": 0.0063339999783784155,
+            "minMs": 0.00108299998100847
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 139,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.0016387266030720557,
+            "p99Ms": 0.0030420000257436186,
+            "minMs": 0.0011249999806750566
+          },
+          "apply": {
+            "meanMs": 0.0014233118721805513,
+            "p99Ms": 0.0036250000121071935,
+            "minMs": 0.0009999999892897904
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 2325,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.005053684741882938,
+            "p99Ms": 0.010749999986728653,
+            "minMs": 0.003499999991618097
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "edge-duplicate-primary-key",
+      "category": "edge",
+      "description": "Array with two items sharing the primary-key value 'dup' (gate must not silently mutate identical keys)",
+      "roundtrip": "exact",
+      "measureMemory": false,
+      "tags": [
+        "duplicate-key"
+      ],
+      "maxArrayLen": 3,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 147,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.005123505366882479,
+            "p99Ms": 0.013428890006907487,
+            "minMs": 0.0033750000002328306
+          },
+          "apply": {
+            "meanMs": 0.001190588938252498,
+            "p99Ms": 0.004333999997470528,
+            "minMs": 0.0008329999982379377
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 147,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.006730836693089195,
+            "p99Ms": 0.015363929998129439,
+            "minMs": 0.004541000002063811
+          },
+          "apply": {
+            "meanMs": 0.0011687539949374205,
+            "p99Ms": 0.004207999998470768,
+            "minMs": 0.0008329999982379377
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "CORRUPT",
+          "verdictDetail": "applied patch does not reconstruct modified",
+          "patchBytes": 299,
+          "patchOps": 4,
+          "diff": {
+            "meanMs": 0.0016875006686762912,
+            "p99Ms": 0.004165999998804182,
+            "minMs": 0.0009999999892897904
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.00040255801864491587,
+            "p99Ms": 0.0009579999896232039,
+            "minMs": 0.00024999998277053237
+          },
+          "apply": {
+            "meanMs": 0.0013086958602850048,
+            "p99Ms": 0.004583000001730397,
+            "minMs": 0.0009160000190604478
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 115,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.01352667533475535,
+            "p99Ms": 0.021678889991308133,
+            "minMs": 0.010500000003958121
+          },
+          "apply": {
+            "meanMs": 0.000981025658707944,
+            "p99Ms": 0.002957999997306615,
+            "minMs": 0.000707999977748841
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 78,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.0014648898736327107,
+            "p99Ms": 0.0027500000142026693,
+            "minMs": 0.0010409999813418835
+          },
+          "apply": {
+            "meanMs": 0.001366938005987036,
+            "p99Ms": 0.0043750000186264515,
+            "minMs": 0.0009579999896232039
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 2532,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.006533801718448324,
+            "p99Ms": 0.014625000004889444,
+            "minMs": 0.004583000001730397
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    },
+    {
+      "case": "staleness-mutate-rediff",
+      "category": "staleness",
+      "description": "Diff a keyed array, then mutate the SAME original object in place and re-diff; a correct engine must not reuse stale per-run memoised state across the two diffs",
+      "roundtrip": "multiset",
+      "measureMemory": false,
+      "tags": [
+        "staleness",
+        "cache"
+      ],
+      "maxArrayLen": 30,
+      "libraries": [
+        {
+          "library": "ours",
+          "label": "ours (this branch)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 63,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.007616020429833491,
+            "p99Ms": 0.011832999996840954,
+            "minMs": 0.005375000007916242
+          },
+          "apply": {
+            "meanMs": 0.005792367522523569,
+            "p99Ms": 0.01187499999650754,
+            "minMs": 0.0043329999898560345
+          },
+          "memory": null
+        },
+        {
+          "library": "ours-moves",
+          "label": "ours + emitMoves",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 63,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.010313128448503135,
+            "p99Ms": 0.016749999980675057,
+            "minMs": 0.00741700001526624
+          },
+          "apply": {
+            "meanMs": 0.005645778461528437,
+            "p99Ms": 0.010290999998978805,
+            "minMs": 0.004374999989522621
+          },
+          "memory": null
+        },
+        {
+          "library": "fjsp-v040",
+          "label": "fjsp v0.4.0 (old published)",
+          "kind": "schema-aware",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 63,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.006232087732151187,
+            "p99Ms": 0.010666999995009974,
+            "minMs": 0.004416000010678545
+          },
+          "apply": null,
+          "memory": null
+        },
+        {
+          "library": "fast-json-patch",
+          "label": "fast-json-patch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.0036170223892273722,
+            "p99Ms": 0.005499999999301508,
+            "minMs": 0.002957999997306615
+          },
+          "apply": {
+            "meanMs": 0.010851884725920932,
+            "p99Ms": 0.02412500002537854,
+            "minMs": 0.008167000021785498
+          },
+          "memory": null
+        },
+        {
+          "library": "rfc6902",
+          "label": "rfc6902",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 50,
+          "patchOps": 1,
+          "diff": {
+            "meanMs": 0.08046931583184276,
+            "p99Ms": 0.11276260000013281,
+            "minMs": 0.06712500000139698
+          },
+          "apply": {
+            "meanMs": 0.0056074696919101745,
+            "p99Ms": 0.00995800000964664,
+            "minMs": 0.004249999998137355
+          },
+          "memory": null
+        },
+        {
+          "library": "jsondiffpatch",
+          "label": "jsondiffpatch",
+          "kind": "generic",
+          "verdict": "PASS",
+          "verdictDetail": "",
+          "patchBytes": 38,
+          "patchOps": null,
+          "diff": {
+            "meanMs": 0.012042220278851384,
+            "p99Ms": 0.01745883999858051,
+            "minMs": 0.009209000010741875
+          },
+          "apply": {
+            "meanMs": 0.005991190129606543,
+            "p99Ms": 0.010415999985998497,
+            "minMs": 0.004583000001730397
+          },
+          "memory": null
+        },
+        {
+          "library": "json-diff-kit",
+          "label": "json-diff-kit",
+          "kind": "generic",
+          "verdict": "NO-APPLIER",
+          "verdictDetail": "display-only diff",
+          "patchBytes": 26657,
+          "patchOps": 2,
+          "diff": {
+            "meanMs": 0.08654622587612279,
+            "p99Ms": 0.13443264000205088,
+            "minMs": 0.07066699999268167
+          },
+          "apply": null,
+          "memory": null
+        }
+      ]
+    }
+  ]
+}
