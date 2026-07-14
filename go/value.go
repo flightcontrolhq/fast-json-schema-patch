@@ -1,0 +1,121 @@
+// Package schemapatch is a Go port of the fast-json-schema-patch engine. It
+// implements the normative specification "spec-v1" (see SPEC.md at the repository
+// root) using only the Go standard library.
+//
+// # Value model
+//
+// Documents are represented by an ordered JSON value model rooted at [Value]
+// (an alias for any). The concrete dynamic types a decoded document ever holds
+// are:
+//
+//   - nil            for JSON null
+//   - bool           for JSON true/false
+//   - string         for JSON strings
+//   - [Number]       for JSON numbers (preserves the original literal text)
+//   - []Value        for JSON arrays (order-significant)
+//   - *[Object]      for JSON objects (member order preserved, O(1) key lookup)
+//
+// Objects preserve member iteration order because the diff generator's output is
+// order-sensitive (SPEC §2.3); equality and apply are order-insensitive over
+// object members (SPEC §2.4.2). Numbers retain their source text so large
+// integers round-trip byte-faithfully through a patch even though all equality
+// and comparison happens at IEEE-754 f64 semantics (SPEC §2.2).
+package schemapatch
+
+import "strconv"
+
+// Value is any node of the ordered JSON value model. Its dynamic type is one of
+// nil, bool, string, [Number], []Value, or *[Object]. It is an alias for any so
+// that []Value is identical to []any and decoded values interoperate freely.
+type Value = any
+
+// Number is a JSON number that preserves its original literal text. All equality
+// and ordering is defined at IEEE-754 double precision (SPEC §2.2): two Numbers
+// whose texts differ but whose f64 images match (e.g. "1" and "1.0", "0" and
+// "-0", "10" and "1e1") are equal. The text is retained only so that echoing a
+// value into a patch round-trips faithfully (SPEC §2.2.3); it never affects
+// equality.
+type Number struct {
+	text string
+}
+
+// NewNumber returns a Number carrying the given literal text. The text is not
+// validated here; callers that need a guaranteed-valid Number should obtain it
+// via [Decode].
+func NewNumber(text string) Number { return Number{text: text} }
+
+// String returns the original literal text of the number.
+func (n Number) String() string { return n.text }
+
+// Float64 parses the number's text as an IEEE-754 double. The error is non-nil
+// only for texts that are not valid JSON numbers (which [Decode] never produces).
+func (n Number) Float64() (float64, error) { return strconv.ParseFloat(n.text, 64) }
+
+// Object is a JSON object that preserves member insertion order while offering
+// O(1) key lookup. The zero value is not usable; construct one with [NewObject].
+type Object struct {
+	keys  []string
+	vals  []Value
+	index map[string]int
+}
+
+// NewObject returns an empty, ready-to-use Object.
+func NewObject() *Object {
+	return &Object{index: make(map[string]int)}
+}
+
+// Len returns the number of members.
+func (o *Object) Len() int { return len(o.keys) }
+
+// Keys returns the member keys in iteration order. The returned slice is the
+// object's internal storage and MUST NOT be mutated by the caller.
+func (o *Object) Keys() []string { return o.keys }
+
+// Get returns the value for key and whether the key is present. A present member
+// whose value is nil (JSON null) returns (nil, true); an absent member returns
+// (nil, false).
+func (o *Object) Get(key string) (Value, bool) {
+	i, ok := o.index[key]
+	if !ok {
+		return nil, false
+	}
+	return o.vals[i], true
+}
+
+// At returns the key and value at member position i (0 <= i < Len). It panics if
+// i is out of range.
+func (o *Object) At(i int) (string, Value) {
+	return o.keys[i], o.vals[i]
+}
+
+// Set assigns v to key. If key already exists its value is overwritten in place,
+// preserving the member's position (matching JSON.parse's last-value-wins,
+// first-position semantics). Otherwise the member is appended at the end.
+func (o *Object) Set(key string, v Value) {
+	if o.index == nil {
+		o.index = make(map[string]int)
+	}
+	if i, ok := o.index[key]; ok {
+		o.vals[i] = v
+		return
+	}
+	o.index[key] = len(o.keys)
+	o.keys = append(o.keys, key)
+	o.vals = append(o.vals, v)
+}
+
+// Delete removes key, reporting whether it was present. Remaining members keep
+// their relative order.
+func (o *Object) Delete(key string) bool {
+	i, ok := o.index[key]
+	if !ok {
+		return false
+	}
+	o.keys = append(o.keys[:i], o.keys[i+1:]...)
+	o.vals = append(o.vals[:i], o.vals[i+1:]...)
+	delete(o.index, key)
+	for j := i; j < len(o.keys); j++ {
+		o.index[o.keys[j]] = j
+	}
+	return true
+}
