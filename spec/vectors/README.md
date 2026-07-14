@@ -38,9 +38,9 @@ stating what it pins and citing its spec section.
 
 Seven of these (one diff, six apply) are the **spec-v1-rc external-review defect round**
 (D1/D2/D4): `diff/kind-mismatch.json`, `apply/malformed-pointer.json`,
-`apply/test-required-value.json`. They pin the **corrected** behavior and are committed
-**before** the TS engine fixes, so they are marked KNOWN-FAILING in
-`test/conformance.test.ts` until each fix lands. See *Pinning behavior before its fix* below.
+`apply/test-required-value.json`. They pin the **corrected** behavior for defects the
+external review found in the reference engines; the engine fixes have landed, so they are
+derived/self-checked against the (fixed) reference like every other vector.
 
 ## Vector record formats
 
