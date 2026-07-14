@@ -121,6 +121,18 @@ type DiffSpec = {
   modified: JsonValue;
   /** how applyPatch(original, expectedPatch) relates to `modified` (§7). */
   roundtrip?: "exact" | "multiset" | "none";
+  /**
+   * Hand-pinned expected patch. When present, the generator does NOT run the
+   * reference differ to derive `expectedPatch` — it uses this array verbatim —
+   * because the current reference is known-buggy for this input (the fix lands
+   * in a later commit; see the KNOWN-FAILING list in
+   * test/conformance.test.ts). The round-trip self-check STILL runs against
+   * this hand-authored patch, so a wrong hand-authored patch is caught. Do NOT
+   * generate an `expectRaw` vector from the buggy reference — that is the whole
+   * point of the mechanism. (First needed for D1; reusable for any future
+   * "pin the corrected behavior before the fix" vector.)
+   */
+  expectRaw?: Operation[];
 };
 type PlanSpec = {
   name: string;
@@ -142,6 +154,17 @@ type ApplySpec = {
   options?: { validateOldValues?: boolean; cloneValues?: boolean; cloneResult?: boolean };
   expected?: JsonValue;
   error?: { code: PatchErrorCode; index: number };
+  /**
+   * When set (to a short defect id like "D2"/"D4"), the generator SKIPS the
+   * self-check that re-runs the reference applier against this vector's
+   * oracle. The current reference is known-buggy for this input (it throws the
+   * wrong code, or does not throw at all), so the self-check would abort the
+   * run. The vector still ships and pins the CORRECT post-fix behavior; the
+   * conformance runner marks it KNOWN-FAILING until the named fix lands, then
+   * flips it on. Not emitted to the wire record (a generation-time flag only,
+   * like DiffSpec.roundtrip).
+   */
+  pendingFix?: string;
 };
 
 const diffFiles: Record<string, DiffSpec[]> = {};
@@ -184,13 +207,20 @@ function buildDiffRecord(spec: DiffSpec): Record<string, unknown> {
     ? // biome-ignore lint: schemas are authored as plain objects
       buildPlan({ schema: spec.schema as never, ...spec.planOpts })
     : new Map();
-  const patcher = new JsonSchemaPatcher({ plan, ...spec.capabilities });
-  const expectedPatch = patcher.execute({
-    original: spec.original,
-    modified: spec.modified,
-  }) as Operation[];
+  // Hand-pinned expectation (§spec/vectors/README "Regenerating"): use the
+  // authored patch verbatim rather than running the known-buggy reference.
+  // Otherwise derive it from the reference differ.
+  const expectedPatch = spec.expectRaw
+    ? spec.expectRaw
+    : (new JsonSchemaPatcher({ plan, ...spec.capabilities }).execute({
+        original: spec.original,
+        modified: spec.modified,
+      }) as Operation[]);
 
   // --- self-check: round-trip (§7 / §10.3.1) ---
+  // Runs for expectRaw vectors too: it validates the hand-authored patch is
+  // itself correct (applying it reproduces `modified`), independent of the
+  // buggy differ.
   const mode = spec.roundtrip ?? "exact";
   if (mode !== "none") {
     const applied = applyPatch(spec.original, expectedPatch);
@@ -274,8 +304,14 @@ function buildInvertRecord(spec: InvertSpec): Record<string, unknown> {
 }
 
 function buildApplyRecord(spec: ApplySpec): Record<string, unknown> {
-  // Self-check the hand-authored oracle against the reference applier.
-  if (spec.error) {
+  // Self-check the hand-authored oracle against the reference applier — UNLESS
+  // this vector pins post-fix behavior the current reference does not yet
+  // implement (spec.pendingFix). In that case the reference would throw the
+  // wrong code (or not throw), aborting generation, so we skip the self-check;
+  // the conformance runner marks the vector KNOWN-FAILING until the fix lands.
+  if (spec.pendingFix) {
+    // no self-check
+  } else if (spec.error) {
     let threw: JsonPatchError | undefined;
     try {
       applyPatch(spec.doc, spec.patch, spec.options ?? {});
@@ -722,6 +758,54 @@ D("primary-key-numeric-string", { name: "pk-numeric-key-f64-equal-differing-lite
 D("key-order", { name: "keyorder-integer-like-ascending-first", comment: "§2.3.2/§5.2.2: object keys {b,\"10\",\"2\",a} all changed — pinned [[OwnPropertyKeys]] order emits integer-like keys ascending (/2,/10) BEFORE the remaining keys in insertion order (/b,/a); pure insertion order (/b,/10,/2,/a) fails §10.3.2", schema: null, original: { b: 1, "10": 1, "2": 1, a: 1 }, modified: { b: 2, "10": 2, "2": 2, a: 2 } });
 // modified-only integer-like keys also obey the pinned order within the second pass.
 D("key-order", { name: "keyorder-modified-only-integer-like", comment: "§5.2.2: original keys {b,\"5\"} visit as /5,/b (integer-like first); modified-only keys {\"3\",z} then visit as /3,/z (integer-like first) — two passes each in pinned order", schema: null, original: { b: 1, "5": 1 }, modified: { b: 2, "5": 2, "3": 9, z: 9 } });
+
+// ===========================================================================
+// EXTERNAL-REVIEW DEFECT ROUND (D1/D2/D4) — spec-v1-rc, 2026-07-14.
+// These vectors pin the CORRECTED post-fix behavior. The TS reference is still
+// buggy for them at the commit that adds them, so:
+//   - the diff vector uses `expectRaw` (hand-pinned, NOT generated from the
+//     buggy differ);
+//   - the apply vectors use `pendingFix` (self-check-against-reference skipped);
+//   - test/conformance.test.ts marks all three KNOWN-FAILING until the engine
+//     fix commits land and flip them on.
+// ===========================================================================
+
+// --- diff/kind-mismatch (D1): empty-array vs empty-object are DISTINCT (§2.4.1/§2.4.2) ---
+// The buggy differ's deepEqualMemo empty-container fast path treated [] === {} (both zero keys),
+// so the LCS trim (§5.5.0) consumed both positions as "common" and emitted ZERO ops — silent
+// wrong output. Post-fix, [] ≠ {} (§2.4.2): interning distinguishes them and Myers (§5.5.2) finds
+// the crossing common element (the empty containers appear on both sides at swapped indices, LCS
+// length 1), yielding a remove+add pair that round-trips exactly (§7.1). Hand-pinned via expectRaw
+// because the fix lands after this commit; probed against a locally-fixed engine to capture the
+// exact op sequence. NOTE: this is a remove+add, not two positional replaces — Myers minimises the
+// edit script and matches the equal empty containers rather than replacing element-for-element.
+D("kind-mismatch", {
+  name: "kindmismatch-empty-array-vs-empty-object-not-equal",
+  comment: "§2.4.1/§2.4.2 (D1): [] ≠ {} — a zero-members fast path that skips the array-vs-object type check is non-conforming; diff {x:[[],{}]}->{x:[{},[]]} MUST NOT emit zero ops. Post-fix LCS emits remove /x/0 + add /x/1 (Myers matches the equal empty containers at swapped indices, §5.5.2). Hand-pinned (expectRaw) — the current reference wrongly emits [].",
+  schema: null,
+  original: { x: [[], {}] },
+  modified: { x: [{}, []] },
+  expectRaw: [
+    { op: "remove", path: "/x/0", oldValue: [] },
+    { op: "add", path: "/x/1", value: [] },
+  ] as unknown as Operation[],
+});
+
+// --- apply/malformed-pointer (D2): a non-empty pointer without a leading "/" -> INVALID_POINTER (§3.7) ---
+// The buggy TS applier's splitPath("foo") returned [] and so ALIASED "foo" to the root document:
+// applyPatch({foo:1},[{op:"replace",path:"foo",value:2}]) returned 2 instead of rejecting. §3.7
+// requires INVALID_POINTER on all six ops and for both `path` and `from`, read-side included.
+A("malformed-pointer", { name: "ptr-replace-no-leading-slash-invalid", comment: "§3.7 (D2): replace with path \"foo\" (no leading /) is a malformed whole-pointer -> INVALID_POINTER, NOT an alias to the root document", doc: { foo: 1 }, patch: [{ op: "replace", path: "foo", value: 2 } as unknown as Operation], error: { code: "INVALID_POINTER", index: 0 }, pendingFix: "D2" });
+A("malformed-pointer", { name: "ptr-add-no-leading-slash-invalid", comment: "§3.7 (D2): add with path \"foo\" (no leading /) -> INVALID_POINTER", doc: { foo: 1 }, patch: [{ op: "add", path: "foo", value: 2 } as unknown as Operation], error: { code: "INVALID_POINTER", index: 0 }, pendingFix: "D2" });
+A("malformed-pointer", { name: "ptr-move-from-no-leading-slash-invalid", comment: "§3.7 (D2): move whose `from` is \"foo\" (no leading /) -> INVALID_POINTER on the read-side source too (whole-pointer syntax error precedes read/write resolution)", doc: { foo: 1 }, patch: [{ op: "move", path: "/bar", from: "foo" } as unknown as Operation], error: { code: "INVALID_POINTER", index: 0 }, pendingFix: "D2" });
+
+// --- apply/test-required-value (D4): `test` MUST carry `value` (RFC 6902 §4.6, §8.3/§8.3.5) ---
+// TS fell through to comparing against `undefined` and threw TEST_FAILED (wrong code); Go treated an
+// absent value as null, so {op:"test",path:"/a"} on {a:null} wrongly PASSED. Post-fix: missing
+// `value` is a tier-1 required-field failure -> INVALID_OPERATION, BEFORE the read-side existence check.
+A("test-required-value", { name: "test-missing-value-null-target-invalid", comment: "§8.3/§8.3.5 (D4): {op:test,path:/a} on {a:null} with NO `value` -> INVALID_OPERATION (tier 1), NOT a pass treating absent value as null (Go's bug) and NOT TEST_FAILED (TS's bug)", doc: { a: null }, patch: [{ op: "test", path: "/a" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 }, pendingFix: "D4" });
+A("test-required-value", { name: "test-missing-value-present-target-invalid", comment: "§8.3/§8.3.5 (D4): {op:test,path:/a} on {a:1} with NO `value` -> INVALID_OPERATION at tier 1, before any value comparison", doc: { a: 1 }, patch: [{ op: "test", path: "/a" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 }, pendingFix: "D4" });
+A("test-required-value", { name: "test-missing-value-absent-target-invalid", comment: "§8.3.5 (D4): missing `value` (tier 1) precedes read-side non-existence (tier 3) -> INVALID_OPERATION, not PATH_UNRESOLVABLE", doc: { a: 1 }, patch: [{ op: "test", path: "/missing" } as unknown as Operation], error: { code: "INVALID_OPERATION", index: 0 }, pendingFix: "D4" });
 
 //<<THEMES>>
 

@@ -30,11 +30,17 @@ stating what it pins and citing its spec section.
 
 | category | vectors | files |
 |----------|--------:|------:|
-| diff     | 151     | 13    |
-| apply    | 87      | 9     |
+| diff     | 157     | 16    |
+| apply    | 93      | 11    |
 | plan     | 23      | 2     |
 | invert   | 28      | 3     |
-| **total**| **289** | **27**|
+| **total**| **301** | **32**|
+
+Seven of these (one diff, six apply) are the **spec-v1-rc external-review defect round**
+(D1/D2/D4): `diff/kind-mismatch.json`, `apply/malformed-pointer.json`,
+`apply/test-required-value.json`. They pin the **corrected** behavior and are committed
+**before** the TS engine fixes, so they are marked KNOWN-FAILING in
+`test/conformance.test.ts` until each fix lands. See *Pinning behavior before its fix* below.
 
 ## Vector record formats
 
@@ -176,6 +182,28 @@ If the reference implementation changes an **intended** output, regenerate and
 commit the vector diff alongside the code change. An **unintended** change shows
 up as a vector diff on a run where none was expected — treat that as a
 regression.
+
+### Pinning behavior before its fix (`expectRaw` / `pendingFix`)
+
+Sometimes a vector must pin the **corrected** behavior of a defect **before** the
+engine fix lands (so the spec+vector unit and the fix are separate commits). The
+generator cannot derive such a vector from the reference (the reference is still
+buggy), so two generation-time escape hatches exist:
+
+- **diff `expectRaw`** — a hand-authored `expectedPatch` used verbatim instead of
+  running the differ. The round-trip self-check still runs against it (a wrong
+  hand-authored patch is still caught), so it must genuinely reconstruct
+  `modified`. Used by `diff/kind-mismatch.json` (D1). Probe the fixed engine to
+  capture the exact op sequence; do **not** eyeball it.
+- **apply `pendingFix`** — skips the self-check that re-runs the reference applier
+  against the vector's `error`/`expected` oracle (the buggy reference would throw
+  the wrong code, or not throw, aborting the run). Used by
+  `apply/malformed-pointer.json` (D2) and `apply/test-required-value.json` (D4).
+
+Neither flag is written to the wire record — they are generation-time only (like
+`DiffSpec.roundtrip`). Every such vector is listed in `KNOWN_FAILING` in
+`test/conformance.test.ts` so the suite stays green; the fix commit **deletes**
+its name there in the same change that makes the reference conform.
 
 ## Cross-language caveats (flagged for the Go gate)
 

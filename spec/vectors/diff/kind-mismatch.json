@@ -1,0 +1,30 @@
+[
+  {
+    "name": "kindmismatch-empty-array-vs-empty-object-not-equal",
+    "comment": "§2.4.1/§2.4.2 (D1): [] ≠ {} — a zero-members fast path that skips the array-vs-object type check is non-conforming; diff {x:[[],{}]}->{x:[{},[]]} MUST NOT emit zero ops. Post-fix LCS emits remove /x/0 + add /x/1 (Myers matches the equal empty containers at swapped indices, §5.5.2). Hand-pinned (expectRaw) — the current reference wrongly emits [].",
+    "original": {
+      "x": [
+        [],
+        {}
+      ]
+    },
+    "modified": {
+      "x": [
+        {},
+        []
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/x/0",
+        "oldValue": []
+      },
+      {
+        "op": "add",
+        "path": "/x/1",
+        "value": []
+      }
+    ]
+  }
+]

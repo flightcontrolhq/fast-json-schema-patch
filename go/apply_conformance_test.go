@@ -29,6 +29,23 @@ type applyVectorOpts struct {
 	CloneResult       bool `json:"cloneResult"`
 }
 
+// applyKnownFailing lists apply vectors that pin CORRECTED post-fix behavior for
+// the spec-v1-rc external-review defect round (SPEC §1.3) but were committed with
+// the spec+vector unit BEFORE the Go engine fix lands. They are skipped ONLY
+// until their fix:
+//   - D4: `test` op accepts a missing `value` — the Go applier treats an absent
+//     value as null, so a value-less `test` wrongly passes / throws the wrong code
+//     instead of INVALID_OPERATION (SPEC §8.3/§8.3.5).
+//
+// D2 (malformed pointer without leading "/") is NOT listed: the Go engine already
+// rejects it with INVALID_POINTER, so those vectors pass here today. The Go engine
+// agent MUST delete each name below in the SAME commit that fixes the defect.
+var applyKnownFailing = map[string]bool{
+	"test-missing-value-null-target-invalid":    true, // D4
+	"test-missing-value-present-target-invalid": true, // D4
+	"test-missing-value-absent-target-invalid":  true, // D4
+}
+
 func TestApplyConformanceVectors(t *testing.T) {
 	dir := filepath.Join("..", "spec", "vectors", "apply")
 	entries, err := os.ReadDir(dir)
@@ -56,6 +73,9 @@ func TestApplyConformanceVectors(t *testing.T) {
 			vec := vec
 			total++
 			t.Run(entry.Name()+"/"+vec.Name, func(t *testing.T) {
+				if applyKnownFailing[vec.Name] {
+					t.Skipf("KNOWN-FAILING-UNTIL-D-FIXES: pins post-fix behavior; %s", vec.Comment)
+				}
 				runApplyVector(t, vec)
 			})
 		}

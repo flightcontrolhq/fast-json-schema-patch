@@ -1,7 +1,7 @@
 # fast-json-schema-patch — Normative Specification
 
-**Spec version:** `spec-v1`
-**Status:** Final. Finalized 2026-07-14 (see §1.3).
+**Spec version:** `spec-v1-rc`
+**Status:** Release Candidate. Reopened 2026-07-14 for an external-review defect round (D1–D7); see §1.3.
 **Reference implementation:** the TypeScript package in this repository, `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`).
 
 ---
@@ -28,13 +28,22 @@ consumer), and authors of conformance vectors.
 
 ### 1.3 Spec versioning and stability
 
-- This is `spec-v1`, finalized **2026-07-14** against reference implementation
+- This is `spec-v1-rc`, dated **2026-07-14** against reference implementation
   `fast-json-schema-patch` v0.4.0 (branch `feat/deep-dive-overhaul`). Section numbers
   (e.g. `5.3.2`) are stable citation anchors; vectors and implementations SHOULD cite them.
-- `spec-v1` was finalized after the P1–P4 phases landed (correctness, performance,
+- `spec-v1` was first finalized after the P1–P4 phases landed (correctness, performance,
   compactness, packaging). Every section the draft marked *(draft-pending)* is now landed in
   the reference implementation and reads as normative; Appendix A records each landed fix
   with its section for provenance.
+- **Release-candidate status (2026-07-14).** An external review found seven real defects
+  (D1–D7) in the reference implementations — the TS differ's empty-container equality
+  (D1, §2.4.1/§5.5.0), TS apply accepting a leading-`/`-less pointer as the root (D2, §3.7),
+  a stale non-epoch-scoped path cache (D3), `test` accepting a missing `value` (D4, §8.3),
+  and Go-side plan aliasing, non-finite numbers, and per-op re-cloning (D5–D7). The spec was
+  reopened from *Final* to *Release Candidate* to pin the corrected behavior normatively
+  (§2.2.4 non-finite numbers, §3.7 malformed pointer, §8.3 `test` requiring `value`) and to
+  add conformance vectors for it. `spec-v1` returns to *Final* once every engine passes the
+  augmented suite.
 - **Normative vs. pre-audit HEAD.** This spec describes the semantics of the finalized
   reference implementation. Several behaviors specified here were bug-fixes over the
   pre-audit HEAD (primaryKey fallback §5.4.3, nested-array plan paths §4.3.5, `basePath`
@@ -101,6 +110,16 @@ application, even though the differ cannot *distinguish* two numbers that share 
 Preserving text MUST NOT change equality: two numbers equal under `f64` MUST be treated as equal
 regardless of source text.
 
+`2.2.4` **Non-finite numbers are excluded (normative).** `NaN`, `+Infinity`, and `-Infinity` are
+**not** JSON values (§2.1) and cannot appear in valid JSON text (RFC 8259 §6). An implementation
+**MUST NOT** admit a non-finite number into the value model: constructing a number value from a
+non-finite float, and encoding a value that contains one to JSON text, **MUST fail** rather than
+emit a non-JSON token (`NaN`, `Infinity`, `-Infinity`) or silently coerce it (e.g. to `null` or
+`0`). Number *text* accepted at construction (§2.2.3) MUST match the JSON number grammar
+(RFC 8259 §6); non-numeric or non-finite text MUST be rejected. (§2.4.3 already excludes `NaN`
+from equality; this pins the construction/encode boundary — normative for a language whose native
+float type can hold non-finite values, e.g. the Go engine's `FromAny`/`NewNumber`/`Encode`, D6.)
+
 ### 2.3 Object key order
 
 `2.3.1` Object member **iteration order** is significant to the *generator only*: it fixes the
@@ -136,7 +155,10 @@ integer-like-ascending-first reordering above. Apply/invert (§8, §9) do not de
     (**key-order-insensitive**).
 
 `2.4.2` Equality is **array-order-sensitive** and **object-key-order-insensitive**. `{"a":1,"b":2}`
-equals `{"b":2,"a":1}`; `[1,2]` does not equal `[2,1]`.
+equals `{"b":2,"a":1}`; `[1,2]` does not equal `[2,1]`. Because equality first requires the **same
+JSON type**, an **empty array is never equal to an empty object** (`[] ≠ {}`): a "both sides have
+zero members" fast path that skips the array-vs-object type check is non-conforming (§2.4.4; the
+trap behind D1, whose vector is `diff/kind-mismatch.json`).
 
 `2.4.3` There is no type coercion: `1 ≠ "1"`, `null ≠ false`, `null ≠ 0`, `null ≠ absent-member`.
 (`NaN`/`Infinity` are not representable in JSON and cannot appear in a conforming input.)
@@ -186,6 +208,19 @@ intermediate segment along the way. On **read-side resolution** (a `test` target
 `move`/`copy` **source**) the malformed segment instead fails existence and surfaces as
 `PATH_UNRESOLVABLE` (§8.6). A segment is interpreted as an array index only when the container it
 addresses is an array; against an object the same segment is an ordinary member key (§8.2.3).
+
+`3.7` **Malformed pointer — no leading `/` (normative).** A valid pointer is either the empty
+string `""` (the root) or a sequence of `/`-prefixed escaped segments (§3.4). A **non-empty**
+pointer that does **not** begin with `/` is therefore malformed: it is neither the root nor a
+segment sequence, and it MUST NOT be split into a segment list (in particular an implementation
+MUST NOT treat `"foo"` as equivalent to the root pointer `""` or to `"/foo"`). Apply **MUST reject**
+such a `path` or `from` with `INVALID_POINTER`, on **all six ops** and for **both** `path` and
+`from`. This is a whole-pointer **syntactic** rejection evaluated at parse time (§8.3.5 tier 2),
+**before** read-side/write-side resolution — so, unlike the per-segment `-`/bad-index softening of
+§3.5/§3.6 (which fails *existence* and surfaces read-side as `PATH_UNRESOLVABLE`), a leading-`/`-less
+pointer is `INVALID_POINTER` even for a `test` target or a `move`/`copy` **source**. A conforming
+generator MUST NOT emit such a pointer (every emitted path is built by `parentPath + "/" + escape(segment)`
+from a root of `""`, §3.4, so it is always `""` or `/`-prefixed).
 
 ---
 
@@ -1093,7 +1128,7 @@ the path shape.
 | `replace` | must have `value`; target exists | array: **overwrite** at index; object: **set** existing member | path `""` → returns `value` |
 | `move` | must have `from`; `from` exists; `from` not a proper prefix of `path` | `remove(from)` then `add(path, from-value)` | via add |
 | `copy` | must have `from`; `from` exists | **deep-clone** `from`-value then `add(path, clone)` | via add |
-| `test` | target exists | assert target deep-equals `value` (§2.4.1); else `TEST_FAILED` | no change |
+| `test` | must have `value`; target exists | assert target deep-equals `value` (§2.4.1); else `TEST_FAILED` | no change |
 
 `8.3.1` **`add` index range:** `add` accepts index `== length` (append) and `-`; index `> length`
 → `INDEX_OUT_OF_BOUNDS`. **`remove`/`replace` index range (split rule):** the `-` append token is
@@ -1114,13 +1149,16 @@ fooled.
 
 `8.3.5` **Error precedence (normative).** When an op could fail for more than one reason, checks
 are evaluated in this fixed order and the **first** applicable failure is thrown: (1) a **missing
-required field** — `value` on `add`/`replace`, `from` on `move`/`copy` — → `INVALID_OPERATION`;
-then (2) **pointer/index syntax and bounds** (§3.5, §3.6, §8.3.1: `INVALID_POINTER`,
+required field** — `value` on `add`/`replace`/`test`, `from` on `move`/`copy` — → `INVALID_OPERATION`;
+then (2) **pointer/index syntax and bounds** (§3.5, §3.6, §3.7, §8.3.1: `INVALID_POINTER`,
 `INDEX_OUT_OF_BOUNDS`, and, on write-side object segments, the `UNSAFE_KEY` guard §8.6.1); then
 (3) **existence** of the target or an intermediate segment (§8.2.2) → `PATH_UNRESOLVABLE`; then
 (4) **value checks** — `OLD_VALUE_MISMATCH` (§8.4) or `TEST_FAILED` (§8.3). (Thus e.g. an `add`
 missing `value` with an also-malformed index throws `INVALID_OPERATION`, not `INVALID_POINTER`;
-verified by probe.)
+verified by probe.) `test` carries `value` as a **tier-1 required field** (RFC 6902 §4.6: a `test`
+op *MUST* contain a `value` member): a `test` with no `value` is `INVALID_OPERATION` at tier 1 —
+**before** the tier-3 read-side existence check — so `{op:"test",path:"/a"}` against `{"a":null}`
+is `INVALID_OPERATION`, **not** a pass-by-treating-absent-value-as-`null` and **not** `TEST_FAILED`.
 
 ### 8.4 `oldValue` validation
 
@@ -1146,12 +1184,12 @@ of:
 
 | code | meaning |
 |------|---------|
-| `INVALID_POINTER` | malformed pointer on **write-side** resolution (add/remove/replace targets and intermediates, move/copy destinations): `-` on a remove/replace final or any non-final segment (§3.5), leading-zero/sign/decimal array index (§3.6). Read-side malformed/`-` segments surface as `PATH_UNRESOLVABLE` instead. |
+| `INVALID_POINTER` | a **whole-pointer** syntax error — a non-empty `path`/`from` not beginning with `/` (§3.7) — on **any** op and **either** side; or a malformed segment on **write-side** resolution (add/remove/replace targets and intermediates, move/copy destinations): `-` on a remove/replace final or any non-final segment (§3.5), leading-zero/sign/decimal array index (§3.6). Read-side malformed/`-` *segments* surface as `PATH_UNRESOLVABLE` instead, but a leading-`/`-less whole pointer is `INVALID_POINTER` read-side too (§3.7). |
 | `PATH_UNRESOLVABLE` | a target or intermediate segment does not exist (§8.2.2); remove/replace of a nonexistent member; a malformed or `-` segment encountered during **read-side** resolution — `test`, or a `move`/`copy` **source** (§3.5, §3.6); a read-side `__proto__`/`constructor`/`prototype` segment (§8.6.1) |
 | `INDEX_OUT_OF_BOUNDS` | array index out of range for the op (§8.3.1) |
 | `TEST_FAILED` | `test` value mismatch (§8.3) |
 | `OLD_VALUE_MISMATCH` | `validateOldValues`: document value ≠ `oldValue` (§8.4) |
-| `INVALID_OPERATION` | unknown op; missing required field (`value`/`from`); remove at root; `move` into own child |
+| `INVALID_OPERATION` | unknown op; missing required field (`value` on add/replace/test, `from` on move/copy — RFC 6902 §4.6 requires `test` to carry `value`); remove at root; `move` into own child |
 | `UNSAFE_KEY` | prototype-pollution guard tripped (§8.6.1) |
 
 `8.6.1` **Prototype-pollution guard (write-side only).** During **write-side** resolution
