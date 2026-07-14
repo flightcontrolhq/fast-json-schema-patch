@@ -13,9 +13,9 @@ import (
 // written by the seeded TS generator). Only the fields the Go runner needs are
 // decoded.
 type Manifest struct {
-	SchemaVersion int    `json:"schemaVersion"`
-	Seed          int64  `json:"seed"`
-	Count         int    `json:"count"`
+	SchemaVersion int   `json:"schemaVersion"`
+	Seed          int64 `json:"seed"`
+	Count         int   `json:"count"`
 	Cases         []struct {
 		Name          string `json:"name"`
 		File          string `json:"file"`

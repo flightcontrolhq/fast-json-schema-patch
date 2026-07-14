@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	evan "github.com/evanphx/json-patch/v5"
 	sp "github.com/flightcontrolhq/fast-json-schema-patch/go"
@@ -40,17 +41,27 @@ func jsonLen(v any) int {
 	return len(b)
 }
 
+// mustPatcher wraps sp.NewPatcher for the benchmark adapters, whose plans and
+// options are statically valid; a construction error here is a harness bug.
+func mustPatcher(plan sp.Plan, opts ...sp.PatcherOption) *sp.Patcher {
+	p, err := sp.NewPatcher(plan, opts...)
+	if err != nil {
+		panic(fmt.Sprintf("go-bench: NewPatcher: %v", err))
+	}
+	return p
+}
+
 func newDiffAdapters() []diffAdapter {
 	// --- our engine, default capabilities ---------------------------------------
 	ours := diffAdapter{
 		id: "ours", label: "ours (Go engine, default)", kind: "schema-aware", hasApplier: true,
 		produce: func(c *CorpusCase) ([]byte, int, []sp.Operation, error) {
-			ops := sp.NewPatcher(c.buildPlan()).Execute(c.Original, c.Modified)
+			ops := mustPatcher(c.buildPlan()).Execute(c.Original, c.Modified)
 			pb, err := json.Marshal(ops)
 			return pb, len(ops), ops, err
 		},
 		diffFn: func(c *CorpusCase) func() {
-			return func() { sp.NewPatcher(c.buildPlan()).Execute(c.Original, c.Modified) }
+			return func() { mustPatcher(c.buildPlan()).Execute(c.Original, c.Modified) }
 		},
 		decodeFn: func(c *CorpusCase) func() {
 			return func() { _, _ = sp.Decode(c.OriginalBytes); _, _ = sp.Decode(c.ModifiedBytes) }
@@ -59,7 +70,7 @@ func newDiffAdapters() []diffAdapter {
 			return func() {
 				o, _ := sp.Decode(c.OriginalBytes)
 				m, _ := sp.Decode(c.ModifiedBytes)
-				ops := sp.NewPatcher(c.buildPlan()).Execute(o, m)
+				ops := mustPatcher(c.buildPlan()).Execute(o, m)
 				_, _ = json.Marshal(ops)
 			}
 		},
@@ -76,13 +87,13 @@ func newDiffAdapters() []diffAdapter {
 		id: "ours-moves", label: "ours (Go engine, emitMoves)", kind: "schema-aware",
 		requiresSchema: true, hasApplier: true,
 		produce: func(c *CorpusCase) ([]byte, int, []sp.Operation, error) {
-			ops := sp.NewPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
+			ops := mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
 			pb, err := json.Marshal(ops)
 			return pb, len(ops), ops, err
 		},
 		diffFn: func(c *CorpusCase) func() {
 			return func() {
-				sp.NewPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
+				mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(c.Original, c.Modified)
 			}
 		},
 		decodeFn: func(c *CorpusCase) func() {
@@ -92,7 +103,7 @@ func newDiffAdapters() []diffAdapter {
 			return func() {
 				o, _ := sp.Decode(c.OriginalBytes)
 				m, _ := sp.Decode(c.ModifiedBytes)
-				ops := sp.NewPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(o, m)
+				ops := mustPatcher(c.buildPlan(), sp.EmitMoves(true)).Execute(o, m)
 				_, _ = json.Marshal(ops)
 			}
 		},

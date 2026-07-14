@@ -12,9 +12,9 @@
 //     matching the TS tinybench budgets so the two engines are timed alike.
 //   - Decode cost: our engine consumes the ordered Value model, competitors take
 //     []byte or interface{}. Each diff row therefore reports THREE framings:
-//       diff   — patch produced from PRE-PARSED inputs (Value / any); no I/O.
-//       decode — bytes -> parsed input form (nil for byte-only libs).
-//       e2e    — bytes -> patch(-> bytes); the fair end-to-end comparison.
+//     diff   — patch produced from PRE-PARSED inputs (Value / any); no I/O.
+//     decode — bytes -> parsed input form (nil for byte-only libs).
+//     e2e    — bytes -> patch(-> bytes); the fair end-to-end comparison.
 //   - Allocations: bytes/op and allocs/op for the diff op (Go analogue of
 //     b.ReportAllocs); pathological shapes additionally record a live-heap proxy.
 //   - Round-trip verdict: PASS / CORRUPT / CRASH / NO-APPLIER / SKIPPED. Competitor
@@ -52,21 +52,21 @@ type Memory struct {
 }
 
 type LibResult struct {
-	Library       string   `json:"library"`
-	Label         string   `json:"label"`
-	Kind          string   `json:"kind"`
-	Role          string   `json:"role"` // "diff" | "apply"
-	Verdict       string   `json:"verdict"`
-	VerdictDetail string   `json:"verdictDetail"`
-	PatchBytes    *int     `json:"patchBytes"`
-	PatchOps      *int     `json:"patchOps"`
-	Diff          *Timing  `json:"diff"`
-	Decode        *Timing  `json:"decode"`
-	E2E           *Timing  `json:"e2e"`
-	Apply         *Timing  `json:"apply"`
-	Alloc         *Alloc   `json:"alloc"`
-	Memory        *Memory  `json:"memory"`
-	SkippedReason string   `json:"skippedReason,omitempty"`
+	Library       string  `json:"library"`
+	Label         string  `json:"label"`
+	Kind          string  `json:"kind"`
+	Role          string  `json:"role"` // "diff" | "apply"
+	Verdict       string  `json:"verdict"`
+	VerdictDetail string  `json:"verdictDetail"`
+	PatchBytes    *int    `json:"patchBytes"`
+	PatchOps      *int    `json:"patchOps"`
+	Diff          *Timing `json:"diff"`
+	Decode        *Timing `json:"decode"`
+	E2E           *Timing `json:"e2e"`
+	Apply         *Timing `json:"apply"`
+	Alloc         *Alloc  `json:"alloc"`
+	Memory        *Memory `json:"memory"`
+	SkippedReason string  `json:"skippedReason,omitempty"`
 }
 
 type CaseResult struct {
@@ -418,10 +418,10 @@ func main() {
 		"commit":        sh(root, "git", "rev-parse", "HEAD"),
 		"branch":        sh(root, "git", "rev-parse", "--abbrev-ref", "HEAD"),
 		"corpus": map[string]any{
-			"seed":            manifest.Seed,
-			"caseCount":       manifest.Count,
-			"manifestSha256":  corpusSha,
-			"note":            "identical shared corpus as the TS runner; manifestSha256 must match analysis/results/bench-v2.json",
+			"seed":           manifest.Seed,
+			"caseCount":      manifest.Count,
+			"manifestSha256": corpusSha,
+			"note":           "identical shared corpus as the TS runner; manifestSha256 must match analysis/results/bench-v2.json",
 		},
 		"engines": map[string]any{
 			"ours": map[string]any{
@@ -440,15 +440,15 @@ func main() {
 			"cpus": sh(root, "sysctl", "-n", "machdep.cpu.brand_string"),
 		},
 		"methodology": map[string]any{
-			"timing":       "manual warmup + adaptive-budget sample loop (mean/p99/min), budgets matched to the TS tinybench runner",
-			"diff":         "patch produced from PRE-PARSED inputs (our Value model / competitors' any); excludes decode & marshal",
-			"decode":       "bytes -> parsed input form; null for byte-only libraries (mattbaird) whose diff already embeds the parse",
-			"e2e":          "bytes -> patch(-> bytes); the fair cross-input end-to-end comparison",
-			"apply":        "diff rows apply their OWN patch (ours=our ApplyPatch, competitors=evanphx neutral applier); the ours-apply/evanphx rows race on the IDENTICAL jsondiff canonical patch",
-			"verdict":      "PASS/CORRUPT/CRASH/NO-APPLIER/SKIPPED; competitor patches judged by evanphx (neutral), our patches by our applier; multiset cases use an order-normalized contract (verdictDetail=multiset-canonical)",
-			"alloc":        "bytes/op and allocs/op for the diff op (Go analogue of b.ReportAllocs)",
-			"memory":       "measureMemory cases add an in-process live-heap proxy; NOT comparable to the TS subprocess RSS probe",
-			"competitors":  "wI2L/jsondiff and snorwin/jsonpatch take any; mattbaird takes []byte; none are schema/primary-key aware, so keyed reorders differ structurally from our planned output",
+			"timing":      "manual warmup + adaptive-budget sample loop (mean/p99/min), budgets matched to the TS tinybench runner",
+			"diff":        "patch produced from PRE-PARSED inputs (our Value model / competitors' any); excludes decode & marshal",
+			"decode":      "bytes -> parsed input form; null for byte-only libraries (mattbaird) whose diff already embeds the parse",
+			"e2e":         "bytes -> patch(-> bytes); the fair cross-input end-to-end comparison",
+			"apply":       "diff rows apply their OWN patch (ours=our ApplyPatch, competitors=evanphx neutral applier); the ours-apply/evanphx rows race on the IDENTICAL jsondiff canonical patch",
+			"verdict":     "PASS/CORRUPT/CRASH/NO-APPLIER/SKIPPED; competitor patches judged by evanphx (neutral), our patches by our applier; multiset cases use an order-normalized contract (verdictDetail=multiset-canonical)",
+			"alloc":       "bytes/op and allocs/op for the diff op (Go analogue of b.ReportAllocs)",
+			"memory":      "measureMemory cases add an in-process live-heap proxy; NOT comparable to the TS subprocess RSS probe",
+			"competitors": "wI2L/jsondiff and snorwin/jsonpatch take any; mattbaird takes []byte; none are schema/primary-key aware, so keyed reorders differ structurally from our planned output",
 		},
 		"adapters": adapterMeta(diffAdapters, applyAdapters),
 		"results":  results,
