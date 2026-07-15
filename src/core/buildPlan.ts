@@ -57,6 +57,16 @@ export interface ArrayPlan {
   keys?: string[]
   /** `map` only: `"significant"` | `"insignificant"` (default `"insignificant"`). */
   order?: "significant" | "insignificant"
+  /**
+   * CORE §3.3.7 recursion alias: this path's subtree repeats the subtree at
+   * `recurseTo` (always a proper path prefix — the on-stack entry path of the
+   * schema node whose re-entry was cut short by the cycle guard). At trie
+   * compilation the aliased node inherits the anchor node's plan and edges,
+   * which is what extends strategy selection to unbounded recursion depth. An
+   * entry may be alias-only (`strategy` undefined, carrying just `recurseTo`)
+   * when the cycle guard fired before any array registered at the path.
+   */
+  recurseTo?: string
 }
 
 /**
@@ -82,6 +92,15 @@ export type Plan = Map<string, PlanEntry>
 /** Discriminate an ObjectPlan from an ArrayPlan within a `PlanEntry`. */
 export function isObjectPlan(entry: PlanEntry): entry is ObjectPlan {
   return "granularity" in entry
+}
+
+/**
+ * True for an alias-only entry (CORE §3.3.7): a `recurseTo` recorded at a path
+ * where no array ever registered a strategy. Such an entry contributes no plan
+ * of its own — at trie compilation it inherits the anchor's.
+ */
+export function isRecursionAliasOnly(entry: PlanEntry): boolean {
+  return !isObjectPlan(entry) && entry.strategy === undefined && entry.recurseTo !== undefined
 }
 
 export interface BuildPlanOptions {
@@ -228,6 +247,31 @@ function declaredTopologyConflict(path: string): TypeError {
   )
 }
 
+/**
+ * Register a recursion alias at `docPath` pointing at `anchorPath` (CORE §3.3.7):
+ * the cycle guard cut a re-entry of an on-stack schema node short, so the
+ * subtree at `docPath` repeats the subtree at `anchorPath`. An existing entry
+ * keeps its own plan and merely gains the alias; a declared-atomic object
+ * ignores it (its subtree is pruned, CORE §8.3.3).
+ */
+function registerRecursionAlias(
+  plan: Plan,
+  docPath: string,
+  anchorPath: string,
+  basePath: string | undefined,
+): void {
+  const targetPath = resolveTargetPath(docPath, basePath)
+  const targetAnchor = resolveTargetPath(anchorPath, basePath)
+  if (targetPath === null || targetAnchor === null || targetPath === targetAnchor) return
+  const existing = plan.get(targetPath)
+  if (!existing) {
+    plan.set(targetPath, {primaryKey: null, recurseTo: targetAnchor})
+    return
+  }
+  if (isObjectPlan(existing)) return
+  existing.recurseTo ??= targetAnchor
+}
+
 /** Register an ArrayPlan at `docPath`, reconciling with any existing entry (CORE §3.7/§8.2.2). */
 function registerArrayPlan(
   plan: Plan,
@@ -246,6 +290,13 @@ function registerArrayPlan(
     // An ObjectPlan only exists for a declared-atomic object; an array node at
     // the same path is a conflicting declared assertion.
     throw declaredTopologyConflict(targetPath)
+  }
+  if (isRecursionAliasOnly(existing)) {
+    // An alias-only entry yields to a real plan; the alias itself survives on
+    // the winning entry (CORE §3.3.7).
+    arrayPlan.recurseTo ??= existing.recurseTo
+    plan.set(targetPath, arrayPlan)
+    return
   }
   const candDeclared = arrayPlan.topology !== undefined
   const existDeclared = existing.topology !== undefined
@@ -288,8 +339,10 @@ function registerObjectPlan(
   const targetPath = resolveTargetPath(docPath, basePath)
   if (targetPath === null) return
   const existing = plan.get(targetPath)
-  if (existing && !isObjectPlan(existing)) {
+  if (existing && !isObjectPlan(existing) && !isRecursionAliasOnly(existing)) {
     // An array node already registered at this object's path is a conflict.
+    // (An alias-only entry is not an assertion about the node itself — the
+    // atomic object wins and prunes the subtree, CORE §8.3.3.)
     throw declaredTopologyConflict(targetPath)
   }
   plan.set(targetPath, { granularity: "atomic" })
@@ -324,13 +377,24 @@ export function _traverseSchema(
   docPath: string,
   plan: Plan,
   schema: Schema,
-  visited: Set<object> = new Set(),
+  visited: Map<object, string> = new Map(),
   options?: Omit<BuildPlanOptions, "schema">,
 ) {
-  if (!subSchema || typeof subSchema !== "object" || visited.has(subSchema)) {
+  if (!subSchema || typeof subSchema !== "object") {
     return
   }
-  visited.add(subSchema)
+  // Cycle guard (CORE §3.3): a node currently on the traversal stack is not
+  // re-entered. When the re-entry happens at a DEEPER path, the subtree there
+  // repeats the on-stack subtree — record a recursion alias so the compiled
+  // trie can extend strategy selection to unbounded depth (CORE §3.3.7).
+  const anchorPath = visited.get(subSchema)
+  if (anchorPath !== undefined) {
+    if (anchorPath !== docPath) {
+      registerRecursionAlias(plan, docPath, anchorPath, options?.basePath)
+    }
+    return
+  }
+  visited.set(subSchema, docPath)
 
   if (subSchema.$ref) {
     const resolved = _resolveRef(subSchema.$ref, schema, options?.onWarning)
@@ -598,8 +662,38 @@ export function _traverseSchema(
 export function buildPlan(options: BuildPlanOptions): Plan {
   const plan: Plan = new Map()
   const { schema, ...rest } = options
-  _traverseSchema(schema, "", plan, schema, new Set(), rest)
+  _traverseSchema(schema, "", plan, schema, new Map(), rest)
+  registerUnreachedPrimaryKeyMapEntries(plan, rest.primaryKeyMap, rest.basePath)
   return plan
+}
+
+/**
+ * CORE §3.4.3: a `primaryKeyMap` path the schema traversal never reached —
+ * because the schema does not describe it, or there is no schema at all —
+ * still registers a `primaryKey` plan, so the override works without schema
+ * coverage. Paths register in sorted order for determinism; an entry the
+ * traversal already planned is left alone (the override was applied during
+ * construction, and a declared topology outranks it, CORE §3.4.0). The
+ * diff-time applicability gate (GEN §4.3) still guards dispatch.
+ */
+function registerUnreachedPrimaryKeyMapEntries(
+  plan: Plan,
+  primaryKeyMap: Record<string, string> | undefined,
+  basePath: string | undefined,
+): void {
+  if (!primaryKeyMap) return
+  for (const path of Object.keys(primaryKeyMap).sort()) {
+    const targetPath = resolveTargetPath(path, basePath)
+    if (targetPath === null) continue
+    const existing = plan.get(targetPath)
+    if (existing && !isRecursionAliasOnly(existing)) continue
+    const entry: ArrayPlan = {
+      primaryKey: primaryKeyMap[path] as string,
+      strategy: "primaryKey",
+    }
+    if (existing && !isObjectPlan(existing)) entry.recurseTo = existing.recurseTo
+    plan.set(targetPath, entry)
+  }
 }
 
 // Utility: produce a canonical JSON string with sorted keys so we can deduplicate
@@ -653,4 +747,6 @@ function mergePlanMetadata(dst: ArrayPlan, src: ArrayPlan) {
     dst.hashFields = Array.from(merged)
   }
   if (!dst.requiredFields && src.requiredFields) dst.requiredFields = new Set(src.requiredFields)
+  // A recursion alias survives plan reconciliation (CORE §3.3.7).
+  if (dst.recurseTo === undefined && src.recurseTo !== undefined) dst.recurseTo = src.recurseTo
 }

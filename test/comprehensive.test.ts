@@ -1955,26 +1955,31 @@ describe("fastHash function", () => {
 describe("_traverseSchema function", () => {
   test("should handle boolean schemas", () => {
     const plan = new Map();
-    _traverseSchema(true, "/test", plan, {}, new Set());
+    _traverseSchema(true, "/test", plan, {}, new Map());
     expect(plan.size).toBe(0);
 
-    _traverseSchema(false, "/test", plan, {}, new Set());
+    _traverseSchema(false, "/test", plan, {}, new Map());
     expect(plan.size).toBe(0);
   });
 
   test("should handle null schemas", () => {
     const plan = new Map();
-    _traverseSchema(null as unknown as any, "/test", plan, {}, new Set());
+    _traverseSchema(null as unknown as any, "/test", plan, {}, new Map());
     expect(plan.size).toBe(0);
   });
 
   test("should handle visited schemas", () => {
     const plan = new Map();
     const schema = { type: "object" };
-    const visited = new Set([schema]);
 
-    _traverseSchema(schema, "/test", plan, {}, visited);
+    // Re-entry at the node's own on-stack path registers nothing (CORE §3.3).
+    _traverseSchema(schema, "/test", plan, {}, new Map([[schema, "/test"]]));
     expect(plan.size).toBe(0);
+
+    // Re-entry at a deeper path records a recursion alias (CORE §3.3.7).
+    _traverseSchema(schema, "/test/child", plan, {}, new Map([[schema, "/test"]]));
+    expect(plan.size).toBe(1);
+    expect(plan.get("/test/child")).toEqual({ primaryKey: null, recurseTo: "/test" });
   });
 
   test("should handle $ref schemas", () => {
@@ -1990,7 +1995,7 @@ describe("_traverseSchema function", () => {
       "/users",
       plan,
       schema,
-      new Set()
+      new Map()
     );
     expect(plan.has("/users")).toBe(true);
   });
@@ -2004,7 +2009,7 @@ describe("_traverseSchema function", () => {
       "/test",
       plan,
       schema,
-      new Set()
+      new Map()
     );
     expect(plan.size).toBe(0);
   });
@@ -2019,7 +2024,7 @@ describe("_traverseSchema function", () => {
       allOf: [{ type: "object" }],
     };
 
-    _traverseSchema(subSchema, "/test", plan, schema, new Set());
+    _traverseSchema(subSchema, "/test", plan, schema, new Map());
     expect(plan.size).toBeGreaterThan(0);
   });
 
@@ -2034,7 +2039,7 @@ describe("_traverseSchema function", () => {
       },
     };
 
-    _traverseSchema(subSchema, "", plan, schema, new Set());
+    _traverseSchema(subSchema, "", plan, schema, new Map());
     expect(plan.has("/items")).toBe(true);
   });
 
@@ -2050,7 +2055,7 @@ describe("_traverseSchema function", () => {
       },
     };
 
-    _traverseSchema(subSchema, "/test", plan, schema, new Set());
+    _traverseSchema(subSchema, "/test", plan, schema, new Map());
     expect(plan.has("/test/*")).toBe(true);
   });
 
@@ -2061,7 +2066,7 @@ describe("_traverseSchema function", () => {
       "/tags",
       plan,
       {},
-      new Set()
+      new Map()
     );
 
     const arrayPlan = plan.get("/tags");
@@ -2079,7 +2084,7 @@ describe("_traverseSchema function", () => {
       },
     };
 
-    _traverseSchema(subSchema, "/users", plan, {}, new Set());
+    _traverseSchema(subSchema, "/users", plan, {}, new Map());
     const arrayPlan = plan.get("/users");
     expect(arrayPlan?.primaryKey).toBe("id");
     expect(arrayPlan?.strategy).toBe("primaryKey");
@@ -2094,7 +2099,7 @@ describe("_traverseSchema function", () => {
       "/root/items",
       plan,
       {},
-      new Set(),
+      new Map(),
       options
     );
     expect(plan.has("/items")).toBe(true);
@@ -2105,7 +2110,7 @@ describe("_traverseSchema function", () => {
       "/other/items",
       plan,
       {},
-      new Set(),
+      new Map(),
       options
     );
     expect(plan.size).toBe(0);
@@ -2128,7 +2133,7 @@ describe("_traverseSchema function", () => {
       items: { $ref: "#/definitions/user" },
     };
 
-    _traverseSchema(subSchema, "/users", plan, schema, new Set());
+    _traverseSchema(subSchema, "/users", plan, schema, new Map());
     const arrayPlan = plan.get("/users");
     expect(arrayPlan?.primaryKey).toBe("id");
   });
@@ -2143,7 +2148,7 @@ describe("_traverseSchema function", () => {
       },
     };
 
-    _traverseSchema(subSchema, "/items", plan, {}, new Set());
+    _traverseSchema(subSchema, "/items", plan, {}, new Map());
     const arrayPlan = plan.get("/items");
     expect(arrayPlan?.primaryKey).toBe(null);
     expect(arrayPlan?.strategy).toBe("lcs");

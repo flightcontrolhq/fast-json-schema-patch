@@ -61,12 +61,32 @@ type ArrayPlan struct {
 	// entry with Granularity != "" is an ObjectPlan and MUST NOT be dispatched as
 	// an array.
 	Granularity string
+
+	// RecurseTo is the CORE §3.3.7 recursion alias: this path's subtree repeats
+	// the subtree at RecurseTo (always a proper path prefix — the on-stack entry
+	// path of the schema node whose re-entry was cut short by the cycle guard).
+	// At trie compilation the aliased node inherits the anchor node's plan and
+	// edges, which is what extends strategy selection to unbounded recursion
+	// depth. HasRecurseTo marks presence (mirroring Operation's presence flags):
+	// "" is a valid anchor, the document root. An entry may be alias-only
+	// (Strategy zero, carrying just the alias) when the cycle guard fired before
+	// any array registered at the path.
+	RecurseTo    string
+	HasRecurseTo bool
 }
 
 // isObjectPlan reports whether ap is a declared-atomic object plan (CORE §8.3.2)
 // rather than an array plan. Nil-safe.
 func (ap *ArrayPlan) isObjectPlan() bool {
 	return ap != nil && ap.Granularity != ""
+}
+
+// isRecursionAliasOnly reports an alias-only entry (CORE §3.3.7): a RecurseTo
+// recorded at a path where no array ever registered a strategy. Such an entry
+// contributes no plan of its own — at trie compilation it inherits the
+// anchor's. Nil-safe.
+func (ap *ArrayPlan) isRecursionAliasOnly() bool {
+	return ap != nil && ap.HasRecurseTo && ap.Strategy == "" && !ap.isObjectPlan()
 }
 
 // clone returns a deep copy of the plan, including independent RequiredFields
@@ -222,11 +242,45 @@ func BuildPlan(schema Value, opts BuildPlanOptions) (Plan, error) {
 		candidates:    candidates,
 		onWarning:     opts.OnWarning,
 	}
-	b.traverse(schema, "", make(map[*Object]bool))
+	b.traverse(schema, "", make(map[*Object]string))
 	if b.err != nil {
 		return Plan{}, b.err
 	}
+	b.registerUnreachedPrimaryKeyMapEntries()
 	return Plan{paths: b.plan, root: b.buildTrie()}, nil
+}
+
+// registerUnreachedPrimaryKeyMapEntries registers any PrimaryKeyMap path the
+// traversal never planned — because the schema does not describe it, or there
+// is no schema at all — so the override works without schema coverage
+// (CORE §3.4.3). Paths register in sorted order for determinism; an entry the
+// traversal already planned is left alone (the override was applied during
+// construction, and a declared topology outranks it, CORE §3.4.0). The
+// diff-time applicability gate (GEN §4.3) still guards dispatch.
+func (b *planBuilder) registerUnreachedPrimaryKeyMapEntries() {
+	if len(b.primaryKeyMap) == 0 {
+		return
+	}
+	paths := make([]string, 0, len(b.primaryKeyMap))
+	for path := range b.primaryKeyMap {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		target, ok := b.resolveTarget(path)
+		if !ok {
+			continue
+		}
+		existing, exists := b.plan[target]
+		if exists && !existing.isRecursionAliasOnly() {
+			continue
+		}
+		entry := &ArrayPlan{PrimaryKey: b.primaryKeyMap[path], Strategy: StrategyPrimaryKey}
+		if exists {
+			entry.RecurseTo, entry.HasRecurseTo = existing.RecurseTo, existing.HasRecurseTo
+		}
+		b.plan[target] = entry
+	}
 }
 
 type planBuilder struct {
@@ -249,9 +303,12 @@ func (b *planBuilder) warn(msg string) {
 
 // traverse walks a schema node, accumulating an escaped document path and
 // registering array plans (CORE §3.3). visited guards against $ref cycles by
-// schema-node identity: a node on the current stack is not re-entered and is
-// removed when its subtree completes (CORE §3.3).
-func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bool) {
+// schema-node identity, mapping each on-stack node to its entry path: a node
+// on the current stack is not re-entered — when the re-entry happens at a
+// DEEPER path, the subtree there repeats the on-stack subtree, so a recursion
+// alias is recorded (CORE §3.3.7) — and it is removed when its subtree
+// completes (CORE §3.3).
+func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]string) {
 	if b.err != nil {
 		return // a construction error was already recorded; stop traversal
 	}
@@ -259,10 +316,13 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 	if !ok {
 		return
 	}
-	if visited[obj] {
+	if anchorPath, onStack := visited[obj]; onStack {
+		if anchorPath != docPath {
+			b.registerRecursionAlias(docPath, anchorPath)
+		}
 		return
 	}
-	visited[obj] = true
+	visited[obj] = docPath
 	defer delete(visited, obj)
 
 	// $ref: resolve local references only; a non-local/unresolvable ref skips
@@ -341,7 +401,7 @@ func (b *planBuilder) traverse(sub Value, docPath string, visited map[*Object]bo
 // A declared x-schema-patch-topology (CORE §3.4.0/§8.3.1) short-circuits the
 // compat derivation and overrides primaryKeyMap + auto-detection; an atomic array
 // prunes its whole subtree (CORE §8.3.3).
-func (b *planBuilder) registerArray(obj *Object, items Value, docPath string, visited map[*Object]bool) {
+func (b *planBuilder) registerArray(obj *Object, items Value, docPath string, visited map[*Object]string) {
 	// spec-v2: parse the declared array topology (construction validation, §8.2.3).
 	topo, err := parseArrayTopology(obj, b.warn)
 	if err != nil {
@@ -623,12 +683,18 @@ func (b *planBuilder) resolveRef(ref string) Value {
 
 // buildTrie compiles the flat plan map into the matching trie (GEN §4.5.1).
 // Returns nil for an empty plan.
+//
+// Recursion aliases (CORE §3.3.7) wire second: a node whose entry carries
+// RecurseTo inherits the anchor node's plan and edges (explicit edges win),
+// iterated to a fixpoint so nested cycles resolve regardless of map order. The
+// resulting trie may be CYCLIC; diff recursion is bounded by document depth,
+// but any exhaustive trie walk must guard against revisits.
 func (b *planBuilder) buildTrie() *PlanNode {
 	if len(b.plan) == 0 {
 		return nil
 	}
 	root := &PlanNode{}
-	for path, ap := range b.plan {
+	ensure := func(path string) *PlanNode {
 		node := root
 		for _, seg := range planKeySegments(path) {
 			if seg == "*" {
@@ -649,7 +715,45 @@ func (b *planBuilder) buildTrie() *PlanNode {
 			}
 			node = child
 		}
-		node.plan = ap
+		return node
+	}
+
+	type aliasEdge struct {
+		target *PlanNode
+		anchor *PlanNode
+	}
+	var aliases []aliasEdge
+	for path, ap := range b.plan {
+		node := ensure(path)
+		if !ap.isRecursionAliasOnly() {
+			node.plan = ap
+		}
+		if ap.HasRecurseTo && !ap.isObjectPlan() {
+			aliases = append(aliases, aliasEdge{target: node, anchor: ensure(ap.RecurseTo)})
+		}
+	}
+
+	for changed := true; changed; {
+		changed = false
+		for _, edge := range aliases {
+			if edge.anchor.plan != nil && edge.target.plan == nil {
+				edge.target.plan = edge.anchor.plan
+				changed = true
+			}
+			if edge.anchor.wildcard != nil && edge.target.wildcard == nil {
+				edge.target.wildcard = edge.anchor.wildcard
+				changed = true
+			}
+			for key, child := range edge.anchor.children {
+				if edge.target.children == nil {
+					edge.target.children = make(map[string]*PlanNode)
+				}
+				if _, ok := edge.target.children[key]; !ok {
+					edge.target.children[key] = child
+					changed = true
+				}
+			}
+		}
 	}
 	return root
 }
@@ -713,6 +817,10 @@ func mergePlanMetadata(dst, src *ArrayPlan) {
 	}
 	if dst.RequiredFields == nil && src.RequiredFields != nil {
 		dst.RequiredFields = append([]string(nil), src.RequiredFields...)
+	}
+	// A recursion alias survives plan reconciliation (CORE §3.3.7).
+	if !dst.HasRecurseTo && src.HasRecurseTo {
+		dst.RecurseTo, dst.HasRecurseTo = src.RecurseTo, true
 	}
 }
 

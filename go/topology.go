@@ -173,6 +173,15 @@ func (b *planBuilder) registerArrayPlan(docPath string, ap *ArrayPlan) {
 		b.plan[target] = ap
 		return
 	}
+	if existing.isRecursionAliasOnly() {
+		// An alias-only entry yields to a real plan; the alias itself survives
+		// on the winning entry (CORE §3.3.7).
+		if !ap.HasRecurseTo {
+			ap.RecurseTo, ap.HasRecurseTo = existing.RecurseTo, true
+		}
+		b.plan[target] = ap
+		return
+	}
 	if existing.Granularity != "" {
 		// A declared-atomic object already sits here; an array node is a conflict.
 		b.fail(declaredTopologyConflict(target))
@@ -214,12 +223,41 @@ func (b *planBuilder) registerObject(docPath string) {
 	if !ok {
 		return
 	}
-	if existing, exists := b.plan[target]; exists && existing.Granularity == "" {
+	if existing, exists := b.plan[target]; exists && existing.Granularity == "" && !existing.isRecursionAliasOnly() {
 		// An array node already registered at this object's path is a conflict.
+		// (An alias-only entry is not an assertion about the node itself — the
+		// atomic object wins and prunes the subtree, CORE §8.3.3.)
 		b.fail(declaredTopologyConflict(target))
 		return
 	}
 	b.plan[target] = &ArrayPlan{Granularity: "atomic"}
+}
+
+// registerRecursionAlias records that the subtree at docPath repeats the
+// subtree at anchorPath (CORE §3.3.7): the cycle guard cut a re-entry of an
+// on-stack schema node short. An existing entry keeps its own plan and merely
+// gains the alias; a declared-atomic object ignores it (its subtree is pruned,
+// CORE §8.3.3). Both paths must resolve under BasePath.
+func (b *planBuilder) registerRecursionAlias(docPath, anchorPath string) {
+	target, ok := b.resolveTarget(docPath)
+	if !ok {
+		return
+	}
+	anchor, ok := b.resolveTarget(anchorPath)
+	if !ok || target == anchor {
+		return
+	}
+	existing, exists := b.plan[target]
+	if !exists {
+		b.plan[target] = &ArrayPlan{RecurseTo: anchor, HasRecurseTo: true}
+		return
+	}
+	if existing.isObjectPlan() {
+		return
+	}
+	if !existing.HasRecurseTo {
+		existing.RecurseTo, existing.HasRecurseTo = anchor, true
+	}
 }
 
 // fail records the first construction error; later errors are dropped.

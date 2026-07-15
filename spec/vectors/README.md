@@ -134,7 +134,9 @@ self-check, so a regenerated suite is also a reference-applier conformance run.
     { "path": "/ports",    "primaryKey": "containerPort", "strategy": "primaryKey", "requiredFields": [], "hashFields": [],
       "topology": "map", "keys": ["containerPort", "protocol"], "order": "insignificant" },
     // spec-v2: a declared-ATOMIC object is a distinct entry shape — just path + granularity:
-    { "path": "/settings", "granularity": "atomic" }
+    { "path": "/settings", "granularity": "atomic" },
+    // spec-v2: a recursion alias (CORE §3.3.7) — alias-only entries are just path + recurseTo:
+    { "path": "/steps/parallel", "recurseTo": "/steps" }
   ]
 }
 ```
@@ -151,6 +153,11 @@ is compared **ORDER-SENSITIVELY** — unlike `requiredFields`/`hashFields` — b
 the declared tuple order is significant to identity (CORE §8.4.3). An `atomic`
 node **prunes its subtree**: a plan MUST NOT contain any entry for a path beneath
 it (CORE §8.3.3).
+
+**Recursion aliases (CONF §7.3, CORE §3.3.7):** `recurseTo` is compared by
+presence and value (`""` — the document root — is a valid, present anchor). An
+alias-only entry is exactly `{ path, recurseTo }`; a real array entry may carry
+`recurseTo` alongside its ordinary fields.
 
 ### invert (`invert/`, CONF §8)
 

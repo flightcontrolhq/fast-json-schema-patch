@@ -36,6 +36,7 @@ import {
 	buildPlan,
 	invertPatch,
 	isObjectPlan,
+	isRecursionAliasOnly,
 	JsonPatchError,
 	JsonSchemaPatcher,
 } from "../src/index";
@@ -207,6 +208,8 @@ interface PlanExpectedEntry {
 	order?: "significant" | "insignificant";
 	// spec-v2 object-plan entry (a declared-atomic object): { path, granularity }.
 	granularity?: "atomic";
+	// CORE §3.3.7 recursion alias (CONF §7.3); alias-only entries omit strategy.
+	recurseTo?: string;
 }
 interface PlanVector {
 	name: string;
@@ -392,6 +395,11 @@ function sortFields(fields: string[]): string[] {
  */
 function canonPlanEntry(e: PlanExpectedEntry): Record<string, unknown> {
 	if (e.granularity) return { path: e.path, granularity: e.granularity };
+	// A recursion-alias-only entry (CONF §7.3) is just { path, recurseTo } — no
+	// strategy default applies, since the entry carries no plan of its own.
+	if (e.strategy === undefined && e.recurseTo !== undefined) {
+		return { path: e.path, recurseTo: e.recurseTo };
+	}
 	const c: Record<string, unknown> = {
 		path: e.path,
 		primaryKey: e.primaryKey ?? null,
@@ -402,6 +410,7 @@ function canonPlanEntry(e: PlanExpectedEntry): Record<string, unknown> {
 	if (e.topology) c.topology = e.topology;
 	if (e.keys) c.keys = [...e.keys];
 	if (e.order) c.order = e.order;
+	if (e.recurseTo !== undefined) c.recurseTo = e.recurseTo;
 	return c;
 }
 function normalizePlanEntries(
@@ -438,6 +447,9 @@ describe("conformance: plan-snapshot vectors (CONF §7/CONF §7.1)", () => {
 						return { path, granularity: entry.granularity };
 					}
 					const ap = entry;
+					if (isRecursionAliasOnly(ap)) {
+						return { path, recurseTo: ap.recurseTo };
+					}
 					const e: PlanExpectedEntry = {
 						path,
 						primaryKey: ap.primaryKey ?? null,
@@ -448,6 +460,7 @@ describe("conformance: plan-snapshot vectors (CONF §7/CONF §7.1)", () => {
 					if (ap.topology) e.topology = ap.topology;
 					if (ap.keys) e.keys = [...ap.keys];
 					if (ap.order) e.order = ap.order;
+					if (ap.recurseTo !== undefined) e.recurseTo = ap.recurseTo;
 					return e;
 				},
 			);

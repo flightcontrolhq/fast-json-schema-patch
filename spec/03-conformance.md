@@ -349,6 +349,8 @@ JSON record:
     }
     // OR object-plan entry (spec-v2; a declared-atomic object, CORE §8.3.2):
     // { "path": documentPath, "granularity": "atomic" }
+    // OR alias-only entry (spec-v2; a recursion alias, CORE §3.3.7):
+    // { "path": documentPath, "recurseTo": documentPath }
   ]
 }
 ```
@@ -376,6 +378,13 @@ compared:
 - **Atomic pruning (CORE §8.3.3):** a plan MUST NOT contain any entry for a path **beneath** an
   `atomic` node; a plan-snapshot vector for an atomic subtree asserts the atomic node's single entry
   and the **absence** of descendant entries.
+
+`7.3` **Recursion aliases (spec-v2, CORE §3.3.7).** `recurseTo` is compared by **presence and
+value**: an entry carrying an alias must expose it, and the anchor path must match exactly (the
+empty string `""` — the document root — is a valid, present anchor and MUST be distinguishable
+from an absent field). An **alias-only** entry is exactly `{ path, recurseTo }` — no `strategy`
+default applies to it, since it registers no plan of its own. A real array entry may carry
+`recurseTo` alongside its ordinary fields.
 
 ## 8. Invert vector format (normative)
 

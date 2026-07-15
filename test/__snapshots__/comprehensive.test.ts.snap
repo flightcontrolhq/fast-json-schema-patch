@@ -129,6 +129,10 @@ Set {
     "primaryKey": null,
     "strategy": "lcs",
   },
+  "/environments/services/permissions/inline/*/*" => {
+    "primaryKey": null,
+    "recurseTo": "/environments/services/permissions/inline/*",
+  },
   "/environments/services/permissions/attach" => {
     "primaryKey": null,
     "strategy": "unique",
@@ -164,6 +168,10 @@ Set {
   "/environments/services/bucketPolicy/*" => {
     "primaryKey": null,
     "strategy": "lcs",
+  },
+  "/environments/services/bucketPolicy/*/*" => {
+    "primaryKey": null,
+    "recurseTo": "/environments/services/bucketPolicy/*",
   },
   "/environments/services/ports" => {
     "hashFields": [

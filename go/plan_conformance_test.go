@@ -37,6 +37,9 @@ type expectedArrayPlan struct {
 	Keys        []string `json:"keys"`
 	Order       string   `json:"order"`
 	Granularity string   `json:"granularity"`
+	// CORE §3.3.7 recursion alias (CONF §7.3). A pointer so an absent field is
+	// distinguishable from an alias anchored at the document root ("").
+	RecurseTo *string `json:"recurseTo"`
 }
 
 func TestPlanConformanceVectors(t *testing.T) {
@@ -132,6 +135,15 @@ func assertPlanEquals(t *testing.T, plan Plan, expected []expectedArrayPlan) {
 		}
 		if !sameStringSliceOrdered(ap.Keys, exp.Keys) {
 			t.Errorf("path %q: keys = %v, want %v (ORDER-sensitive)", exp.Path, ap.Keys, exp.Keys)
+		}
+		// CONF §7.3: recursion alias. Presence and value must both match.
+		wantRecurse, wantHas := "", false
+		if exp.RecurseTo != nil {
+			wantRecurse, wantHas = *exp.RecurseTo, true
+		}
+		if ap.HasRecurseTo != wantHas || ap.RecurseTo != wantRecurse {
+			t.Errorf("path %q: recurseTo = (%q, present=%v), want (%q, present=%v)",
+				exp.Path, ap.RecurseTo, ap.HasRecurseTo, wantRecurse, wantHas)
 		}
 	}
 }

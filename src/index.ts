@@ -28,4 +28,4 @@ export type {
   ArraySemantics,
   BuildPlanOptions,
 } from "./core/buildPlan";
-export { isObjectPlan } from "./core/buildPlan";
+export { isObjectPlan, isRecursionAliasOnly } from "./core/buildPlan";

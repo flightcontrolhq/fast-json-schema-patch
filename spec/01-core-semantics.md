@@ -219,9 +219,11 @@ BuildPlanOptions = {
 ### 3.3 Schema traversal
 
 Traversal starts at the root schema with document path `""` and recurses, accumulating an
-escaped document path. A `visited` set of schema-node object identities guards against reference
-cycles: a node currently on the traversal stack is not re-entered; it is removed from the set when
-its subtree completes (so the same shared subschema may be reached again via a different path).
+escaped document path. A `visited` map of schema-node object identities to their on-stack entry
+paths guards against reference cycles: a node currently on the traversal stack is not re-entered;
+it is removed from the map when its subtree completes (so the same shared subschema may be
+reached again via a different path). A re-entry cut short at a **deeper** path additionally
+records a recursion alias (§3.3.7).
 
 `3.3.1` A schema node is traversed as an **object** when it has `properties` or
 `additionalProperties`, and as an **array** when it has `items`, **regardless of whether an
@@ -263,6 +265,30 @@ skipped. Fingerprints are **not** shared across `anyOf`/`oneOf`/`allOf` at a nod
 branch appearing under two different keywords is traversed once per keyword. The fingerprint's
 cycle guard treats a re-encountered node as `undefined`.
 
+`3.3.7` **Recursion aliases.** When the cycle guard (§3.3) cuts a re-entry short and the
+re-entry's document path differs from the node's on-stack entry path (the **anchor** — always a
+proper prefix, since traversal paths only extend), the builder records a **recursion alias** at
+the re-entry path: the subtree there repeats the subtree at the anchor. Registration rules:
+
+- Both paths must resolve under `basePath` (§3.6); otherwise the alias is dropped.
+- An existing entry at the alias path keeps its own plan and merely **gains** the alias (first
+  alias wins); a declared-atomic object ignores it (its subtree is pruned, §8.3.3). Where no
+  entry exists, an **alias-only** entry is registered — it carries no strategy of its own. An
+  alias survives plan reconciliation (§3.7): a real plan later registering at an alias-only path
+  replaces the entry but keeps the alias.
+- At trie compilation (GEN §4.5.1), a node whose entry carries an alias **inherits the anchor
+  node's plan and edges** — explicit plan/edges at the node always win — iterated to a fixpoint
+  so nested cycles resolve regardless of registration order. The compiled trie may therefore be
+  **cyclic**: diff recursion stays bounded by document depth, but any exhaustive trie walk MUST
+  guard against revisits. This is what extends strategy selection (and primary-key auto-detection
+  results) to unbounded recursion depth in self-referential schemas.
+- A re-entry at the node's own entry path records nothing (the trie node already describes that
+  position, preserving pre-§3.3.7 behavior for same-path cycles).
+
+(Landed, spec-v2 addition. At spec-v1, a recursive `$ref` planned only its first level: every
+array beneath the cycle point silently degraded to `lcs`, and consumers worked around it by
+manually unrolling their schemas N levels deep.)
+
 ### 3.4 Constructing an ArrayPlan
 
 Given an array node with resolved item schema `itemsSchema` (if `items` is a `$ref`, it is
@@ -286,6 +312,15 @@ or `"boolean"`, set `strategy = "unique"`. (A primitive item array is a candidat
 `3.4.3` **`primaryKeyMap` override.** If `primaryKeyMap[currentPath]` is set, set
 `primaryKey = that value` and `strategy = "primaryKey"` unconditionally (overriding §3.4.2 and
 §3.5). The override is trusted; no property-existence check is performed at plan time.
+
+Additionally, after traversal completes, every `primaryKeyMap` path that received **no plan
+entry** — because the schema never reached it, including an empty or absent schema — registers a
+`{ primaryKey, strategy: "primaryKey" }` entry directly (in sorted path order, subject to
+`basePath` §3.6; an alias-only entry at the path is replaced but keeps its alias, §3.3.7). A
+declared topology still outranks the override (§3.4.0), and the diff-time applicability gate
+(GEN §4.3) still guards dispatch, so a mismatched override degrades to `lcs` rather than
+misbehaving. (Landed, spec-v2 addition: at spec-v1 the override was consulted only for arrays
+the traversal discovered, so it silently did nothing without schema coverage.)
 
 `3.4.4` Otherwise, if items are **not** primitive, run primary-key auto-detection (§3.5).
 

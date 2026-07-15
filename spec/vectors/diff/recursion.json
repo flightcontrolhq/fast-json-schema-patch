@@ -1,0 +1,138 @@
+[
+  {
+    "name": "diff-recursion-keyed-at-depth",
+    "comment": "CORE §3.3.7: keyed diffing reaches through a $ref cycle — a removal two recursion levels down emits one keyed remove, not an LCS rewrite",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "$ref": "#/$defs/stepList"
+        }
+      },
+      "$defs": {
+        "stepList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "step": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "parallel": {
+              "$ref": "#/$defs/stepList"
+            }
+          }
+        }
+      }
+    },
+    "original": {
+      "steps": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "group",
+          "parallel": [
+            {
+              "id": "p1",
+              "parallel": [
+                {
+                  "id": "q1"
+                },
+                {
+                  "id": "q2"
+                }
+              ]
+            },
+            {
+              "id": "p2"
+            }
+          ]
+        }
+      ]
+    },
+    "modified": {
+      "steps": [
+        {
+          "id": "a"
+        },
+        {
+          "id": "group",
+          "parallel": [
+            {
+              "id": "p1",
+              "parallel": [
+                {
+                  "id": "q1"
+                }
+              ]
+            },
+            {
+              "id": "p2"
+            }
+          ]
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "remove",
+        "path": "/steps/1/parallel/0/parallel/1",
+        "oldValue": {
+          "id": "q2"
+        }
+      }
+    ]
+  },
+  {
+    "name": "diff-pkmap-without-schema-coverage",
+    "comment": "CORE §3.4.3: primaryKeyMap keys an array the schema never describes; the reorder is absorbed and one field replace emits",
+    "schema": {
+      "type": "object"
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/users": "email"
+      }
+    },
+    "original": {
+      "users": [
+        {
+          "email": "a@x.io",
+          "role": "admin"
+        },
+        {
+          "email": "b@x.io",
+          "role": "user"
+        }
+      ]
+    },
+    "modified": {
+      "users": [
+        {
+          "email": "b@x.io",
+          "role": "user"
+        },
+        {
+          "email": "a@x.io",
+          "role": "owner"
+        }
+      ]
+    },
+    "expectedPatch": [
+      {
+        "op": "replace",
+        "path": "/users/0/role",
+        "value": "owner",
+        "oldValue": "admin"
+      }
+    ]
+  }
+]

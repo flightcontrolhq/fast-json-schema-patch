@@ -1,0 +1,74 @@
+[
+  {
+    "name": "plan-recursion-alias-ref-cycle",
+    "comment": "CORE §3.3.7: a $ref cycle records a recursion alias at the re-entry path; the alias-only entry carries no strategy of its own",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "$ref": "#/$defs/stepList"
+        }
+      },
+      "$defs": {
+        "stepList": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "step": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "parallel": {
+              "$ref": "#/$defs/stepList"
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/steps",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id"
+        ],
+        "hashFields": [
+          "id"
+        ]
+      },
+      {
+        "path": "/steps/parallel",
+        "recurseTo": "/steps"
+      }
+    ]
+  },
+  {
+    "name": "plan-primarykeymap-unreached-path",
+    "comment": "CORE §3.4.3: a primaryKeyMap path outside schema coverage still registers a primaryKey plan (diff-time applicability gate still applies)",
+    "schema": {
+      "type": "object"
+    },
+    "options": {
+      "primaryKeyMap": {
+        "/users": "email"
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/users",
+        "primaryKey": "email",
+        "strategy": "primaryKey",
+        "requiredFields": [],
+        "hashFields": []
+      }
+    ]
+  }
+]

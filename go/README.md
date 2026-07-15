@@ -242,7 +242,7 @@ through to it. The defaults reproduce pre-capability output byte-for-byte:
 | ----------------------------------- | ------- | ------ |
 | `IncludeOldValue(bool)`             | `true`  | Attach the full prior value as `oldValue` on every `remove`/`replace` (CORE §4.4). Pass `false` to omit it. |
 | `EmitMoves(bool)`                   | `false` | Express relocations of otherwise-identical items as `move` ops so the applied document matches `modified`'s order exactly, not just its content (GEN §8). |
-| `WholesaleReplaceFallback(bool)`    | `false` | For a heavily-rewritten array, replace it wholesale when that is smaller than the element-wise edit script (GEN §9), capping patch size. |
+| `WholesaleReplaceFallback(bool)`    | `false` | For a heavily-rewritten array, replace it wholesale when that is smaller than the element-wise edit script (GEN §9), capping patch size. The size comparison uses the spec's pinned estimate of fjsp's own op encoding (`oldValue` and all); if you re-encode ops into a different wire shape, a borderline cutover can differ from your encoding's true optimum by a few bytes. |
 | `IgnorePaths(paths...)`             | none    | Object-member JSON Pointers whose subtrees are treated as equal — no ops at or beneath them, in any strategy; use `*` for an array level (GEN §10). An invalid pointer makes `NewPatcher` return an error. |
 
 ```go
@@ -261,7 +261,7 @@ patch := patcher.Execute(original, modified)
 
 | Field                   | Effect |
 | ----------------------- | ------ |
-| `PrimaryKeyMap`         | `map[docPath]keyField` — force the `primaryKey` strategy on specific array paths, overriding auto-detection (CORE §3.4.3). |
+| `PrimaryKeyMap`         | `map[docPath]keyField` — force the `primaryKey` strategy on specific array paths, overriding auto-detection; paths the schema never reaches (including a nil/empty schema) still register, so the override works without schema coverage (CORE §3.4.3). The diff-time applicability gate still applies. |
 | `PrimaryKeyCandidates`  | Override the ordered auto-detection candidate list (default `["id","name","port"]`, CORE §3.5.3). An **empty, non-nil** slice disables auto-detection entirely — every object array falls back to `lcs`. A `nil` slice keeps the default. |
 | `BasePath`              | Restrict and relativize the plan to the subtree at or under this pointer, for diffing a sub-document (CORE §3.3.1). |
 
@@ -280,7 +280,10 @@ Documents are represented as an ordered JSON value model rooted at `Value`
 Helpers: `Decode([]byte) (Value, error)` and `Encode(Value) ([]byte, error)`
 round-trip preserving member order and number text; `EncodeOperations` /
 `DecodeOperations` do the same for `[]Operation`. For interop with ordinary Go
-values there are `FromAny(any) (Value, error)` and `ToAny(Value) any`.
+values there are `FromAny(any) (Value, error)` and `ToAny(Value) any`. Note `ToAny`
+returns numbers as `json.Number` (preserving literal text) — wire-identical to
+`float64` after marshaling, but in-memory comparisons against `float64` fixtures
+will see a different dynamic type.
 `DeepEqual(a, b Value) bool` compares under JSON semantics (CORE §1.4); `Clone` makes
 a deep copy.
 
@@ -318,7 +321,7 @@ performance (this table is capabilities only).
 
 | Capability | Ours (Go) | wI2L/jsondiff v0.7.1 |
 |---|---|---|
-| Schema-aware array strategies | Yes — `BuildPlan` derives a per-array strategy (`lcs`/`unique`/`primaryKey`) from a JSON Schema.<!-- proof: spec/vectors/diff/plan-selection.json; go/plan.go --> | No — one generic recursive/LCS comparison; `Compare`/`CompareJSON` take no schema argument. |
+| Schema-aware array strategies | Yes — `BuildPlan` derives a per-array strategy (`lcs`/`unique`/`primaryKey`) from a JSON Schema, including through recursive `$ref` cycles: a self-referential schema keeps keyed diffing at every nesting depth (CORE §3.3.7).<!-- proof: spec/vectors/diff/plan-selection.json; go/plan.go --> | No — one generic recursive/LCS comparison; `Compare`/`CompareJSON` take no schema argument. |
 | Raw-JSON entry | Yes — `CompareJSON(schema, original, modified []byte, ...)`.<!-- proof: go/compare_test.go --> | Yes — `CompareJSON(source, target []byte, ...)` (compare.go:21). |
 | Typed-value entry | Yes — `Compare(schema, source, target any, ...)`.<!-- proof: go/compare_any_test.go --> | Yes — `Compare(source, target interface{}, ...)` (compare.go:11). |
 | Apply | Yes — `ApplyPatch`, all six RFC 6902 ops, immutable and atomic.<!-- proof: go/apply.go; go/apply_conformance_test.go; spec/vectors/apply/ (93 vectors) --> | No — an `apply` method exists but is deliberately unexported: "will **NEVER** be exported... is feature-wise out of scope of the project" (apply.go:19-22, citing wI2L/jsondiff#28). |

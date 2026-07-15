@@ -13,7 +13,7 @@ import {
   diffArrayUniqueMoves,
   type ModificationCallback,
 } from "./arrayDiffAlgorithms";
-import { isObjectPlan, type ArrayPlan, type ObjectPlan, type Plan, type PlanEntry } from "./buildPlan";
+import { isObjectPlan, isRecursionAliasOnly, type ArrayPlan, type ObjectPlan, type Plan, type PlanEntry } from "./buildPlan";
 import {
   compileIgnoreTrie,
   ignoreMember,
@@ -163,10 +163,16 @@ export class JsonSchemaPatcher {
    * `/`; a `*` segment is the wildcard edge, any other segment is unescaped and
    * stored as an exact `children` edge. The empty key `""` (a root-level array
    * document) terminates at the root node itself.
+   *
+   * Recursion aliases (CORE §3.3.7) wire second: a node whose entry carries
+   * `recurseTo` inherits the anchor node's plan and edges (explicit edges win),
+   * iterated to a fixpoint so nested cycles resolve regardless of map order.
+   * The resulting trie may be CYCLIC; diff recursion is bounded by document
+   * depth, but any exhaustive trie walk must guard against revisits.
    */
   private compilePlanTrie(plan: Plan): PlanTrieNode {
     const root: PlanTrieNode = {};
-    for (const [key, arrayPlan] of plan) {
+    const ensureNode = (key: string): PlanTrieNode => {
       const segments = key.length === 0 ? [] : key.split("/").slice(1);
       let node = root;
       for (const seg of segments) {
@@ -184,7 +190,43 @@ export class JsonSchemaPatcher {
           node = child;
         }
       }
-      node.plan = arrayPlan;
+      return node;
+    };
+
+    const aliases: Array<[PlanTrieNode, PlanTrieNode]> = [];
+    for (const [key, entry] of plan) {
+      const node = ensureNode(key);
+      if (!isRecursionAliasOnly(entry)) {
+        node.plan = entry;
+      }
+      const recurseTo = isObjectPlan(entry) ? undefined : entry.recurseTo;
+      if (recurseTo !== undefined) {
+        aliases.push([node, ensureNode(recurseTo)]);
+      }
+    }
+
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const [target, anchor] of aliases) {
+        if (anchor.plan && !target.plan) {
+          target.plan = anchor.plan;
+          changed = true;
+        }
+        if (anchor.wildcard && !target.wildcard) {
+          target.wildcard = anchor.wildcard;
+          changed = true;
+        }
+        if (anchor.children) {
+          target.children ??= new Map();
+          for (const [key, child] of anchor.children) {
+            if (!target.children.has(key)) {
+              target.children.set(key, child);
+              changed = true;
+            }
+          }
+        }
+      }
     }
     return root;
   }
