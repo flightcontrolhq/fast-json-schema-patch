@@ -568,18 +568,38 @@ export function _traverseSchema(
     }
 
     // Auto-detection over the (allOf-merged) item schema, following anyOf/oneOf
-    // branches in array order (CORE §3.5.1).
+    // branches recursively in array order (CORE §3.5.1): a branch that is
+    // itself a union — a discriminated union wrapped in a category union, as
+    // TypeSpec/OpenAPI compilers commonly emit — is descended depth-first, and
+    // the first branch anywhere that yields a key wins. A visited set guards
+    // reference cycles.
     const detectMetadata = (): ReturnType<typeof findMetadata> => {
-      const schemas = itemsSchema.anyOf || itemsSchema.oneOf
-      if (schemas) {
-        let metadata: ReturnType<typeof findMetadata> | null = null
-        for (const s of schemas) {
-          metadata = findMetadata(s)
-          if (metadata?.primaryKey) return metadata
+      const detect = (
+        node: JSONSchema,
+        visited: Set<object>,
+      ): ReturnType<typeof findMetadata> => {
+        if (!node || typeof node !== "object" || visited.has(node)) return null
+        visited.add(node)
+        let resolved = node
+        if (resolved.$ref) {
+          const target = _resolveRef(resolved.$ref, schema, options?.onWarning)
+          if (!target || visited.has(target)) return null
+          visited.add(target)
+          resolved = target
+        }
+        let metadata = findMetadata(resolved)
+        if (metadata?.primaryKey) return metadata
+        const branches = resolved.anyOf || resolved.oneOf
+        if (branches && Array.isArray(branches)) {
+          for (const branch of branches) {
+            const branchMetadata = detect(branch as JSONSchema, visited)
+            if (branchMetadata?.primaryKey) return branchMetadata
+            metadata ??= branchMetadata
+          }
         }
         return metadata
       }
-      return findMetadata(itemsSchema)
+      return detect(itemsSchema, new Set())
     }
 
     if (declaredTopology) {

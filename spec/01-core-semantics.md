@@ -329,7 +329,14 @@ the traversal discovered, so it silently did nothing without schema coverage.)
 `3.5.1` Auto-detection runs over an **object item schema**. Resolve the candidate schema:
 
 - If `itemsSchema` has `anyOf` or `oneOf`, examine each branch **in array order** and use the
-  first branch that yields a primary key (§3.5.3).
+  first branch that yields a primary key (§3.5.3). Branches are examined **recursively**: a
+  branch that is itself a union — possibly behind a leading `$ref` — is descended depth-first in
+  document order, and the first branch anywhere that yields a key wins. A visited set of schema
+  node identities guards reference cycles. (Landed, spec-v2 amendment: TypeSpec/OpenAPI compilers
+  commonly wrap a discriminated union inside a category union, e.g.
+  `Step = anyOf[ActionStep = oneOf[...concrete steps requiring id...], ParallelStep]`; at
+  spec-v1 only the top-level branch list was examined, so such arrays silently degraded to
+  `lcs`.)
 - Otherwise examine `itemsSchema` directly.
 
 Each candidate schema (a branch, or `itemsSchema` itself) is first reduced to a synthetic object

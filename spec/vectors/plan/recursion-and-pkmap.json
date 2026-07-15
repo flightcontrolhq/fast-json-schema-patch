@@ -1,7 +1,7 @@
 [
   {
     "name": "plan-recursion-alias-ref-cycle",
-    "comment": "CORE §3.3.7: a $ref cycle records a recursion alias at the re-entry path; the alias-only entry carries no strategy of its own",
+    "comment": "CORE \u00a73.3.7: a $ref cycle records a recursion alias at the re-entry path; the alias-only entry carries no strategy of its own",
     "schema": {
       "type": "object",
       "properties": {
@@ -52,7 +52,7 @@
   },
   {
     "name": "plan-primarykeymap-unreached-path",
-    "comment": "CORE §3.4.3: a primaryKeyMap path outside schema coverage still registers a primaryKey plan (diff-time applicability gate still applies)",
+    "comment": "CORE \u00a73.4.3: a primaryKeyMap path outside schema coverage still registers a primaryKey plan (diff-time applicability gate still applies)",
     "schema": {
       "type": "object"
     },
@@ -68,6 +68,117 @@
         "strategy": "primaryKey",
         "requiredFields": [],
         "hashFields": []
+      }
+    ]
+  },
+  {
+    "name": "plan-nested-union-key-detection",
+    "comment": "CORE \u00a73.5.1: a discriminated union wrapped in a category union (anyOf -> $ref -> oneOf) is descended recursively; the concrete branches' required id keys BOTH the outer array and the nested parallel array, whose entry also carries the recursion alias (CORE \u00a73.3.7)",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      },
+      "$defs": {
+        "step": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/actionStep"
+            },
+            {
+              "$ref": "#/$defs/parallelStep"
+            }
+          ]
+        },
+        "actionStep": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/buildStep"
+            },
+            {
+              "$ref": "#/$defs/deployStep"
+            }
+          ]
+        },
+        "buildStep": {
+          "type": "object",
+          "required": [
+            "id",
+            "type"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "deployStep": {
+          "type": "object",
+          "required": [
+            "id",
+            "type"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            }
+          }
+        },
+        "parallelStep": {
+          "type": "object",
+          "required": [
+            "parallel"
+          ],
+          "properties": {
+            "parallel": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/step"
+              }
+            }
+          }
+        }
+      }
+    },
+    "expectedPlan": [
+      {
+        "path": "/steps",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id",
+          "type"
+        ],
+        "hashFields": [
+          "id",
+          "type"
+        ]
+      },
+      {
+        "path": "/steps/parallel",
+        "primaryKey": "id",
+        "strategy": "primaryKey",
+        "requiredFields": [
+          "id",
+          "type"
+        ],
+        "hashFields": [
+          "id",
+          "type"
+        ],
+        "recurseTo": "/steps"
       }
     ]
   }

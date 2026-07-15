@@ -507,28 +507,53 @@ type keyMetadata struct {
 }
 
 // detectKey runs primary-key auto-detection over an object item schema (SPEC
-// CORE §3.5). anyOf/oneOf branches are examined in order; the first branch that
-// yields a key wins.
+// CORE §3.5). anyOf/oneOf branches are examined recursively in array order: a
+// branch that is itself a union — a discriminated union wrapped in a category
+// union, as TypeSpec/OpenAPI compilers commonly emit — is descended
+// depth-first, and the first branch anywhere that yields a key wins. A visited
+// set guards reference cycles.
 func (b *planBuilder) detectKey(itemsSchema Value) *keyMetadata {
-	it, ok := itemsSchema.(*Object)
+	return b.detectKeyIn(itemsSchema, make(map[*Object]bool))
+}
+
+func (b *planBuilder) detectKeyIn(node Value, visited map[*Object]bool) *keyMetadata {
+	obj, ok := node.(*Object)
+	if !ok || visited[obj] {
+		return nil
+	}
+	visited[obj] = true
+
+	resolved := node
+	if ref, ok := stringProp(obj, "$ref"); ok && ref != "" {
+		target, isObj := b.resolveRef(ref).(*Object)
+		if !isObj || visited[target] {
+			return nil
+		}
+		visited[target] = true
+		resolved = target
+	}
+
+	if md := b.findMetadata(resolved); md != nil {
+		return md
+	}
+
+	resolvedObj, ok := resolved.(*Object)
 	if !ok {
 		return nil
 	}
-	branches, ok := arrayProp(it, "anyOf")
+	branches, ok := arrayProp(resolvedObj, "anyOf")
 	if !ok {
-		branches, ok = arrayProp(it, "oneOf")
+		branches, ok = arrayProp(resolvedObj, "oneOf")
 	}
-	if ok {
-		var md *keyMetadata
-		for _, s := range branches {
-			md = b.findMetadata(s)
-			if md != nil {
-				break
-			}
+	if !ok {
+		return nil
+	}
+	for _, branch := range branches {
+		if md := b.detectKeyIn(branch, visited); md != nil {
+			return md
 		}
-		return md
 	}
-	return b.findMetadata(itemsSchema)
+	return nil
 }
 
 // findMetadata reduces a candidate schema by the allOf merge (CORE §3.5.1.1) and
