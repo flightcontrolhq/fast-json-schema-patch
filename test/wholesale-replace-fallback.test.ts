@@ -10,20 +10,22 @@ import type { JsonValue, Operation } from "../src/types"
 // rewrite of a 12-item, no-common-elements array) as the trigger case, and
 // asserts small/typical diffs never trigger the fallback.
 
-// Audit repro shape (scratchpad compactness.ts S5): 12 objects with a long
-// shared `description`/`tagsList`/`metadata` but a per-item `title`/`score`
-// that changes for EVERY item, so LCS finds zero common elements and the
-// granular op stream is a full remove-all + add-all (no collapse into
-// replace pairs — see investigation notes), well over the array's own bytes.
+// Audit repro shape (scratchpad compactness.ts S5), sharpened for the GEN §9.3
+// wholesale-op threshold: 12 objects where EVERY field of EVERY item differs
+// between original and modified, so the granular stream carries the full old
+// and new content plus per-op overhead and genuinely exceeds the single
+// wholesale replace. (The earlier fixture shared a fat constant `description`
+// across items — granular per-field ops legitimately beat wholesale there,
+// which is exactly what the corrected threshold preserves.)
 const bigItem = (i: number) => ({
   title: `Item ${i}`,
-  description: "x".repeat(400),
-  tagsList: ["alpha", "beta", "gamma", "delta"],
+  description: `desc-${i}-` + "x".repeat(400),
+  tagsList: [`alpha${i}`, `beta${i}`, `gamma${i}`, `delta${i}`],
   metadata: {
-    created: "2024-01-01",
-    updated: "2024-06-01",
-    author: "someone",
-    flags: { a: true, b: false },
+    created: `2024-01-${i}`,
+    updated: `2024-06-${i}`,
+    author: `someone-${i}`,
+    flags: { a: i % 2 === 0, b: false },
   },
   score: i * 10,
 })

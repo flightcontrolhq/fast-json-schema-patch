@@ -141,17 +141,18 @@ export class JsonSchemaPatcher {
    * GEN §9.2 (F24): a deterministic, cheap-to-compute estimate of the
    * serialized size of `ops` — NOT an exact `JSON.stringify(ops).length`, but
    * pinned exactly so a reimplementation reproduces the identical cutover
-   * decision. For each op: `+30` (fixed per-op overhead standing in for
-   * `{"op":"...","path":"..."}` structure) plus `JSON.stringify(op.value).length`
-   * when `value` is present, plus `JSON.stringify(op.oldValue).length` when
-   * `oldValue` is present. `move` ops (no `value`/`oldValue`) contribute only
-   * the 30B overhead.
+   * decision. For each op: `+30` (fixed per-op overhead standing in for the
+   * `{"op":"...","path":""}` structure) plus `op.path.length` (paths are real
+   * serialized bytes and deep paths dominate small values) plus
+   * `JSON.stringify(op.value).length` when `value` is present, plus
+   * `JSON.stringify(op.oldValue).length` when `oldValue` is present. `move`
+   * ops contribute the overhead and their path only.
    */
   private static estimatePatchBytes(ops: Operation[]): number {
     let total = 0;
     for (let i = 0; i < ops.length; i++) {
       const op = ops[i] as Operation;
-      total += 30;
+      total += 30 + op.path.length;
       if (op.value !== undefined) total += JSON.stringify(op.value).length;
       if (op.oldValue !== undefined) total += JSON.stringify(op.oldValue).length;
     }
@@ -493,7 +494,16 @@ export class JsonSchemaPatcher {
     const local: Operation[] = [];
     this.dispatchArrayStrategy(arr1, arr2, path, local, node, ignoreNode);
     const estimate = JsonSchemaPatcher.estimatePatchBytes(local);
-    const wholesaleThreshold = JSON.stringify(arr2).length;
+    // GEN §9.3: the threshold is the SAME pinned estimate applied to the single
+    // wholesale replace this cutover would emit — 30 + value + oldValue (when
+    // includeOldValue is on). Comparing against just the array's serialized
+    // size under-counted the wholesale side and could cut over to a LARGER
+    // patch, breaking the capability's never-worse guarantee.
+    const wholesaleThreshold =
+      30 +
+      path.length +
+      JSON.stringify(arr2).length +
+      (this.includeOldValue ? JSON.stringify(arr1).length : 0);
     if (estimate > wholesaleThreshold) {
       const op: Operation = { op: "replace", path, value: arr2 };
       if (this.includeOldValue) op.oldValue = arr1;

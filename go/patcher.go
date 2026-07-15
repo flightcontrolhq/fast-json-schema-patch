@@ -238,7 +238,15 @@ func (p *Patcher) diffArray(arr1, arr2 []Value, path string, patches *[]Operatio
 	var local []Operation
 	p.dispatchArrayStrategy(arr1, arr2, path, &local, node, ignoreNode)
 	estimate := estimatePatchBytes(local)
-	threshold := jsStringifyLen(arr2)
+	// GEN §9.3: the threshold is the SAME pinned estimate applied to the single
+	// wholesale replace this cutover would emit — 30 + value + oldValue (when
+	// includeOldValue is on). Comparing against just the array's serialized size
+	// under-counted the wholesale side and could cut over to a LARGER patch,
+	// breaking the capability's never-worse guarantee.
+	threshold := 30 + len(path) + jsStringifyLen(arr2)
+	if p.includeOldValue {
+		threshold += jsStringifyLen(arr1)
+	}
 	if estimate > threshold { // strict >: a tie keeps the granular ops (GEN §9.3)
 		*patches = append(*patches, p.replaceOp(path, arr1, arr2))
 		return
@@ -466,14 +474,15 @@ func arrayIndexKey(s string) (uint32, bool) {
 // --- wholesaleReplaceFallback byte accounting (GEN §9.2) ---
 
 // estimatePatchBytes is the pinned per-op byte estimate (GEN §9.2): 30 bytes
-// fixed overhead per op, plus the serialized length of value and oldValue when
-// present. move ops (neither present) contribute only the 30. It is a cheap
-// deterministic stand-in for the serialized patch size, NOT the exact length.
+// fixed overhead per op, plus the op's path length (paths are real serialized
+// bytes and deep paths dominate small values), plus the serialized length of
+// value and oldValue when present. It is a cheap deterministic stand-in for
+// the serialized patch size, NOT the exact length.
 func estimatePatchBytes(ops []Operation) int {
 	total := 0
 	for i := range ops {
 		op := &ops[i]
-		total += 30
+		total += 30 + len(op.Path)
 		if op.HasValue {
 			total += jsStringifyLen(op.Value)
 		}

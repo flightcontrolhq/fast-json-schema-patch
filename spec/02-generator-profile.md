@@ -546,6 +546,7 @@ which may already contain a child's wholesale replace.
 ```
 estimate = sum over op in ops of:
     30                                              // fixed per-op overhead
+  + len(op.path)                                    // the op's own path bytes
   + (op.value    !== undefined ? len(JSON.stringify(op.value))    : 0)
   + (op.oldValue !== undefined ? len(JSON.stringify(op.oldValue)) : 0)
 ```
@@ -553,13 +554,29 @@ estimate = sum over op in ops of:
 This is a **cheap, deterministic stand-in** for the serialized patch size — NOT
 `len(JSON.stringify(ops))` — pinned exactly (including the `30` constant) so a reimplementation
 reaches the identical cutover decision on the identical input. `move` ops (no `value`/`oldValue`)
-contribute only the 30B overhead.
+contribute the overhead and their path only. (Landed, spec-v2 amendment: the estimate previously
+omitted `len(op.path)`; deeply nested granular ops — whose paths are real serialized bytes, often
+dominating small field values — were then systematically under-counted relative to the single
+shallow wholesale op, skewing the §9.3 comparison.)
 
-`9.3` **Threshold and cutover.** Let `threshold = len(JSON.stringify(modified))` (the array's own
-serialized size). If `estimate > threshold`, **discard** the array's op list entirely and emit
-instead a single `{ op: "replace", path, value: modified, oldValue: original }` (`oldValue` present
-iff `includeOldValue`, CORE §4.4.2) at the array's own path. Otherwise emit the array's op list
-unchanged. The comparison is **strict `>`** — a tie keeps the granular ops.
+`9.3` **Threshold and cutover.** The threshold is the §9.2 estimate applied to the single
+wholesale replace this cutover would emit:
+
+```
+threshold = 30                                       // fixed per-op overhead
+          + len(arrayPath)                           // the wholesale op's own path
+          + len(JSON.stringify(modified))            // the op's value
+          + (includeOldValue ? len(JSON.stringify(original)) : 0)   // the op's oldValue
+```
+
+If `estimate > threshold`, **discard** the array's op list entirely and emit instead a single
+`{ op: "replace", path, value: modified, oldValue: original }` (`oldValue` present iff
+`includeOldValue`, CORE §4.4.2) at the array's own path. Otherwise emit the array's op list
+unchanged. The comparison is **strict `>`** — a tie keeps the granular ops. (Landed, spec-v2
+amendment: the previous threshold was `len(JSON.stringify(modified))` alone, which under-counts
+the wholesale op — with `includeOldValue` on, cutting over could then *grow* the patch, e.g. a
+pure two-element append to a small array became a whole-array replace carrying both copies.
+Comparing estimate-to-estimate restores the capability's never-worse guarantee.)
 
 `9.4` **Determinism.** §9.2–§9.3 depend only on the op list a supported strategy/capability
 combination would otherwise produce and on `JSON.stringify` of the array values, both of which are

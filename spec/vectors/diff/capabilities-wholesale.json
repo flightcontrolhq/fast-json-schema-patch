@@ -1,7 +1,7 @@
 [
   {
     "name": "wrf-estimate-equals-threshold-keeps-granular",
-    "comment": "GEN §9.3: estimate(43) == threshold(43); strict > false, so the granular replace is KEPT",
+    "comment": "GEN §9.3: two replaces estimate(94) == wholesale-op threshold(94); strict > false, so the granular ops are KEPT",
     "schema": {
       "type": "object",
       "properties": {
@@ -22,15 +22,15 @@
     "original": {
       "a": [
         "AAAAAAAAAAA",
-        "u1ccccccccc",
-        "u2ccccccccc"
+        "CCCCCCCCCCC",
+        "uccccccccccccccccccccccccccccc"
       ]
     },
     "modified": {
       "a": [
         "BBBBBBBBBBB",
-        "u1ccccccccc",
-        "u2ccccccccc"
+        "DDDDDDDDDDD",
+        "uccccccccccccccccccccccccccccc"
       ]
     },
     "expectedPatch": [
@@ -38,12 +38,17 @@
         "op": "replace",
         "path": "/a/0",
         "value": "BBBBBBBBBBB"
+      },
+      {
+        "op": "replace",
+        "path": "/a/1",
+        "value": "DDDDDDDDDDD"
       }
     ]
   },
   {
     "name": "wrf-estimate-exceeds-by-one-goes-wholesale",
-    "comment": "GEN §9.3: same shape, one unchanged element 1 byte shorter -> threshold(42) < estimate(43) -> WHOLESALE replace of /a",
+    "comment": "GEN §9.3: same shape, the unchanged element 1 byte shorter -> threshold(93) < estimate(94) -> WHOLESALE replace of /a",
     "schema": {
       "type": "object",
       "properties": {
@@ -64,15 +69,15 @@
     "original": {
       "a": [
         "AAAAAAAAAAA",
-        "u1ccccccccc",
-        "u2cccccccc"
+        "CCCCCCCCCCC",
+        "ucccccccccccccccccccccccccccc"
       ]
     },
     "modified": {
       "a": [
         "BBBBBBBBBBB",
-        "u1ccccccccc",
-        "u2cccccccc"
+        "DDDDDDDDDDD",
+        "ucccccccccccccccccccccccccccc"
       ]
     },
     "expectedPatch": [
@@ -81,8 +86,8 @@
         "path": "/a",
         "value": [
           "BBBBBBBBBBB",
-          "u1ccccccccc",
-          "u2cccccccc"
+          "DDDDDDDDDDD",
+          "ucccccccccccccccccccccccccccc"
         ]
       }
     ]
@@ -575,7 +580,7 @@
   },
   {
     "name": "wrf-nested-inner-triggers-outer-keeps",
-    "comment": "GEN §9.1 bottom-up: the inner array crosses its own threshold and goes wholesale while the outer array keeps granular descent",
+    "comment": "GEN §9.1 bottom-up: the inner array crosses its own wholesale-op threshold and goes wholesale while the outer array keeps granular descent",
     "schema": {
       "type": "object",
       "properties": {
@@ -610,8 +615,8 @@
           "id": "g",
           "inner": [
             "AAAAAAAAAAA",
-            "u1ccccccccc",
-            "u2cccccccc"
+            "CCCCCCCCCCC",
+            "ucccccccccccccccccccccccccccccccccccccc"
           ]
         },
         {
@@ -628,8 +633,8 @@
           "id": "g",
           "inner": [
             "BBBBBBBBBBB",
-            "u1ccccccccc",
-            "u2cccccccc"
+            "DDDDDDDDDDD",
+            "ucccccccccccccccccccccccccccccccccccccc"
           ]
         },
         {
@@ -646,8 +651,8 @@
         "path": "/outer/0/inner",
         "value": [
           "BBBBBBBBBBB",
-          "u1ccccccccc",
-          "u2cccccccc"
+          "DDDDDDDDDDD",
+          "ucccccccccccccccccccccccccccccccccccccc"
         ]
       }
     ]
